@@ -21,8 +21,9 @@ export default function ListaCasos({ tipo, items, total, seleccionadoId, onSelec
                                 aria-current={activo ? 'true' : undefined}
                                 onClick={() => onSeleccionar(it)}
                                 className={clsx(
-                                    'flex min-h-11 w-full flex-col gap-1 rounded-full border p-3 text-left text-sm',
-                                    activo ? 'border-primary bg-muted' : 'border-border bg-card hover:bg-muted',
+                                    'flex min-h-11 w-full flex-col gap-1 rounded-xl border p-4 text-left text-sm transition-colors duration-150',
+                                    'focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/30',
+                                    activo ? 'border-foreground bg-accent/50' : 'border-border bg-card hover:border-input hover:bg-accent/30',
                                 )}
                             >
                                 <span className="flex flex-wrap items-center justify-between gap-2">
