@@ -57,6 +57,24 @@ Solo observaciones propias; las capturas no se versionan.
 5. Login: **titulares que rotan** (3) y **panel derecho que demuestra el producto** (lista de alumnos que pasan a *presente*, barra de riesgo que sube, reporte que se genera). Reglas de contraseña visibles en "Activar mi cuenta" y "Cambiar contraseña".
 6. El **avatar + nombre al fondo del riel** reemplaza el menú de usuario arriba a la derecha en escritorio (en móvil sigue en la barra superior).
 
+## Medidas reales de SchoolAI (Chrome del usuario, 2026-10-03; `app.schoolai.com/discover`, computed styles)
+
+- **Tipografía**: UI en **General Sans** (400/500/600), titulares emocionales en **dante-mt-pro** (serif tipo Garamond, 500). Base **14 px**; `h1` 48 px / 500 / -0.36 px; `h2` 20 px / 600; título de tarjeta 14 px / 600; descripción 12 px.
+- **Color**: lienzo gris neutro `lab(96.5)` ≈ `#F5F5F5`; texto `rgba(0,0,0,.8)`, secundario `rgba(0,0,0,.56)`; azul primario `rgb(3,92,226)`; ítem activo del riel `rgba(3,92,226,.06)`.
+- **Riel**: ítems de 40 px, 14 px, radio 6 px, icono de línea; sin borde ni fondo propio.
+- **Tarjeta**: blanca, padding 16, radio 12, sombra `0 4px 12px -2px rgba(20,0,0,.12)`; ilustración 3:2 arriba; pie con autor y contador.
+- **Teselas del hero**: 58–73 px, radio 16, sombra `0 10px 20px -5px rgba(0,0,0,.25)`, giradas, con imágenes.
+- **Buscador del hero**: 520 × 56, píldora, borde `rgba(0,0,0,.2)`, botón circular azul de 40 px.
+
+## Dropbox Dash (imágenes del usuario, 2026-10-03) — la referencia que manda en shell, tarjetas y tipografía
+
+- **Marco**: lienzo crema; contenido en un **panel blanco flotante** (margen ~8 px, esquinas ~16–18 px); riel de ~232 px sobre el lienzo, sin borde.
+- **Riel**: marca (glifo + «Dash»), «Home», «Search» con atajo `⌘ K` a la derecha; secciones con título gris («Chats», «Stacks») con ítems de texto o con miniatura de 24 px; «View all»; al pie «Invite people», «Apps» (activo = rectángulo gris suave, radio ~8) y «Account» (avatar de iniciales).
+- **Cabecera de página**: título ~26 px / 500; pestañas con subrayado negro de 2 px; fila de **píldoras** (activa = negra con texto blanco; inactiva = gris cálido con contador en círculo blanco); campo de búsqueda con lupa, borde y radio ~8; botón primario **negro** («Create Stack», radio 8).
+- **Tarjetas «Stacks»** (≈ 196 × 200): borde fino, radio ~14, portada de ~70 px (foto, degradado arcoíris o pastel plano) con una **ficha blanca de 36 px** con el icono arriba a la izquierda; título 14–15 px / 500 en dos líneas; meta gris 12 px («12 items • 3 days ago»); pie con avatares apilados (círculos naranjas con iniciales blancas) o candado + «Private». Sin sombra.
+- **Tarjetas «Apps»** (≈ 338 × 70, 3 columnas, separación 16): borde fino, radio ~14; logotipo de 32–40 px, título 14–15 px / 500 + subtítulo gris, botón circular gris claro (`+` o palomita).
+- **Tipografía**: grotesca limpia en un solo tipo para todo (pesos 400/500/600). No es libre; se usa **Hanken Grotesk** como la alternativa más cercana.
+
 ## Lo que se adapta a SUSAN (decisiones)
 
 1. **Shell con barra lateral** (colapsable; en móvil, barra inferior) y píldora activa tintada. Los ítems salen de un **registro de módulos** (hoy: Panel, Sesiones, Revisión, Reportes, Analítica; mañana: Calificaciones, Asistente IA, Mensajes, Calendario… con insignia *Pronto*).

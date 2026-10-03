@@ -1,6 +1,6 @@
 ---
-status: running
-heartbeat: 2026-10-03T05:55:56Z
+status: done
+heartbeat: 2026-10-03T05:58:34Z
 phase: F9
 ---
 
@@ -25,6 +25,7 @@ Si `heartbeat` está más viejo (o `pending`), toma el trabajo: pon `status: run
 - [x] **F5** Operación: sesión en vivo, pase manual, revisión, reportes, portal del alumno (heredan ui-kit y tokens; radios, sombras y enlaces-botón migrados; sin desbordes a 360 px)
 - [x] **F6** Admin, técnico y analítica (misma migración; corregido el acceso del administrador a `/tecnico` en solo lectura)
 - [x] **F7** Pulido de movimiento, presupuesto de rendimiento (medido, ver abajo), reduced-motion y a11y (StatCard con CountUp, paleta combobox, texto sr-only en titulares/cifras animados)
+- [x] **F9** Rediseño fiel (2026-10-03): el usuario pidió apegarse más a la referencia → shell, tarjetas y tipografía de **Dropbox Dash**, onboarding de cuenta y Lucide siempre (ver `docs/design/SISTEMA.md`)
 - [x] **F8** Cierre: recorrido desktop + 360 px por rol, documentación (README, CLAUDE.md, ARCHITECTURE §14, docs/design/*), todo verde y subido
 
 ## Registro
@@ -41,7 +42,8 @@ Si `heartbeat` está más viejo (o `pending`), toma el trabajo: pon `status: run
 | 2026-10-03 | F4: pantallas de acceso con panel de producto animado, `/activar-cuenta` | ddf24c5 |
 | 2026-10-03 | F5/F6: radios y sombras coherentes en todas las pantallas; presupuesto de bundle medido | d9c3b5d |
 | 2026-10-03 | Documentación del sistema de diseño; StatCard animado | 444b229 |
-| 2026-10-03 | Cierre: acceso del administrador a `/tecnico` (solo lectura) y verificación final | (último commit) |
+| 2026-10-03 | Cierre: acceso del administrador a `/tecnico` (solo lectura) y verificación final | e48b112 |
+| 2026-10-03 | F9: rediseño Dash (shell, TarjetaPortada/TarjetaFila, Pills, Hanken Grotesk), onboarding `/activar-cuenta` + `/bienvenida`, Lucide siempre | 3e6f1d1 |
 
 ## Dependencias de animación añadidas (nombre · tamaño gz · dónde)
 
@@ -60,7 +62,7 @@ Medido el 2026-10-03 con `scripts/measure-bundle.mjs` (suma de chunks JS que ref
 | Ruta | Base (gzip KB) | Ahora (gzip KB) | Cambio |
 |---|---|---|---|
 | `/login` | 197.7 | 212.5 | +7.5 % |
-| `/docente` | 209.3 | 233.1 | **+11.4 %** (presupuesto ≤ +15 %) |
+| `/docente` | 209.3 | 235.3 | **+12.4 %** (presupuesto ≤ +15 %; medido tras F9) |
 | `/admin` | 207.2 | 230.4 | +11.2 % |
 | `/alumno` | 218.8 | 242.0 | +10.6 % |
 | `/reportes` | 216.1 | 231.1 | +6.9 % |
