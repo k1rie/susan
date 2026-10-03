@@ -1,0 +1,30 @@
+# dependencias y builds (sin "/" final: web/node_modules y web/.next son symlinks a *.nosync por iCloud)
+node_modules
+.next
+.next-*
+coverage
+__pycache__
+*.pyc
+.venv
+.pytest_cache
+.models
+
+# iCloud: carpetas excluidas de la sincronizacion (ver docs/RUNBOOK.md)
+*.nosync
+*.old-icloud
+
+# entorno y secretos: NUNCA se versionan
+.env
+.env.*
+!.env.example
+!.env.local.example
+
+# datos locales (PostgreSQL de desarrollo, storage en disco, indice FAISS local)
+.local
+*.faiss
+
+.DS_Store
+
+# CLI de Supabase (estado temporal / enlace de proyecto)
+supabase/.temp
+supabase/.branches
