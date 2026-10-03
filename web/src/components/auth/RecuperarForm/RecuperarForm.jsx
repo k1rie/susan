@@ -9,7 +9,7 @@ import Input from '@/components/ui/Input/Input.jsx';
 import { recuperarContrasena } from '@/lib/api/auth.js';
 
 const VOLVER = (
-    <Link href="/login" className="inline-flex min-h-11 items-center text-sm text-primary underline">
+    <Link href="/login" className="inline-flex min-h-11 items-center self-start rounded-full px-1 text-sm font-medium text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/40">
         Volver a iniciar sesión
     </Link>
 );
@@ -68,7 +68,7 @@ export default function RecuperarForm() {
                     disabled={cargando}
                 />
             </Field>
-            <Button type="submit" loading={cargando} fullWidth>
+            <Button type="submit" loading={cargando} fullWidth arrow className="justify-between pl-6">
                 Enviar instrucciones
             </Button>
             {VOLVER}

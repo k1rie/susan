@@ -33,11 +33,11 @@ justificantes, docentes y las filas de `usuario` de demostración (**sin** cuent
 ## 2. Autenticación (Project Settings → Authentication)
 
 - Desactiva el registro público: *Providers → Email → Allow new users to sign up = off* (SUSAN no tiene autorregistro; el administrador crea las cuentas).
-- *URL Configuration*: **Site URL** `http://localhost:3000` (y tu dominio cuando lo tengas) y en *Redirect URLs* agrega `http://localhost:3000/cambiar-contrasena`.
+- *URL Configuration*: **Site URL** `http://localhost:3000` (y tu dominio cuando lo tengas) y en *Redirect URLs* agrega `http://localhost:3000/cambiar-contrasena` y `http://localhost:3000/activar-cuenta`.
 - **Plantillas de correo** (*Authentication → Email Templates*): para que el enlace funcione aunque se abra en **otro navegador o dispositivo**, cambia el enlace de las plantillas
   *Reset Password* e *Invite user* a:
   `{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=recovery` (recuperación) y `{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=invite` (invitación).
-  La ruta `/auth/confirm` canjea el token en el servidor y lleva a `/cambiar-contrasena`. (Con la plantilla por defecto solo funciona en el mismo navegador que pidió el correo.)
+  La ruta `/auth/confirm` canjea el token en el servidor y lleva a `/cambiar-contrasena` (recuperación) o a `/activar-cuenta` (invitación: la persona crea su primera contraseña). (Con la plantilla por defecto solo funciona en el mismo navegador que pidió el correo.)
 - Para pruebas rápidas puedes dejar el SMTP por defecto de Supabase (límite de correos bajo). Para producción configura SMTP propio.
 
 ## 3. Cuentas de demostración

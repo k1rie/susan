@@ -10,7 +10,7 @@ import { IS_LOCAL } from '@/config';
 
 const DESTINOS = Object.freeze({
     recovery: '/cambiar-contrasena',
-    invite: '/cambiar-contrasena',
+    invite: '/activar-cuenta',
     magiclink: '/',
     email: '/',
     signup: '/',
