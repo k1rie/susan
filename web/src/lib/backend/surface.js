@@ -9,6 +9,8 @@ export function restringir(cliente, { admin = false } = {}) {
         signOut: (...a) => cliente.auth.signOut(...a),
         resetPasswordForEmail: (email, opciones) => cliente.auth.resetPasswordForEmail(email, opciones),
         updateUser: (attrs) => cliente.auth.updateUser(attrs),
+        // Solo modo real: canjea el token_hash del correo (recuperacion/invitacion) por sesion, en el servidor (/auth/confirm).
+        verifyOtp: (params) => cliente.auth.verifyOtp(params),
         onAuthStateChange: (cb) => cliente.auth.onAuthStateChange(cb),
     };
     if (admin) {

@@ -31,6 +31,11 @@ export async function actualizarSesion(request) {
         },
     });
     // getUser() valida el JWT contra Auth (getSession() solo lo lee de la cookie y no es confiable).
-    const { data } = await cliente.auth.getUser();
+    const { data, error } = await cliente.auth.getUser();
+    // Caida o lentitud de Auth (red/5xx): no es "sin sesion". Se deja pasar sin redirigir; la pagina o el handler
+    // responden 503 AUTH_NO_DISPONIBLE y el usuario no pierde su sesion por una falla transitoria.
+    if (!data?.user && error && (error.name === 'AuthRetryableFetchError' || (typeof error.status === 'number' && error.status >= 500))) {
+        return { response, user: { id: null, incierto: true } };
+    }
     return { response, user: data?.user ? { id: data.user.id } : null };
 }

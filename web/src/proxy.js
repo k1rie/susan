@@ -3,9 +3,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { actualizarSesion } from '@/lib/backend/proxy.js';
 
-// /cambiar-contrasena NO se protege aqui a proposito: en el flujo real de recuperacion de Supabase el token llega en el
-// hash de la URL (solo lo ve el navegador), asi que la sesion de recuperacion se establece en el cliente y es la propia
-// pagina la que comprueba si hay sesion.
+// /cambiar-contrasena NO se protege aqui a proposito: la sesion de recuperacion se establece en /auth/confirm (verifyOtp con el
+// token_hash del correo) o, en el mismo navegador, por PKCE en el cliente; la propia pagina comprueba si hay sesion.
 const PREFIJOS_PROTEGIDOS = ['/docente', '/alumno', '/admin', '/tecnico', '/reportes', '/analitica'];
 
 const esProtegida = (ruta) => PREFIJOS_PROTEGIDOS.some((p) => ruta === p || ruta.startsWith(`${p}/`));

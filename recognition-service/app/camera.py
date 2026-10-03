@@ -13,15 +13,18 @@ from app.errors import ApiError
 METADATA_HOSTS = {'metadata.google.internal', 'metadata', 'instance-data'}
 
 
+# Metadatos de nube: se bloquean SIEMPRE, aun con ALLOW_PRIVATE_CAMERAS (169.254.169.254 ya cae por link-local).
+ALWAYS_BLOCKED = (ipaddress.ip_address('fd00:ec2::254'), ipaddress.ip_address('100.100.100.200'))
+
+
 def _blocked(ip: ipaddress._BaseAddress, allow_private: bool) -> bool:
     if getattr(ip, 'ipv4_mapped', None):
         ip = ip.ipv4_mapped
-    # Link-local incluye 169.254.169.254 (metadatos de nube): se bloquea SIEMPRE, aun con ALLOW_PRIVATE_CAMERAS
-    if ip.is_link_local or ip.is_unspecified or ip.is_multicast or ip.is_reserved:
+    if ip.is_link_local or ip.is_unspecified or ip.is_multicast or ip.is_reserved or ip in ALWAYS_BLOCKED:
         return True
-    if ip == ipaddress.ip_address('fd00:ec2::254'):
-        return True
-    if ip.is_loopback or ip.is_private:
+    # Loopback, redes privadas, CGNAT 100.64.0.0/10 y demas rangos no globales: solo si el operador declaro que
+    # las camaras estan en su LAN (ALLOW_PRIVATE_CAMERAS=1). Una IP publica (global) siempre se permite.
+    if not ip.is_global:
         return not allow_private
     return False
 
