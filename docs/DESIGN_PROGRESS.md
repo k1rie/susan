@@ -50,4 +50,30 @@ Si `heartbeat` está más viejo (o `pending`), toma el trabajo: pon `status: run
 
 ## Presupuesto de rendimiento (medido)
 
-_(vacío)_
+Medido el 2026-10-03 con `scripts/measure-bundle.mjs` (suma de chunks JS que referencia cada ruta, gzip nivel 9) contra la **base previa al rediseño**
+(commit `232b09f`, compilada en un worktree aparte). Presupuesto del plan: JS inicial de `/docente` ≤ +15 %.
+
+| Ruta | Base (gzip KB) | Ahora (gzip KB) | Cambio |
+|---|---|---|---|
+| `/login` | 197.7 | 212.5 | +7.5 % |
+| `/docente` | 209.3 | 233.1 | **+11.4 %** (presupuesto ≤ +15 %) |
+| `/admin` | 207.2 | 230.4 | +11.2 % |
+| `/alumno` | 218.8 | 242.0 | +10.6 % |
+| `/reportes` | 216.1 | 231.1 | +6.9 % |
+| `/analitica` | 344.3 | 359.0 | +4.3 % |
+| `/docente/sesiones/[id]` | 221.9 | 236.5 | +6.6 % |
+
+Lecciones: la primera medición dio +15,3 % en `/docente`; `cn()` (tailwind-merge, ~7 KB gz) se había colado en componentes nuevos. `cn()` queda **solo** para
+las primitivas de shadcn (`components/shadcn`); el resto usa `clsx`. Sin `gsap` ni `motion` (≈ 100 KB gz evitados).
+
+Tiempo de ejecución (build de producción con `next start`, Chrome del pane, localhost, sin red):
+
+| Medida | `/docente` | `/alumno` |
+|---|---|---|
+| First Contentful Paint | 76 ms | 92 ms |
+| Largest Contentful Paint | 108 ms | 164 ms |
+| Cumulative Layout Shift | 0,019 | 0,021 |
+| Tareas largas (> 50 ms) | 0 | 0 |
+| Fotogramas en reposo (5 animaciones CSS activas) | 120 fps, peor fotograma 9 ms | — |
+
+Las animaciones usan solo `transform`/`opacity` (compositor), un observador por bloque y se apagan con "reducir movimiento". Para repetir: `cd web && npm run build && node ../scripts/measure-bundle.mjs .`

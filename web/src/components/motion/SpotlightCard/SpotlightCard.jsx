@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef } from 'react';
-import { cn } from '@/lib/utils';
+import clsx from 'clsx';
 
 // Tarjeta con foco de luz que sigue al puntero (basada en SpotlightCard de ReactBits). La posición se escribe en
 // variables CSS (--x/--y) desde el manejador del puntero: sin estado de React ni re-render por movimiento. El foco
@@ -21,7 +21,7 @@ export default function SpotlightCard({ as: Etiqueta = 'div', className, childre
         <Etiqueta
             ref={ref}
             onPointerMove={alMover}
-            className={cn(
+            className={clsx(
                 'group/spot relative isolate overflow-hidden rounded-3xl border border-border bg-card text-card-foreground shadow-soft',
                 'transition-shadow duration-300 hover:shadow-lift',
                 className,

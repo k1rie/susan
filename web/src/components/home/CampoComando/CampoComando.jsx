@@ -1,7 +1,7 @@
 'use client';
 
 import { ArrowRight, Search } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import clsx from 'clsx';
 
 // Campo de comando del Home (componente firma): se ve como un campo de texto grande en píldora con botón circular,
 // pero es un botón que abre la paleta de comandos (⌘K) — ahí se escribe y se busca. Un solo lugar para "ir a".
@@ -12,7 +12,7 @@ export default function CampoComando({ placeholder = '¿Qué quieres hacer hoy?'
             onClick={onAbrir}
             aria-label="Buscar o ir a"
             aria-keyshortcuts="Control+K Meta+K"
-            className={cn(
+            className={clsx(
                 'group flex h-14 w-full max-w-2xl items-center gap-2.5 rounded-full border border-border bg-card pl-4 pr-2 text-left shadow-soft sm:h-16 sm:gap-3 sm:pl-6',
                 'transition-[box-shadow,border-color] duration-200 hover:border-input hover:shadow-lift',
                 'focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/40',
