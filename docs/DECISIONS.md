@@ -45,3 +45,27 @@ técnicamente y lo que sigue abierto. El SQL (`supabase/`) y `docs/API-RPC.md` s
 7. El servicio guarda el índice en **memoria de un proceso**: con varias instancias hay que activar la versión en cada una.
 8. Piloto en 1–2 grupos y prueba SUS (RNF-11); variante de 360 px verificada en pantallas, no con usuarios.
 9. **Credenciales expuestas fuera de este repo**: `MVP-Project-Unach/microService-faiss/main.py` tiene una key de Backblaze B2 escrita en el código (y commiteada). No se copió a SUSAN; hay que **rotarla**. SmartClass guarda la contraseña en `localStorage` y la envía en cada petición: no se imitó.
+
+## 4. Revisión de seguridad y endurecimiento (informes en `docs/review/`)
+
+Tres revisiones independientes (SQL/RLS, web, y modo real de Supabase contra un servidor simulado fiel `scripts/fake-supabase.mjs`) más una validación numérica contra scipy
+(`web/src/review/numerics_referencias.test.js`, 27 pruebas) y una auditoría de privilegios sobre la base. **Sin bloqueantes.** Resultado y estado:
+
+| Hallazgo | Severidad | Estado |
+|---|---|---|
+| Sin cabeceras de seguridad HTTP | major | **Corregido** (`next.config.mjs`: X-Frame-Options, nosniff, Referrer-Policy, Permissions-Policy; CSP + HSTS en producción; `poweredByHeader: false`). Verificado con build de producción en navegador (sin violaciones de CSP). |
+| El limitador de captura no limitaba repetir `marca_tiempo` | major | **Corregido** (máx. 2 reenvíos gratuitos por marca) |
+| Caída/lentitud de Auth se trataba como "sin sesión" y expulsaba al usuario | major | **Corregido** (503 `AUTH_NO_DISPONIBLE`; el proxy no redirige) |
+| Recuperación de contraseña solo funcionaba en el mismo navegador (PKCE) | major | **Corregido** (`/auth/confirm` + `verifyOtp` en servidor; plantillas en `docs/SUPABASE_SETUP.md`) |
+| SSRF: faltaba bloquear `100.64.0.0/10` y metadatos de Alibaba | minor | **Corregido** (`recognition-service/app/camera.py`, pruebas nuevas) |
+| `serverEnv()` publicaba el secreto HMAC por defecto del modo local en el bundle | minor | **Corregido** (sin valor por defecto en producción) |
+| Operaciones sensibles sin asiento de bitácora (cambio de rol/estatus de cuenta, revocar consentimiento, baja de alumno, asistencia manual con hora retroactiva) | major (endurecimiento; la spec exige RNF-08 solo para correcciones, justificantes, parámetros y consultas biométricas) | **Pendiente**: requiere ampliar el enum `accion_bitacora` (la spec fija 8 valores) y llamar `app.bitacora` en esas RPC. Pruebas que lo documentan: `supabase/tests/review_sql_04_auditoria.sql` (`HALLAZGO:`). |
+| La IP de la bitácora la declara el propio llamador (`p_ip`) en 3 RPC | minor | **Pendiente**: ignorar `p_ip` salvo `service_role`; implica que los handlers usen `svc_*` para registrar consultas. Mitigación actual: el proxy debe sobrescribir `x-forwarded-for` (RUNBOOK). |
+| Cookie de sesión de Supabase en modo real no es HttpOnly (la fija `createBrowserClient`) | minor | **Aceptado**: es el diseño de `@supabase/ssr`; mitigado con CSP. |
+| 2–3 viajes a Auth por petición (`getUser` en proxy y handler) | minor | **Pendiente** (optimización: `getClaims()`/excluir `/api/*` del proxy) |
+| Modo local: logout no invalida el token (8 h) y login sin límite de intentos | minor | **Aceptado** (solo desarrollo; ver `docs/review/web.md`) |
+
+Resistieron (verificado): IDOR en las 72 RPC con ids ajenos, privilegios (`anon` sin acceso, ningún `svc_*` para usuarios, ningún `SECURITY DEFINER` sin `search_path`, sin escritura directa, RLS en 19 tablas),
+reloj simulado inmanipulable por un usuario, bitácora inmutable, inyección vía `p_q`/`jsonb`, subidas por firma binaria, rutas de objetos, jobs sin `CRON_SECRET` (503 nunca 200),
+open redirect en `?next=`, inyección de fórmulas en CSV, secretos fuera del bundle del cliente, reglas de la spec en sus casos límite (9:59/10:00, 20:00/20:01, 0.849/0.850, 47 h/49 h,
+48 sesiones: 9 vs 10 faltas, zona horaria cerca de medianoche UTC).

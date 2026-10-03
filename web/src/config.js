@@ -24,5 +24,6 @@ export const serverEnv = () => ({
     cronSecret: process.env.CRON_SECRET || '',
     localDatabaseUrl: process.env.LOCAL_DATABASE_URL || 'postgres://localhost:54329/susan',
     localStorageDir: process.env.LOCAL_STORAGE_DIR || (process.env.SUSAN_LOCAL_DIR ? `${process.env.SUSAN_LOCAL_DIR}/storage` : '.local/storage'),
-    localAuthSecret: process.env.LOCAL_AUTH_SECRET || 'susan-local-dev-secret-change-me',
+    // En producción NO hay valor por defecto (el modo local está deshabilitado); así el secreto de desarrollo no viaja en ningún bundle.
+    localAuthSecret: process.env.LOCAL_AUTH_SECRET || (process.env.NODE_ENV === 'production' ? '' : 'susan-local-dev-secret-change-me'),
 });

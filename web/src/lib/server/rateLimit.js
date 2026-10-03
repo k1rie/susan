@@ -3,7 +3,9 @@
 // (evitar que un cliente defectuoso o abusivo sature el servicio de reconocimiento), no para facturación.
 import { ApiError } from '@/lib/api/errors';
 
-/** clave -> { ultimo: ms de la última solicitud aceptada, marca: marca_tiempo que la acompañó } */
+/** clave -> { ultimo: ms de la última solicitud aceptada, marca: marca_tiempo que la acompañó, reintentos: reenvíos de esa marca } */
+/** Reenvíos gratuitos de la MISMA marca (fallo de red): más allá de esto cuentan como solicitud normal (evita saturar el servicio repitiendo una marca). */
+const MAX_REINTENTOS_MISMA_MARCA = 2;
 const registro = new Map();
 const MAX_ENTRADAS = 5000;
 
@@ -19,7 +21,7 @@ function limpiar(ahora, ventanaMs) {
 
 /**
  * Regla: 1 solicitud por cámara cada >= intervalo/2 segundos (el cliente muestrea cada `intervalo`).
- * Un reintento con la misma `marcaTiempo` que la última aceptada pasa sin consumir cupo: es el mismo
+ * Un reintento con la misma `marcaTiempo` que la última aceptada pasa sin consumir cupo (máx. 2 veces): es el mismo
  * fotograma reenviado tras un fallo de red (la captura es idempotente por cámara+marca).
  * @param {{ idUsuario: number, idSesion: number, idCamara: number, intervaloSeg: number,
  *           marcaTiempo?: string | null, ahora?: number }} p
@@ -32,13 +34,16 @@ export function consumirCupoCaptura({ idUsuario, idSesion, idCamara, intervaloSe
     if (previa) {
         const transcurrido = ahora - previa.ultimo;
         const mismoFotograma = marcaTiempo !== null && marcaTiempo === previa.marca;
-        if (transcurrido < minimoMs && !mismoFotograma) {
+        if (mismoFotograma && (previa.reintentos ?? 0) < MAX_REINTENTOS_MISMA_MARCA) {
+            previa.reintentos = (previa.reintentos ?? 0) + 1;
+            return { permitido: true, reintentarEnSeg: 0 };
+        }
+        if (transcurrido < minimoMs) {
             return { permitido: false, reintentarEnSeg: Math.max(1, Math.ceil((minimoMs - transcurrido) / 1000)) };
         }
-        if (mismoFotograma) return { permitido: true, reintentarEnSeg: 0 };
     }
     limpiar(ahora, minimoMs);
-    registro.set(clave, { ultimo: ahora, marca: marcaTiempo });
+    registro.set(clave, { ultimo: ahora, marca: marcaTiempo, reintentos: 0 });
     return { permitido: true, reintentarEnSeg: 0 };
 }
 

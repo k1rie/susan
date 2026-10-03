@@ -67,7 +67,7 @@ SUSAN/
 │  ├─ DECISIONS.md · RUNBOOK.md · NUMERICS.md
 │  ├─ api/*.md                           diseños de referencia por dominio (parciales; manda el SQL)
 │  └─ spec/                              1er avance (PDF + texto) y presentación
-├─ supabase/  migrations/ (0001–0136) · seed/ · local/ (stubs de Auth/Storage solo para PG local) · tests/ · config.toml
+├─ supabase/  migrations/ (0001–0990) · demo/ (reloj de demostración) · seed/ · local/ (stubs de Auth/Storage solo para PG local) · tests/ · config.toml
 ├─ recognition-service/                  app/ · tests/ · Dockerfile · Procfile
 ├─ web/src/
 │  ├─ app/        rutas: (public) login · (app) docente · alumno · admin · tecnico · reportes · analitica · api/*
@@ -91,7 +91,9 @@ SUSAN/
 
 ## Despliegue
 
-Ver `docs/RUNBOOK.md` (proyecto Supabase real, servicio de reconocimiento, tareas programadas, variables de entorno).
+- **Probar la interfaz con tu proyecto Supabase**: [`docs/SUPABASE_SETUP.md`](docs/SUPABASE_SETUP.md) (migraciones, semilla, cuentas de demostración, reloj de demostración, variables).
+- **Producción**: [`docs/RUNBOOK.md`](docs/RUNBOOK.md) (servicio de reconocimiento, tareas programadas, respaldo, variables de entorno).
+- **Diseño real (fase 2)**: [`docs/DESIGN_PLAN.md`](docs/DESIGN_PLAN.md) y [`docs/DESIGN_PROGRESS.md`](docs/DESIGN_PROGRESS.md).
 
 ## Seguridad
 

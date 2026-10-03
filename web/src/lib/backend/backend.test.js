@@ -59,7 +59,7 @@ describe('restringir (superficie permitida del modo real)', () => {
         };
         const b = restringir(falso);
         expect(Object.keys(b).sort()).toEqual(['auth', 'rpc', 'storage']);
-        expect(Object.keys(b.auth).sort()).toEqual([...SUPERFICIE_AUTH].sort());
+        expect(Object.keys(b.auth).sort()).toEqual([...SUPERFICIE_AUTH, 'verifyOtp'].sort());
         expect(Object.keys(b.storage.from('x')).sort()).toEqual(['createSignedUrl', 'download', 'remove', 'upload']);
         expect(b.from).toBeUndefined();
         expect(await b.rpc('api_yo')).toEqual({ data: { n: 'api_yo', a: {} }, error: null });

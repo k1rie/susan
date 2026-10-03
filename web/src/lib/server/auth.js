@@ -39,11 +39,17 @@ async function usuarioAuth(backend) {
     let resultado;
     try {
         resultado = await backend.auth.getUser();
-    } catch {
+    } catch (e) {
+        if (esCaidaDeAuth(e)) throw authNoDisponible();
         return null;
     }
+    // Un error de red o 5xx de Auth NO significa "sin sesión": expulsar al usuario por una caída transitoria es peor.
+    if (esCaidaDeAuth(resultado?.error)) throw authNoDisponible();
     return resultado?.data?.user ?? null;
 }
+
+const esCaidaDeAuth = (e) => Boolean(e) && (e.name === 'AuthRetryableFetchError' || (typeof e.status === 'number' && e.status >= 500));
+const authNoDisponible = () => fallo('AUTH_NO_DISPONIBLE', 'El servicio de autenticación no responde. Intenta de nuevo en unos segundos.', 503);
 
 /**
  * Estado de la sesión actual en un RSC/Route Handler.

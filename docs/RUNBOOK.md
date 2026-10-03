@@ -7,7 +7,7 @@ proyecto de pruebas.
 ## 1. Supabase (base de datos, Auth y bucket)
 
 1. Crea el proyecto en Supabase (PostgreSQL 15+; probado en 16). Anota `Project URL`, `anon key` y `service_role key`.
-2. Aplica las migraciones (38 archivos `supabase/migrations/0001…0136`, orden lexicográfico):
+2. Aplica las migraciones (39 archivos `supabase/migrations/0001…0990`, orden lexicográfico; `supabase db push --include-seed` carga además la semilla de demostración):
    ```bash
    supabase link --project-ref <ref>
    supabase db push --dry-run     # revisa el plan: los prefijos 0001… funcionan como versiones numéricas

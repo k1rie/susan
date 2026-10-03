@@ -86,7 +86,7 @@ La app habla con un objeto "tipo supabase-js" obtenido de `@/lib/backend`:
 
 Superficie PERMITIDA de ese objeto (nada más; así el modo local puede imitarla fielmente):
 `auth.getUser()`, `auth.getSession()`, `auth.signInWithPassword({email,password})`, `auth.signOut()`,
-`auth.resetPasswordForEmail(email,{redirectTo})`, `auth.updateUser({password})`, `auth.onAuthStateChange(cb)`,
+`auth.resetPasswordForEmail(email,{redirectTo})`, `auth.updateUser({password})`, `auth.verifyOtp({type,token_hash})` (solo modo real; lo usa `/auth/confirm`), `auth.onAuthStateChange(cb)`,
 `rpc(nombre, args)` → `{ data, error }`, `storage.from(bucket).upload(path, body, opts)`,
 `storage.from(bucket).createSignedUrl(path, segundos)`, `storage.from(bucket).download(path)`,
 `storage.from(bucket).remove([paths])`, y (admin) `auth.admin.createUser/updateUserById/deleteUser/listUsers`.
@@ -252,3 +252,9 @@ Además: `GET /health`, `GET /v1/index`, `POST /v1/photo/check`, `POST /v1/index
   (3) lo correcto a largo plazo es mover el proyecto fuera del Escritorio (p. ej. `~/Developer/SUSAN`). Nunca crear symlinks con el nombre de un directorio que iCloud ya conocía mientras se borra el viejo.
 - `proxy.js` deja `/cambiar-contrasena` pública: el token de recuperación de Supabase llega en el hash de la URL (solo el navegador lo ve), así que la sesión de recuperación se establece en el cliente y es la propia página la que comprueba si hay sesión.
 - Pendientes conocidos: `svc_usuario_obtener` (hoy restablecer recorre listados) y bitácora de alta/restablecimiento de cuentas (el enum `accion_bitacora` no tiene valor propio).
+- **Cabeceras de seguridad** (`web/next.config.mjs`): siempre X-Frame-Options DENY, nosniff, Referrer-Policy y Permissions-Policy (`camera=(self)`); en producción además CSP (`script-src 'self' 'unsafe-inline'`
+  porque Next hidrata con scripts en línea; endurecer con nonces desde `proxy.js` queda como mejora) y HSTS. `img-src`/`connect-src` incluyen el origen de `NEXT_PUBLIC_SUPABASE_URL`.
+  Los componentes de animación futuros que usen WebGL/workers deben respetar `worker-src 'self' blob:`; fuentes solo con `next/font` (autoalojadas).
+- **`/auth/confirm`** (`web/src/app/auth/confirm/route.js`): canjea `token_hash` por sesión en el servidor (`verifyOtp`) para recuperación/invitación; solo modo real (404 en local); destinos fijos.
+- **Caída de Auth**: `usuarioAuth` lanza 503 `AUTH_NO_DISPONIBLE` ante `AuthRetryableFetchError`/5xx; el proxy deja pasar sin redirigir.
+- **Verificación del modo real**: `scripts/fake-supabase.mjs` emula GoTrue + PostgREST + Storage sobre el SQL local; ver `docs/review/real-mode.md`.

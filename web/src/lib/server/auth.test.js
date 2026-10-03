@@ -17,6 +17,24 @@ beforeEach(() => {
     getServerBackend.mockResolvedValue(crearBackend({ rpcs: { api_yo: () => YO.docente } }));
 });
 
+describe('caída de Auth (hallazgo de la revisión del modo real)', () => {
+    it('un error de red/5xx de Auth lanza 503 AUTH_NO_DISPONIBLE en vez de tratarlo como sin sesión', async () => {
+        const b = crearBackend({});
+        b.auth.getUser.mockResolvedValue({ data: { user: null }, error: Object.assign(new Error('fetch failed'), { name: 'AuthRetryableFetchError', status: 0 }) });
+        getServerBackend.mockResolvedValue(b);
+        const e = await obtenerSesion().catch((x) => x);
+        expect(e.code).toBe('AUTH_NO_DISPONIBLE');
+        expect(e.status).toBe(503);
+        b.auth.getUser.mockRejectedValue(Object.assign(new Error('boom'), { name: 'AuthRetryableFetchError' }));
+        expect((await obtenerSesion().catch((x) => x)).code).toBe('AUTH_NO_DISPONIBLE');
+    });
+
+    it('una sesión realmente ausente sigue siendo sin_sesion (no 503)', async () => {
+        getServerBackend.mockResolvedValue(crearBackend({ user: null }));
+        expect((await obtenerSesion()).estado).toBe('sin_sesion');
+    });
+});
+
 describe('requerirSesion (RSC)', () => {
     it('sin sesión redirige a /login conservando la ruta (solo rutas internas)', async () => {
         getServerBackend.mockResolvedValue(crearBackend({ user: null }));
