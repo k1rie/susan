@@ -20,7 +20,7 @@ import TablaRiesgo from '../TablaRiesgo';
 import TarjetasAnalitica from '../TarjetasAnalitica';
 import { useAnalitica } from './useAnalitica.js';
 
-// Contenedor de /analitica: selector, alertas, tarjetas, gráficas, riesgo y procedimiento numérico.
+// Contenedor de /analitica: selector, cifras clave, alertas, gráficas, riesgo y procedimiento numérico (plegado).
 export default function Analitica({ filtrosIniciales = {} }) {
     const { toast } = useToast();
     const [valor, setValor] = useState({ periodo: filtrosIniciales.periodo || '', idGrupo: filtrosIniciales.idGrupo || null });
@@ -72,7 +72,7 @@ export default function Analitica({ filtrosIniciales = {} }) {
         <div className="flex flex-col gap-4">
             <PageHeader
                 title="Analítica de ausentismo"
-                subtitle="Patrones, tendencia y proyección del ausentismo por métodos numéricos."
+                subtitle="Tendencia, proyección y riesgo por grupo."
                 actions={
                     estado === 'listo' && (
                         <Button variant="secondary" onClick={exportar}>
@@ -105,31 +105,31 @@ export default function Analitica({ filtrosIniciales = {} }) {
             {estado === 'vacio' && (
                 <EmptyState
                     title="Este grupo aún no tiene sesiones cerradas."
-                    description="El análisis se habilita cuando hay sesiones cerradas con asistencia registrada."
+                    description="El análisis se habilita al cerrar sesiones con asistencia."
                 />
             )}
             {estado === 'listo' && (
                 <>
-                    <AlertasAnalitica alertas={analisis.alertas} />
                     <TarjetasAnalitica
                         resumen={analisis.resumen}
-                        tendencia={analisis.tendencia}
                         proyeccion={analisis.proyeccion}
                         cruceLimite={analisis.cruceLimite}
                         limitePct={limitePct}
                     />
-                    <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+                    <AlertasAnalitica alertas={analisis.alertas} />
+                    <div className="grid grid-cols-1 gap-4 lg:grid-cols-[repeat(2,minmax(0,1fr))]">
                         <GraficaSerie
                             tendencia={analisis.tendencia}
                             suavizado={analisis.suavizado}
                             proyeccion={analisis.proyeccion}
                             resumen={analisis.resumen}
+                            cruceLimite={analisis.cruceLimite}
                             limitePct={limitePct}
                         />
                         <GraficaAcumulado cruceLimite={analisis.cruceLimite} limitePct={limitePct} />
                     </div>
                     <PatronSemanal patronSemanal={analisis.patronSemanal} />
-                    <TablaRiesgo items={analisis.alumnosEnRiesgo} hrefHistorial={hrefHistorial} />
+                    <TablaRiesgo items={analisis.alumnosEnRiesgo} evaluados={analisis.resumen.alumnosEvaluados} hrefHistorial={hrefHistorial} />
                     <PanelProcedimiento procedimientos={analisis.procedimientos} />
                 </>
             )}

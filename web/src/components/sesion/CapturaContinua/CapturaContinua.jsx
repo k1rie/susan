@@ -2,6 +2,7 @@
 
 import { useRef, useState } from 'react';
 import Alert from '@/components/ui/Alert';
+import Badge from '@/components/ui/Badge';
 import CameraCapture from '@/components/ui/CameraCapture';
 import Checkbox from '@/components/ui/Checkbox';
 import Select from '@/components/ui/Select';
@@ -39,32 +40,35 @@ export default function CapturaContinua({ sesion, camaras = [], activo, onFin })
 
     return (
         <section aria-label="Captura continua" className="flex flex-col gap-3 rounded-xl border border-border bg-card p-5">
-            <h2 className="text-base font-semibold">Captura de asistencia</h2>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+                <h2 className="text-base font-semibold">Captura de asistencia</h2>
+                <Badge tone={activo ? 'success' : 'neutral'}>{activo ? 'Muestreando' : 'En pausa'}</Badge>
+            </div>
 
             {muestreo.servicioNoDisponible && (
-                <Alert tone="warning" title="Servicio de reconocimiento no disponible">
-                    Registra manualmente a quien falte; el monitor sigue funcionando y se reintentara en cada ciclo.
+                <Alert tone="warning" title="Reconocimiento no disponible">
+                    Registra manualmente a quien falte. Se reintentará en cada ciclo.
                 </Alert>
             )}
             {muestreo.detenido && (
                 <Alert tone="info" title="Muestreo detenido">
-                    La sesion ya no admite capturas ({muestreo.detenido}). Se actualizo el monitor.
+                    La sesión ya no admite capturas ({muestreo.detenido}).
                 </Alert>
             )}
             {errorCamara && (
-                <Alert tone="warning" title="Sin acceso a la camara del navegador">
-                    {errorCamara} Puedes continuar solo con camaras IP o registrar manualmente.
+                <Alert tone="warning" title="Sin acceso a la cámara del navegador">
+                    {errorCamara} Continúa con cámaras IP o registra manualmente.
                     <div className="mt-2">
-                        <Checkbox label="Continuar sin la camara de este dispositivo" checked={!usarNavegador} onChange={(e) => setUsarNavegador(!e.target.checked)} />
+                        <Checkbox label="Continuar sin la cámara de este dispositivo" checked={!usarNavegador} onChange={(e) => setUsarNavegador(!e.target.checked)} />
                     </div>
                 </Alert>
             )}
 
             {camarasNavegador.length > 0 && (
                 <div className="flex flex-col gap-2">
-                    <Checkbox label="Usar la camara de este dispositivo" checked={usarNavegador} onChange={(e) => setUsarNavegador(e.target.checked)} />
+                    <Checkbox label="Usar la cámara de este dispositivo" checked={usarNavegador} onChange={(e) => setUsarNavegador(e.target.checked)} />
                     {usarNavegador && camarasNavegador.length > 1 && (
-                        <Select aria-label="Camara del aula a usar" value={idNavegador ?? ''} onChange={(e) => setIdElegido(Number(e.target.value))} options={camarasNavegador.map((c) => ({ value: c.id_camara, label: `Cámara ${c.posicion}` }))} />
+                        <Select aria-label="Cámara del aula a usar" value={idNavegador ?? ''} onChange={(e) => setIdElegido(Number(e.target.value))} options={camarasNavegador.map((c) => ({ value: c.id_camara, label: `Cámara ${c.posicion}` }))} />
                     )}
                     {usarNavegador && (
                         <div className="max-w-md">
@@ -87,19 +91,19 @@ export default function CapturaContinua({ sesion, camaras = [], activo, onFin })
                     )}
                 </div>
             )}
-            {camarasIp.length > 0 && <p className="text-sm text-muted-foreground">Camaras IP activas: {camarasIp.length}. El servidor toma su instantanea en cada ciclo.</p>}
-            {sinFuentes && <p className="text-sm text-muted-foreground">No hay ninguna fuente de captura activa en este momento.</p>}
+            {camarasIp.length > 0 && <p className="text-sm text-muted-foreground">Cámaras IP activas: {camarasIp.length}.</p>}
+            {sinFuentes && <p className="text-sm text-muted-foreground">Sin fuentes de captura activas.</p>}
 
             <div aria-live="polite" className="text-sm">
                 {!activo ? (
-                    <p className="text-muted-foreground">El muestreo está en pausa (fuera de la ventana de tolerancia).</p>
+                    <p className="text-muted-foreground">Fuera de la ventana de tolerancia.</p>
                 ) : ultima ? (
                     <p>
-                        Ultima captura: <strong>{ultima.rostros}</strong> rostros, <strong>{ultima.validas}</strong> válidas, <strong>{ultima.cambios?.length ?? 0}</strong> cambios
-                        {muestreo.enviando ? ' · enviando...' : ''}
+                        Última: <strong>{ultima.rostros}</strong> rostros · <strong>{ultima.validas}</strong> válidas · <strong>{ultima.cambios?.length ?? 0}</strong> cambios
+                        {muestreo.enviando ? ' · enviando…' : ''}
                     </p>
                 ) : (
-                    <p className="text-muted-foreground">{muestreo.enviando ? 'Enviando primera captura...' : 'Esperando la primera captura...'}</p>
+                    <p className="text-muted-foreground">{muestreo.enviando ? 'Enviando la primera captura…' : 'Esperando la primera captura…'}</p>
                 )}
             </div>
         </section>

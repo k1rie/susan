@@ -29,32 +29,41 @@ export const ETIQUETA_NIVEL_RIESGO = { alto: 'Alto', medio: 'Medio', bajo: 'Bajo
 const MENSAJE_INSUFICIENTE = 'Datos insuficientes: se requieren al menos 4 semanas con sesiones cerradas.';
 export { MENSAJE_INSUFICIENTE };
 
-/** Datos para las cuatro tarjetas. Devuelve textos ya formateados. */
-export function datosTarjetas({ resumen, tendencia, proyeccion, cruceLimite, limitePct = 20 }) {
+const VALOR_CRUCE = {
+    cruza: (c) => `Semana ${c.semana}`,
+    superado: () => 'Ya superado',
+    no_cruza: () => 'No cruza',
+    insuficiente: () => SIN_DATO,
+};
+
+/** Datos para la franja de indicadores (textos ya formateados y cortos). */
+export function datosTarjetas({ resumen, proyeccion, cruceLimite, limitePct = 20 }) {
     const suficiente = Boolean(resumen?.suficiente);
     const ultimo = proyeccion?.disponible && proyeccion.puntos?.length ? proyeccion.puntos[proyeccion.puntos.length - 1] : null;
+    const evaluados = resumen?.alumnosEvaluados ?? 0;
+    const enRiesgo = resumen?.alumnosEnRiesgo ?? 0;
+    const superan = resumen?.alumnosSuperanLimite ?? 0;
     return {
         actual: {
             valor: fmtPct(resumen?.tasaActual),
-            nota: resumen?.variacionPP == null ? 'Sin semana previa para comparar' : `${fmtSigno(resumen.variacionPP)} pp frente a la semana previa`,
+            nota: resumen?.variacionPP == null ? 'Sin semana previa' : `${fmtSigno(resumen.variacionPP)} pp vs. semana previa`,
             tono: resumen?.tasaActual != null && resumen.tasaActual > limitePct ? 'danger' : 'neutral',
-        },
-        tendencia: {
-            valor: tendencia?.disponible ? `${fmtSigno(tendencia.pendientePuntosPorSemana, 2)} pp/sem` : SIN_DATO,
-            nota: tendencia?.disponible ? ETIQUETA_DIRECCION[tendencia.direccion] || SIN_DATO : suficiente ? SIN_DATO : MENSAJE_INSUFICIENTE,
-            tono: tendencia?.direccion === 'alza' ? 'warning' : 'neutral',
         },
         proyeccion: {
             valor: ultimo ? fmtPct(ultimo.valor * 100) : SIN_DATO,
-            nota: ultimo
-                ? `Semana ${ultimo.semana}: entre ${fmtPct(ultimo.inferior * 100)} y ${fmtPct(ultimo.superior * 100)}`
-                : proyeccion?.mensaje || MENSAJE_INSUFICIENTE,
+            nota: ultimo ? `Semana ${ultimo.semana} (${fmtPct(ultimo.inferior * 100, 0)} a ${fmtPct(ultimo.superior * 100, 0)})` : suficiente ? 'Sin proyección' : 'Faltan semanas',
             tono: 'neutral',
         },
         cruce: {
-            valor: cruceLimite?.mensaje || SIN_DATO,
-            nota: cruceLimite?.estado === 'cruza' ? `Límite de ${limitePct} % de faltas equivalentes` : cruceLimite?.estado === 'insuficiente' ? MENSAJE_INSUFICIENTE : `Límite de ${limitePct} %`,
+            // Valor corto (cabe en la cifra grande); el mensaje completo vive en la gráfica de acumulado.
+            valor: VALOR_CRUCE[cruceLimite?.estado] ? VALOR_CRUCE[cruceLimite.estado](cruceLimite) : SIN_DATO,
+            nota: cruceLimite?.estado === 'insuficiente' || !cruceLimite ? 'Faltan semanas' : (cruceLimite.estado === 'cruza' ? `Estimada, límite de ${limitePct} %` : `Límite de ${limitePct} %`),
             tono: cruceLimite?.estado === 'superado' ? 'danger' : cruceLimite?.estado === 'cruza' ? 'warning' : 'neutral',
+        },
+        riesgo: {
+            valor: evaluados > 0 ? String(enRiesgo) : SIN_DATO,
+            nota: evaluados > 0 ? (superan > 0 ? `de ${evaluados}; ${superan} sobre el límite` : `de ${evaluados} alumnos`) : 'Sin matriz de asistencia',
+            tono: superan > 0 ? 'danger' : enRiesgo > 0 ? 'warning' : 'neutral',
         },
     };
 }
@@ -110,11 +119,49 @@ export function construirSerieAcumulado(cruceLimite) {
     return [...filas.values()].sort((a, b) => a.semana - b.semana);
 }
 
-/** Texto de resumen para aria-label de las gráficas. */
-export function resumenTextoSerie({ tendencia, resumen }) {
+/** Primer y último valor no nulos de una lista paralela a `semanas` (para "va de X a Y"). */
+function extremos(semanas = [], valores = []) {
+    const idx = valores.map((v, i) => (typeof v === 'number' && Number.isFinite(v) ? i : -1)).filter((i) => i >= 0);
+    if (idx.length === 0) return null;
+    const i0 = idx[0];
+    const i1 = idx[idx.length - 1];
+    return { desde: { semana: semanas[i0], valor: valores[i0] }, hasta: { semana: semanas[i1], valor: valores[i1] } };
+}
+
+/**
+ * Descripción corta bajo el título de la gráfica semanal: dirección y pendiente de la tendencia (antes era una tarjeta).
+ * Sin tendencia disponible no hay descripción (la gráfica muestra su aviso de datos insuficientes).
+ */
+export function descripcionTendencia(tendencia) {
+    if (!tendencia?.disponible) return undefined;
+    const dir = ETIQUETA_DIRECCION[tendencia.direccion];
+    const p = tendencia.pendientePuntosPorSemana;
+    const pendiente = Number.isFinite(p) ? `: ${fmtSigno(p, 2)} pp por semana` : '';
+    return `${dir ? `Tendencia ${dir.toLowerCase()}` : 'Tendencia'}${pendiente}. Proyección con intervalo de 95\u00a0%.`;
+}
+
+/** Texto alternativo de la gráfica semanal: de X % a Y %, tendencia, proyección y cruce del límite. */
+export function resumenTextoSerie({ tendencia, resumen, proyeccion, cruceLimite, limitePct = 20 }) {
     if (!tendencia?.disponible) return 'Ausentismo semanal: datos insuficientes para estimar la tendencia.';
     const dir = (ETIQUETA_DIRECCION[tendencia.direccion] || '').toLowerCase();
-    return `Ausentismo semanal, tendencia ${dir} de ${fmtSigno(tendencia.pendientePuntosPorSemana, 2)} puntos por semana; tasa actual ${fmtPct(resumen?.tasaActual)}.`;
+    const e = extremos(tendencia.semanas, tendencia.tasas);
+    const partes = [];
+    if (e) partes.push(`el ausentismo va de ${fmtPct(e.desde.valor * 100)} en la semana ${e.desde.semana} a ${fmtPct(e.hasta.valor * 100)} en la semana ${e.hasta.semana}`);
+    partes.push(`tendencia ${dir} de ${fmtSigno(tendencia.pendientePuntosPorSemana, 2)} puntos por semana`);
+    if (resumen?.tasaActual != null) partes.push(`tasa actual ${fmtPct(resumen.tasaActual)}`);
+    const ult = proyeccion?.disponible && proyeccion.puntos?.length ? proyeccion.puntos[proyeccion.puntos.length - 1] : null;
+    if (ult) partes.push(`proyección de ${fmtPct(ult.valor * 100)} en la semana ${ult.semana}`);
+    if (cruceLimite?.estado === 'cruza') partes.push(`la proyección cruza el límite de ${limitePct} % en la semana ${cruceLimite.semana}`);
+    else if (cruceLimite?.estado === 'superado') partes.push(`el límite de ${limitePct} % ya fue superado`);
+    return `Ausentismo semanal: ${partes.join('; ')}.`;
+}
+
+/** Texto alternativo de la gráfica de acumulado frente al límite. */
+export function resumenTextoAcumulado(cruceLimite, limitePct = 20) {
+    if (!cruceLimite || cruceLimite.estado === 'insuficiente') return 'Faltas acumuladas: datos insuficientes.';
+    const e = extremos(cruceLimite.acumulado?.semanas, cruceLimite.acumulado?.valores);
+    const rango = e ? `El promedio de faltas por alumno va de ${fmtPct(e.desde.valor)} en la semana ${e.desde.semana} a ${fmtPct(e.hasta.valor)} en la semana ${e.hasta.semana}. ` : '';
+    return `Faltas acumuladas frente al límite de ${limitePct} %. ${rango}Cruce del límite: ${cruceLimite.mensaje}.`;
 }
 
 /** Filas del patrón por día (tasa en %). */
@@ -128,6 +175,155 @@ export function datosPatron(patronSemanal) {
     }));
 }
 
+/**
+ * Filas del patrón para barras apiladas: el día crítico va en su propia serie (otro color y otra etiqueta en la leyenda),
+ * así la señal nunca depende solo del color. `tasa` en %; los días sin sesiones quedan nulos.
+ */
+export function datosPatronBarras(patronSemanal) {
+    return datosPatron(patronSemanal).map((d) => ({ dia: d.dia, normal: d.critico ? null : d.tasa, critico: d.critico ? d.tasa : null }));
+}
+
+export const CONFIG_PATRON = {
+    normal: { label: 'Ausentismo', color: 'var(--chart-1)' },
+    critico: { label: 'Día crítico', color: 'var(--ausente)' },
+};
+
+/** Texto alternativo del patrón semanal con las cifras de cada día. */
+export function resumenTextoPatron(patronSemanal) {
+    const dias = datosPatron(patronSemanal);
+    if (dias.length === 0) return 'Patrón por día de la semana: sin sesiones cerradas.';
+    const lista = dias.map((d) => `${d.dia} ${d.tasa == null ? 'sin datos' : fmtPct(d.tasa)} (${d.ausentes} de ${d.sesiones} sesiones${d.critico ? ', día crítico' : ''})`).join('; ');
+    return `Ausentismo por día de la semana: ${lista}.`;
+}
+
+// ---- Configuración de colores de las gráficas (solo tokens de globals.css) ----
+// `forma` = muestra de la leyenda y el tooltip (ver MuestraSerie): ajuste, proyección e intervalo comparten el azul de
+// la gráfica, así que la forma (línea, discontinua, banda) es lo que las distingue, no solo el color.
+export const CONFIG_SERIE = {
+    observada: { label: 'Observada', color: 'var(--foreground)', forma: 'punto' },
+    ajuste: { label: 'Ajuste', color: 'var(--chart-1)', forma: 'linea' },
+    proyeccion: { label: 'Proyección', color: 'var(--chart-1)', forma: 'discontinua' },
+    banda: { label: 'Intervalo 95 %', color: 'var(--chart-1)', forma: 'banda' },
+    sma: { label: 'SMA', color: 'var(--chart-3)', forma: 'linea' },
+    ema: { label: 'EMA', color: 'var(--chart-2)', forma: 'linea' },
+    wma: { label: 'WMA', color: 'var(--chart-5)', forma: 'linea' },
+};
+
+export const CONFIG_ACUMULADO = {
+    acumulado: { label: 'Acumulado', color: 'var(--foreground)', forma: 'punto' },
+    ajuste: CONFIG_SERIE.ajuste,
+    proyeccion: CONFIG_SERIE.proyeccion,
+    banda: CONFIG_SERIE.banda,
+};
+
+// ---- Riesgo: distribución y ranking ----
+export const CONFIG_RIESGO = {
+    bajo: { label: 'Bajo', color: 'var(--presente)' },
+    medio: { label: 'Medio', color: 'var(--retardo)' },
+    alto: { label: 'Alto', color: 'var(--ausente)' },
+};
+
+/**
+ * Distribución por nivel de riesgo. `items` trae solo medio/alto (analizarGrupo); los de nivel bajo son los evaluados que
+ * faltan. Sin `evaluados` (p. ej. sin matriz) solo se cuentan los de la lista.
+ * @returns {{ datos: {clave: string, valor: number}[], enRiesgo: number, total: number }}
+ */
+export function distribucionRiesgo(items = [], evaluados = null) {
+    const alto = items.filter((a) => a.nivel === 'alto').length;
+    const medio = items.filter((a) => a.nivel === 'medio').length;
+    const enRiesgo = alto + medio;
+    const total = Number.isFinite(evaluados) && evaluados >= enRiesgo ? evaluados : enRiesgo;
+    return {
+        datos: [
+            { clave: 'bajo', valor: total - enRiesgo },
+            { clave: 'medio', valor: medio },
+            { clave: 'alto', valor: alto },
+        ],
+        enRiesgo,
+        total,
+    };
+}
+
+/**
+ * Nombre acotado para el eje de las barras (los completos viven en la tabla): si no cabe, la primera palabra entera y las
+ * demás como iniciales ("González C. M."); si aun así no cabe, se corta con puntos suspensivos.
+ */
+export function nombreCorto(nombre, max = 16) {
+    const t = String(nombre ?? '').trim().replace(/\s+/g, ' ');
+    if (!t) return SIN_DATO;
+    if (t.length <= max) return t;
+    const [primera, ...resto] = t.split(' ');
+    const iniciales = resto.map((p) => `${p[0].toUpperCase()}.`).join(' ');
+    const corto = iniciales ? `${primera} ${iniciales}` : primera;
+    return corto.length > max ? `${corto.slice(0, max - 1).trimEnd()}…` : corto;
+}
+
+export const TOP_RIESGO = 8;
+
+// Ancho máximo (en caracteres) de la etiqueta del eje: el eje Y de GraficaBarras mide 110 px.
+const MAX_ETIQUETA = 16;
+
+/**
+ * Los `n` alumnos de mayor puntaje para barras horizontales apiladas por nivel (cada nivel su serie y su color).
+ * Las etiquetas del eje son únicas y nunca pasan de MAX_ETIQUETA caracteres: si dos nombres cortos chocan se recortan y
+ * llevan los últimos 4 de la matrícula ("González C. #3456"); como último recurso, un número de orden.
+ */
+export function topRiesgo(items = [], n = TOP_RIESGO) {
+    const orden = ordenarRiesgo(items, 'puntaje', 'desc').slice(0, n);
+    const bases = orden.map((a) => nombreCorto(a.nombre, MAX_ETIQUETA));
+    const cuenta = new Map();
+    bases.forEach((b) => cuenta.set(b, (cuenta.get(b) || 0) + 1));
+    const usadas = new Set();
+    return orden.map((a, i) => {
+        let alumno = bases[i];
+        if (cuenta.get(alumno) > 1) {
+            const sufijo = ` #${String(a.matricula ?? a.idAlumno ?? '?').slice(-4)}`;
+            alumno = `${nombreCorto(a.nombre, MAX_ETIQUETA - sufijo.length)}${sufijo}`;
+        }
+        const etiqueta = alumno;
+        for (let k = 2; usadas.has(alumno); k += 1) {
+            const numero = ` (${k})`;
+            alumno = `${etiqueta.slice(0, MAX_ETIQUETA - numero.length).trimEnd()}${numero}`;
+        }
+        usadas.add(alumno);
+        const puntaje = typeof a.puntaje === 'number' && Number.isFinite(a.puntaje) ? a.puntaje : 0;
+        return { alumno, alto: a.nivel === 'alto' ? puntaje : null, medio: a.nivel === 'alto' ? null : puntaje };
+    });
+}
+
+/** Tendencia reciente de faltas de un alumno a partir de su factor `pendienteReciente` (pp por sesión; ±0.5 = estable). */
+export function tendenciaAlumno(alumno) {
+    const f = (alumno?.factores || []).find((x) => x.id === 'pendienteReciente');
+    const v = f?.valor;
+    if (typeof v !== 'number' || !Number.isFinite(v)) return { direccion: null, etiqueta: SIN_DATO, valor: null };
+    const direccion = v > 0.5 ? 'alza' : v < -0.5 ? 'baja' : 'estable';
+    return { direccion, etiqueta: ETIQUETA_DIRECCION[direccion], valor: v };
+}
+
+/** Texto alternativo del ranking de riesgo: nombres completos con puntaje y nivel. */
+export function resumenTextoTop(items = [], n = TOP_RIESGO) {
+    const orden = ordenarRiesgo(items, 'puntaje', 'desc').slice(0, n);
+    if (orden.length === 0) return 'Ningún alumno en riesgo con los datos actuales.';
+    const lista = orden.map((a) => `${a.nombre || SIN_DATO} ${fmtNum(a.puntaje, 0)} de 100 (${(ETIQUETA_NIVEL_RIESGO[a.nivel] || a.nivel || '').toLowerCase()})`).join('; ');
+    return `Alumnos de mayor riesgo, de ${orden.length} de ${items.length}: ${lista}.`;
+}
+
+/** Divide las alertas (de más a menos grave): las `visibles` primeras a la vista, el resto plegado. */
+export function partirAlertas(alertas = [], visibles = 3) {
+    const orden = { alta: 0, media: 1, info: 2 };
+    const lista = [...alertas].sort((a, b) => (orden[a.nivel] ?? 3) - (orden[b.nivel] ?? 3));
+    return { principales: lista.slice(0, visibles), resto: lista.slice(visibles) };
+}
+
+/** Primera frase de un texto largo y, aparte, el resto (para mostrar lo esencial primero sin perder nada). */
+export function dividirTexto(texto, max = 140) {
+    const t = String(texto ?? '').trim();
+    if (t.length <= max) return { corto: t, resto: '' };
+    const m = /^(.+?[.!?])\s+(.*)$/s.exec(t);
+    if (m && m[1].length <= max * 1.5) return { corto: m[1], resto: m[2] };
+    return { corto: t, resto: '' };
+}
+
 const ORDEN_NIVEL = { alto: 2, medio: 1, bajo: 0 };
 
 const VALOR_ORDEN = {
@@ -137,6 +333,7 @@ const VALOR_ORDEN = {
     faltasEq: (a) => a.faltasEq,
     faltasRestantes: (a) => a.faltasRestantes,
     cruce: (a) => a.semanaCruceEstimada,
+    tendencia: (a) => tendenciaAlumno(a).valor,
 };
 
 /** Ordena sin mutar; los valores nulos van siempre al final. */

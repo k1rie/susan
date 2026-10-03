@@ -3,7 +3,7 @@
 import Field from '@/components/ui/Field';
 import Select from '@/components/ui/Select';
 
-// Periodo y grupo. Al cambiar el periodo se limpia el grupo.
+// Periodo y grupo en una sola fila compacta. Al cambiar el periodo se limpia el grupo.
 export default function SelectorGrupo({ periodos = [], grupos = [], valor, onCambio, deshabilitado = false }) {
     const opcionesGrupo = [
         { value: '', label: 'Elige un grupo', disabled: true },
@@ -13,7 +13,7 @@ export default function SelectorGrupo({ periodos = [], grupos = [], valor, onCam
         <form
             aria-label="Selección de grupo a analizar"
             onSubmit={(e) => e.preventDefault()}
-            className="grid grid-cols-1 gap-3 rounded-xl border border-border bg-card p-5 sm:grid-cols-2"
+            className="grid grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]"
         >
             <Field label="Periodo">
                 <Select

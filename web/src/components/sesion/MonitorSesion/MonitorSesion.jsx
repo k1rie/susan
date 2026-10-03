@@ -1,12 +1,13 @@
 'use client';
 
 import { useState } from 'react';
-import Alert from '@/components/ui/Alert';
 import Button from '@/components/ui/Button';
 import StatCard from '@/components/ui/StatCard';
 import CapturaContinua from '../CapturaContinua';
 import CierreSesionDialog from '../CierreSesionDialog';
 import EstadoCamaras from '../EstadoCamaras';
+import GraficaActividadSesion from '../GraficaActividadSesion';
+import GraficaAsistenciaSesion from '../GraficaAsistenciaSesion';
 import RegistroManualDialog from '../RegistroManualDialog';
 import TablaAlumnosSesion from '../TablaAlumnosSesion';
 import VentanaTolerancia from '../VentanaTolerancia';
@@ -27,13 +28,15 @@ export default function MonitorSesion({ data, onActualizar }) {
                 <StatCard label="Presentes" value={totales.presentes ?? 0} tone="success" />
                 <StatCard label="Retardos" value={totales.retardos ?? 0} tone="warning" />
                 <StatCard label="Sin registro" value={totales.sin_registro ?? 0} tone="danger" />
-                <StatCard label="Pendientes" value={totales.pendientes ?? 0} />
-                <StatCard label="Capturas" value={totales.capturas ?? 0} />
-                <StatCard label="Detecciones" value={totales.detecciones ?? 0} />
-                <StatCard label="Detecciones validas" value={totales.detecciones_validas ?? 0} />
             </div>
 
-            <VentanaTolerancia sesion={sesion} />
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:items-start">
+                <GraficaAsistenciaSesion totales={totales} />
+                <div className="flex flex-col gap-4">
+                    <VentanaTolerancia sesion={sesion} />
+                    <GraficaActividadSesion totales={totales} />
+                </div>
+            </div>
 
             {abierta && <CapturaContinua sesion={sesion} camaras={camaras} activo={sesion.en_ventana === true} onFin={onActualizar} />}
 
@@ -56,7 +59,7 @@ export default function MonitorSesion({ data, onActualizar }) {
                         </div>
                     )}
                 </div>
-                {abierta && !puedeCerrar && <Alert tone="info">El cierre se habilita al terminar la ventana de tolerancia ({sesion.tolerancia_min} min).</Alert>}
+                {abierta && !puedeCerrar && <p className="text-sm text-muted-foreground">El cierre se habilita al terminar la tolerancia ({sesion.tolerancia_min} min).</p>}
                 <TablaAlumnosSesion alumnos={alumnos} puedeRegistrar={abierta} onRegistrar={(a) => setManual({ abierto: true, alumno: a })} />
             </section>
 

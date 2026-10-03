@@ -2,12 +2,11 @@
 
 import { useState } from 'react';
 import Alert from '@/components/ui/Alert';
+import Badge from '@/components/ui/Badge';
 import Button from '@/components/ui/Button';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import Input from '@/components/ui/Input';
-import { AVISOS_CRITICOS, esCritico, textoRango, validarValor } from './parametros.utils.js';
-
-const fecha = (iso) => (iso ? new Date(iso).toLocaleString('es-MX') : null);
+import { AVISOS_CRITICOS, esCritico, resumenParametro, validarValor } from './parametros.utils.js';
 
 // Una fila editable: valida el rango en cliente, confirma y delega el guardado en onGuardar(clave, valor).
 export default function ParametroFila({ parametro, soloLectura = false, onGuardar }) {
@@ -35,13 +34,13 @@ export default function ParametroFila({ parametro, soloLectura = false, onGuarda
     };
 
     return (
-        <li className="rounded-xl border border-border bg-card p-5">
-            <label htmlFor={id} className="block text-sm font-semibold">{parametro.clave}</label>
-            {parametro.descripcion && <p className="text-sm text-muted-foreground">{parametro.descripcion}</p>}
-            <p id={`${id}-ayuda`} className="mt-1 text-xs text-muted-foreground">
-                Tipo: {parametro.tipo} · Rango: {textoRango(parametro)}
-            </p>
-            <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-start">
+        <li className="rounded-xl border border-border bg-card p-4">
+            <div className="flex flex-wrap items-center gap-2">
+                <label htmlFor={id} className="text-sm font-semibold">{parametro.clave}</label>
+                {critico && <Badge tone="warning">Crítico</Badge>}
+            </div>
+            {parametro.descripcion && <p className="mt-0.5 text-[13px] text-muted-foreground">{parametro.descripcion}</p>}
+            <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-start">
                 <div className="flex-1">
                     <Input
                         id={id}
@@ -58,12 +57,9 @@ export default function ParametroFila({ parametro, soloLectura = false, onGuarda
                     <Button disabled={!cambio || Boolean(errorLocal)} onClick={() => setConfirmando(true)}>Guardar</Button>
                 )}
             </div>
-            {parametro.fecha_actualizacion && (
-                <p className="mt-2 text-xs text-muted-foreground">
-                    Última modificación: {fecha(parametro.fecha_actualizacion)}
-                    {parametro.actualizado_por?.correo ? `, por ${parametro.actualizado_por.correo}` : ''}
-                </p>
-            )}
+            <p id={`${id}-ayuda`} className="mt-2 text-xs text-muted-foreground">
+                {resumenParametro(parametro)}
+            </p>
             {avisos.length > 0 && (
                 <Alert tone="warning" className="mt-2" onClose={() => setAvisos([])}>
                     <ul className="list-disc pl-5">{avisos.map((a) => <li key={a}>{a}</li>)}</ul>
@@ -81,7 +77,7 @@ export default function ParametroFila({ parametro, soloLectura = false, onGuarda
                 {critico && (
                     <Alert tone="warning" className="mt-3">{AVISOS_CRITICOS[parametro.clave]}</Alert>
                 )}
-                <p className="mt-3 text-xs text-muted-foreground">Cada cambio queda en bitácora con el valor anterior.</p>
+                <p className="mt-3 text-xs text-muted-foreground">El cambio queda en bitácora con el valor anterior.</p>
             </ConfirmDialog>
         </li>
     );

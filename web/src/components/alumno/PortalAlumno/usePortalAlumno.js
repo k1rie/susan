@@ -4,7 +4,7 @@ import { useCallback, useState } from 'react';
 import { useApiQuery } from '@/hooks/data';
 import { alumnoHistorial, alumnoResumen } from '@/lib/api/reportes.js';
 
-export const FILAS_HISTORIAL = 10;
+export const FILAS_HISTORIAL = 8;
 
 export default function usePortalAlumno({ idSesionInicial = null } = {}) {
     const [periodo, setPeriodo] = useState('');

@@ -1,12 +1,13 @@
 import { columnasTraza, fmtCelda } from '../analitica.utils.js';
 
-// Traza de un método iterativo (bisección, Newton...): columnas = claves del primer elemento.
+// Traza de un método iterativo (bisección, Newton...): columnas = claves del primer elemento. Se pinta dentro de un
+// <Detalles> (ver PanelProcedimiento), así que no lleva marco propio salvo el desplazamiento horizontal en pantallas angostas.
 export default function TablaIteraciones({ traza = [], caption }) {
     const columnas = columnasTraza(traza);
     if (columnas.length === 0) return <p className="text-sm text-muted-foreground">Sin iteraciones registradas.</p>;
     return (
         <div className="overflow-x-auto rounded-xl border border-border">
-            <table className="w-full min-w-max border-collapse text-sm tabular-nums">
+            <table className="w-full min-w-max border-collapse text-xs tabular-nums">
                 {caption && <caption className="px-3 py-2 text-left text-xs text-muted-foreground">{caption}</caption>}
                 <thead className="bg-muted text-muted-foreground">
                     <tr>

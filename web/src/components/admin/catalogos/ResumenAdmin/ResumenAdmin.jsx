@@ -1,11 +1,17 @@
 'use client';
 
+import { CalendarClock, ChevronRight, CheckCircle2, ScanFace } from 'lucide-react';
 import PageHeader from '@/components/layout/PageHeader';
 import Button from '@/components/ui/Button';
 import DataState from '@/components/ui/DataState';
+import GraficaDona from '@/components/ui/GraficaDona';
 import StatCard from '@/components/ui/StatCard';
+import TarjetaFila from '@/components/ui/TarjetaFila';
+import TarjetaGrafica from '@/components/ui/TarjetaGrafica';
 import { useApiQuery } from '@/hooks/data';
 import { adminResumen } from '@/lib/api/admin.js';
+import { resumenTexto } from '@/lib/graficas.js';
+import { CONFIG_CAMARAS, CONFIG_SESIONES, avisosAtencion, datosCamaras, datosSesiones } from './resumenAdmin.utils.js';
 
 const ACCESOS = [
     { href: '/admin/grupos', label: 'Grupos' },
@@ -18,7 +24,9 @@ const ACCESOS = [
     { href: '/tecnico', label: 'Cámaras y sistema' },
 ];
 
-// Portada del administrador: contadores de api_admin_resumen y accesos a los catálogos.
+const ICONOS = { CalendarClock, ScanFace };
+
+// Portada del administrador: 3 contadores, dos gráficas (sesiones de hoy y cámaras) y avisos de atención de api_admin_resumen.
 // `encabezado={false}`: la portada (HomeRol) aporta el h1 y las tarjetas de módulos reemplazan a los accesos rápidos.
 export default function ResumenAdmin({ encabezado = true }) {
     const consulta = useApiQuery(adminResumen, {});
@@ -28,48 +36,61 @@ export default function ResumenAdmin({ encabezado = true }) {
             {encabezado && <PageHeader title="Administración" subtitle="Resumen del periodo y accesos rápidos" />}
             <DataState loading={consulta.loading} error={consulta.error} data={consulta.data} onRetry={consulta.refetch} isEmpty={() => false}>
                 {(r) => {
-                    const sesiones = r.sesiones_hoy ?? {};
-                    const camaras = r.camaras ?? {};
+                    const sesiones = datosSesiones(r.sesiones_hoy);
+                    const camaras = datosCamaras(r.camaras);
+                    const avisos = avisosAtencion(r);
                     return (
-                        <section aria-label="Contadores" className="flex flex-col gap-2">
-                            <p className="text-sm text-muted-foreground">
-                                Periodo {r.periodo} · {r.fecha}
-                            </p>
-                            <div className="grid grid-cols-1 gap-3 min-[480px]:grid-cols-2 lg:grid-cols-4">
-                                <StatCard animated label="Alumnos activos" value={r.alumnos_activos} href="/admin/alumnos" />
-                                <StatCard animated label="Docentes activos" value={r.docentes_activos} href="/admin/docentes" />
-                                <StatCard animated label="Grupos del periodo" value={r.grupos_periodo} href="/admin/grupos" />
-                                <StatCard
-                                    animated
-                                    label="Sesiones de hoy"
-                                    value={sesiones.total ?? 0}
-                                    hint={`${sesiones.abiertas ?? 0} abiertas · ${sesiones.programadas ?? 0} programadas · ${sesiones.cerradas ?? 0} cerradas`}
-                                />
-                                <StatCard animated label="Cámaras activas" value={camaras.activas ?? 0} tone="success" href="/tecnico" />
-                                <StatCard
-                                    animated
-                                    label="Cámaras inactivas"
-                                    value={camaras.inactivas ?? 0}
-                                    tone={(camaras.inactivas ?? 0) > 0 ? 'warning' : 'neutral'}
-                                    hint="Incluye las en mantenimiento"
-                                    href="/tecnico"
-                                />
-                                <StatCard
-                                    animated
-                                    label="Consentimientos por vencer (30 días)"
-                                    value={r.consentimientos_por_vencer_30d ?? 0}
-                                    tone={(r.consentimientos_por_vencer_30d ?? 0) > 0 ? 'warning' : 'neutral'}
-                                    href="/admin/alumnos"
-                                />
-                                <StatCard
-                                    animated
-                                    label="Plantillas sin indexar"
-                                    value={r.plantillas_sin_indexar ?? 0}
-                                    tone={(r.plantillas_sin_indexar ?? 0) > 0 ? 'warning' : 'neutral'}
-                                    href="/tecnico"
-                                />
-                            </div>
-                        </section>
+                        <>
+                            <section aria-label="Contadores" className="flex flex-col gap-3">
+                                <p className="text-sm text-muted-foreground">Periodo {r.periodo} · {r.fecha}</p>
+                                <div className="grid grid-cols-1 gap-3 min-[480px]:grid-cols-3">
+                                    <StatCard animated label="Alumnos activos" value={r.alumnos_activos} href="/admin/alumnos" />
+                                    <StatCard animated label="Docentes activos" value={r.docentes_activos} href="/admin/docentes" />
+                                    <StatCard animated label="Grupos del periodo" value={r.grupos_periodo} href="/admin/grupos" />
+                                </div>
+                            </section>
+                            <section aria-label="Sesiones y cámaras" className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+                                <TarjetaGrafica
+                                    titulo="Sesiones de hoy"
+                                    descripcion="Por estado"
+                                    resumen={resumenTexto(sesiones, CONFIG_SESIONES)}
+                                >
+                                    <GraficaDona datos={sesiones} config={CONFIG_SESIONES} centro={{ etiqueta: 'Sesiones' }} alto={220} vacio="Hoy no hay sesiones" />
+                                </TarjetaGrafica>
+                                <TarjetaGrafica
+                                    titulo="Cámaras"
+                                    descripcion="Inactivas incluye las en mantenimiento"
+                                    acciones={<Button href="/tecnico" variant="ghost" size="sm" arrow>Ver cámaras</Button>}
+                                    resumen={resumenTexto(camaras, CONFIG_CAMARAS)}
+                                >
+                                    <GraficaDona datos={camaras} config={CONFIG_CAMARAS} centro={{ etiqueta: 'Cámaras' }} alto={220} vacio="No hay cámaras registradas" />
+                                </TarjetaGrafica>
+                            </section>
+                            <section aria-labelledby="t-atencion" className="flex flex-col gap-3">
+                                <h2 id="t-atencion" className="text-xl font-semibold tracking-tight">Para revisar</h2>
+                                {avisos.length ? (
+                                    <ul className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+                                        {avisos.map((a) => (
+                                            <li key={a.clave}>
+                                                <TarjetaFila
+                                                    icono={ICONOS[a.icono]}
+                                                    tono={a.tono}
+                                                    titulo={a.titulo}
+                                                    subtitulo={a.subtitulo}
+                                                    href={a.href}
+                                                    accion={<ChevronRight aria-hidden="true" className="size-5 text-muted-foreground" strokeWidth={1.75} />}
+                                                />
+                                            </li>
+                                        ))}
+                                    </ul>
+                                ) : (
+                                    <p className="flex items-center gap-3 rounded-xl border border-border bg-card p-4 text-sm text-muted-foreground">
+                                        <CheckCircle2 aria-hidden="true" className="size-5 shrink-0 text-presente" strokeWidth={1.75} />
+                                        Todo en orden: nada por vencer ni por indexar.
+                                    </p>
+                                )}
+                            </section>
+                        </>
                     );
                 }}
             </DataState>

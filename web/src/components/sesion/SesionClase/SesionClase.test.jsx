@@ -24,6 +24,31 @@ describe('SesionClase', () => {
         expect(screen.getByText('3/3')).toBeTruthy();
         expect(screen.getByRole('button', { name: 'Cerrar sesión de clase' }).disabled).toBe(true);
         expect(screen.getAllByRole('button', { name: 'Registrar manualmente' }).length).toBe(2);
+        // El motivo viaja con el botón (en móvil la columna de consentimiento está oculta); solo para quien lo necesita.
+        expect(screen.getAllByText('Sin lecturas válidas')).toHaveLength(1);
+    });
+
+    it('automatica abierta: 4 KPI, dona de asistencia y actividad de reconocimiento (sin los 8 contadores)', async () => {
+        sesionMonitor.mockResolvedValue({
+            sesion: { ...base, estatus: 'abierta', modo_registro: 'automatico', en_ventana: true, fase: 'presente', minuto_actual: 5 },
+            camaras,
+            alumnos,
+            totales: { ...totales, capturas: 12, detecciones: 40, detecciones_validas: 31 },
+        });
+        render(<SesionClase idSesion={19} />);
+        await waitFor(() => expect(screen.getByText('Sin lecturas')).toBeTruthy());
+        for (const etiqueta of ['Inscritos', 'Presentes', 'Retardos', 'Sin registro']) expect(screen.getAllByText(etiqueta).length).toBeGreaterThan(0);
+        expect(screen.queryByText('Detecciones validas')).toBeNull();
+        expect(screen.getByRole('group', { name: 'Asistencia de la sesión' })).toHaveAccessibleDescription('Presentes: 1 (50 %); Retardos: 0 (0 %); Sin registro: 1 (50 %); Pendientes: 0 (0 %)');
+        expect(screen.getByRole('group', { name: 'Actividad de reconocimiento' })).toHaveAccessibleDescription('Capturas: 12; Detecciones: 40; Det. válidas: 31');
+        expect(screen.getByRole('progressbar', { name: 'Avance de la ventana de tolerancia' })).toHaveAttribute('aria-valuenow', '25');
+    });
+
+    it('automatica abierta sin actividad: la gráfica de actividad avisa en lugar de quedar vacía', async () => {
+        sesionMonitor.mockResolvedValue({ sesion: { ...base, estatus: 'abierta', modo_registro: 'automatico', en_ventana: true, fase: 'presente', minuto_actual: 5 }, camaras, alumnos, totales });
+        render(<SesionClase idSesion={19} />);
+        await waitFor(() => expect(screen.getByText('Aún sin capturas')).toBeTruthy());
+        expect(screen.getByRole('group', { name: 'Actividad de reconocimiento' })).toHaveAccessibleDescription('Aún no hay capturas ni detecciones.');
     });
 
     it('manual abierta: pase de lista con aviso', async () => {
@@ -32,12 +57,17 @@ describe('SesionClase', () => {
         await waitFor(() => expect(screen.getByText('Sesión en modo manual')).toBeTruthy());
         expect(screen.getByRole('button', { name: 'Marcar restantes según la hora' })).toBeTruthy();
         expect(screen.getByRole('button', { name: 'Guardar y cerrar sesión de clase' })).toBeTruthy();
+        expect(screen.getByRole('progressbar', { name: 'Alumnos marcados' })).toHaveAttribute('aria-valuetext', '1 de 2');
+        // La sugerencia por hora se dice una vez (minuto 15 = retardo), no en una columna por fila.
+        expect(screen.getByText('Sugerido a esta hora').parentElement).toHaveTextContent('Sugerido a esta hora Retardo');
+        expect(screen.queryByRole('columnheader', { name: 'Sugerido' })).toBeNull();
     });
 
     it('cerrada: resumen de solo lectura', async () => {
         sesionMonitor.mockResolvedValue({ sesion: { ...base, estatus: 'cerrada', modo_registro: 'automatico', en_ventana: false, fase: 'cerrada', minuto_actual: 4000 }, camaras, alumnos, totales: { ...totales, ausentes: 1 } });
         render(<SesionClase idSesion={19} />);
         await waitFor(() => expect(screen.getByText('Justificados')).toBeTruthy());
+        expect(screen.getByRole('group', { name: 'Asistencia de la sesión' })).toBeTruthy();
         expect(screen.queryByRole('button', { name: 'Cerrar sesión de clase' })).toBeNull();
     });
 

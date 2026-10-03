@@ -1,7 +1,7 @@
 ---
 status: done
-heartbeat: 2026-10-03T05:58:34Z
-phase: F9
+heartbeat: 2026-10-03T06:49:25Z
+phase: F10
 ---
 
 # Progreso del diseño real
@@ -25,6 +25,7 @@ Si `heartbeat` está más viejo (o `pending`), toma el trabajo: pon `status: run
 - [x] **F5** Operación: sesión en vivo, pase manual, revisión, reportes, portal del alumno (heredan ui-kit y tokens; radios, sombras y enlaces-botón migrados; sin desbordes a 360 px)
 - [x] **F6** Admin, técnico y analítica (misma migración; corregido el acceso del administrador a `/tecnico` en solo lectura)
 - [x] **F7** Pulido de movimiento, presupuesto de rendimiento (medido, ver abajo), reduced-motion y a11y (StatCard con CountUp, paleta combobox, texto sr-only en titulares/cifras animados)
+- [x] **F10** Menos texto + gráficas shadcn (2026-10-03): dona, barras y tarjeta de gráfica compartidas; Reportes en pestañas; Analítica con shadcn chart; paneles de docente, revisión, sesión, alumno, admin y técnico con cifras y gráficas; textos largos plegados (`Detalles`). Orquestado con un workflow de 12 agentes (implementar → revisión adversarial → corrección).
 - [x] **F9** Rediseño fiel (2026-10-03): el usuario pidió apegarse más a la referencia → shell, tarjetas y tipografía de **Dropbox Dash**, onboarding de cuenta y Lucide siempre (ver `docs/design/SISTEMA.md`)
 - [x] **F8** Cierre: recorrido desktop + 360 px por rol, documentación (README, CLAUDE.md, ARCHITECTURE §14, docs/design/*), todo verde y subido
 
@@ -61,15 +62,15 @@ Medido el 2026-10-03 con `scripts/measure-bundle.mjs` (suma de chunks JS que ref
 
 | Ruta | Base (gzip KB) | Ahora (gzip KB) | Cambio |
 |---|---|---|---|
-| `/login` | 197.7 | 212.5 | +7.5 % |
-| `/docente` | 209.3 | 235.3 | **+12.4 %** (presupuesto ≤ +15 %; medido tras F9) |
-| `/admin` | 207.2 | 230.4 | +11.2 % |
-| `/alumno` | 218.8 | 242.0 | +10.6 % |
-| `/reportes` | 216.1 | 231.1 | +6.9 % |
-| `/analitica` | 344.3 | 359.0 | +4.3 % |
-| `/docente/sesiones/[id]` | 221.9 | 236.5 | +6.6 % |
+| `/login` | 197.7 | 211.6 | +7.0 % |
+| `/docente` | 209.3 | 240.5 | +14.9 % |
+| `/admin` | 207.2 | 235.4 | +13.6 % |
+| `/alumno` | 218.8 | 249.6 | +14.1 % |
+| `/analitica` | 344.3 | 255.2 | -25.9 % |
+| `/reportes` | 216.1 | 245.3 | +13.5 % |
+| `/docente/sesiones/[id]` | 221.9 | 245.8 | +10.8 % |
 
-Lecciones: la primera medición dio +15,3 % en `/docente`; `cn()` (tailwind-merge, ~7 KB gz) se había colado en componentes nuevos. `cn()` queda **solo** para
+Lecciones: tras agregar las gráficas shadcn (recharts ≈ 130 KB gzip) `/docente` subió a 371 KB (+77 %). Se cargan con `next/dynamic` (`ui/GraficaDona`, `ui/GraficaBarras`, `analitica/GraficaSerie` y `analitica/GraficaAcumulado`; las implementaciones viven en `*Impl.jsx`): el chunk de recharts se descarga aparte, solo en las pantallas con gráficas y con el alto reservado, y el JS inicial volvió a entrar en presupuesto. En pruebas, `next/dynamic` se sustituye por un shim síncrono (`src/test/nextDynamic.jsx`, alias en `vitest.config.mjs`). La primera medición del rediseño dio +15,3 % en `/docente`; `cn()` (tailwind-merge, ~7 KB gz) se había colado en componentes nuevos. `cn()` queda **solo** para
 las primitivas de shadcn (`components/shadcn`); el resto usa `clsx`. Sin `gsap` ni `motion` (≈ 100 KB gz evitados).
 
 Tiempo de ejecución (build de producción con `next start`, Chrome del pane, localhost, sin red):

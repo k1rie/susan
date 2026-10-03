@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import Alert from '@/components/ui/Alert';
+import Avatar from '@/components/ui/Avatar';
 import Button from '@/components/ui/Button';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import Field from '@/components/ui/Field';
@@ -21,6 +22,10 @@ export default function JustificanteCard({ justificante, minimoValidas, onResuel
     const [comentario, setComentario] = useState('');
     const [confirmar, setConfirmar] = useState(null); // 'aprobar' | 'rechazar' | null
     const [doc, setDoc] = useState({ cargando: false, url: null, error: null });
+    // Las lecturas se piden al abrirlas por primera vez: cada carga queda en la bitácora de consulta (RF-19) y los recortes
+    // firmados vencen a los 5 min, así que no se cargan «por si acaso». Al ocultar se conservan montadas (sin otra consulta).
+    const [lecturas, setLecturas] = useState({ visibles: false, cargadas: false });
+    const idLecturas = useId();
 
     const verDocumento = async () => {
         setDoc({ cargando: true, url: null, error: null });
@@ -52,23 +57,26 @@ export default function JustificanteCard({ justificante, minimoValidas, onResuel
     const j = justificante;
     return (
         <article aria-label={`Justificante de ${j.alumno.nombre_completo}`} className="flex flex-col gap-4 rounded-xl border border-border bg-card p-5">
-            <header className="flex flex-col gap-1">
+            <header className="flex flex-col gap-2">
                 <Button variant="ghost" size="sm" className="self-start md:hidden" onClick={onCerrar}>
                     Volver a la lista
                 </Button>
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                    <h2 className="text-lg font-semibold">{j.alumno.nombre_completo}</h2>
-                    <span className="flex gap-2">
+                {/* flex-wrap: a 360 px los dos chips bajan a su propia línea en lugar de dejar el nombre en «Me…». */}
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+                    <Avatar nombre={j.alumno.nombre_completo} />
+                    <div className="min-w-0 flex-1 basis-44">
+                        <h2 className="truncate text-lg font-semibold leading-tight">{j.alumno.nombre_completo}</h2>
+                        <p className="truncate text-sm text-muted-foreground">
+                            {j.alumno.matricula} · {j.materia.nombre} · {j.grupo.clave_grupo}
+                        </p>
+                    </div>
+                    <span className="flex flex-wrap gap-1.5">
                         <StatusChip kind="justificante" value="pendiente" />
                         <StatusChip kind="asistencia" value={j.estado_asistencia} />
                     </span>
                 </div>
-                <p className="text-sm text-muted-foreground">Matrícula {j.alumno.matricula}</p>
-                <p className="text-sm">
-                    {j.materia.nombre} · Grupo {j.grupo.clave_grupo} · Sesión del {j.sesion.fecha}
-                </p>
                 <p className="text-sm text-muted-foreground">
-                    Registrado por {j.registrado_por_rol === 'docente' ? 'el docente' : 'el alumno'} el {formatearFechaHora(j.fecha_registro)}
+                    Sesión del {j.sesion.fecha} · Registrado por {j.registrado_por_rol === 'docente' ? 'el docente' : 'el alumno'} el {formatearFechaHora(j.fecha_registro)}
                 </p>
             </header>
 
@@ -83,14 +91,28 @@ export default function JustificanteCard({ justificante, minimoValidas, onResuel
                         <a href={doc.url} target="_blank" rel="noopener noreferrer" className="text-link underline">
                             Abrir documento
                         </a>{' '}
-                        (el enlace vence en 5 minutos)
+                        (vence en 5 min)
                     </p>
                 )}
                 {doc.error && <Alert tone="danger" className="mt-2">{doc.error}</Alert>}
             </section>
 
-            <section aria-label="Lecturas del caso">
-                <LecturasCaso idAsistencia={j.id_asistencia} minimoValidas={minimoValidas} />
+            <section aria-label="Lecturas del reconocimiento" className="flex flex-col gap-3">
+                <Button
+                    variant="secondary"
+                    size="sm"
+                    className="self-start"
+                    aria-expanded={lecturas.visibles}
+                    aria-controls={lecturas.cargadas ? idLecturas : undefined}
+                    onClick={() => setLecturas((previo) => ({ visibles: !previo.visibles, cargadas: true }))}
+                >
+                    {lecturas.visibles ? 'Ocultar lecturas del reconocimiento' : 'Ver lecturas del reconocimiento'}
+                </Button>
+                {lecturas.cargadas && (
+                    <div id={idLecturas} hidden={!lecturas.visibles}>
+                        <LecturasCaso idAsistencia={j.id_asistencia} minimoValidas={minimoValidas} />
+                    </div>
+                )}
             </section>
 
             {error && <Alert tone="danger">{error.message}</Alert>}

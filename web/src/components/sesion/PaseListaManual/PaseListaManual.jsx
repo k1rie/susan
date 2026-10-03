@@ -10,6 +10,7 @@ import { useToast } from '@/components/ui/Toast';
 import { useApiMutation } from '@/hooks/data';
 import { cerrarSesion, paseListaManual } from '@/lib/api/sesiones.js';
 import { formatearHoraIso, sugerirEstado } from '../MonitorSesion/monitorSesion.utils.js';
+import { conteoMarcas } from './paseListaManual.utils.js';
 
 const OPCIONES = [
     { value: '', label: 'Sin marcar' },
@@ -29,6 +30,7 @@ export default function PaseListaManual({ data, onActualizar }) {
     const activos = alumnos.filter((a) => !a.inscripcion || a.inscripcion === 'activa');
     const [marcas, setMarcas] = useState(() => Object.fromEntries(activos.filter((a) => ESTADOS_EDITABLES.includes(a.estado)).map((a) => [a.id_alumno, a.estado])));
     const ocupado = guardarMut.loading || cerrarMut.loading;
+    const avance = conteoMarcas(activos, marcas);
 
     const marcarRestantes = () => setMarcas((prev) => Object.fromEntries(activos.map((a) => [a.id_alumno, prev[a.id_alumno] || sugerido])));
 
@@ -54,7 +56,7 @@ export default function PaseListaManual({ data, onActualizar }) {
     };
 
     const columns = [
-        { key: 'matricula', header: 'Matrícula' },
+        { key: 'matricula', header: 'Matrícula', hideBelow: 'sm' },
         { key: 'nombre', header: 'Alumno', primary: true },
         {
             key: 'estado',
@@ -63,16 +65,35 @@ export default function PaseListaManual({ data, onActualizar }) {
                 <Select aria-label={`Estado de ${a.nombre}`} value={marcas[a.id_alumno] ?? ''} options={OPCIONES} onChange={(e) => setMarcas((p) => ({ ...p, [a.id_alumno]: e.target.value }))} className="min-w-36" />
             ),
         },
-        { key: 'sugerencia', header: 'Sugerido', render: () => <StatusChip kind="asistencia" value={sugerido} size="sm" /> },
-        { key: 'hora', header: 'Hora', render: (a) => (a.hora_registro ? formatearHoraIso(a.hora_registro) : 'Al guardar') },
-        { key: 'origen', header: 'Origen', render: (a) => (a.origen ? <StatusChip kind="origen" value={a.origen} size="sm" /> : <StatusChip kind="origen" value="manual" size="sm" />) },
+        { key: 'hora', header: 'Hora', hideBelow: 'md', render: (a) => (a.hora_registro ? formatearHoraIso(a.hora_registro) : 'Al guardar') },
+        { key: 'origen', header: 'Origen', hideBelow: 'md', render: (a) => (a.origen ? <StatusChip kind="origen" value={a.origen} size="sm" /> : <StatusChip kind="origen" value="manual" size="sm" />) },
     ];
 
     return (
         <div className="flex flex-col gap-4">
             <Alert tone="info" title="Sesión en modo manual">
-                El aula no tiene cámaras activas, por lo que el pase de lista es manual. Los alumnos que queden sin marcar se registrarán como ausentes al cerrar la sesion.
+                El aula no tiene cámaras activas. Quien quede sin marcar será ausente al cerrar la sesión.
             </Alert>
+            <div className="flex flex-col gap-1.5">
+                <p className="text-sm">
+                    Marcados <strong className="font-semibold tabular-nums">{avance.marcados}</strong> de <span className="tabular-nums">{avance.total}</span>
+                </p>
+                <span
+                    role="progressbar"
+                    aria-label="Alumnos marcados"
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                    aria-valuenow={Math.round(avance.ancho)}
+                    aria-valuetext={`${avance.marcados} de ${avance.total}`}
+                    className="block h-1.5 max-w-80 overflow-hidden rounded-full bg-muted"
+                >
+                    <span className="block h-full rounded-full bg-presente" style={{ width: `${avance.ancho}%` }} />
+                </span>
+            </div>
+            {/* La sugerencia es la misma para todos (sale de la hora): se dice una vez, no en una columna que se oculta en móvil. */}
+            <p className="flex flex-wrap items-center gap-1.5 text-sm text-muted-foreground">
+                Sugerido a esta hora <StatusChip kind="asistencia" value={sugerido} size="sm" />
+            </p>
             <div className="flex flex-wrap gap-2">
                 <Button variant="secondary" onClick={marcarRestantes} disabled={ocupado}>
                     Marcar restantes según la hora
