@@ -1,7 +1,7 @@
 ---
 status: running
-heartbeat: 2026-10-03T04:09:04Z
-phase: prerrequisitos
+heartbeat: 2026-10-03T04:11:34Z
+phase: F1
 ---
 
 # Progreso del diseño real
@@ -17,7 +17,7 @@ Si `heartbeat` está más viejo (o `pending`), toma el trabajo: pon `status: run
 
 ## Fases
 
-- [ ] **F0** Investigación en Mobbin (Chrome del usuario) → `docs/design/REFERENCIAS.md` y `docs/design/SISTEMA.md`
+- [x] **F0** Investigación → `docs/design/REFERENCIAS.md` y `docs/design/SISTEMA.md` (SchoolAI público revisado con el navegador integrado; **Mobbin pendiente**: la extensión de Chrome no estaba conectada — ampliar REFERENCIAS.md cuando lo esté)
 - [ ] **F1** Infraestructura: shadcn init, tokens, `lib/motion`, componentes ReactBits elegidos
 - [ ] **F2** ui-kit re-skineado (misma API de props)
 - [ ] **F3** Shell, registro de módulos y Home por rol (+ `/modulos/[id]`)
@@ -31,7 +31,8 @@ Si `heartbeat` está más viejo (o `pending`), toma el trabajo: pon `status: run
 
 | Fecha (UTC) | Qué se hizo | Commit |
 |---|---|---|
-| — | Plan creado | — |
+| — | Plan creado | 2332fc4 |
+| 2026-10-03 | F0: referencias y sistema de diseño | (siguiente commit) |
 
 ## Dependencias de animación añadidas (nombre · tamaño gz · dónde)
 
