@@ -9,9 +9,10 @@ Base funcional: la especificación del 1er avance (`docs/spec/Avance1.pdf`, text
 (`docs/NUMERICS.md`). Referencias de origen: SmartClass (flujos de grupos/asistencia/justificantes/exportación) y
 MVP-FITNESS (estructura Next.js, un folder por componente).
 
-**Estado actual: BASE.** El diseño visual es deliberadamente mínimo (Tailwind utilitario sobre tokens semánticos);
-el rediseño vendrá después. No inviertas en animaciones, temas, glass ni pulido visual: prioriza funcionalidad,
-datos correctos, accesibilidad básica y que se vea bien a 360 px.
+**Estado actual: base funcional + diseño real (fases F0–F7 de `docs/DESIGN_PLAN.md`).** La identidad y las reglas de
+movimiento están en `docs/design/SISTEMA.md`; el avance y el presupuesto de rendimiento medido, en
+`docs/DESIGN_PROGRESS.md`. Toda pantalla nueva debe verse bien a 360 px, respetar "reducir movimiento" y no
+desbordar horizontalmente.
 
 ## Mapa del repositorio
 
@@ -54,11 +55,23 @@ SUSAN/
       NombreComponente.test.jsx   # pruebas
       index.js                    # export { default } from './NombreComponente.jsx';
   ```
-  Primitivas compartidas en `components/ui/<Nombre>/`; layout en `components/layout/<Nombre>/`.
+  Primitivas compartidas en `components/ui/<Nombre>/` (API de props de SUSAN; úsalas siempre en pantallas),
+  primitivas vendorizadas de shadcn en `components/shadcn/` (solo las envuelven los `ui/`), movimiento en
+  `components/motion/`, piezas del Home en `components/home/`, layout en `components/layout/<Nombre>/`.
   Las páginas (`src/app/**/page.jsx`) son delgadas: solo componen componentes y cargan datos.
-- Estilos: clases de Tailwind con los **tokens semánticos** de `src/app/globals.css` (`bg-surface`,
-  `text-muted`, `border-border`, `bg-primary`, `text-presente`…). Nunca colores hex crudos en componentes.
-  Estados de asistencia: siempre etiqueta de texto + color (componente `StatusChip`).
+- Estilos: clases de Tailwind con los **tokens semánticos** de `src/app/globals.css` (vocabulario shadcn:
+  `bg-background`, `bg-card`, `bg-muted`, `text-foreground`, `text-muted-foreground`, `border-border`, `bg-primary`,
+  `text-destructive`, `bg-accent`…; marca: `text-brand-gold`, `bg-brand-gold-soft`; estados: `text-presente`,
+  `bg-ausente-bg`…). Nunca colores hex crudos en componentes. Estados de asistencia: siempre etiqueta de texto +
+  color (componente `StatusChip`). Titulares en serif con `font-display`; interfaz en Inter.
+- **Forma**: tarjetas `rounded-3xl` con `shadow-soft`; botones, chips y buscadores en píldora (`rounded-full`);
+  inputs `rounded-[14px]`; foco visible con anillo (`focus-visible:ring-4 ring-ring/40`). Iconos: `lucide-react`.
+- **Movimiento**: solo con `components/motion/*` y `lib/motion` (CSS + IntersectionObserver/rAF; sin gsap ni
+  `motion`). Solo `transform`/`opacity`; una vez al entrar en vista; apagado con "reducir movimiento". No agregues
+  librerías de animación sin medir con `scripts/measure-bundle.mjs` (presupuesto: `/docente` ≤ +15 % vs. la base).
+  `cn()` (tailwind-merge) es solo para `components/shadcn`; en el resto usa `clsx`.
+- **Módulos**: las funciones nuevas (y las futuras) se registran en `web/src/lib/modulos.js` (ver
+  `docs/design/MODULOS.md`); el Home, `/modulos`, la paleta ⌘K y el riel lateral salen de ahí.
 - **Acceso a datos**: los componentes NUNCA llaman a Supabase directamente. Usan `@/lib/api/*` (envoltorios
   tipados sobre las RPC) y `@/lib/http/*` (clientes de los Route Handlers). Toda la lógica de negocio vive en
   PostgreSQL (RPC/triggers) o en Route Handlers; la interfaz solo presenta y captura decisiones.
