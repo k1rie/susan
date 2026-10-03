@@ -1,0 +1,203 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+vi.mock('@/lib/backend', () => ({ getServerBackend: vi.fn(), getAdminBackend: vi.fn() }));
+vi.mock('./recognition.js', () => ({
+    construirIndice: vi.fn(),
+    activarIndice: vi.fn(),
+    infoIndice: vi.fn(),
+    manifiestoIndice: vi.fn(),
+}));
+
+import { ApiError } from '@/lib/api/errors';
+import { activarIndice, construirIndice, infoIndice, manifiestoIndice } from './recognition.js';
+import { estadoIndice, reconstruirIndice, revertirIndice, sincronizarIndice } from './indice.js';
+import { crearBackend, errorDeNegocio } from './testing.js';
+
+const PLAN = {
+    dimension: 512,
+    version_sugerida: 'v004',
+    base: { id_indice: 3, version: 'v003', objeto_indice: 'indice/v003.json', total_vectores: 1 },
+    motivo_sin_base: null,
+    totales: { activas: 2, nuevas: 1, en_base: 1, obsoletas: 0 },
+    nada_que_hacer: false,
+    entries: [
+        { id_plantilla: 12, id_alumno: 3, faiss_id: 1001, id_indice: 3, en_base: true, objeto_foto: 'registro/3/a.jpg' },
+        { id_plantilla: 41, id_alumno: 17, faiss_id: 1043, id_indice: null, en_base: false, objeto_foto: 'registro/17/b.jpg' },
+    ],
+};
+const MAPEO = [{ id_plantilla: 12, faiss_id: 1001 }, { id_plantilla: 41, faiss_id: 1043 }];
+const BUILD_OK = { version: 'v004', objeto_indice: 'indice/v004.json', dimension: 512, ntotal: 2, mapeo: MAPEO, errores: [] };
+
+/** Backend admin con la secuencia feliz; `anular` reemplaza RPC concretas. */
+function admin(anular = {}) {
+    return crearBackend({
+        rpcs: {
+            svc_bloqueo_adquirir: () => true,
+            svc_bloqueo_liberar: () => true,
+            svc_indice_plan: () => PLAN,
+            svc_indice_registrar: () => ({ id_indice: 4, version: 'v004', ya_registrada: false }),
+            svc_indice_activar: () => ({ id_indice: 4, version: 'v004', anterior: { id_indice: 3, version: 'v003' }, plantillas_asignadas: 2, plantillas_pendientes: 0, ya_activo: false }),
+            svc_indice_en_uso: () => ({ id_indice: 4, version: 'v004' }),
+            svc_indice_revertir: () => ({ id_indice: 3, version: 'v003', anterior: { id_indice: 4, version: 'v004' }, plantillas_asignadas: 1, plantillas_pendientes: 1, ya_activo: false }),
+            ...anular,
+        },
+    });
+}
+
+beforeEach(() => {
+    construirIndice.mockResolvedValue(BUILD_OK);
+    activarIndice.mockResolvedValue({ version: 'v004', ntotal: 2, dimension: 512, active: true, preloaded: false });
+    manifiestoIndice.mockResolvedValue({ version: 'v003', ntotal: 1, dimension: 512, refs: [{ id_plantilla: 12, faiss_id: 1001 }] });
+    infoIndice.mockResolvedValue({ version: 'v004', ntotal: 2, dimension: 512, model: 'fake', loaded_at: 't' });
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+});
+
+describe('reconstruirIndice', () => {
+    it('orquesta en orden: bloqueo -> plan -> build -> registrar -> precarga -> activar BD -> activar servicio -> liberar', async () => {
+        const orden = [];
+        const a = admin();
+        const original = a.rpc.getMockImplementation();
+        a.rpc.mockImplementation(async (n, args) => { orden.push(n); return original(n, args); });
+        construirIndice.mockImplementation(async () => { orden.push('/build'); return BUILD_OK; });
+        activarIndice.mockImplementation(async ({ preloadOnly }) => { orden.push(preloadOnly ? '/activate(preload)' : '/activate'); return {}; });
+
+        const r = await reconstruirIndice({ admin: a });
+
+        expect(orden).toEqual([
+            'svc_bloqueo_adquirir', 'svc_indice_plan', '/build', 'svc_indice_registrar', '/activate(preload)',
+            'svc_indice_activar', '/activate', 'svc_bloqueo_liberar',
+        ]);
+        expect(r).toMatchObject({ estado: 'activada', version: 'v004', id_indice: 4, total_vectores: 2, plantillas_asignadas: 2 });
+    });
+
+    it('arma entries: keep para las de la base y objeto_foto para las nuevas; base_version del plan', async () => {
+        await reconstruirIndice({ admin: admin() });
+        expect(construirIndice).toHaveBeenCalledWith({
+            version: 'v004',
+            baseVersion: 'v003',
+            entries: [
+                { id_plantilla: 12, faiss_id: 1001, keep: true },
+                { id_plantilla: 41, faiss_id: 1043, objeto_foto: 'registro/17/b.jpg' },
+            ],
+        });
+    });
+
+    it('pasa el mapeo del build (refs) a svc_indice_activar y el id registrado', async () => {
+        const a = admin();
+        await reconstruirIndice({ admin: a });
+        const llamada = a.rpc.mock.calls.find(([n]) => n === 'svc_indice_activar');
+        expect(llamada[1]).toEqual({ p_id_indice: 4, p_mapeo: MAPEO });
+    });
+
+    it('errores[] del servicio ABORTA: no registra, no precarga, no activa, y libera el bloqueo', async () => {
+        construirIndice.mockResolvedValue({ ...BUILD_OK, objeto_indice: null, ntotal: 0, mapeo: [], errores: [{ id_plantilla: 41, motivo: 'No se detecto ningun rostro.' }] });
+        const a = admin();
+        const e = await reconstruirIndice({ admin: a }).catch((x) => x);
+        expect(e).toBeInstanceOf(ApiError);
+        expect(e).toMatchObject({ code: 'INDICE_CONSTRUCCION_FALLIDA', status: 422 });
+        expect(e.details.errores).toEqual([{ id_plantilla: 41, motivo: 'No se detecto ningun rostro.' }]);
+        expect(a.llamadas).not.toContain('svc_indice_registrar');
+        expect(a.llamadas).not.toContain('svc_indice_activar');
+        expect(activarIndice).not.toHaveBeenCalled();
+        expect(a.llamadas.at(-1)).toBe('svc_bloqueo_liberar');
+    });
+
+    it('si el build lanza (servicio caído) no hay efectos en BD y el bloqueo se libera', async () => {
+        construirIndice.mockRejectedValue(new ApiError({ code: 'SERVICIO_RECONOCIMIENTO_NO_DISPONIBLE', message: 'x', status: 503 }));
+        const a = admin();
+        const e = await reconstruirIndice({ admin: a }).catch((x) => x);
+        expect(e).toMatchObject({ code: 'SERVICIO_RECONOCIMIENTO_NO_DISPONIBLE', details: { fase: 'construccion', version: 'v004' } });
+        expect(a.llamadas).toEqual(['svc_bloqueo_adquirir', 'svc_indice_plan', 'svc_bloqueo_liberar']);
+    });
+
+    it('si falla la precarga NO activa en BD (la BD no cambia de versión) y libera el bloqueo', async () => {
+        activarIndice.mockRejectedValueOnce(new ApiError({ code: 'INDICE_INVALIDO', message: 'x', status: 422 }));
+        const a = admin();
+        const e = await reconstruirIndice({ admin: a }).catch((x) => x);
+        expect(e.details.fase).toBe('precarga');
+        expect(a.llamadas).not.toContain('svc_indice_activar');
+        expect(a.llamadas.at(-1)).toBe('svc_bloqueo_liberar');
+    });
+
+    it('si falla svc_indice_activar (plan obsoleto) no cambia el puntero del servicio y reporta la fase', async () => {
+        const a = admin({ svc_indice_activar: () => errorDeNegocio('INDICE_PLAN_OBSOLETO', 'El plan cambió.') });
+        const e = await reconstruirIndice({ admin: a }).catch((x) => x);
+        expect(e).toMatchObject({ code: 'INDICE_PLAN_OBSOLETO', details: { fase: 'activacion_bd' } });
+        expect(activarIndice).toHaveBeenCalledTimes(1); // solo la precarga
+        expect(activarIndice.mock.calls[0][0].preloadOnly).toBe(true);
+        expect(a.llamadas.at(-1)).toBe('svc_bloqueo_liberar');
+    });
+
+    it('si falla el cambio final del servicio avisa que la BD ya quedó activada (sincronizar)', async () => {
+        activarIndice.mockResolvedValueOnce({}).mockRejectedValueOnce(new ApiError({ code: 'SERVICIO_RECONOCIMIENTO_NO_DISPONIBLE', message: 'x', status: 503 }));
+        const a = admin();
+        const e = await reconstruirIndice({ admin: a }).catch((x) => x);
+        expect(e.details).toMatchObject({ fase: 'activacion_servicio', bd_activada: true, sincronizado: false });
+        expect(a.llamadas.at(-1)).toBe('svc_bloqueo_liberar');
+    });
+
+    it('si otro proceso tiene el bloqueo: 409 RECONSTRUCCION_EN_CURSO, sin plan ni liberar un bloqueo ajeno', async () => {
+        const a = admin({ svc_bloqueo_adquirir: () => false });
+        await expect(reconstruirIndice({ admin: a })).rejects.toMatchObject({ code: 'RECONSTRUCCION_EN_CURSO', status: 409 });
+        expect(a.llamadas).toEqual(['svc_bloqueo_adquirir']);
+    });
+
+    it('nada_que_hacer -> sin_cambios, sin llamar al servicio, y libera el bloqueo', async () => {
+        const a = admin({ svc_indice_plan: () => ({ ...PLAN, nada_que_hacer: true }) });
+        const r = await reconstruirIndice({ admin: a });
+        expect(r).toMatchObject({ estado: 'sin_cambios', version: 'v003' });
+        expect(construirIndice).not.toHaveBeenCalled();
+        expect(a.llamadas.at(-1)).toBe('svc_bloqueo_liberar');
+    });
+
+    it('un fallo al liberar el bloqueo no oculta el resultado', async () => {
+        const a = admin({ svc_bloqueo_liberar: () => errorDeNegocio('VALIDACION', 'x') });
+        await expect(reconstruirIndice({ admin: a })).resolves.toMatchObject({ estado: 'activada' });
+    });
+
+    it('reintento seguro: tras un fallo, la siguiente corrida vuelve a intentar completa', async () => {
+        activarIndice.mockRejectedValueOnce(new ApiError({ code: 'X', message: 'x', status: 500 }));
+        const a = admin();
+        await reconstruirIndice({ admin: a }).catch(() => {});
+        await expect(reconstruirIndice({ admin: a })).resolves.toMatchObject({ estado: 'activada' });
+        expect(a.llamadas.filter((n) => n === 'svc_bloqueo_liberar')).toHaveLength(2);
+    });
+
+    it('completa: true se lo pide al plan', async () => {
+        const a = admin();
+        await reconstruirIndice({ completa: true, admin: a });
+        expect(a.rpc.mock.calls.find(([n]) => n === 'svc_indice_plan')[1]).toEqual({ p_completa: true });
+    });
+});
+
+describe('estado, sincronizar y revertir', () => {
+    it('estadoIndice combina BD y servicio y marca sincronizado', async () => {
+        const backend = crearBackend({ rpcs: { api_indice_estado: () => ({ en_uso: { id_indice: 4, version: 'v004' }, plantillas: {} }) } });
+        const ok = await estadoIndice({ backend });
+        expect(ok).toMatchObject({ sincronizado: true, servicio: { disponible: true, version: 'v004' } });
+        infoIndice.mockResolvedValueOnce({ version: 'v003', ntotal: 1, dimension: 512 });
+        expect((await estadoIndice({ backend })).sincronizado).toBe(false);
+        infoIndice.mockRejectedValueOnce(new ApiError({ code: 'SERVICIO_RECONOCIMIENTO_NO_DISPONIBLE', message: 'x', status: 503 }));
+        const caido = await estadoIndice({ backend });
+        expect(caido.servicio).toEqual({ disponible: false, motivo: 'SERVICIO_RECONOCIMIENTO_NO_DISPONIBLE' });
+        expect(caido.sincronizado).toBeNull();
+    });
+
+    it('sincronizarIndice activa en el servicio la versión en uso de la BD; sin versión -> 409', async () => {
+        const r = await sincronizarIndice({ admin: admin() });
+        expect(activarIndice).toHaveBeenCalledWith({ version: 'v004' });
+        expect(r.estado).toBe('sincronizada');
+        await expect(sincronizarIndice({ admin: admin({ svc_indice_en_uso: () => null }) })).rejects.toMatchObject({ code: 'SIN_INDICE_EN_USO', status: 409 });
+    });
+
+    it('revertirIndice usa los refs del manifiesto como mapeo y bloquea', async () => {
+        const a = admin();
+        const r = await revertirIndice({ idIndice: 3, version: 'v003', admin: a });
+        const llamada = a.rpc.mock.calls.find(([n]) => n === 'svc_indice_revertir');
+        expect(llamada[1]).toEqual({ p_id_indice: 3, p_mapeo: [{ id_plantilla: 12, faiss_id: 1001 }] });
+        expect(r).toMatchObject({ estado: 'revertida', version: 'v003', plantillas_pendientes: 1 });
+        expect(a.llamadas[0]).toBe('svc_bloqueo_adquirir');
+        expect(a.llamadas.at(-1)).toBe('svc_bloqueo_liberar');
+        expect(activarIndice.mock.calls.map(([x]) => x.preloadOnly ?? false)).toEqual([true, false]);
+    });
+});
