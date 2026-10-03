@@ -245,11 +245,11 @@ Además: `GET /health`, `GET /v1/index`, `POST /v1/photo/check`, `POST /v1/index
   (no `recortes/{id_sesion}/{id_captura}/{n}.jpg`). La purga se guía por las rutas de `deteccion.objeto_recorte`, no por el layout.
 - **Cámaras IP**: el docente no ve `direccion_ip`; el handler de captura la obtiene con `svc_camara_direccion(p_id_sesion, p_id_camara)` y arma `http://<ip><CAMERA_SNAPSHOT_PATH>`.
 - **Reloj de demostración local**: `LOCAL_FAKE_NOW` fija `app.fake_now` en cada RPC local (`scripts/dev-all.sh` lo pone en `2026-09-14 07:12:00-06`; `SUSAN_FAKE_NOW=off` usa el real).
-- **iCloud**: el proyecto está en un Escritorio sincronizado que desaloja archivos (`dataless`), vuelve lentas las lecturas y duplica directorios/symlinks vivos (`X 2`).
-  Solución por capas: (1) los **datos mutables del modo local** (clúster PostgreSQL, storage, PIDs, logs) viven en `SUSAN_LOCAL_DIR`, que `scripts/local-dir.sh` resuelve a
-  `~/.susan-local/<proyecto>` cuando el proyecto está en Escritorio/Documentos/iCloud Drive (y a `<repo>/.local` en otro caso); `web/.env.local` (ignorado por git) lo fija para Next;
-  (2) las carpetas regenerables son `*.nosync` con symlink (`web/node_modules`, `web/.next`, `recognition-service/.venv`); dev servers paralelos: `NEXT_DIST_DIR=.next-<clave>.nosync`;
-  (3) lo correcto a largo plazo es mover el proyecto fuera del Escritorio (p. ej. `~/Developer/SUSAN`). Nunca crear symlinks con el nombre de un directorio que iCloud ya conocía mientras se borra el viejo.
+- **iCloud y ubicación del proyecto**: el Escritorio de la máquina de desarrollo está sincronizado con iCloud y, con el disco al ~98 %, macOS desaloja archivos (`dataless`): lecturas lentas o imposibles,
+  módulos truncados, directorios/symlinks duplicados (`X 2`) y migraciones omitidas en silencio. Por eso **el proyecto real vive en `~/Developer/SUSAN`** y `~/Desktop/SUSAN` es solo un enlace simbólico a esa ruta.
+  Capas adicionales: los datos mutables del modo local (clúster PostgreSQL, storage, PIDs) van a `SUSAN_LOCAL_DIR` (`scripts/local-dir.sh`; en esta máquina `~/.susan-local/SUSAN`, que se reutiliza si ya existe);
+  `web/node_modules`, `web/.next` y `recognition-service/.venv` son `*.nosync` con symlink; dev servers paralelos: `NEXT_DIST_DIR=.next-<clave>.nosync`.
+  Usa siempre la ruta real (`~/Developer/SUSAN`) en scripts y tareas. Si el enlace del Escritorio aparece renombrado ("SUSAN 2"), bórralo y recréalo; el repo no se ve afectado. Nunca crees symlinks sobre un nombre que iCloud ya conocía mientras borras el anterior.
 - `proxy.js` deja `/cambiar-contrasena` pública: el token de recuperación de Supabase llega en el hash de la URL (solo el navegador lo ve), así que la sesión de recuperación se establece en el cliente y es la propia página la que comprueba si hay sesión.
 - Pendientes conocidos: `svc_usuario_obtener` (hoy restablecer recorre listados) y bitácora de alta/restablecimiento de cuentas (el enum `accion_bitacora` no tiene valor propio).
 - **Cabeceras de seguridad** (`web/next.config.mjs`): siempre X-Frame-Options DENY, nosniff, Referrer-Policy y Permissions-Policy (`camera=(self)`); en producción además CSP (`script-src 'self' 'unsafe-inline'`

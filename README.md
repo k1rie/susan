@@ -43,7 +43,7 @@ Con `docente1@` abre la sesión del grupo 3A, mira el monitor y el análisis en 
 abandono, ausencias en viernes y retardos).
 
 > El estado mutable local (clúster PostgreSQL, storage) vive en `~/.susan-local/SUSAN` si el proyecto está en Escritorio/Documentos
-> (iCloud desaloja y duplica archivos vivos); ver `scripts/local-dir.sh` y `docs/ARCHITECTURE.md` §13.
+> (iCloud desaloja y duplica archivos vivos); ver `scripts/local-dir.sh` y `docs/ARCHITECTURE.md` §13. **Recomendación: clona/ubica el proyecto fuera de carpetas sincronizadas** (p. ej. `~/Developer/SUSAN`).
 
 ## Pruebas
 

@@ -1,6 +1,6 @@
 ---
 status: running
-heartbeat: 2026-10-03T02:56:59Z
+heartbeat: 2026-10-03T04:09:04Z
 phase: prerrequisitos
 ---
 
@@ -12,8 +12,8 @@ Si `heartbeat` está más viejo (o `pending`), toma el trabajo: pon `status: run
 ## Prerrequisitos (los hace la sesión que preparó el plan)
 
 - [x] Base funcional completa y subida a GitHub (`k1rie/susan`, `main`)
-- [ ] Revisión adversarial re-ejecutada y hallazgos blocker/major corregidos
-- [ ] Migraciones listas para Supabase real (`docs/RUNBOOK.md`, `scripts/bootstrap-admin.mjs`, demo) y subidas
+- [x] Revisión adversarial (SQL, web, modo real, numérica) hecha; sin bloqueantes; majors corregidos salvo la bitácora de operaciones sensibles (backlog, ver `docs/DECISIONS.md` §4)
+- [x] Migraciones listas para Supabase real (`docs/SUPABASE_SETUP.md`, `scripts/bootstrap-admin.mjs`, `scripts/seed-auth-users.mjs`, `supabase/demo/`) y subidas a GitHub
 
 ## Fases
 
