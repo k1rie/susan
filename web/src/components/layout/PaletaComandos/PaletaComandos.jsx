@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useId, useMemo, useRef, useState } from 'react';
 import Badge from '@/components/ui/Badge';
 import { useDialog } from '@/hooks/ui/useDialog.js';
-import { cn } from '@/lib/utils';
+import clsx from 'clsx';
 import { agruparComandos, filtrarComandos } from './paleta.utils.js';
 
 // Paleta de comandos (⌘K / Ctrl+K): búsqueda sobre páginas y módulos del rol. Patrón combobox/listbox: el foco se
@@ -98,7 +98,7 @@ function Paleta({ onClose, comandos, onSalir }) {
                                         aria-selected={esActivo}
                                         onMouseMove={() => setActivo(visibles.indexOf(c))}
                                         onClick={() => ejecutar(c)}
-                                        className={cn('flex min-h-11 cursor-pointer items-center gap-3 rounded-2xl px-3 text-sm', esActivo ? 'bg-accent text-accent-foreground' : 'text-foreground')}
+                                        className={clsx('flex min-h-11 cursor-pointer items-center gap-3 rounded-2xl px-3 text-sm', esActivo ? 'bg-accent text-accent-foreground' : 'text-foreground')}
                                     >
                                         {Icono ? <Icono aria-hidden="true" className="size-[18px] shrink-0" strokeWidth={1.75} /> : <span className="size-[18px] shrink-0" aria-hidden="true" />}
                                         <span className="min-w-0 flex-1">

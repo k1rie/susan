@@ -1,4 +1,4 @@
-import { cn } from '@/lib/utils';
+import clsx from 'clsx';
 
 const COLOR = { azul: 'var(--primary)', dorado: 'var(--brand-gold)', verde: 'var(--presente)', violeta: 'var(--chart-5)' };
 
@@ -14,7 +14,7 @@ const POSICIONES = [
 // `modulos` aporta icono y tono de cada tesela (los primeros 4 del rol).
 export default function TeselasFlotantes({ modulos = [], className }) {
     return (
-        <div aria-hidden="true" className={cn('pointer-events-none absolute inset-0 hidden overflow-hidden lg:block', className)}>
+        <div aria-hidden="true" className={clsx('pointer-events-none absolute inset-0 hidden overflow-hidden lg:block', className)}>
             {POSICIONES.map((p, i) => {
                 const m = modulos[i % Math.max(modulos.length, 1)];
                 const Icono = m?.icono;
@@ -22,7 +22,7 @@ export default function TeselasFlotantes({ modulos = [], className }) {
                 return (
                     <div
                         key={p.cls}
-                        className={cn('tesela-flota textura-grano absolute flex items-center justify-center overflow-hidden rounded-3xl shadow-soft', p.cls)}
+                        className={clsx('tesela-flota textura-grano absolute flex items-center justify-center overflow-hidden rounded-3xl shadow-soft', p.cls)}
                         style={{
                             '--dur': p.dur, '--ret': p.ret, '--dx': p.dx, '--dy': p.dy, '--rot': p.rot,
                             background: `linear-gradient(135deg, color-mix(in oklab, ${color} 12%, var(--card)), color-mix(in oklab, ${color} 38%, var(--card)))`,

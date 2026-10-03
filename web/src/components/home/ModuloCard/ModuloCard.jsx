@@ -2,7 +2,7 @@ import { ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { SpotlightCard } from '@/components/motion';
 import Badge from '@/components/ui/Badge';
-import { cn } from '@/lib/utils';
+import clsx from 'clsx';
 
 // Color base de la ilustración por tono: siempre derivado de tokens (sigue el tema).
 const TONO = {
@@ -22,14 +22,14 @@ export default function ModuloCard({ modulo, className }) {
     const color = TONO[tono] || TONO.azul;
 
     return (
-        <SpotlightCard className={cn('h-full rounded-3xl', className)}>
+        <SpotlightCard className={clsx('h-full rounded-3xl', className)}>
             <Link
                 href={destino}
                 data-modulo={id}
                 className="group/mod flex h-full flex-col gap-3 p-3 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/40"
             >
                 <div
-                    className={cn('textura-grano relative flex h-28 items-center justify-center overflow-hidden rounded-2xl', pronto && 'opacity-80')}
+                    className={clsx('textura-grano relative flex h-28 items-center justify-center overflow-hidden rounded-2xl', pronto && 'opacity-80')}
                     style={{ background: `linear-gradient(135deg, color-mix(in oklab, ${color} 10%, var(--card)), color-mix(in oklab, ${color} 34%, var(--card)))` }}
                 >
                     <Icono aria-hidden="true" className="size-12 transition-transform duration-500 group-hover/mod:scale-110 group-hover/mod:-rotate-3" strokeWidth={1.4} style={{ color }} />

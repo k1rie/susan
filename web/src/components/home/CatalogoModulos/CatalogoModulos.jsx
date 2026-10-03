@@ -4,7 +4,7 @@ import { Check } from 'lucide-react';
 import { useState } from 'react';
 import { StaggerList } from '@/components/motion';
 import { aplicarFiltro, filtrosDeModulos, modulosParaRol } from '@/lib/modulos.js';
-import { cn } from '@/lib/utils';
+import clsx from 'clsx';
 import ModuloCard from '../ModuloCard';
 
 // Catálogo de /modulos: filtros en píldora (contenedor gris, activo oscuro con palomita) y cuadrícula de tarjetas.
@@ -26,7 +26,7 @@ export default function CatalogoModulos({ rol, filtroInicial = 'todos' }) {
                             type="button"
                             aria-pressed={activo}
                             onClick={() => setFiltro(f.id)}
-                            className={cn(
+                            className={clsx(
                                 'inline-flex min-h-9 items-center gap-1.5 whitespace-nowrap rounded-full px-4 text-sm font-medium transition-colors duration-200',
                                 'focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/40',
                                 activo ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground',
@@ -34,7 +34,7 @@ export default function CatalogoModulos({ rol, filtroInicial = 'todos' }) {
                         >
                             {activo && <Check aria-hidden="true" className="size-3.5" strokeWidth={2.25} />}
                             {f.etiqueta}
-                            <span className={cn('text-xs', activo ? 'opacity-70' : 'opacity-60')}>{f.total}</span>
+                            <span className={clsx('text-xs', activo ? 'opacity-70' : 'opacity-60')}>{f.total}</span>
                         </button>
                     );
                 })}

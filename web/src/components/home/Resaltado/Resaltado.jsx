@@ -1,10 +1,10 @@
-import { cn } from '@/lib/utils';
+import clsx from 'clsx';
 
 // Palabra clave con subrayado dorado "dibujado a mano" que se traza una sola vez (firma visual de SUSAN, ver
 // docs/design/SISTEMA.md). El trazo es un SVG decorativo: el texto sigue siendo texto normal para lectores de pantalla.
 export default function Resaltado({ children, className }) {
     return (
-        <span className={cn('relative inline-block', className)}>
+        <span className={clsx('relative inline-block', className)}>
             <span className="relative z-10">{children}</span>
             <svg
                 aria-hidden="true"

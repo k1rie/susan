@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { cn } from '@/lib/utils';
+import clsx from 'clsx';
 import { EASE, useEnVista, usePrefersReducedMotion } from '@/lib/motion';
 
 const DESPLAZAMIENTO = {
@@ -49,7 +49,7 @@ export default function Reveal({
         <Etiqueta
             ref={ref}
             data-reveal={visible ? 'visible' : 'oculto'}
-            className={cn(className)}
+            className={clsx(className)}
             style={{
                 opacity: visible ? 1 : 0,
                 transform: visible ? 'none' : desde,

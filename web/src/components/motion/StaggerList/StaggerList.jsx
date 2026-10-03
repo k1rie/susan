@@ -1,7 +1,7 @@
 'use client';
 
 import { Children, useRef } from 'react';
-import { cn } from '@/lib/utils';
+import clsx from 'clsx';
 import { EASE, useEnVista, usePrefersReducedMotion } from '@/lib/motion';
 
 // Lista cuyos elementos aparecen en cascada al entrar al viewport. Equivale al AnimatedList de ReactBits sin su
@@ -18,7 +18,7 @@ export default function StaggerList({ as: Etiqueta = 'ul', itemAs: Item = 'li', 
             {Children.toArray(children).map((hijo, i) => (
                 <Item
                     key={hijo.key ?? i}
-                    className={cn(itemClassName)}
+                    className={clsx(itemClassName)}
                     style={{
                         opacity: visible ? 1 : 0,
                         transform: visible ? 'none' : `translate3d(0, ${distance}px, 0)`,
