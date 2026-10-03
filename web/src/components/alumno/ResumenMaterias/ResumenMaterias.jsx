@@ -17,7 +17,7 @@ function Tarjeta({ item, seleccionada, onSeleccionar }) {
                     type="button"
                     onClick={() => onSeleccionar(item.id_grupo)}
                     aria-pressed={seleccionada}
-                    className="min-h-11 rounded-full border border-border px-4 text-sm font-medium hover:bg-muted"
+                    className="min-h-10 rounded-md border border-border px-4 text-sm font-medium hover:bg-accent"
                 >
                     {seleccionada ? 'Viendo historial' : 'Ver historial'}
                 </button>
