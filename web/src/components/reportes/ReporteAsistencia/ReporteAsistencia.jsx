@@ -69,7 +69,7 @@ export default function ReporteAsistencia({ filtrosIniciales = {} }) {
                     actions={
                         <>
                             {hayGrupo && (
-                                <Link href={`/analitica?grupo=${r.valor.idGrupo}`} className="inline-flex min-h-11 items-center rounded-full border border-border bg-card px-4 text-sm font-medium hover:bg-muted">
+                                <Link href={`/analitica?grupo=${r.valor.idGrupo}`} className="inline-flex min-h-11 items-center rounded-md border border-border bg-card px-4 text-sm font-medium hover:bg-muted">
                                     Ver analítica
                                 </Link>
                             )}

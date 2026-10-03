@@ -53,7 +53,7 @@ export default function HorarioEditor({ idGrupo, horario = [], onSaved }) {
             {filas.length === 0 && <p className="text-sm text-muted-foreground">Este grupo aún no tiene bloques de horario.</p>}
             <ul className="grid gap-3">
                 {filas.map((f, i) => (
-                    <li key={f.clave} className="grid gap-3 rounded-3xl border border-border p-3 sm:grid-cols-[1fr_1fr_1fr_auto] sm:items-end">
+                    <li key={f.clave} className="grid gap-3 rounded-xl border border-border p-3 sm:grid-cols-[1fr_1fr_1fr_auto] sm:items-end">
                         <Field label={`Día (bloque ${i + 1})`}>
                             <Select value={f.dia_semana} onChange={(e) => cambiar(f.clave, 'dia_semana', e.target.value)} options={DIAS} />
                         </Field>

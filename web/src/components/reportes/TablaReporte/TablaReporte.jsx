@@ -5,7 +5,7 @@ const COLS = ['Matrícula', 'Alumno', 'Presentes', 'Retardos', 'Ausencias', 'Jus
 // Tabla por alumno. El derecho a examen va como texto (+ color de fila); scroll horizontal en pantallas angostas.
 export default function TablaReporte({ items = [], sinSesiones = false }) {
     return (
-        <div className="overflow-x-auto rounded-3xl border border-border bg-card shadow-soft">
+        <div className="overflow-x-auto rounded-xl border border-border bg-card">
             <table className="w-full min-w-max border-collapse text-sm">
                 <caption className="sr-only">Asistencia acumulada por alumno</caption>
                 <thead className="bg-muted text-muted-foreground">

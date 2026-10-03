@@ -1,17 +1,25 @@
 'use client';
 
+import { CalendarClock, CircleCheck, CirclePause, Radio } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import Button from '@/components/ui/Button';
-import Card from '@/components/ui/Card';
 import EmptyState from '@/components/ui/EmptyState';
 import StatusChip from '@/components/ui/StatusChip';
+import TarjetaFila from '@/components/ui/TarjetaFila';
 import { useToast } from '@/components/ui/Toast';
 import { abrirSesion } from '@/lib/api/sesiones.js';
 
 const hhmm = (h) => (h ? String(h).slice(0, 5) : '-');
+// Icono y color de la ficha según el estado de la sesión (Lucide).
+const FICHA = {
+    abierta: { icono: Radio, tono: 'verde' },
+    programada: { icono: CalendarClock, tono: 'azul' },
+    cerrada: { icono: CircleCheck, tono: 'neutro' },
+    suspendida: { icono: CirclePause, tono: 'dorado' },
+};
 
-// Sesiones de hoy (P-02). Abrir/Ver monitor solo si el servidor la marca 'abrible' (RN-06).
+// Sesiones de hoy (P-02): una tarjeta de fila por sesión. Abrir/Ver monitor solo si el servidor la marca 'abrible' (RN-06).
 export default function SesionesHoy({ sesiones = [] }) {
     const router = useRouter();
     const { toast } = useToast();
@@ -29,42 +37,48 @@ export default function SesionesHoy({ sesiones = [] }) {
     };
 
     return (
-        <Card title="Sesiones de hoy">
+        <section aria-labelledby="t-sesiones-hoy">
+            <h2 id="t-sesiones-hoy" className="mb-4 text-xl font-semibold tracking-tight">Sesiones de hoy</h2>
             {sesiones.length === 0 ? (
                 <EmptyState title="Sin sesiones hoy" description="No tienes clases programadas para el día de hoy." />
             ) : (
-                <ul className="flex flex-col gap-3">
-                    {sesiones.map((s) => (
-                        <li key={s.id_sesion} className="flex flex-col gap-2 rounded-2xl border border-border p-3.5 sm:flex-row sm:items-center sm:justify-between">
-                            <div className="min-w-0">
-                                <p className="font-medium">
-                                    {s.materia} ({s.clave_grupo})
-                                </p>
-                                <p className="text-sm text-muted-foreground">
-                                    {hhmm(s.hora_inicio)} - {hhmm(s.hora_fin)} · Aula {s.aula} · {s.camaras_activas} cámaras activas
-                                </p>
-                                <div className="mt-1 flex flex-wrap gap-2">
-                                    <StatusChip kind="sesion" value={s.estatus} size="sm" />
-                                    <StatusChip kind="modo" value={s.modo_previsto} size="sm" title="Modo de registro previsto" />
-                                </div>
-                            </div>
-                            <div className="flex flex-wrap gap-2">
-                                {s.estatus === 'programada' && s.abrible && (
-                                    <Button onClick={() => abrir(s)} loading={abriendo === s.id_sesion} disabled={abriendo != null}>
-                                        Abrir sesión
-                                    </Button>
-                                )}
-                                {s.estatus === 'abierta' && s.abrible && <Button href={`/docente/sesiones/${s.id_sesion}`}>Ver monitor</Button>}
-                                {(s.estatus === 'cerrada' || s.estatus === 'suspendida') && (
-                                    <Button variant="secondary" href={`/docente/sesiones/${s.id_sesion}`}>
-                                        Ver sesión
-                                    </Button>
-                                )}
-                            </div>
-                        </li>
-                    ))}
+                <ul className="grid gap-3 md:grid-cols-2">
+                    {sesiones.map((s) => {
+                        const ficha = FICHA[s.estatus] ?? FICHA.programada;
+                        return (
+                            <li key={s.id_sesion}>
+                                <TarjetaFila
+                                    icono={ficha.icono}
+                                    tono={ficha.tono}
+                                    titulo={`${s.materia} (${s.clave_grupo})`}
+                                    subtitulo={`${hhmm(s.hora_inicio)} - ${hhmm(s.hora_fin)} · Aula ${s.aula} · ${s.camaras_activas} cámaras activas`}
+                                    className="h-full flex-wrap sm:flex-nowrap"
+                                    accion={
+                                        <div className="flex flex-wrap gap-2">
+                                            {s.estatus === 'programada' && s.abrible && (
+                                                <Button size="sm" onClick={() => abrir(s)} loading={abriendo === s.id_sesion} disabled={abriendo != null}>
+                                                    Abrir sesión
+                                                </Button>
+                                            )}
+                                            {s.estatus === 'abierta' && s.abrible && <Button size="sm" href={`/docente/sesiones/${s.id_sesion}`}>Ver monitor</Button>}
+                                            {(s.estatus === 'cerrada' || s.estatus === 'suspendida') && (
+                                                <Button size="sm" variant="secondary" href={`/docente/sesiones/${s.id_sesion}`}>
+                                                    Ver sesión
+                                                </Button>
+                                            )}
+                                        </div>
+                                    }
+                                >
+                                    <span className="mt-1.5 flex flex-wrap gap-1.5">
+                                        <StatusChip kind="sesion" value={s.estatus} size="sm" />
+                                        <StatusChip kind="modo" value={s.modo_previsto} size="sm" title="Modo de registro previsto" />
+                                    </span>
+                                </TarjetaFila>
+                            </li>
+                        );
+                    })}
                 </ul>
             )}
-        </Card>
+        </section>
     );
 }

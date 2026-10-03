@@ -5,8 +5,9 @@ export function iniciales(nombre) {
     return palabras.slice(0, 2).map((p) => p[0].toUpperCase()).join('');
 }
 
-// Tinte estable por nombre (hash simple) entre los colores de gráfica: el mismo alumno siempre sale igual.
-export const TINTES = ['var(--chart-1)', 'var(--chart-2)', 'var(--chart-3)', 'var(--chart-5)'];
+// Colores sólidos del avatar (contraste AA con texto blanco). El mismo nombre siempre sale con el mismo color; la persona
+// puede elegir otro en el onboarding (preferencia de perfil).
+export const TINTES = ['#e5501e', '#0b6bcb', '#1f7a47', '#6f4fb3', '#b4551a', '#0e7490', '#a21caf', '#475569'];
 export function tinteDe(nombre) {
     let h = 0;
     for (const c of String(nombre ?? '')) h = (h * 31 + c.charCodeAt(0)) >>> 0;

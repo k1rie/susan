@@ -59,7 +59,7 @@ function Paleta({ onClose, comandos, onSalir }) {
                 role="dialog"
                 aria-modal="true"
                 aria-label="Buscar o ir a"
-                className="flex max-h-[70dvh] w-full max-w-xl animate-in flex-col overflow-hidden rounded-3xl border border-border bg-popover text-popover-foreground shadow-lift duration-200 fade-in-0 zoom-in-95"
+                className="flex max-h-[70dvh] w-full max-w-xl animate-in flex-col overflow-hidden rounded-2xl border border-border bg-popover text-popover-foreground shadow-lift duration-200 fade-in-0 zoom-in-95"
             >
                 <div className="flex items-center gap-3 border-b border-border px-4">
                     <Search aria-hidden="true" className="size-5 shrink-0 text-muted-foreground" strokeWidth={1.75} />
@@ -98,7 +98,7 @@ function Paleta({ onClose, comandos, onSalir }) {
                                         aria-selected={esActivo}
                                         onMouseMove={() => setActivo(visibles.indexOf(c))}
                                         onClick={() => ejecutar(c)}
-                                        className={clsx('flex min-h-11 cursor-pointer items-center gap-3 rounded-2xl px-3 text-sm', esActivo ? 'bg-accent text-accent-foreground' : 'text-foreground')}
+                                        className={clsx('flex min-h-11 cursor-pointer items-center gap-3 rounded-lg px-3 text-sm', esActivo ? 'bg-accent text-accent-foreground' : 'text-foreground')}
                                     >
                                         {Icono ? <Icono aria-hidden="true" className="size-[18px] shrink-0" strokeWidth={1.75} /> : <span className="size-[18px] shrink-0" aria-hidden="true" />}
                                         <span className="min-w-0 flex-1">

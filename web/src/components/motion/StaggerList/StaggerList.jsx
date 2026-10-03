@@ -18,6 +18,7 @@ export default function StaggerList({ as: Etiqueta = 'ul', itemAs: Item = 'li', 
             {Children.toArray(children).map((hijo, i) => (
                 <Item
                     key={hijo.key ?? i}
+                    data-anim=""
                     className={clsx(itemClassName)}
                     style={{
                         opacity: visible ? 1 : 0,

@@ -8,7 +8,7 @@ import { datosPatron } from '../analitica.utils.js';
 export default function PatronSemanal({ patronSemanal }) {
     const datos = useMemo(() => datosPatron(patronSemanal), [patronSemanal]);
     return (
-        <section className="rounded-3xl border border-border bg-card shadow-soft p-5">
+        <section className="rounded-xl border border-border bg-card p-5">
             <h2 className="text-base font-semibold">Patrón por día de la semana</h2>
             {datos.length === 0 ? (
                 <p className="mt-2 text-sm text-muted-foreground">Sin sesiones cerradas para calcular el patrón.</p>
@@ -30,7 +30,7 @@ export default function PatronSemanal({ patronSemanal }) {
                                 <Tooltip formatter={(v) => (v == null ? '-' : `${v} %`)} />
                                 <Bar dataKey="tasa" name="Ausentismo" isAnimationActive={false}>
                                     {datos.map((d) => (
-                                        <Cell key={d.dia} fill={d.critico ? 'var(--ausente)' : 'var(--primary)'} />
+                                        <Cell key={d.dia} fill={d.critico ? 'var(--ausente)' : 'var(--chart-1)'} />
                                     ))}
                                 </Bar>
                             </BarChart>

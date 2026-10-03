@@ -22,7 +22,7 @@ const COLUMNAS = [
         header: 'Matrícula',
         primary: true,
         render: (a) => (
-            <Link href={`/admin/alumnos/${a.id_alumno}`} className="text-primary underline">
+            <Link href={`/admin/alumnos/${a.id_alumno}`} className="text-link underline">
                 {a.matricula}
             </Link>
         ),

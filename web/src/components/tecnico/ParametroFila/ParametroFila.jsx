@@ -35,7 +35,7 @@ export default function ParametroFila({ parametro, soloLectura = false, onGuarda
     };
 
     return (
-        <li className="rounded-3xl border border-border bg-card shadow-soft p-5">
+        <li className="rounded-xl border border-border bg-card p-5">
             <label htmlFor={id} className="block text-sm font-semibold">{parametro.clave}</label>
             {parametro.descripcion && <p className="text-sm text-muted-foreground">{parametro.descripcion}</p>}
             <p id={`${id}-ayuda`} className="mt-1 text-xs text-muted-foreground">

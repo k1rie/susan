@@ -1,4 +1,5 @@
 import clsx from 'clsx';
+import { ArrowDown, ArrowUp } from 'lucide-react';
 import Spinner from '../Spinner/Spinner.jsx';
 
 const ALINEACION = { left: 'text-left', right: 'text-right', center: 'text-center' };
@@ -25,10 +26,10 @@ export default function Table({
     const ariaSort = (col) => (sort?.key === col.key ? (sort.dir === 'asc' ? 'ascending' : 'descending') : undefined);
 
     return (
-        <div className={clsx('overflow-x-auto rounded-3xl border border-border bg-card shadow-soft', stickyHeader && 'max-h-[70dvh] overflow-y-auto', className)}>
+        <div className={clsx('overflow-x-auto rounded-xl border border-border bg-card', stickyHeader && 'max-h-[70dvh] overflow-y-auto', className)}>
             <table className="w-full min-w-max border-collapse text-sm">
                 {caption && <caption className="px-4 py-2 text-left text-sm text-muted-foreground">{caption}</caption>}
-                <thead className={clsx('bg-muted/60 text-xs uppercase tracking-wide text-muted-foreground', stickyHeader && 'sticky top-0 z-10')}>
+                <thead className={clsx('bg-muted/50 text-xs font-medium text-muted-foreground', stickyHeader && 'sticky top-0 z-10')}>
                     <tr>
                         {columns.map((col) => (
                             <th
@@ -40,7 +41,7 @@ export default function Table({
                                 {onSort && col.sortable !== false ? (
                                     <button type="button" onClick={() => onSort(col.key)} className="min-h-9 font-medium">
                                         {col.header}
-                                        {sort?.key === col.key && <span aria-hidden="true">{sort.dir === 'asc' ? ' ▲' : ' ▼'}</span>}
+                                        {sort?.key === col.key && (sort.dir === 'asc' ? <ArrowUp aria-hidden="true" className="ml-1 inline size-3.5" strokeWidth={2} /> : <ArrowDown aria-hidden="true" className="ml-1 inline size-3.5" strokeWidth={2} />)}
                                     </button>
                                 ) : (
                                     col.header

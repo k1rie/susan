@@ -48,6 +48,7 @@ export default function Reveal({
     return (
         <Etiqueta
             ref={ref}
+            data-anim=""
             data-reveal={visible ? 'visible' : 'oculto'}
             className={clsx(className)}
             style={{

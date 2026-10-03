@@ -21,7 +21,7 @@ function Bloque({ titulo, valor }) {
         <div>
             <p className="text-xs font-medium text-muted-foreground">{titulo}</p>
             {texto ? (
-                <pre className="max-h-64 max-w-md overflow-auto rounded-2xl bg-muted p-2 text-xs">{texto}</pre>
+                <pre className="max-h-64 max-w-md overflow-auto rounded-xl bg-muted p-2 text-xs">{texto}</pre>
             ) : (
                 <p className="text-xs text-muted-foreground">Sin valor</p>
             )}
@@ -40,7 +40,7 @@ const COLUMNAS = [
         header: 'Detalle',
         render: (b) => (
             <details>
-                <summary className="min-h-9 cursor-pointer py-2 text-primary underline">Ver valores</summary>
+                <summary className="min-h-9 cursor-pointer py-2 text-link underline">Ver valores</summary>
                 <div className="flex flex-col gap-2 py-2">
                     <Bloque titulo="Valor anterior" valor={b.valor_anterior} />
                     <Bloque titulo="Valor nuevo" valor={b.valor_nuevo} />

@@ -11,7 +11,7 @@ export default function GraficaAcumulado({ cruceLimite, limitePct = 20 }) {
     const datos = useMemo(() => construirSerieAcumulado(cruceLimite), [cruceLimite]);
     const sinDatos = !cruceLimite || cruceLimite.estado === 'insuficiente' || datos.length === 0;
     return (
-        <section className="rounded-3xl border border-border bg-card shadow-soft p-5">
+        <section className="rounded-xl border border-border bg-card p-5">
             <h2 className="text-base font-semibold">Faltas acumuladas frente al límite</h2>
             {sinDatos ? (
                 <p className="mt-2 text-sm text-muted-foreground">{MENSAJE_INSUFICIENTE}</p>
@@ -30,10 +30,10 @@ export default function GraficaAcumulado({ cruceLimite, limitePct = 20 }) {
                                 <YAxis tick={{ fontSize: 12 }} stroke="var(--muted-foreground)" unit=" %" />
                                 <Tooltip formatter={fmt} labelFormatter={(s) => `Semana ${s}`} />
                                 <Legend />
-                                <Area dataKey="banda" name="Intervalo 95 %" stroke="none" fill="var(--primary)" fillOpacity={0.15} isAnimationActive={false} />
+                                <Area dataKey="banda" name="Intervalo 95 %" stroke="none" fill="var(--chart-1)" fillOpacity={0.15} isAnimationActive={false} />
                                 <Line dataKey="acumulado" name="Acumulado" stroke="var(--foreground)" strokeWidth={0} dot={{ r: 3 }} isAnimationActive={false} connectNulls />
-                                <Line dataKey="ajuste" name="Ajuste" stroke="var(--primary)" strokeWidth={2} dot={false} isAnimationActive={false} connectNulls />
-                                <Line dataKey="proyeccion" name="Proyección" stroke="var(--primary)" strokeWidth={2} strokeDasharray="6 4" dot={false} isAnimationActive={false} connectNulls />
+                                <Line dataKey="ajuste" name="Ajuste" stroke="var(--chart-1)" strokeWidth={2} dot={false} isAnimationActive={false} connectNulls />
+                                <Line dataKey="proyeccion" name="Proyección" stroke="var(--chart-1)" strokeWidth={2} strokeDasharray="6 4" dot={false} isAnimationActive={false} connectNulls />
                                 <ReferenceLine y={limitePct} stroke="var(--destructive)" strokeDasharray="2 2" />
                                 {cruceLimite.estado === 'cruza' && cruceLimite.semana != null && <ReferenceLine x={cruceLimite.semana} stroke="var(--destructive)" />}
                             </ComposedChart>

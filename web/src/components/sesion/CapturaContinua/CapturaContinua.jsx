@@ -38,7 +38,7 @@ export default function CapturaContinua({ sesion, camaras = [], activo, onFin })
     const sinFuentes = !navegadorEnUso && camarasIp.length === 0;
 
     return (
-        <section aria-label="Captura continua" className="flex flex-col gap-3 rounded-3xl border border-border bg-card shadow-soft p-5">
+        <section aria-label="Captura continua" className="flex flex-col gap-3 rounded-xl border border-border bg-card p-5">
             <h2 className="text-base font-semibold">Captura de asistencia</h2>
 
             {muestreo.servicioNoDisponible && (

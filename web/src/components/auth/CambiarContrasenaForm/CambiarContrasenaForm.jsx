@@ -16,7 +16,8 @@ import { TEXTO_ERROR_CONTRASENA, validarContrasena } from './contrasena.utils.js
 const ESPERA_SESION_MS = 3000;
 
 // modo: 'cambiar' (recuperación o cambio voluntario) | 'activar' (primera contraseña de una cuenta creada por el administrador).
-export default function CambiarContrasenaForm({ modo = 'cambiar' }) {
+// `onExito`: si se pasa (onboarding), se llama al guardar en lugar de mostrar el aviso y redirigir al inicio.
+export default function CambiarContrasenaForm({ modo = 'cambiar', onExito }) {
     const activar = modo === 'activar';
     const router = useRouter();
     const { toast } = useToast();
@@ -59,6 +60,10 @@ export default function CambiarContrasenaForm({ modo = 'cambiar' }) {
         setCargando(true);
         try {
             await cambiarContrasena({ contrasena: nueva });
+            if (onExito) {
+                onExito();
+                return;
+            }
             toast({ tone: 'success', message: activar ? 'Cuenta activada' : 'Contraseña actualizada' });
             router.replace('/');
         } catch (err) {
@@ -78,9 +83,11 @@ export default function CambiarContrasenaForm({ modo = 'cambiar' }) {
     if (estado === 'sin_sesion') {
         return (
             <div className="flex flex-col gap-4">
-                <Alert tone="danger">El enlace expiró o no es válido. Solicita uno nuevo.</Alert>
-                <Link href="/recuperar" className="inline-flex min-h-11 items-center self-start rounded-full px-1 text-sm font-medium text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/40">
-                    Solicitar un enlace nuevo
+                <Alert tone="danger">
+                    {activar ? 'El enlace de invitación expiró o no es válido. Pide a Coordinación que te envíe uno nuevo.' : 'El enlace expiró o no es válido. Solicita uno nuevo.'}
+                </Alert>
+                <Link href={activar ? '/login' : '/recuperar'} className="inline-flex min-h-11 items-center self-start rounded-full px-1 text-sm font-medium text-link underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/30">
+                    {activar ? 'Ir a iniciar sesión' : 'Solicitar un enlace nuevo'}
                 </Link>
             </div>
         );
@@ -101,7 +108,7 @@ export default function CambiarContrasenaForm({ modo = 'cambiar' }) {
                 />
             </Field>
             <ReglasContrasena nueva={nueva} confirmacion={confirmacion} />
-            <Button type="submit" loading={cargando} fullWidth arrow className="justify-between pl-6">
+            <Button type="submit" loading={cargando} fullWidth arrow>
                 {activar ? 'Activar mi cuenta' : 'Guardar contraseña'}
             </Button>
         </form>
