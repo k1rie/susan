@@ -36,16 +36,18 @@ export default function ResumenAdmin({ encabezado = true }) {
                                 Periodo {r.periodo} · {r.fecha}
                             </p>
                             <div className="grid grid-cols-1 gap-3 min-[480px]:grid-cols-2 lg:grid-cols-4">
-                                <StatCard label="Alumnos activos" value={r.alumnos_activos} href="/admin/alumnos" />
-                                <StatCard label="Docentes activos" value={r.docentes_activos} href="/admin/docentes" />
-                                <StatCard label="Grupos del periodo" value={r.grupos_periodo} href="/admin/grupos" />
+                                <StatCard animated label="Alumnos activos" value={r.alumnos_activos} href="/admin/alumnos" />
+                                <StatCard animated label="Docentes activos" value={r.docentes_activos} href="/admin/docentes" />
+                                <StatCard animated label="Grupos del periodo" value={r.grupos_periodo} href="/admin/grupos" />
                                 <StatCard
+                                    animated
                                     label="Sesiones de hoy"
                                     value={sesiones.total ?? 0}
                                     hint={`${sesiones.abiertas ?? 0} abiertas · ${sesiones.programadas ?? 0} programadas · ${sesiones.cerradas ?? 0} cerradas`}
                                 />
-                                <StatCard label="Cámaras activas" value={camaras.activas ?? 0} tone="success" href="/tecnico" />
+                                <StatCard animated label="Cámaras activas" value={camaras.activas ?? 0} tone="success" href="/tecnico" />
                                 <StatCard
+                                    animated
                                     label="Cámaras inactivas"
                                     value={camaras.inactivas ?? 0}
                                     tone={(camaras.inactivas ?? 0) > 0 ? 'warning' : 'neutral'}
@@ -53,12 +55,14 @@ export default function ResumenAdmin({ encabezado = true }) {
                                     href="/tecnico"
                                 />
                                 <StatCard
+                                    animated
                                     label="Consentimientos por vencer (30 días)"
                                     value={r.consentimientos_por_vencer_30d ?? 0}
                                     tone={(r.consentimientos_por_vencer_30d ?? 0) > 0 ? 'warning' : 'neutral'}
                                     href="/admin/alumnos"
                                 />
                                 <StatCard
+                                    animated
                                     label="Plantillas sin indexar"
                                     value={r.plantillas_sin_indexar ?? 0}
                                     tone={(r.plantillas_sin_indexar ?? 0) > 0 ? 'warning' : 'neutral'}

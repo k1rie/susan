@@ -9,14 +9,15 @@ ausentismo para orientar la intervención docente oportuna.
 Base funcional: el 1er avance del Proyecto Integrador (`docs/spec/Avance1.pdf`: 22 RF, 13 RN, 14 RNF, 19 tablas, pantallas P-01…P-09), más el
 análisis numérico del ausentismo. Estilo y estructura tomados de MVP-FITNESS (Next.js, un folder por componente) y flujos de SmartClass.
 
-> **Estado: BASE.** Todo el sistema funciona de punta a punta con datos de demostración, pero el diseño visual es mínimo a propósito
-> (Tailwind sobre tokens semánticos); el rediseño viene después. Ver `docs/DECISIONS.md` para desviaciones, riesgos y pendientes.
+> **Estado: base funcional + diseño real.** Todo el sistema funciona de punta a punta con datos de demostración y la interfaz ya tiene su diseño
+> (inspirado en SchoolAI: lienzo cálido, serif de marca, píldoras, tarjetas de 24 px, paleta de comandos ⌘K, animaciones ligeras). Ver
+> [`docs/design/SISTEMA.md`](docs/design/SISTEMA.md) y `docs/DECISIONS.md` (desviaciones, riesgos y pendientes).
 
 ## Qué incluye
 
 | Pieza | Dónde | Tecnología |
 |---|---|---|
-| Aplicación web (9 pantallas de la spec + analítica + consola técnica) | `web/` | Next.js 16 (App Router), React 19, Tailwind 4, JavaScript |
+| Aplicación web (9 pantallas de la spec + analítica + consola técnica + catálogo de módulos) | `web/` | Next.js 16 (App Router), React 19, Tailwind 4, shadcn/ui (primitivas), JavaScript |
 | Base de datos y backend | `supabase/` | PostgreSQL 16: 19 tablas 3FN, triggers, RLS, 72 RPC `api_*` y 19 `svc_*` |
 | Autenticación y almacenamiento | Supabase Auth + bucket privado `susan-private` | incluye el JSON del índice FAISS |
 | Servicio de reconocimiento | `recognition-service/` | FastAPI + `faiss-cpu`, embeddings de 512-d (InsightFace) o embedder determinista para pruebas |
@@ -65,14 +66,16 @@ SUSAN/
 │  ├─ ARCHITECTURE.md                    capas, reglas transversales, contratos, propiedad de archivos
 │  ├─ API-RPC.md                         catálogo de RPC y códigos de error (GENERADO del SQL)
 │  ├─ DECISIONS.md · RUNBOOK.md · NUMERICS.md
+│  ├─ design/                            SISTEMA.md (identidad y movimiento) · REFERENCIAS.md (SchoolAI/Mobbin) · MODULOS.md (registro de módulos)
+│  ├─ DESIGN_PLAN.md · DESIGN_PROGRESS.md  plan por fases del diseño, avance y presupuesto de rendimiento medido
 │  ├─ api/*.md                           diseños de referencia por dominio (parciales; manda el SQL)
 │  └─ spec/                              1er avance (PDF + texto) y presentación
 ├─ supabase/  migrations/ (0001–0990) · demo/ (reloj de demostración) · seed/ · local/ (stubs de Auth/Storage solo para PG local) · tests/ · config.toml
 ├─ recognition-service/                  app/ · tests/ · Dockerfile · Procfile
 ├─ web/src/
-│  ├─ app/        rutas: (public) login · (app) docente · alumno · admin · tecnico · reportes · analitica · api/*
-│  ├─ components/ un folder por componente (ui/ · layout/ · auth/ · docente/ · sesion/ · revision/ · reportes/ · alumno/ · analitica/ · admin/ · tecnico/)
-│  ├─ lib/        api/ (envoltorios de RPC) · http/ · server/ · backend/ · local/ · numerics/
+│  ├─ app/        rutas: (public) login · recuperar · cambiar-contrasena · activar-cuenta · (app) docente · alumno · admin · tecnico · reportes · analitica · modulos · api/*
+│  ├─ components/ un folder por componente (ui/ · shadcn/ · motion/ · home/ · layout/ · auth/ · docente/ · sesion/ · revision/ · reportes/ · alumno/ · analitica/ · admin/ · tecnico/)
+│  ├─ lib/        api/ (envoltorios de RPC) · http/ · server/ · backend/ · local/ · numerics/ · motion/ · modulos.js (registro de módulos)
 │  └─ hooks/
 └─ scripts/       db-*.sh · test-sql.sh · dev-all.sh · dev-stop.sh · gen-api-catalog.mjs · seed-auth-users.mjs
 ```
@@ -93,7 +96,7 @@ SUSAN/
 
 - **Probar la interfaz con tu proyecto Supabase**: [`docs/SUPABASE_SETUP.md`](docs/SUPABASE_SETUP.md) (migraciones, semilla, cuentas de demostración, reloj de demostración, variables).
 - **Producción**: [`docs/RUNBOOK.md`](docs/RUNBOOK.md) (servicio de reconocimiento, tareas programadas, respaldo, variables de entorno).
-- **Diseño real (fase 2)**: [`docs/DESIGN_PLAN.md`](docs/DESIGN_PLAN.md) y [`docs/DESIGN_PROGRESS.md`](docs/DESIGN_PROGRESS.md).
+- **Diseño**: [`docs/design/SISTEMA.md`](docs/design/SISTEMA.md) (identidad, componentes firma, movimiento), [`docs/DESIGN_PLAN.md`](docs/DESIGN_PLAN.md) y [`docs/DESIGN_PROGRESS.md`](docs/DESIGN_PROGRESS.md) (avance, presupuesto de rendimiento medido).
 
 ## Seguridad
 

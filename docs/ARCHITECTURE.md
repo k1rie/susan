@@ -258,3 +258,22 @@ Además: `GET /health`, `GET /v1/index`, `POST /v1/photo/check`, `POST /v1/index
 - **`/auth/confirm`** (`web/src/app/auth/confirm/route.js`): canjea `token_hash` por sesión en el servidor (`verifyOtp`) para recuperación/invitación; solo modo real (404 en local); destinos fijos.
 - **Caída de Auth**: `usuarioAuth` lanza 503 `AUTH_NO_DISPONIBLE` ante `AuthRetryableFetchError`/5xx; el proxy deja pasar sin redirigir.
 - **Verificación del modo real**: `scripts/fake-supabase.mjs` emula GoTrue + PostgREST + Storage sobre el SQL local; ver `docs/review/real-mode.md`.
+
+## 14. Sistema de diseño (capa de presentación)
+
+Resumen técnico; la identidad, los componentes firma y la tabla de movimiento están en [`docs/design/SISTEMA.md`](design/SISTEMA.md), las referencias en
+[`docs/design/REFERENCIAS.md`](design/REFERENCIAS.md) y el registro de módulos en [`docs/design/MODULOS.md`](design/MODULOS.md).
+
+- **Tokens**: `web/src/app/globals.css` define el vocabulario de shadcn/ui (`--background`, `--card`, `--primary`, `--muted`, `--accent`, `--destructive`, `--border`, `--ring`…), la marca UNACH
+  (`--brand-navy/-gold/-gold-soft`), los estados de asistencia (`--presente/-bg`, `--retardo`, `--ausente`, `--pendiente`, `--justificado`), sombras (`--shadow-soft/-lift`) y una paleta `.dark`
+  (todavía sin interruptor). `@theme inline` los expone como utilidades de Tailwind 4. Fuentes con `next/font`: Inter (interfaz), Instrument Serif (`font-display`) y Geist Mono.
+- **Capas de componentes**: `components/shadcn/` = primitivas vendorizadas (CLI `shadcn`, estilo radix-maia, JS); `components/ui/` = API estable de SUSAN que las pantallas usan (mismas props que en la base);
+  `components/motion/` = BlurText, CountUp, Reveal, SpotlightCard, StaggerList (CSS + IntersectionObserver/rAF); `components/home/` = Resaltado, ModuloCard, FilaModulos, CampoComando, HomeRol, CatalogoModulos;
+  `components/layout/` = AppShell (riel, barra superior, barra inferior móvil, paleta ⌘K); `components/auth/` = pantalla dividida con PanelProducto.
+- **Registro de módulos** (`lib/modulos.js`): fuente única del Home por rol, `/modulos`, `/modulos/[id]`, la paleta de comandos y la sección «Próximamente» del riel. Los componentes cliente lo importan
+  (las entradas llevan componentes de icono y no cruzan de servidor a cliente como props).
+- **Reglas de movimiento**: ver `components/motion/README.md`. Presupuesto de JS y mediciones en `docs/DESIGN_PROGRESS.md` (`scripts/measure-bundle.mjs`).
+- **Accesibilidad**: foco visible en anillo, `aria-current` en navegación, combobox/listbox en la paleta, texto `sr-only` para titulares y cifras animadas, panel de producto del login `aria-hidden` y sin controles,
+  estados siempre con texto además de color, objetivos táctiles ≥ 44 px en controles principales.
+- **Hidratación**: el HTML del servidor y la primera pasada del cliente deben coincidir. Lo que depende del navegador (hora local, preferencia de movimiento) usa `useSyncExternalStore` con instantánea de servidor
+  (`HomeRol` → «Hola»; `usePrefersReducedMotion` → `false`) o se activa tras montar (`Reveal immediate`).
