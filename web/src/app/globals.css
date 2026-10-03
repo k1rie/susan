@@ -24,6 +24,7 @@
   /* Acción */
   --primary: #2f5aa8;
   --primary-foreground: #ffffff;
+  --primary-hover: #264a8c;
   --secondary: #ebe9e2;
   --secondary-foreground: #14213d;
 
@@ -94,6 +95,7 @@
   --popover-foreground: #eaf0fb;
   --primary: #7aa2ea;
   --primary-foreground: #0b1426;
+  --primary-hover: #94b4ee;
   --secondary: #1a2a47;
   --secondary-foreground: #eaf0fb;
   --muted: #17243f;
@@ -140,6 +142,7 @@
   --color-popover-foreground: var(--popover-foreground);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
+  --color-primary-hover: var(--primary-hover);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
   --color-muted: var(--muted);
