@@ -56,7 +56,7 @@ export default function SesionClase({ idSesion }) {
                         )}
                         {sesion.estatus === 'programada' && (
                             <Alert tone="info" title="La sesión aún no se abre">
-                                <p>Al abrirla se fija el modo de registro según las cámaras activas del aula.</p>
+                                <p>Al abrirla se fija el modo según las cámaras activas del aula.</p>
                                 <Button onClick={abrirAhora} loading={abrir.loading} className="mt-2">
                                     Abrir sesión
                                 </Button>
@@ -64,7 +64,7 @@ export default function SesionClase({ idSesion }) {
                         )}
                         {sesion.estatus === 'suspendida' && (
                             <Alert tone="warning" title="Sesión suspendida">
-                                Esta sesión fue suspendida y no cuenta para el cálculo de faltas.
+                                No cuenta para el cálculo de faltas.
                             </Alert>
                         )}
                         {sesion.estatus === 'cerrada' && <ResumenSesion data={data} />}

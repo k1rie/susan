@@ -25,11 +25,13 @@ const a = analizarGrupo({ serie: { sesiones }, matriz: { fechas, alumnos }, limi
 describe('render de componentes de analítica', () => {
     it('panel, tablas y tarjetas se pintan sin lanzar', () => {
         const panel = renderToString(<PanelProcedimiento procedimientos={a.procedimientos} />);
-        expect(panel).toContain('<details');
+        expect(panel).toContain('Ver el procedimiento paso a paso');
         const riesgo = renderToString(<TablaRiesgo items={a.alumnosEnRiesgo} hrefHistorial={(id) => `/reportes?alumno=${id}`} />);
         expect(riesgo).toContain('Alumnos en riesgo');
         expect(renderToString(<TablaRiesgo items={[]} />)).toContain('Ningún alumno en riesgo');
-        expect(renderToString(<TarjetasAnalitica {...a} limitePct={20} />)).toContain('Cruce del límite');
-        expect(renderToString(<AlertasAnalitica alertas={a.alertas} />)).toContain('Código');
+        const tarjetas = renderToString(<TarjetasAnalitica {...a} limitePct={20} />);
+        expect(tarjetas).toContain('Cruce del límite');
+        expect(tarjetas).toContain('Alumnos en riesgo');
+        expect(renderToString(<AlertasAnalitica alertas={a.alertas} />)).toContain('Alertas del análisis');
     });
 });

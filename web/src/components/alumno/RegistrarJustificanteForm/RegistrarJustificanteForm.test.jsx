@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
-import { FormularioJustificante } from './RegistrarJustificanteForm.jsx';
+import RegistrarJustificanteForm, { FormularioJustificante } from './RegistrarJustificanteForm.jsx';
 import { MAX_BYTES, MOTIVO_MAX, validarFormulario } from './registrarJustificante.utils.js';
 
 const subir = vi.hoisted(() => vi.fn());
@@ -65,5 +65,17 @@ describe('FormularioJustificante', () => {
         await waitFor(() => expect(alRegistrar).toHaveBeenCalled());
         expect(subir).toHaveBeenCalledTimes(1);
         expect(registrar).toHaveBeenLastCalledWith({ idSesion: 7, motivo: 'Cita médica', objetoDocumento: 'justificantes/1/u.pdf' });
+    });
+});
+
+describe('RegistrarJustificanteForm (tarjeta)', () => {
+    it('con registros ya cargados: una sola tarjeta con título y el formulario dentro', () => {
+        render(<RegistrarJustificanteForm registros={registros} idSesion={7} />);
+        const tarjeta = screen.getByRole('region', { name: 'Registrar justificante' });
+        const formulario = screen.getByRole('form', { name: 'Registrar justificante' });
+        expect(tarjeta).toContainElement(formulario);
+        // El formulario no trae borde propio: nada de tarjeta dentro de tarjeta.
+        expect(tarjeta).toHaveClass('border');
+        expect(formulario).not.toHaveClass('border', 'rounded-xl');
     });
 });

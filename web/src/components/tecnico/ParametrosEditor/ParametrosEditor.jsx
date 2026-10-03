@@ -6,6 +6,7 @@ import DataState from '@/components/ui/DataState';
 import EmptyState from '@/components/ui/EmptyState';
 import { useToast } from '@/components/ui/Toast';
 import ParametroFila from '../ParametroFila';
+import { resumenLista } from '../ParametroFila/parametros.utils.js';
 
 const ARGS = { limit: 50 };
 
@@ -36,12 +37,17 @@ export default function ParametrosEditor({ soloLectura = false }) {
             empty={<EmptyState title="No hay parámetros." />}
         >
             {(d) => (
-                <ul className="flex flex-col gap-3">
-                    {d.items.map((p) => (
-                        // La clave incluye el valor para que la fila se reinicie tras un guardado exitoso.
-                        <ParametroFila key={`${p.clave}:${p.valor}`} parametro={p} soloLectura={soloLectura} onGuardar={guardar} />
-                    ))}
-                </ul>
+                <div className="flex flex-col gap-3">
+                    <p className="text-sm text-muted-foreground">
+                        {resumenLista(d.items)}. Cada cambio pide confirmación.
+                    </p>
+                    <ul className="grid grid-cols-1 items-start gap-3 lg:grid-cols-2">
+                        {d.items.map((p) => (
+                            // La clave incluye el valor para que la fila se reinicie tras un guardado exitoso.
+                            <ParametroFila key={`${p.clave}:${p.valor}`} parametro={p} soloLectura={soloLectura} onGuardar={guardar} />
+                        ))}
+                    </ul>
+                </div>
             )}
         </DataState>
     );

@@ -3,22 +3,22 @@
 import Field from '@/components/ui/Field';
 import Select from '@/components/ui/Select';
 
-// Tres selectores (periodo, grupo, alumno). Al cambiar el periodo se limpian grupo y alumno.
-// Una sola columna a 360 px.
+// Tres selectores en una fila (periodo, grupo, alumno); una columna a 360 px. Al cambiar el periodo se limpian grupo y alumno.
+// Sin texto de ayuda: el selector de alumno dice en su propia opción que falta elegir grupo.
 export default function FiltrosReporte({ periodos = [], grupos = [], alumnos = [], valor, onCambio, deshabilitado = false }) {
     const opcionesGrupo = [
-        { value: '', label: 'Todos los grupos del periodo' },
+        { value: '', label: 'Todos los grupos' },
         ...grupos.map((g) => ({ value: String(g.id_grupo), label: `${g.materia_nombre} · ${g.clave_grupo}` })),
     ];
     const opcionesAlumno = [
-        { value: '', label: 'Todos los alumnos' },
+        { value: '', label: valor.idGrupo ? 'Todos los alumnos' : 'Elige un grupo primero' },
         ...alumnos.map((a) => ({ value: String(a.idAlumno), label: a.nombreCompleto })),
     ];
     return (
         <form
             aria-label="Filtros del reporte"
             onSubmit={(e) => e.preventDefault()}
-            className="print:hidden grid grid-cols-1 gap-3 rounded-xl border border-border bg-card p-5 sm:grid-cols-3"
+            className="print:hidden grid grid-cols-1 gap-3 sm:grid-cols-3"
         >
             <Field label="Periodo">
                 <Select
@@ -36,7 +36,7 @@ export default function FiltrosReporte({ periodos = [], grupos = [], alumnos = [
                     options={opcionesGrupo}
                 />
             </Field>
-            <Field label="Alumno" hint={valor.idGrupo ? undefined : 'Elige un grupo para filtrar por alumno.'}>
+            <Field label="Alumno">
                 <Select
                     value={valor.idAlumno ? String(valor.idAlumno) : ''}
                     disabled={deshabilitado || !valor.idGrupo}

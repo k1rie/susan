@@ -55,9 +55,9 @@ export default function ColaRevision({ pestanaInicial, casoInicial = null }) {
                         lista.length === 0 ? (
                             <EmptyState title={VACIOS[pestana]} />
                         ) : pestana === 'correcciones' ? (
-                            <CorreccionesRecientes items={lista} />
+                            <CorreccionesRecientes items={lista} total={total} />
                         ) : (
-                            <div className="grid gap-4 md:grid-cols-[minmax(0,20rem)_minmax(0,1fr)]">
+                            <div className="grid grid-cols-1 gap-4 md:grid-cols-[minmax(0,20rem)_minmax(0,1fr)]">
                                 <div className={seleccionado ? 'hidden md:block' : ''}>
                                     <ListaCasos
                                         tipo={pestana === 'pendientes' ? 'pendiente' : 'justificante'}
@@ -72,7 +72,7 @@ export default function ColaRevision({ pestanaInicial, casoInicial = null }) {
                                 <div className={seleccionado ? '' : 'hidden md:block'}>
                                     {!seleccionado ? (
                                         <p className="rounded-xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
-                                            Elige un caso de la lista para ver sus lecturas.
+                                            Elige un caso para ver el detalle.
                                         </p>
                                     ) : pestana === 'pendientes' ? (
                                         <CasoPendiente

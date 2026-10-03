@@ -35,3 +35,27 @@ export function textoRango(p) {
     if (p.maximo != null) return `máximo ${p.maximo}${u}`;
     return u.trim() || 'sin rango';
 }
+
+const fechaCorta = (iso) => {
+    const d = iso ? new Date(iso) : null;
+    return d && !Number.isNaN(d.getTime()) ? d.toLocaleDateString('es-MX') : null;
+};
+
+/**
+ * Línea de ayuda de una fila en una sola frase corta: "decimal · de 0.5 a 0.999 score · modificado 12/03/2026 por ana@x".
+ * El tipo y el rango ayudan a teclear un valor válido; la última modificación solo se añade si existe.
+ */
+export function resumenParametro(p) {
+    const partes = [p.tipo, textoRango(p)].filter(Boolean);
+    const f = fechaCorta(p.fecha_actualizacion);
+    if (f) partes.push(`modificado ${f}${p.actualizado_por?.correo ? ` por ${p.actualizado_por.correo}` : ''}`);
+    return partes.join(' · ');
+}
+
+/** "12 parámetros, 4 críticos": encabezado corto de la lista. */
+export function resumenLista(items = []) {
+    const lista = items || [];
+    const criticos = lista.filter((p) => esCritico(p.clave)).length;
+    const n = lista.length;
+    return `${n} parámetro${n === 1 ? '' : 's'}${criticos ? `, ${criticos} crítico${criticos === 1 ? '' : 's'}` : ''}`;
+}

@@ -40,9 +40,9 @@ export default function SesionesHoy({ sesiones = [] }) {
         <section aria-labelledby="t-sesiones-hoy">
             <h2 id="t-sesiones-hoy" className="mb-4 text-xl font-semibold tracking-tight">Sesiones de hoy</h2>
             {sesiones.length === 0 ? (
-                <EmptyState title="Sin sesiones hoy" description="No tienes clases programadas para el día de hoy." />
+                <EmptyState title="Sin sesiones hoy" description="No tienes clases programadas hoy." />
             ) : (
-                <ul className="grid gap-3 md:grid-cols-2">
+                <ul className="grid grid-cols-1 gap-3 md:grid-cols-2">
                     {sesiones.map((s) => {
                         const ficha = FICHA[s.estatus] ?? FICHA.programada;
                         return (
@@ -51,7 +51,7 @@ export default function SesionesHoy({ sesiones = [] }) {
                                     icono={ficha.icono}
                                     tono={ficha.tono}
                                     titulo={`${s.materia} (${s.clave_grupo})`}
-                                    subtitulo={`${hhmm(s.hora_inicio)} - ${hhmm(s.hora_fin)} · Aula ${s.aula} · ${s.camaras_activas} cámaras activas`}
+                                    subtitulo={`${hhmm(s.hora_inicio)} - ${hhmm(s.hora_fin)} · Aula ${s.aula} · ${s.camaras_activas} cám.`}
                                     className="h-full flex-wrap sm:flex-nowrap"
                                     accion={
                                         <div className="flex flex-wrap gap-2">

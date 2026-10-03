@@ -56,6 +56,13 @@ describe('ParametrosEditor', () => {
         expect(actualizar).not.toHaveBeenCalled();
     });
 
+    it('resume la lista y marca como crítico solo al parámetro crítico', async () => {
+        render(<ParametrosEditor />);
+        expect(await screen.findByText(/2 parámetros, 1 crítico/)).toBeInTheDocument();
+        expect(screen.getAllByText('Crítico')).toHaveLength(1);
+        expect(screen.getByText('decimal · de 0.500 a 0.999 score')).toBeInTheDocument();
+    });
+
     it('en solo lectura no hay botones de guardar', async () => {
         render(<ParametrosEditor soloLectura />);
         await screen.findByLabelText('umbral_similitud');

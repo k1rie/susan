@@ -5,7 +5,8 @@ import { formatearFechaLimite, formatearPlazo, segundosActuales } from './plazoR
 
 // Plazo restante. Descuenta localmente el tiempo desde que llegó el dato (no depende del reloj absoluto del
 // navegador) y se refresca cada 60 s. El padre debe poner `key` ligada a segundosRestantes para reiniciar la base.
-export default function PlazoRestante({ venceEn, segundosRestantes }) {
+// `compacto` omite la fecha límite (listas); el detalle del caso la sigue mostrando.
+export default function PlazoRestante({ venceEn, segundosRestantes, compacto = false }) {
     const [recibido] = useState(() => Date.now());
     const [ahora, setAhora] = useState(recibido);
 
@@ -20,7 +21,7 @@ export default function PlazoRestante({ venceEn, segundosRestantes }) {
     return (
         <span className={vencido ? 'text-ausente' : 'text-muted-foreground'}>
             <span className="font-medium">{formatearPlazo(segundos)}</span>
-            {limite && <span className="text-xs"> (límite: {limite})</span>}
+            {limite && !compacto && <span className="text-xs"> (límite: {limite})</span>}
         </span>
     );
 }

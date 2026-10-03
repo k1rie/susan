@@ -1,62 +1,49 @@
 'use client';
 
+import { BarChart3 } from 'lucide-react';
 import Link from 'next/link';
-import Card from '@/components/ui/Card';
+import { useState } from 'react';
 import DataState from '@/components/ui/DataState';
 import EmptyState from '@/components/ui/EmptyState';
 import Alert from '@/components/ui/Alert';
 import Pagination from '@/components/ui/Pagination';
-import StatusChip from '@/components/ui/StatusChip';
 import PageHeader from '@/components/layout/PageHeader';
 import FiltrosReporte from '../FiltrosReporte';
-import IndicadoresGrupo from '../IndicadoresGrupo';
 import TablaReporte from '../TablaReporte';
 import TablaPeriodo from '../TablaPeriodo';
-import ImpactoTiempo from '../ImpactoTiempo';
+import ResumenGrupo from '../ResumenGrupo';
+import ResumenPeriodo from '../ResumenPeriodo';
+import DetalleAlumno from '../DetalleAlumno';
+import PestanasReporte from '../PestanasReporte';
 import BotonesExportar from '../BotonesExportar';
 import HojaImpresion from '../HojaImpresion';
-import { fechaCorta } from '../reporte.utils.js';
 import useReporteAsistencia, { FILAS_POR_PAGINA } from './useReporteAsistencia.js';
 
-function DetalleAlumno({ detalle }) {
-    const filas = detalle || [];
-    return (
-        <Card title="Detalle por sesión">
-            {filas.length === 0 ? (
-                <EmptyState title="Sin sesiones registradas para este alumno." />
-            ) : (
-                <div className="overflow-x-auto">
-                    <table className="w-full min-w-max text-sm">
-                        <thead className="text-left text-muted-foreground">
-                            <tr>
-                                {['Fecha', 'Hora', 'Estado', 'Origen', 'Justificante'].map((c) => <th key={c} scope="col" className="px-3 py-2 font-medium">{c}</th>)}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {filas.map((d) => (
-                                <tr key={d.id_sesion} className="border-t border-border">
-                                    <td className="px-3 py-2">{fechaCorta(d.fecha)}</td>
-                                    <td className="px-3 py-2">{String(d.hora_inicio || '').slice(0, 5)}</td>
-                                    <td className="px-3 py-2">{d.estado ? <StatusChip kind="asistencia" value={d.estado} size="sm" /> : 'Sin registro'}</td>
-                                    <td className="px-3 py-2">{d.origen ? <StatusChip kind="origen" value={d.origen} size="sm" /> : '—'}</td>
-                                    <td className="px-3 py-2">{d.justificante_estatus ? <StatusChip kind="justificante" value={d.justificante_estatus} size="sm" /> : '—'}</td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-            )}
-        </Card>
-    );
-}
-
-// Contenedor de P-07: filtros -> indicadores -> tabla -> exportación. Sin reglas de negocio.
+// Contenedor de P-07: filtros -> pestañas (Resumen con cifras y gráficas / detalle en tabla) -> exportación. Sin reglas de negocio.
+// Al imprimir solo se muestra HojaImpresion, que lleva TODAS las filas (las pestañas no recortan el papel).
 export default function ReporteAsistencia({ filtrosIniciales = {} }) {
     const r = useReporteAsistencia(filtrosIniciales);
+    // Con un enlace directo a un alumno (?grupo&alumno) se aterriza en su historial por sesión, igual que al elegirlo en el filtro.
+    const [pestana, setPestana] = useState(filtrosIniciales.idGrupo && filtrosIniciales.idAlumno ? 'detalle' : 'resumen');
     const hayGrupo = Boolean(r.valor.idGrupo);
     const grupos = r.filtros.data?.grupos || [];
     const alumnoSel = r.alumnos.find((a) => a.idAlumno === r.valor.idAlumno);
     const reporteExport = hayGrupo ? (r.grupo.data ? { ...r.grupo.data, items: r.filas } : null) : r.periodoRep.data;
+    // Si el impacto falla no bloquea el reporte: solo se omite la tarjeta.
+    const impacto = r.impacto.data || null;
+
+    // Al elegir un alumno lo que interesa es su historial por sesión: se abre la pestaña de detalle. Si cambia el periodo o el
+    // grupo se empieza de nuevo en el resumen (la pestaña "detalle" de un grupo no es la del periodo ni la de otro grupo).
+    const alCambiarFiltros = (nuevo) => {
+        if (nuevo.idAlumno && nuevo.idAlumno !== r.valor.idAlumno) setPestana('detalle');
+        else if ((nuevo.idGrupo ?? null) !== (r.valor.idGrupo ?? null) || (nuevo.periodo ?? '') !== r.valor.periodo) setPestana('resumen');
+        r.cambiar(nuevo);
+    };
+    const verDetalle = () => setPestana('detalle');
+    const abrirGrupo = (idGrupo) => {
+        setPestana('resumen');
+        r.abrirGrupo(idGrupo);
+    };
 
     return (
         <div>
@@ -65,11 +52,12 @@ export default function ReporteAsistencia({ filtrosIniciales = {} }) {
             <div className="print:hidden">
                 <PageHeader
                     title="Reporte de asistencia"
-                    subtitle="Acumulados por grupo y periodo, con derecho a examen."
+                    subtitle="Asistencia acumulada y derecho a examen."
                     actions={
                         <>
                             {hayGrupo && (
-                                <Link href={`/analitica?grupo=${r.valor.idGrupo}`} className="inline-flex min-h-11 items-center rounded-md border border-border bg-card px-4 text-sm font-medium hover:bg-muted">
+                                <Link href={`/analitica?grupo=${r.valor.idGrupo}`} className="inline-flex min-h-11 items-center gap-2 rounded-md border border-border bg-card px-4 text-sm font-medium hover:bg-muted focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/30">
+                                    <BarChart3 aria-hidden="true" className="size-4" strokeWidth={1.75} />
                                     Ver analítica
                                 </Link>
                             )}
@@ -86,7 +74,7 @@ export default function ReporteAsistencia({ filtrosIniciales = {} }) {
                 >
                     {(f) => (
                         <div className="flex flex-col gap-4">
-                            <FiltrosReporte periodos={f.periodos || []} grupos={f.grupos || []} alumnos={r.alumnos} valor={r.valor} onCambio={r.cambiar} />
+                            <FiltrosReporte periodos={f.periodos || []} grupos={f.grupos || []} alumnos={r.alumnos} valor={r.valor} onCambio={alCambiarFiltros} />
                             {grupos.length === 0 ? (
                                 <EmptyState title="No hay grupos para este periodo." />
                             ) : hayGrupo ? (
@@ -95,28 +83,46 @@ export default function ReporteAsistencia({ filtrosIniciales = {} }) {
                                     {(g) => (
                                         <div className="flex flex-col gap-4">
                                             <p className="text-sm text-muted-foreground">
-                                                {g.grupo.materia_nombre} · Grupo {g.grupo.clave_grupo} · Docente: {g.grupo.docente_nombre}
+                                                {g.grupo.materia_nombre} · Grupo {g.grupo.clave_grupo} · {g.grupo.docente_nombre}
                                             </p>
                                             {g.kpis.sesiones_programadas === 0 && (
-                                                <Alert tone="info">Aún no hay sesiones programadas: el porcentaje se calculará al generar el horario.</Alert>
+                                                <Alert tone="info">Aún no hay sesiones programadas: el porcentaje se calcula al generar el horario.</Alert>
                                             )}
-                                            <IndicadoresGrupo kpis={g.kpis} />
-                                            <ImpactoBloque impacto={r.impacto} />
-                                            {r.filas.length === 0 ? (
-                                                <EmptyState title="El grupo no tiene alumnos inscritos." />
-                                            ) : (
-                                                <>
-                                                    <TablaReporte items={r.filasPagina} sinSesiones={g.kpis.sesiones_programadas === 0} />
-                                                    <Pagination total={r.filas.length} limit={FILAS_POR_PAGINA} offset={r.pagina * FILAS_POR_PAGINA}
-                                                        onChange={({ offset }) => r.setPagina(Math.floor(offset / FILAS_POR_PAGINA))} />
-                                                </>
-                                            )}
-                                            {r.valor.idAlumno && (
-                                                <DataState loading={r.detalle.loading} error={r.detalle.error} data={r.detalle.data} onRetry={r.detalle.refetch}
-                                                    isEmpty={() => false}>
-                                                    {(d) => <DetalleAlumno detalle={d.detalle} />}
-                                                </DataState>
-                                            )}
+                                            <PestanasReporte
+                                                valor={pestana}
+                                                onCambio={setPestana}
+                                                pestanas={[
+                                                    { id: 'resumen', label: 'Resumen' },
+                                                    r.valor.idAlumno
+                                                        ? { id: 'detalle', label: 'Sesiones' }
+                                                        : { id: 'detalle', label: 'Alumnos', count: r.filas.length },
+                                                ]}
+                                                paneles={{
+                                                    resumen: (
+                                                        <ResumenGrupo reporte={g} filas={r.filas} impacto={impacto} onVerDetalle={verDetalle}
+                                                            nombreAlumno={r.valor.idAlumno ? r.filas[0]?.nombre_completo : undefined} />
+                                                    ),
+                                                    detalle: (
+                                                        <>
+                                                            {r.filas.length === 0 ? (
+                                                                <EmptyState title="El grupo no tiene alumnos inscritos." />
+                                                            ) : (
+                                                                <>
+                                                                    <TablaReporte items={r.filasPagina} sinSesiones={g.kpis.sesiones_programadas === 0} />
+                                                                    <Pagination total={r.filas.length} limit={FILAS_POR_PAGINA} offset={r.pagina * FILAS_POR_PAGINA}
+                                                                        onChange={({ offset }) => r.setPagina(Math.floor(offset / FILAS_POR_PAGINA))} />
+                                                                </>
+                                                            )}
+                                                            {r.valor.idAlumno && (
+                                                                <DataState loading={r.detalle.loading} error={r.detalle.error} data={r.detalle.data} onRetry={r.detalle.refetch}
+                                                                    isEmpty={() => false}>
+                                                                    {(d) => <DetalleAlumno detalle={d.detalle} />}
+                                                                </DataState>
+                                                            )}
+                                                        </>
+                                                    ),
+                                                }}
+                                            />
                                         </div>
                                     )}
                                 </DataState>
@@ -125,10 +131,15 @@ export default function ReporteAsistencia({ filtrosIniciales = {} }) {
                                     isEmpty={(d) => !(d.items || []).length}
                                     empty={<EmptyState title="No hay grupos para este periodo." />}>
                                     {(p) => (
-                                        <div className="flex flex-col gap-4">
-                                            <ImpactoBloque impacto={r.impacto} />
-                                            <TablaPeriodo items={p.items} onAbrirGrupo={r.abrirGrupo} />
-                                        </div>
+                                        <PestanasReporte
+                                            valor={pestana}
+                                            onCambio={setPestana}
+                                            pestanas={[{ id: 'resumen', label: 'Resumen' }, { id: 'detalle', label: 'Grupos', count: p.items.length }]}
+                                            paneles={{
+                                                resumen: <ResumenPeriodo reporte={p} impacto={impacto} />,
+                                                detalle: <TablaPeriodo items={p.items} onAbrirGrupo={abrirGrupo} />,
+                                            }}
+                                        />
                                     )}
                                 </DataState>
                             )}
@@ -138,11 +149,4 @@ export default function ReporteAsistencia({ filtrosIniciales = {} }) {
             </div>
         </div>
     );
-}
-
-// Si el impacto falla no bloquea el reporte: solo se omite la tarjeta.
-function ImpactoBloque({ impacto }) {
-    if (impacto.loading && !impacto.data) return null;
-    if (!impacto.data) return null;
-    return <ImpactoTiempo impacto={impacto.data} />;
 }

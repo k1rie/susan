@@ -1,14 +1,17 @@
 'use client';
 
+import clsx from 'clsx';
 import Alert from '@/components/ui/Alert';
 import Button from '@/components/ui/Button';
+import GraficaBarras from '@/components/ui/GraficaBarras';
 import Spinner from '@/components/ui/Spinner';
+import TarjetaGrafica from '@/components/ui/TarjetaGrafica';
 import RecorteFirmado from '../RecorteFirmado';
 import { formatearHora } from '../PlazoRestante/plazoRestante.utils.js';
-import { recortePurgado, resumenValidas, textoCamara, textoScore } from './lecturasCaso.utils.js';
+import { CONFIG_SCORES, datosScores, lecturasNumeradas, progresoValidas, recortePurgado, resumenScores, resumenValidas, textoCamara, textoScore } from './lecturasCaso.utils.js';
 import { useLecturasCaso } from './useLecturasCaso.js';
 
-// Evidencia del caso: foto de registro y una fila por lectura (hora, cámara, score, validez, recorte).
+// Evidencia del caso: avance de lecturas válidas, gráfica de scores, foto de registro y una tarjeta compacta por lectura.
 // `minimoValidas` viene de la cola (parámetro del servidor). Si falla la carga, resolver sigue disponible.
 export default function LecturasCaso({ idAsistencia, minimoValidas }) {
     const { estado, data, error, recargar } = useLecturasCaso(idAsistencia);
@@ -32,45 +35,66 @@ export default function LecturasCaso({ idAsistencia, minimoValidas }) {
     }
 
     const lecturas = data?.lecturas ?? [];
+    // Mismo orden y mismo número en la gráfica y en la lista: «lectura 3» es la misma en ambas.
+    const ordenadas = lecturasNumeradas(lecturas);
+    const avance = progresoValidas(lecturas, minimoValidas);
+    const scores = datosScores(lecturas);
     return (
         <div className="flex flex-col gap-3">
             <div className="flex flex-wrap items-center justify-between gap-2">
-                <p className="text-sm font-medium">{resumenValidas(lecturas, minimoValidas)}</p>
+                <div className="min-w-0 flex-1">
+                    <p className="text-sm font-medium">{resumenValidas(lecturas, minimoValidas)}</p>
+                    {avance.minimo && (
+                        <span
+                            role="progressbar"
+                            aria-label="Lecturas válidas frente al mínimo"
+                            aria-valuemin={0}
+                            aria-valuemax={100}
+                            aria-valuenow={Math.round(avance.ancho)}
+                            aria-valuetext={`${avance.validas} de ${avance.minimo}`}
+                            className="mt-1.5 block h-1.5 max-w-60 overflow-hidden rounded-full bg-muted"
+                        >
+                            <span className={clsx('block h-full rounded-full', avance.cumple ? 'bg-presente' : 'bg-retardo')} style={{ width: `${avance.ancho}%` }} />
+                        </span>
+                    )}
+                </div>
                 <Button size="sm" variant="ghost" onClick={recargar}>
                     Renovar recortes
                 </Button>
             </div>
+
+            {scores.length >= 2 && (
+                <TarjetaGrafica titulo="Score por lectura" descripcion="Similitud con la foto de registro, por número de lectura" resumen={resumenScores(scores)}>
+                    <GraficaBarras datos={scores} ejeX="lectura" series={[{ clave: 'valida' }, { clave: 'no_valida' }]} config={CONFIG_SCORES} apilado unidad=" %" dominio={[0, 100]} alto={170} leyenda />
+                </TarjetaGrafica>
+            )}
+
             <div className="flex items-center gap-3 text-sm">
-                <RecorteFirmado
-                    url={data?.foto_registro?.url ?? null}
-                    alt="Foto de registro del alumno"
-                    onExpirada={recargar}
-                />
-                <span className="text-muted-foreground">
-                    {data?.foto_registro ? 'Foto de registro' : 'El alumno no tiene foto de registro activa'}
-                </span>
+                <RecorteFirmado url={data?.foto_registro?.url ?? null} alt="Foto de registro del alumno" onExpirada={recargar} />
+                <span className="text-muted-foreground">{data?.foto_registro ? 'Foto de registro' : 'Sin foto de registro activa'}</span>
             </div>
             {lecturas.length === 0 ? (
-                <p className="text-sm text-muted-foreground">Sin lecturas del reconocimiento facial en esta sesión</p>
+                <p className="text-sm text-muted-foreground">Sin lecturas del reconocimiento facial en esta sesión.</p>
             ) : (
-                <ul className="flex flex-col gap-2">
-                    {lecturas.map((l) => (
+                <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                    {ordenadas.map((l) => (
                         <li key={l.id_deteccion} className="flex items-center gap-3 rounded-xl border border-border p-2 text-sm">
                             <RecorteFirmado
                                 url={l.recorte?.url ?? null}
                                 purgado={recortePurgado(l)}
-                                alt={`Recorte de la lectura de las ${formatearHora(l.marca_tiempo)}`}
+                                alt={`Recorte de la lectura ${l.numero}, de las ${formatearHora(l.marca_tiempo)}`}
                                 onExpirada={recargar}
                             />
                             <div className="min-w-0">
-                                <p className="font-medium">
-                                    {formatearHora(l.marca_tiempo)} · {textoCamara(l.camara_posicion)}
+                                <p className="truncate font-medium">
+                                    Lectura {l.numero} · {formatearHora(l.marca_tiempo)}
                                 </p>
-                                <p className="text-muted-foreground">
-                                    Minuto {Number(l.minuto_sesion).toFixed(1)} · Score {textoScore(l.score_similitud)}
+                                <p className="truncate text-muted-foreground">
+                                    {textoCamara(l.camara_posicion)} · Score {textoScore(l.score_similitud)}
                                 </p>
-                                <p className={l.es_valida ? 'text-presente' : 'text-ausente'}>
-                                    {l.es_valida ? 'Válida' : 'No válida'}
+                                <p className="truncate">
+                                    <span className={l.es_valida ? 'text-presente' : 'text-ausente'}>{l.es_valida ? 'Válida' : 'No válida'}</span>
+                                    <span className="text-muted-foreground"> · min {Number(l.minuto_sesion).toFixed(1)}</span>
                                 </p>
                             </div>
                         </li>

@@ -68,3 +68,17 @@ export const VACIOS = {
     justificantes: 'No hay justificantes por resolver',
     correcciones: 'Aún no hay correcciones en los últimos 30 días',
 };
+
+const MESES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+
+/** 'YYYY-MM-DD' -> '14 sep' (sin pasar por Date local para no correr el día). */
+export function fechaCorta(fecha) {
+    const [, m, d] = String(fecha ?? '').slice(0, 10).split('-').map(Number);
+    return d && MESES[m - 1] ? `${d} ${MESES[m - 1]}` : '-';
+}
+
+/** Línea única de meta de una fila de la lista: «Administración Financiera · 3A · 14 sep 07:00». */
+export function metaCaso(item) {
+    const hora = item?.sesion?.hora_inicio ? ` ${String(item.sesion.hora_inicio).slice(0, 5)}` : '';
+    return `${item?.materia?.nombre ?? '-'} · ${item?.grupo?.clave_grupo ?? '-'} · ${fechaCorta(item?.sesion?.fecha)}${hora}`;
+}

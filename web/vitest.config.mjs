@@ -5,7 +5,13 @@ import path from 'node:path';
 // (se activa por archivo con el comentario `// @vitest-environment jsdom`).
 export default defineConfig({
     oxc: { jsx: { runtime: 'automatic' } },
-    resolve: { alias: { '@': path.resolve(import.meta.dirname, 'src') } },
+    resolve: {
+        alias: [
+            // next/dynamic -> shim síncrono para pruebas (ver src/test/nextDynamic.jsx)
+            { find: /^next\/dynamic$/, replacement: path.resolve(import.meta.dirname, 'src/test/nextDynamic.jsx') },
+            { find: '@', replacement: path.resolve(import.meta.dirname, 'src') },
+        ],
+    },
     test: {
         environment: 'node',
         include: ['src/**/*.test.{js,jsx}'],

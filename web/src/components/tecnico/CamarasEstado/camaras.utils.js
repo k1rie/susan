@@ -26,3 +26,47 @@ export function mensajeCambio(camara, nuevo) {
     const base = `Cambiar la cámara ${camara.aula_clave} (${camara.posicion}) a ${nuevo}.`;
     return nuevo === 'activa' ? base : `${base} Las sesiones nuevas del aula pasarán a pase manual si no queda otra cámara activa.`;
 }
+
+/** Contadores de cabecera: activas, inactivas (incluye mantenimiento) y activas sin capturas en 24 h. */
+export function contadoresCamaras(items = []) {
+    const lista = items || [];
+    const activas = lista.filter((c) => c.estatus === 'activa').length;
+    return {
+        total: lista.length,
+        activas,
+        inactivas: lista.length - activas,
+        sinCapturas: lista.filter(sinCapturar).length,
+    };
+}
+
+export const CONFIG_CAPTURAS = { capturas: { label: 'Capturas en 24 h', color: 'var(--chart-1)' } };
+
+export const MAX_BARRAS = 12;
+const MAX_ETIQUETA = 18;
+
+const recortar = (s) => (s.length > MAX_ETIQUETA ? `${s.slice(0, MAX_ETIQUETA - 1)}…` : s);
+
+/**
+ * Filas de "Capturas en 24 h por cámara": las `max` con más capturas (de mayor a menor). Si dos cámaras comparten aula y posición
+ * se añade su id para que no se mezclen en el eje. `omitidas` = cuántas quedaron fuera.
+ */
+export function datosCapturas(items = [], max = MAX_BARRAS) {
+    const lista = [...(items || [])].sort((a, b) => (Number(b.capturas_24h) || 0) - (Number(a.capturas_24h) || 0));
+    const nombres = lista.map((c) => `${c.aula_clave} · ${c.posicion}`);
+    const repetidos = new Set(nombres.filter((n, i) => nombres.indexOf(n) !== i));
+    const filas = lista.slice(0, max).map((c, i) => ({
+        camara: recortar(repetidos.has(nombres[i]) ? `${nombres[i]} #${c.id_camara}` : nombres[i]),
+        capturas: Number(c.capturas_24h) || 0,
+    }));
+    return { filas, omitidas: Math.max(0, lista.length - filas.length) };
+}
+
+/** Alto de la gráfica según el número de barras (≈ 34 px por barra). */
+export const altoCapturas = (n) => Math.min(460, Math.max(160, 56 + n * 34));
+
+/** Texto alternativo de la gráfica de capturas. */
+export function resumenCapturas({ filas, omitidas }) {
+    if (!filas.length) return 'Sin cámaras.';
+    const texto = filas.map((f) => `${f.camara}: ${f.capturas}`).join('; ');
+    return omitidas > 0 ? `${texto}. Otras ${omitidas} cámaras no se muestran.` : texto;
+}

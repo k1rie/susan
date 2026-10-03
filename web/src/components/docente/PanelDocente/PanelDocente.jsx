@@ -7,6 +7,7 @@ import { useApiQuery } from '@/hooks/data';
 import { ahora } from '@/lib/api/plataforma.js';
 import { docentePanel } from '@/lib/api/sesiones.js';
 import AlertasAsistencia from '../AlertasAsistencia';
+import GraficaAlertas from '../GraficaAlertas';
 import IndicadoresPendientes from '../IndicadoresPendientes';
 import MisGrupos from '../MisGrupos';
 import SesionesHoy from '../SesionesHoy';
@@ -47,9 +48,12 @@ export default function PanelDocente({ encabezado = true }) {
                     <div className="flex flex-col gap-4">
                         <IndicadoresPendientes pendientes={d.pendientes} justificantes={d.justificantes_por_resolver} />
                         <SesionesHoy sesiones={d.sesiones_hoy} />
-                        <div className="grid gap-4 lg:grid-cols-2">
+                        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:items-start">
                             <AlertasAsistencia alertas={d.alertas} />
-                            <MisGrupos grupos={d.grupos} />
+                            <div className="flex flex-col gap-4">
+                                <GraficaAlertas alertas={d.alertas} />
+                                <MisGrupos grupos={d.grupos} />
+                            </div>
                         </div>
                     </div>
                 )}

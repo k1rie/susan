@@ -57,6 +57,24 @@ reglas de movimiento en `web/src/components/motion/README.md`; plan y avance en 
 | `ui/Avatar` | «SL / AS» | Círculo de color sólido con iniciales blancas; el color lo elige la persona en el onboarding (`lib/perfil.js`) |
 | `home/Resaltado` | SchoolAI | Subrayado dorado que se dibuja una vez (saludo y titulares) |
 
+## Gráficas y «menos texto» (shadcn chart)
+
+Principio (pedido del usuario, 2026-10-03): cada pantalla abre con **cifras y gráficas**; la explicación va corta o plegada. Las gráficas usan el componente `chart` de shadcn/ui
+(`components/shadcn/chart.jsx`: `ChartContainer`, `ChartTooltip(Content)`, `ChartLegend(Content)`) sobre recharts, siempre con colores por token.
+
+| Pieza | Uso |
+|---|---|
+| `ui/TarjetaGrafica` | Tarjeta (borde, sin sombra) con título, descripción corta, acciones, gráfica y pie; `resumen` = **texto alternativo obligatorio** para lectores de pantalla |
+| `ui/GraficaDona` | Distribución de estados con el total (o un %) al centro y leyenda; sin datos muestra un aviso |
+| `ui/GraficaBarras` | Barras verticales/horizontales/apiladas con línea de límite (p. ej. el 20 % de faltas) |
+| `ui/Detalles` | Plegable para tablas completas, procedimientos y explicaciones; siempre visible al imprimir |
+| `lib/graficas.js` | `CONFIG_ASISTENCIA` (los 5 estados), `pct`, `sumar`, `resumenTexto`, `formatoPct` |
+
+Carga: recharts pesa ~130 KB gzip, así que `GraficaDona`/`GraficaBarras` (y las gráficas de analítica) se cargan con `next/dynamic` (chunk aparte, alto reservado, sin SSR); las implementaciones viven en `*Impl.jsx`. Una gráfica nueva debe seguir el mismo patrón.
+
+Reglas: la gráfica acompaña a la cifra, no la sustituye; ≤ 8 elementos por gráfica (top N + «Ver todos»); tablas con las columnas esenciales (el resto con `hideBelow` o en `Detalles`);
+una misma frase no se repite en cada fila; los textos necesarios (privacidad, «estimación») se acortan o pliegan, no se borran.
+
 ## Movimiento
 
 Patrones de ReactBits reescritos en CSS/rAF (sin gsap ni `motion`): `Reveal`, `BlurText`, `CountUp`, `StaggerList` (y `SpotlightCard`, disponible, ya sin uso en el Home).

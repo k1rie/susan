@@ -1,32 +1,37 @@
 'use client';
 
+import Detalles from '@/components/ui/Detalles';
 import PasoView from './PasoView.jsx';
 import TablaIteraciones from '../TablaIteraciones';
 import { seccionesProcedimiento } from '../analitica.utils.js';
 
-// Acordeón didáctico: una sección por procedimiento numérico (regresión, bisección, Newton, CUSUM...).
+// Los cálculos que sustentan cada resultado (regresión, bisección, Newton, CUSUM...), plegados: una divulgación general y
+// otra por procedimiento, y las iteraciones largas en la suya. Al imprimir se muestran completos (Detalles).
 export default function PanelProcedimiento({ procedimientos = [] }) {
     const secciones = seccionesProcedimiento(procedimientos);
     return (
-        <section aria-label="Procedimiento numérico" className="rounded-xl border border-border bg-card p-5">
-            <h2 className="text-base font-semibold">Procedimiento paso a paso</h2>
-            <p className="mb-3 text-xs text-muted-foreground">Los cálculos que sustentan cada resultado, con sus tablas intermedias.</p>
+        <section aria-label="Procedimiento numérico">
             {secciones.length === 0 ? (
-                <p className="text-sm text-muted-foreground">Aún no hay procedimientos disponibles para este grupo.</p>
+                <p className="rounded-xl border border-border bg-card p-5 text-sm text-muted-foreground">Aún no hay procedimientos disponibles para este grupo.</p>
             ) : (
-                <div className="flex flex-col gap-2">
-                    {secciones.map((s) => (
-                        <details key={s.id} className="rounded-xl border border-border">
-                            <summary className="flex min-h-11 cursor-pointer items-center px-3 text-sm font-medium">{s.titulo}</summary>
-                            <div className="flex flex-col gap-4 border-t border-border p-3">
-                                {(s.pasos || []).map((p, i) => (
-                                    <PasoView key={i} paso={p} />
-                                ))}
-                                {s.traza?.length > 0 && <TablaIteraciones traza={s.traza} caption="Iteraciones con error por iteración" />}
-                            </div>
-                        </details>
-                    ))}
-                </div>
+                <Detalles titulo="Ver el procedimiento paso a paso" resumen={`${secciones.length} cálculos con sus tablas intermedias`}>
+                    <div className="flex flex-col gap-2">
+                        {secciones.map((s) => (
+                            <Detalles key={s.id} titulo={s.titulo}>
+                                <div className="flex flex-col gap-4">
+                                    {(s.pasos || []).map((p, i) => (
+                                        <PasoView key={i} paso={p} />
+                                    ))}
+                                    {s.traza?.length > 0 && (
+                                        <Detalles titulo="Ver las iteraciones" resumen={`${s.traza.length} ${s.traza.length === 1 ? 'iteración' : 'iteraciones'}`}>
+                                            <TablaIteraciones traza={s.traza} />
+                                        </Detalles>
+                                    )}
+                                </div>
+                            </Detalles>
+                        ))}
+                    </div>
+                </Detalles>
             )}
         </section>
     );

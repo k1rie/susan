@@ -1,10 +1,10 @@
 'use client';
 
+import { FileCheck2 } from 'lucide-react';
 import { useState } from 'react';
 import Alert from '@/components/ui/Alert';
 import Button from '@/components/ui/Button';
 import DataState from '@/components/ui/DataState';
-import EmptyState from '@/components/ui/EmptyState';
 import Field from '@/components/ui/Field';
 import FileInput from '@/components/ui/FileInput';
 import Select from '@/components/ui/Select';
@@ -17,7 +17,8 @@ import { ACCEPT, MAX_BYTES, MOTIVO_MAX, etiquetaJustificable } from './registrar
 
 const TEXTO_FASE = { subiendo: 'Subiendo documento…', guardando: 'Registrando justificante…' };
 
-// Formulario puro (recibe los registros justificables ya cargados).
+// Formulario puro (recibe los registros justificables ya cargados). Sin borde propio: la tarjeta y el título los pone
+// RegistrarJustificanteForm, para que el estado de carga, el vacío y el formulario compartan una sola tarjeta.
 export function FormularioJustificante({ registros, idSesionInicial = null, onRegistrado, onNoJustificable }) {
     const { toast } = useToast();
     const preseleccion = registros.some((r) => r.id_sesion === idSesionInicial) ? String(idSesionInicial) : '';
@@ -39,7 +40,7 @@ export function FormularioJustificante({ registros, idSesionInicial = null, onRe
     };
 
     return (
-        <form onSubmit={alEnviar} noValidate className="flex flex-col gap-4 rounded-xl border border-border bg-card p-5" aria-label="Registrar justificante">
+        <form onSubmit={alEnviar} noValidate className="flex flex-col gap-4" aria-label="Registrar justificante">
             {h.error && <Alert tone="danger">{h.error}</Alert>}
             <Field label="Falta o retardo a justificar" required error={h.errores.idSesion}>
                 <Select
@@ -68,21 +69,30 @@ export function FormularioJustificante({ registros, idSesionInicial = null, onRe
 // Modo alumno: carga las faltas/retardos justificables con misJustificables.
 export default function RegistrarJustificanteForm({ idSesion = null, registros, onRegistrado }) {
     const q = useApiQuery(misJustificables, { limit: 50 }, { enabled: !registros });
-    if (registros) {
-        return <FormularioJustificante registros={registros} idSesionInicial={idSesion} onRegistrado={onRegistrado} />;
-    }
     return (
-        <DataState loading={q.loading} error={q.error} data={q.data} onRetry={q.refetch}
-            isEmpty={(d) => !(d.items || []).length}
-            empty={<EmptyState title="No tienes faltas ni retardos por justificar." />}>
-            {(d) => (
-                <FormularioJustificante
-                    registros={d.items}
-                    idSesionInicial={idSesion}
-                    onNoJustificable={q.refetch}
-                    onRegistrado={(j) => { q.refetch(); onRegistrado?.(j); }}
-                />
-            )}
-        </DataState>
+        <section aria-labelledby="t-reg-just" className="rounded-xl border border-border bg-card p-5">
+            <h3 id="t-reg-just" className="text-base font-semibold tracking-tight">Registrar justificante</h3>
+            <div className="mt-3">
+                {registros ? (
+                    <FormularioJustificante registros={registros} idSesionInicial={idSesion} onRegistrado={onRegistrado} />
+                ) : (
+                    <DataState loading={q.loading} error={q.error} data={q.data} onRetry={q.refetch}
+                        isEmpty={(d) => !(d.items || []).length}
+                        empty={<p className="flex items-center gap-2 text-sm text-muted-foreground">
+                            <FileCheck2 aria-hidden="true" className="size-5 shrink-0" strokeWidth={1.75} />
+                            No tienes faltas ni retardos por justificar.
+                        </p>}>
+                        {(d) => (
+                            <FormularioJustificante
+                                registros={d.items}
+                                idSesionInicial={idSesion}
+                                onNoJustificable={q.refetch}
+                                onRegistrado={(j) => { q.refetch(); onRegistrado?.(j); }}
+                            />
+                        )}
+                    </DataState>
+                )}
+            </div>
+        </section>
     );
 }

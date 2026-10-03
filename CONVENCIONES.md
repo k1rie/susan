@@ -72,6 +72,11 @@ SUSAN/
   `AppShell`; tarjetas `rounded-xl border border-border bg-card` **sin sombra**; botones y campos `rounded-md`
   (8 px); botón primario negro; filtros con `ui/Pills`; pestañas con `ui/Tabs` (subrayadas); tarjetas de módulo con
   `ui/TarjetaPortada` y listas de filas con `ui/TarjetaFila`; foco visible con `focus-visible:ring-4 ring-ring/30`.
+- **Gráficas y densidad de texto**: cada pantalla abre con cifras y gráficas (shadcn `chart` vía `ui/GraficaDona`,
+  `ui/GraficaBarras`, `ui/TarjetaGrafica` con `resumen` como texto alternativo; colores solo por token, ver
+  `lib/graficas.js`); la explicación va corta o dentro de `ui/Detalles`; tablas con solo las columnas esenciales;
+  nada de párrafos repetidos por fila. recharts se carga con `next/dynamic` (patrón `*Impl.jsx`):
+  no lo importes de forma estática en pantallas. Detalle en `docs/design/SISTEMA.md`.
 - **Movimiento**: solo con `components/motion/*` y `lib/motion` (CSS + IntersectionObserver/rAF; sin gsap ni
   `motion`). Solo `transform`/`opacity`; una vez al entrar en vista; apagado con "reducir movimiento". No agregues
   librerías de animación sin medir con `scripts/measure-bundle.mjs` (presupuesto: `/docente` ≤ +15 % vs. la base).

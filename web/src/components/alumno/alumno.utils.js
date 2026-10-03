@@ -27,3 +27,23 @@ export function avisoMateria(item) {
     }
     return null;
 }
+
+const ORIGEN = { automatico: 'Automático', manual: 'Manual', correccion: 'Corrección' };
+
+/** "Automático · 08:03" (origen y hora de registro); cadena vacía si no hay ninguno. */
+export function lineaRegistro(s) {
+    const origen = s?.origen ? ORIGEN[s.origen] || s.origen : '';
+    const hora = s?.hora_registro ? horaCorta(String(s.hora_registro).slice(11)) : '';
+    return [origen, hora].filter(Boolean).join(' · ');
+}
+
+/** Texto gris del historial plegable: "32 sesiones · 12 ausencias". */
+export function resumenHistorial(total, item) {
+    const n = Number(total) || 0;
+    const partes = [n === 1 ? '1 sesión' : `${n} sesiones`];
+    if (item && Number.isFinite(Number(item.ausencias))) {
+        const a = Number(item.ausencias);
+        partes.push(`${a} ausencia${a === 1 ? '' : 's'}`);
+    }
+    return partes.join(' · ');
+}
