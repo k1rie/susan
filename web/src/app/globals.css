@@ -1,0 +1,124 @@
+@import "tailwindcss";
+
+/* =========================================================================
+   SUSAN — tokens de diseño (BASE)
+   Diseño mínimo a propósito: el rediseño visual vendrá después. Por eso los
+   componentes NO usan colores crudos, solo estas utilidades semánticas
+   (bg-surface, text-muted, border-border, bg-primary, text-presente, …):
+   cambiar la apariencia = cambiar estos valores.
+   Paleta institucional UNACH: azul marino #1F3A5F + dorado #A8842C.
+   ========================================================================= */
+
+:root {
+  --background: #f3f5f9;
+  --foreground: #0f1b2d;
+  --surface: #ffffff;
+  --surface-muted: #eef1f6;
+  --border: #d9dfe8;
+  --muted: #5a6779;
+
+  --primary: #1f3a5f;
+  --primary-hover: #2b4c7a;
+  --primary-foreground: #ffffff;
+  --accent: #a8842c;
+  --accent-foreground: #ffffff;
+  --ring: #c29b3c;
+
+  --success: #2e7d4f;
+  --warning: #b7791f;
+  --danger: #b3261e;
+  --info: #2563a8;
+
+  /* Estados de asistencia: siempre texto + color (nunca solo color). */
+  --presente: #1f7a47;
+  --presente-bg: #e3f4ea;
+  --retardo: #9a6408;
+  --retardo-bg: #fbefd2;
+  --ausente: #b3261e;
+  --ausente-bg: #fbe4e1;
+  --pendiente: #475569;
+  --pendiente-bg: #e6ebf2;
+  --justificado: #1f5fa8;
+  --justificado-bg: #e1edfa;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-border: var(--border);
+  --color-muted: var(--muted);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-ring: var(--ring);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+  --color-info: var(--info);
+
+  --color-presente: var(--presente);
+  --color-presente-bg: var(--presente-bg);
+  --color-retardo: var(--retardo);
+  --color-retardo-bg: var(--retardo-bg);
+  --color-ausente: var(--ausente);
+  --color-ausente-bg: var(--ausente-bg);
+  --color-pendiente: var(--pendiente);
+  --color-pendiente-bg: var(--pendiente-bg);
+  --color-justificado: var(--justificado);
+  --color-justificado-bg: var(--justificado-bg);
+
+  --font-sans: var(--font-inter), "Inter", system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+}
+
+/* ---- Base ---- */
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+html,
+body {
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+}
+
+:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+button:not(:disabled),
+[role="button"]:not([aria-disabled="true"]) {
+  cursor: pointer;
+}
+
+/* iOS hace auto-zoom al enfocar campos con font-size < 16px (patrón MVP-FITNESS). */
+@media (max-width: 768px) {
+  input,
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+}
+
+/* Exportar un reporte a PDF = window.print(): oculta lo que tenga .no-print. */
+@media print {
+  @page {
+    size: A4 landscape;
+    margin: 12mm;
+  }
+  .no-print {
+    display: none !important;
+  }
+}

@@ -1,0 +1,95 @@
+import clsx from 'clsx';
+import Spinner from '../Spinner/Spinner.jsx';
+
+const ALINEACION = { left: 'text-left', right: 'text-right', center: 'text-center' };
+const OCULTAR = { sm: 'hidden sm:table-cell', md: 'hidden md:table-cell' };
+
+const clasesCelda = (col) => clsx(ALINEACION[col.align] || 'text-left', col.hideBelow && OCULTAR[col.hideBelow], col.className);
+
+// Tabla simple y semántica. En pantallas angostas el contenedor se desplaza en horizontal
+// (360 px); hideBelow oculta columnas secundarias. El orden lo hace el servidor (onSort solo notifica).
+export default function Table({
+    columns,
+    rows = [],
+    rowKey = 'id',
+    caption,
+    emptyMessage = 'Sin resultados',
+    onRowClick,
+    loading = false,
+    sort,
+    onSort,
+    stickyHeader = false,
+    className,
+}) {
+    const claveDe = (row, i) => (typeof rowKey === 'function' ? rowKey(row) : (row[rowKey] ?? i));
+    const ariaSort = (col) => (sort?.key === col.key ? (sort.dir === 'asc' ? 'ascending' : 'descending') : undefined);
+
+    return (
+        <div className={clsx('overflow-x-auto rounded-lg border border-border bg-surface', stickyHeader && 'max-h-[70dvh] overflow-y-auto', className)}>
+            <table className="w-full min-w-max border-collapse text-sm">
+                {caption && <caption className="px-4 py-2 text-left text-sm text-muted">{caption}</caption>}
+                <thead className={clsx('bg-surface-muted text-muted', stickyHeader && 'sticky top-0 z-10')}>
+                    <tr>
+                        {columns.map((col) => (
+                            <th
+                                key={col.key}
+                                scope="col"
+                                aria-sort={ariaSort(col)}
+                                className={clsx('px-3 py-2 font-medium', clasesCelda(col))}
+                            >
+                                {onSort && col.sortable !== false ? (
+                                    <button type="button" onClick={() => onSort(col.key)} className="min-h-9 font-medium">
+                                        {col.header}
+                                        {sort?.key === col.key && <span aria-hidden="true">{sort.dir === 'asc' ? ' ▲' : ' ▼'}</span>}
+                                    </button>
+                                ) : (
+                                    col.header
+                                )}
+                            </th>
+                        ))}
+                    </tr>
+                </thead>
+                <tbody aria-busy={loading ? 'true' : undefined}>
+                    {loading && rows.length === 0 && (
+                        <tr>
+                            <td colSpan={columns.length} className="px-3 py-8 text-center">
+                                <Spinner />
+                            </td>
+                        </tr>
+                    )}
+                    {!loading && rows.length === 0 && (
+                        <tr>
+                            <td colSpan={columns.length} className="px-3 py-8 text-center text-muted">
+                                {emptyMessage}
+                            </td>
+                        </tr>
+                    )}
+                    {rows.map((row, i) => (
+                        <tr
+                            key={claveDe(row, i)}
+                            tabIndex={onRowClick ? 0 : undefined}
+                            onClick={onRowClick ? () => onRowClick(row) : undefined}
+                            onKeyDown={
+                                onRowClick
+                                    ? (e) => {
+                                          if (e.key === 'Enter' || e.key === ' ') {
+                                              e.preventDefault();
+                                              onRowClick(row);
+                                          }
+                                      }
+                                    : undefined
+                            }
+                            className={clsx('border-t border-border', onRowClick && 'cursor-pointer hover:bg-surface-muted')}
+                        >
+                            {columns.map((col) => (
+                                <td key={col.key} className={clsx('px-3 py-2', col.primary && 'font-medium', clasesCelda(col))}>
+                                    {col.render ? col.render(row) : row[col.key]}
+                                </td>
+                            ))}
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        </div>
+    );
+}
