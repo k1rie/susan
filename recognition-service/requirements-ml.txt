@@ -1,0 +1,5 @@
+# Solo para EMBEDDER=insightface (modelos de uso NO comercial, ver README)
+insightface>=0.7
+onnxruntime>=1.18
+opencv-python-headless>=4.9
+scikit-image>=0.24
