@@ -15,7 +15,7 @@ export default async function LoginPage({ searchParams }) {
     const candidato = estado ?? (typeof error === 'string' ? error : null) ?? (typeof msg === 'string' ? msg : null);
     const mensaje = Object.hasOwn(MENSAJES_INFO, candidato) ? candidato : null;
     return (
-        <AuthCard title="Iniciar sesión" subtitle="Usa tu cuenta institucional.">
+        <AuthCard title="Inicia sesión" resaltar="sesión" subtitle="Usa tu cuenta institucional.">
             <LoginForm next={rutaSegura(next)} mensaje={mensaje} />
         </AuthCard>
     );

@@ -10,11 +10,14 @@ import Spinner from '@/components/ui/Spinner/Spinner.jsx';
 import { useToast } from '@/components/ui/Toast/Toast.jsx';
 import { cambiarContrasena, obtenerSesion, suscribirCambioAuth } from '@/lib/api/auth.js';
 import PasswordInput from '../PasswordInput/PasswordInput.jsx';
+import ReglasContrasena from '../ReglasContrasena/ReglasContrasena.jsx';
 import { TEXTO_ERROR_CONTRASENA, validarContrasena } from './contrasena.utils.js';
 
 const ESPERA_SESION_MS = 3000;
 
-export default function CambiarContrasenaForm() {
+// modo: 'cambiar' (recuperación o cambio voluntario) | 'activar' (primera contraseña de una cuenta creada por el administrador).
+export default function CambiarContrasenaForm({ modo = 'cambiar' }) {
+    const activar = modo === 'activar';
     const router = useRouter();
     const { toast } = useToast();
     // 'verificando' | 'sin_sesion' | 'listo'
@@ -56,7 +59,7 @@ export default function CambiarContrasenaForm() {
         setCargando(true);
         try {
             await cambiarContrasena({ contrasena: nueva });
-            toast({ tone: 'success', message: 'Contraseña actualizada' });
+            toast({ tone: 'success', message: activar ? 'Cuenta activada' : 'Contraseña actualizada' });
             router.replace('/');
         } catch (err) {
             if (err?.code === 'NO_AUTENTICADO') setEstado('sin_sesion');
@@ -76,7 +79,7 @@ export default function CambiarContrasenaForm() {
         return (
             <div className="flex flex-col gap-4">
                 <Alert tone="danger">El enlace expiró o no es válido. Solicita uno nuevo.</Alert>
-                <Link href="/recuperar" className="inline-flex min-h-11 items-center text-sm text-primary underline">
+                <Link href="/recuperar" className="inline-flex min-h-11 items-center self-start rounded-full px-1 text-sm font-medium text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/40">
                     Solicitar un enlace nuevo
                 </Link>
             </div>
@@ -85,7 +88,7 @@ export default function CambiarContrasenaForm() {
     return (
         <form onSubmit={enviar} noValidate className="flex flex-col gap-4">
             {error && <Alert tone="danger">{error}</Alert>}
-            <Field label="Nueva contraseña" required error={errores.nueva} hint="Mínimo 10 caracteres, con letras y números.">
+            <Field label={activar ? 'Crea tu contraseña' : 'Nueva contraseña'} required error={errores.nueva}>
                 <PasswordInput name="nueva" autoComplete="new-password" value={nueva} onChange={(e) => setNueva(e.target.value)} disabled={cargando} />
             </Field>
             <Field label="Confirmar contraseña" required error={errores.confirmacion}>
@@ -97,8 +100,9 @@ export default function CambiarContrasenaForm() {
                     disabled={cargando}
                 />
             </Field>
-            <Button type="submit" loading={cargando} fullWidth>
-                Guardar contraseña
+            <ReglasContrasena nueva={nueva} confirmacion={confirmacion} />
+            <Button type="submit" loading={cargando} fullWidth arrow className="justify-between pl-6">
+                {activar ? 'Activar mi cuenta' : 'Guardar contraseña'}
             </Button>
         </form>
     );

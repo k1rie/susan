@@ -1,6 +1,6 @@
 ---
 status: running
-heartbeat: 2026-10-03T04:36:56Z
+heartbeat: 2026-10-03T04:41:08Z
 phase: F1
 ---
 
@@ -21,7 +21,7 @@ Si `heartbeat` está más viejo (o `pending`), toma el trabajo: pon `status: run
 - [x] **F1** Infraestructura: shadcn init, tokens, `lib/motion`, componentes ReactBits elegidos (reescritos en CSS/rAF; `Stepper` se adapta en F4)
 - [x] **F2** ui-kit re-skineado (misma API de props; nuevo `Button arrow`, `Badge tone="gold"`, `StatCard` con cifra serif)
 - [x] **F3** Shell, registro de módulos y Home por rol (+ `/modulos` y `/modulos/[id]`): riel sin borde con «Próximamente», barra superior con buscador/paleta ⌘K, barra inferior móvil, `HomeRol` (saludo en serif + subrayado dorado + campo de comando + filas de módulos), `docs/design/MODULOS.md`
-- [ ] **F4** Auth: login, recuperar, cambiar contraseña, activar cuenta
+- [x] **F4** Auth: login, recuperar, cambiar contraseña, activar cuenta (pantalla dividida + panel de producto animado con 3 escenas rotativas, reglas de contraseña en vivo, `/activar-cuenta` como destino de la invitación)
 - [ ] **F5** Operación: sesión en vivo, pase manual, revisión, reportes, portal del alumno
 - [ ] **F6** Admin, técnico y analítica
 - [ ] **F7** Pulido de movimiento, presupuesto de rendimiento, reduced-motion, a11y

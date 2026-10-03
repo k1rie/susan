@@ -11,3 +11,18 @@ export const TEXTO_ERROR_CONTRASENA = {
     CONTRASENA_DEBIL: 'La contraseña no cumple los requisitos de seguridad.',
     CONTRASENA_IGUAL: 'La nueva contraseña debe ser distinta de la actual.',
 };
+
+/**
+ * Reglas para mostrar en vivo (misma política que `validarContrasena`): [{ id, texto, cumple }].
+ * `confirmacion` solo se evalúa cuando ya se escribió algo en ella.
+ */
+export function reglasContrasena(nueva, confirmacion = '') {
+    const n = String(nueva ?? '');
+    const reglas = [
+        { id: 'largo', texto: 'Al menos 10 caracteres', cumple: n.length >= 10 },
+        { id: 'letra', texto: 'Contiene una letra', cumple: /\p{L}/u.test(n) },
+        { id: 'numero', texto: 'Contiene un número', cumple: /\d/.test(n) },
+    ];
+    if (confirmacion) reglas.push({ id: 'coincide', texto: 'Las contraseñas coinciden', cumple: n.length > 0 && n === confirmacion });
+    return reglas;
+}

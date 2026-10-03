@@ -5,7 +5,7 @@ export const metadata = { title: 'Recuperar contraseña' };
 
 export default function RecuperarPage() {
     return (
-        <AuthCard title="Recuperar contraseña" subtitle="Te enviaremos un enlace para restablecerla.">
+        <AuthCard title="Recupera tu contraseña" resaltar="contraseña" subtitle="Te enviaremos un enlace para restablecerla.">
             <RecuperarForm />
         </AuthCard>
     );
