@@ -71,7 +71,7 @@ export default function ColaRevision({ pestanaInicial, casoInicial = null }) {
                                 </div>
                                 <div className={seleccionado ? '' : 'hidden md:block'}>
                                     {!seleccionado ? (
-                                        <p className="rounded-lg border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
+                                        <p className="rounded-3xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
                                             Elige un caso de la lista para ver sus lecturas.
                                         </p>
                                     ) : pestana === 'pendientes' ? (

@@ -10,7 +10,7 @@ export default function MisGrupos({ grupos = [] }) {
             ) : (
                 <ul className="flex flex-col gap-2">
                     {grupos.map((g) => (
-                        <li key={g.id_grupo} className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-border p-3 text-sm">
+                        <li key={g.id_grupo} className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-border p-3.5 text-sm">
                             <span>
                                 <span className="font-medium">{g.materia}</span> ({g.clave_grupo}) · Aula {g.aula} · {g.periodo}
                             </span>

@@ -11,7 +11,7 @@ export default function GraficaAcumulado({ cruceLimite, limitePct = 20 }) {
     const datos = useMemo(() => construirSerieAcumulado(cruceLimite), [cruceLimite]);
     const sinDatos = !cruceLimite || cruceLimite.estado === 'insuficiente' || datos.length === 0;
     return (
-        <section className="rounded-lg border border-border bg-card p-4">
+        <section className="rounded-3xl border border-border bg-card shadow-soft p-5">
             <h2 className="text-base font-semibold">Faltas acumuladas frente al límite</h2>
             {sinDatos ? (
                 <p className="mt-2 text-sm text-muted-foreground">{MENSAJE_INSUFICIENTE}</p>

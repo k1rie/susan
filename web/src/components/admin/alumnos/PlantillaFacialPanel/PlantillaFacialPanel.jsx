@@ -21,7 +21,7 @@ function VistaPrevia({ blob }) {
     const url = useMemo(() => URL.createObjectURL(blob), [blob]);
     useEffect(() => () => URL.revokeObjectURL(url), [url]);
     // eslint-disable-next-line @next/next/no-img-element
-    return <img src={url} alt="Vista previa de la foto capturada" className="max-h-64 rounded-md border border-border" />;
+    return <img src={url} alt="Vista previa de la foto capturada" className="max-h-64 rounded-2xl border border-border" />;
 }
 
 // Plantilla facial (RN-12/RN-13): solo con consentimiento vigente; la foto se verifica antes de registrarse.

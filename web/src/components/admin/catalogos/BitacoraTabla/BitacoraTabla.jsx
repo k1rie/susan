@@ -21,7 +21,7 @@ function Bloque({ titulo, valor }) {
         <div>
             <p className="text-xs font-medium text-muted-foreground">{titulo}</p>
             {texto ? (
-                <pre className="max-h-64 max-w-md overflow-auto rounded-md bg-muted p-2 text-xs">{texto}</pre>
+                <pre className="max-h-64 max-w-md overflow-auto rounded-2xl bg-muted p-2 text-xs">{texto}</pre>
             ) : (
                 <p className="text-xs text-muted-foreground">Sin valor</p>
             )}

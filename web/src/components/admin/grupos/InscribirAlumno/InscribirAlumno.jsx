@@ -56,7 +56,7 @@ export default function InscribirAlumno({ idGrupo, inscritosActivos = [], onInsc
                 )}
             </div>
             {items.length > 0 && (
-                <ul className="divide-y divide-border rounded-lg border border-border bg-card">
+                <ul className="divide-y divide-border rounded-3xl border border-border bg-card shadow-soft">
                     {items.map((a) => {
                         const ya = inscritosActivos.includes(a.id_alumno);
                         return (

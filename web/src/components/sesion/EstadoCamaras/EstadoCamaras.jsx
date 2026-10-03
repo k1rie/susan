@@ -9,7 +9,7 @@ export default function EstadoCamaras({ camaras = [] }) {
     return (
         <ul className="grid gap-2 sm:grid-cols-2">
             {camaras.map((c) => (
-                <li key={c.id_camara} className="flex flex-col gap-1 rounded-md border border-border p-3 text-sm">
+                <li key={c.id_camara} className="flex flex-col gap-1 rounded-2xl border border-border p-3.5 text-sm">
                     <div className="flex flex-wrap items-center justify-between gap-2">
                         <span className="font-medium">
                             Camara {c.posicion} ({c.tipo === 'ip' ? 'IP' : 'navegador'})

@@ -35,7 +35,7 @@ export default function SesionesHoy({ sesiones = [] }) {
             ) : (
                 <ul className="flex flex-col gap-3">
                     {sesiones.map((s) => (
-                        <li key={s.id_sesion} className="flex flex-col gap-2 rounded-md border border-border p-3 sm:flex-row sm:items-center sm:justify-between">
+                        <li key={s.id_sesion} className="flex flex-col gap-2 rounded-2xl border border-border p-3.5 sm:flex-row sm:items-center sm:justify-between">
                             <div className="min-w-0">
                                 <p className="font-medium">
                                     {s.materia} ({s.clave_grupo})

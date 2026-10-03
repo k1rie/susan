@@ -6,7 +6,7 @@ export default function CorreccionesRecientes({ items = [] }) {
     return (
         <ul className="flex flex-col gap-2">
             {items.map((c) => (
-                <li key={c.id_bitacora} className="flex flex-col gap-1 rounded-md border border-border bg-card p-3 text-sm">
+                <li key={c.id_bitacora} className="flex flex-col gap-1 rounded-2xl border border-border bg-card p-3.5 text-sm">
                     <p className="font-medium">{c.alumno.nombre_completo}</p>
                     <p className="text-muted-foreground">
                         {c.materia.nombre} · Grupo {c.grupo.clave_grupo} · Sesión del {c.sesion.fecha}

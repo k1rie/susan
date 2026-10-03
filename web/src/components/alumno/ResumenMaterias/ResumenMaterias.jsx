@@ -7,7 +7,7 @@ function Tarjeta({ item, seleccionada, onSeleccionar }) {
     const sinSesiones = !item.sesiones_programadas;
     const nombre = item.materia?.nombre || 'Materia';
     return (
-        <li className={`rounded-lg border bg-card p-4 ${seleccionada ? 'border-primary' : 'border-border'}`}>
+        <li className={`rounded-3xl border bg-card p-5 shadow-soft ${seleccionada ? 'border-primary' : 'border-border'}`}>
             <div className="flex flex-wrap items-start justify-between gap-2">
                 <div className="min-w-0">
                     <h3 className="font-semibold">{nombre}</h3>
@@ -17,7 +17,7 @@ function Tarjeta({ item, seleccionada, onSeleccionar }) {
                     type="button"
                     onClick={() => onSeleccionar(item.id_grupo)}
                     aria-pressed={seleccionada}
-                    className="min-h-11 rounded-md border border-border px-3 text-sm font-medium hover:bg-muted"
+                    className="min-h-11 rounded-full border border-border px-4 text-sm font-medium hover:bg-muted"
                 >
                     {seleccionada ? 'Viendo historial' : 'Ver historial'}
                 </button>

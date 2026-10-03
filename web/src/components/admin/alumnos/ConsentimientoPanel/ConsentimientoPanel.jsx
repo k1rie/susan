@@ -158,7 +158,7 @@ export default function ConsentimientoPanel({ idAlumno, version = 0, onCambio })
                             {data.items?.length ? (
                                 <ul className="flex flex-col gap-2">
                                     {data.items.map((c) => (
-                                        <li key={c.id_consent} className="rounded-md border border-border p-3 text-sm">
+                                        <li key={c.id_consent} className="rounded-2xl border border-border p-3.5 text-sm">
                                             <p className="font-medium">
                                                 Firmado {c.fecha_firma} · vigente hasta {c.vigencia_hasta}
                                             </p>

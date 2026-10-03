@@ -8,7 +8,7 @@ import { datosPatron } from '../analitica.utils.js';
 export default function PatronSemanal({ patronSemanal }) {
     const datos = useMemo(() => datosPatron(patronSemanal), [patronSemanal]);
     return (
-        <section className="rounded-lg border border-border bg-card p-4">
+        <section className="rounded-3xl border border-border bg-card shadow-soft p-5">
             <h2 className="text-base font-semibold">Patrón por día de la semana</h2>
             {datos.length === 0 ? (
                 <p className="mt-2 text-sm text-muted-foreground">Sin sesiones cerradas para calcular el patrón.</p>
