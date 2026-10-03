@@ -39,7 +39,7 @@ export function FormularioJustificante({ registros, idSesionInicial = null, onRe
     };
 
     return (
-        <form onSubmit={alEnviar} noValidate className="flex flex-col gap-4 rounded-lg border border-border bg-card p-4" aria-label="Registrar justificante">
+        <form onSubmit={alEnviar} noValidate className="flex flex-col gap-4 rounded-3xl border border-border bg-card shadow-soft p-5" aria-label="Registrar justificante">
             {h.error && <Alert tone="danger">{h.error}</Alert>}
             <Field label="Falta o retardo a justificar" required error={h.errores.idSesion}>
                 <Select

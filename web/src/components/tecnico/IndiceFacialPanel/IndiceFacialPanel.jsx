@@ -15,7 +15,7 @@ const fecha = (iso) => (iso ? new Date(iso).toLocaleString('es-MX') : '-');
 
 function Dato({ k, v }) {
     return (
-        <div className="rounded-md bg-muted p-3">
+        <div className="rounded-2xl bg-muted p-3.5">
             <dt className="text-xs text-muted-foreground">{k}</dt>
             <dd className="text-lg font-semibold">{v}</dd>
         </div>

@@ -36,7 +36,7 @@ export default function HomeRol({ children }) {
 
     return (
         <div className="flex flex-col gap-10">
-            <section className="relative overflow-hidden rounded-[2rem] border border-border bg-card px-6 py-9 shadow-soft sm:px-10 sm:py-12">
+            <section className="relative overflow-hidden rounded-[2rem] border border-border bg-card px-5 py-8 shadow-soft sm:px-10 sm:py-12">
                 <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-gradient-to-br from-accent/80 via-card to-brand-gold-soft/60" />
                 <TeselasFlotantes modulos={activos.length ? activos : proximos} />
                 <div className="relative flex max-w-xl flex-col items-start gap-5 lg:max-w-[34rem]">

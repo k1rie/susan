@@ -27,12 +27,12 @@ export default function TablaRiesgo({ items = [], hrefHistorial }) {
     const aria = (k) => (orden.clave === k ? (orden.dir === 'asc' ? 'ascending' : 'descending') : undefined);
 
     return (
-        <section className="rounded-lg border border-border bg-card p-4">
+        <section className="rounded-3xl border border-border bg-card shadow-soft p-5">
             <h2 className="text-base font-semibold">Alumnos en riesgo</h2>
             {filas.length === 0 ? (
                 <p className="mt-2 text-sm text-muted-foreground">Ningún alumno en riesgo con los datos actuales.</p>
             ) : (
-                <div className="mt-3 overflow-x-auto rounded-md border border-border">
+                <div className="mt-3 overflow-x-auto rounded-2xl border border-border">
                     <table className="w-full min-w-max border-collapse text-sm">
                         <thead className="bg-muted text-muted-foreground">
                             <tr>

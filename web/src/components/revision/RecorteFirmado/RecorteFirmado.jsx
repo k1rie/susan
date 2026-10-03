@@ -12,7 +12,7 @@ export default function RecorteFirmado({ url = null, purgado = false, alt, onExp
     if (!url || vencida) {
         return (
             <div
-                className={`flex h-20 w-20 shrink-0 flex-col items-center justify-center gap-1 rounded-md border border-border bg-muted p-1 text-center text-[11px] text-muted-foreground ${className}`}
+                className={`flex h-20 w-20 shrink-0 flex-col items-center justify-center gap-1 rounded-xl border border-border bg-muted p-1 text-center text-[11px] text-muted-foreground ${className}`}
             >
                 <svg aria-hidden="true" viewBox="0 0 24 24" className="h-7 w-7 fill-current opacity-50">
                     <circle cx="12" cy="8" r="4" />
@@ -40,7 +40,7 @@ export default function RecorteFirmado({ url = null, purgado = false, alt, onExp
             alt={alt}
             loading="lazy"
             onError={() => setFallo({ url })}
-            className={`h-20 w-20 shrink-0 rounded-md border border-border object-cover ${className}`}
+            className={`h-20 w-20 shrink-0 rounded-xl border border-border object-cover ${className}`}
         />
     );
 }

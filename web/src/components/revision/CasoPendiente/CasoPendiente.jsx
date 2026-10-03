@@ -28,7 +28,7 @@ export default function CasoPendiente({ caso, minimoValidas, historial = [], onR
     };
 
     return (
-        <article aria-label={`Caso de ${caso.alumno.nombre_completo}`} className="flex flex-col gap-4 rounded-lg border border-border bg-card p-4">
+        <article aria-label={`Caso de ${caso.alumno.nombre_completo}`} className="flex flex-col gap-4 rounded-3xl border border-border bg-card shadow-soft p-5">
             <header className="flex flex-col gap-1">
                 <Button variant="ghost" size="sm" className="self-start md:hidden" onClick={onCerrar}>
                     Volver a la lista

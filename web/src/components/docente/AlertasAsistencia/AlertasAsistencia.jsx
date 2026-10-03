@@ -13,7 +13,7 @@ export default function AlertasAsistencia({ alertas = [] }) {
             ) : (
                 <ul className="flex flex-col gap-2">
                     {alertas.map((a) => (
-                        <li key={`${a.tipo}-${a.id_grupo}-${a.id_alumno}`} className="flex flex-col gap-1 rounded-md border border-border p-3 text-sm">
+                        <li key={`${a.tipo}-${a.id_grupo}-${a.id_alumno}`} className="flex flex-col gap-1 rounded-2xl border border-border p-3.5 text-sm">
                             <div className="flex flex-wrap items-center justify-between gap-2">
                                 <span className="font-medium">
                                     {a.nombre} <span className="font-normal text-muted-foreground">({a.matricula})</span>

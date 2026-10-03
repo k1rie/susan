@@ -57,7 +57,7 @@ export default function PasswordTemporalModal({ open, correo, contrasena, titulo
                         value={contrasena}
                         onFocus={(e) => e.target.select()}
                         autoComplete="off"
-                        className="min-h-11 w-full rounded-md border border-border bg-muted px-3 font-mono text-base"
+                        className="min-h-11 w-full rounded-full border border-border bg-muted px-4 font-mono text-base"
                     />
                 </label>
                 <div className="flex flex-wrap items-center gap-3">

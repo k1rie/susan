@@ -14,14 +14,14 @@ export default function GraficaSerie({ tendencia, suavizado, proyeccion, resumen
     const alternar = (k) => setVer((v) => ({ ...v, [k]: !v[k] }));
     if (!tendencia?.disponible) {
         return (
-            <section className="rounded-lg border border-border bg-card p-4">
+            <section className="rounded-3xl border border-border bg-card shadow-soft p-5">
                 <h2 className="text-base font-semibold">Ausentismo semanal</h2>
                 <p className="mt-2 text-sm text-muted-foreground">{MENSAJE_INSUFICIENTE}</p>
             </section>
         );
     }
     return (
-        <section className="rounded-lg border border-border bg-card p-4">
+        <section className="rounded-3xl border border-border bg-card shadow-soft p-5">
             <h2 className="text-base font-semibold">Ausentismo semanal</h2>
             <p className="text-xs text-muted-foreground">Tasa de ausentes sobre inscritos por semana, con ajuste lineal, suavizado y proyección.</p>
             <div role="img" aria-label={resumenTextoSerie({ tendencia, resumen })} className="mt-3 h-60 w-full">

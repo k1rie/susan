@@ -5,7 +5,7 @@ export default function TablaIteraciones({ traza = [], caption }) {
     const columnas = columnasTraza(traza);
     if (columnas.length === 0) return <p className="text-sm text-muted-foreground">Sin iteraciones registradas.</p>;
     return (
-        <div className="overflow-x-auto rounded-md border border-border">
+        <div className="overflow-x-auto rounded-2xl border border-border">
             <table className="w-full min-w-max border-collapse text-sm tabular-nums">
                 {caption && <caption className="px-3 py-2 text-left text-xs text-muted-foreground">{caption}</caption>}
                 <thead className="bg-muted text-muted-foreground">
