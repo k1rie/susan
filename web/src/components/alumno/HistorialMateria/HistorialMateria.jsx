@@ -8,7 +8,7 @@ export default function HistorialMateria({ items = [], total = 0, limit = 10, of
     if (!items.length) return <EmptyState title="Aún no hay sesiones registradas en esta materia." />;
     return (
         <div className="flex flex-col gap-3">
-            <ul className="divide-y divide-border rounded-3xl border border-border bg-card shadow-soft">
+            <ul className="divide-y divide-border rounded-xl border border-border bg-card">
                 {items.map((s) => (
                     <li key={s.id_sesion} className="flex flex-wrap items-center justify-between gap-2 px-4 py-3">
                         <div className="min-w-0">
@@ -33,7 +33,7 @@ export default function HistorialMateria({ items = [], total = 0, limit = 10, of
                             )}
                             {s.puede_justificar && onJustificar && (
                                 <button type="button" onClick={() => onJustificar(s)}
-                                    className="min-h-11 rounded-full border border-border px-4 text-sm font-medium text-primary hover:bg-muted">
+                                    className="min-h-11 rounded-md border border-border px-4 text-sm font-medium text-foreground hover:bg-accent">
                                     Justificar
                                 </button>
                             )}

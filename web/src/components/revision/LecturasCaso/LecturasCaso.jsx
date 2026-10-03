@@ -55,7 +55,7 @@ export default function LecturasCaso({ idAsistencia, minimoValidas }) {
             ) : (
                 <ul className="flex flex-col gap-2">
                     {lecturas.map((l) => (
-                        <li key={l.id_deteccion} className="flex items-center gap-3 rounded-2xl border border-border p-2 text-sm">
+                        <li key={l.id_deteccion} className="flex items-center gap-3 rounded-xl border border-border p-2 text-sm">
                             <RecorteFirmado
                                 url={l.recorte?.url ?? null}
                                 purgado={recortePurgado(l)}

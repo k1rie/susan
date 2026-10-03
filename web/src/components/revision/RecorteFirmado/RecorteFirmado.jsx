@@ -1,5 +1,6 @@
 'use client';
 
+import { UserRound } from 'lucide-react';
 import { useState } from 'react';
 import Button from '@/components/ui/Button';
 
@@ -14,10 +15,7 @@ export default function RecorteFirmado({ url = null, purgado = false, alt, onExp
             <div
                 className={`flex h-20 w-20 shrink-0 flex-col items-center justify-center gap-1 rounded-xl border border-border bg-muted p-1 text-center text-[11px] text-muted-foreground ${className}`}
             >
-                <svg aria-hidden="true" viewBox="0 0 24 24" className="h-7 w-7 fill-current opacity-50">
-                    <circle cx="12" cy="8" r="4" />
-                    <path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8z" />
-                </svg>
+                <UserRound aria-hidden="true" className="size-7 opacity-50" strokeWidth={1.5} />
                 {vencida ? (
                     <>
                         <span>Enlace vencido</span>

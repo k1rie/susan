@@ -15,25 +15,27 @@ import {
 } from 'lucide-react';
 
 // Definición única de la navegación por rol (plataforma.md 2.5). Las sesiones no tienen ítem propio.
+// El primer ítem de cada rol es su «Inicio» (va arriba, junto a Buscar); el resto se agrupa bajo `grupo` (título de sección del
+// riel, como «Chats»/«Stacks» en Dropbox Dash). Iconos: SIEMPRE de Lucide.
 export const NAV_POR_ROL = {
     administrador: [
         { href: '/admin', label: 'Inicio', icon: LayoutDashboard },
-        { href: '/admin/grupos', label: 'Grupos', icon: Users },
-        { href: '/admin/alumnos', label: 'Alumnos', icon: GraduationCap },
-        { href: '/admin/docentes', label: 'Docentes', icon: Presentation },
-        { href: '/admin/materias', label: 'Materias', icon: BookOpen },
-        { href: '/admin/aulas', label: 'Aulas', icon: Building2 },
-        { href: '/admin/usuarios', label: 'Usuarios', icon: UserCog },
-        { href: '/admin/bitacora', label: 'Bitácora', icon: ScrollText },
-        { href: '/reportes', label: 'Reportes', icon: FileBarChart },
-        { href: '/analitica', label: 'Analítica', icon: ChartLine },
-        { href: '/tecnico', label: 'Sistema (solo consulta)', icon: Wrench },
+        { href: '/admin/grupos', label: 'Grupos', icon: Users, grupo: 'Catálogos' },
+        { href: '/admin/alumnos', label: 'Alumnos', icon: GraduationCap, grupo: 'Catálogos' },
+        { href: '/admin/docentes', label: 'Docentes', icon: Presentation, grupo: 'Catálogos' },
+        { href: '/admin/materias', label: 'Materias', icon: BookOpen, grupo: 'Catálogos' },
+        { href: '/admin/aulas', label: 'Aulas', icon: Building2, grupo: 'Catálogos' },
+        { href: '/admin/usuarios', label: 'Usuarios', icon: UserCog, grupo: 'Cuentas y auditoría' },
+        { href: '/admin/bitacora', label: 'Bitácora', icon: ScrollText, grupo: 'Cuentas y auditoría' },
+        { href: '/reportes', label: 'Reportes', icon: FileBarChart, grupo: 'Análisis' },
+        { href: '/analitica', label: 'Analítica', icon: ChartLine, grupo: 'Análisis' },
+        { href: '/tecnico', label: 'Sistema (solo consulta)', icon: Wrench, grupo: 'Sistema' },
     ],
     docente: [
         { href: '/docente', label: 'Panel', icon: LayoutDashboard },
-        { href: '/docente/revision', label: 'Revisión', icon: ClipboardCheck },
-        { href: '/reportes', label: 'Reportes', icon: FileBarChart },
-        { href: '/analitica', label: 'Analítica', icon: ChartLine },
+        { href: '/docente/revision', label: 'Revisión', icon: ClipboardCheck, grupo: 'Asistencia' },
+        { href: '/reportes', label: 'Reportes', icon: FileBarChart, grupo: 'Asistencia' },
+        { href: '/analitica', label: 'Analítica', icon: ChartLine, grupo: 'Análisis' },
     ],
     alumno: [{ href: '/alumno', label: 'Mi asistencia', icon: UserCheck }],
     tecnico: [{ href: '/tecnico', label: 'Consola técnica', icon: Wrench }],
@@ -63,4 +65,20 @@ export function itemActivo(items, pathname) {
         if (coincide && (!mejor || it.href.length > mejor.length)) mejor = it.href;
     }
     return mejor;
+}
+
+// Separa el «Inicio» (primer ítem) de los grupos con título, conservando el orden: { inicio, grupos: [{ grupo, items }] }.
+export function agruparNav(items) {
+    const [inicio, ...resto] = items;
+    const grupos = [];
+    for (const it of resto) {
+        const nombre = it.grupo ?? '';
+        let g = grupos.find((x) => x.grupo === nombre);
+        if (!g) {
+            g = { grupo: nombre, items: [] };
+            grupos.push(g);
+        }
+        g.items.push(it);
+    }
+    return { inicio: inicio ?? null, grupos };
 }

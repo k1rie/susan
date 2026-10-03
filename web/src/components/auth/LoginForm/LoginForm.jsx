@@ -49,10 +49,10 @@ export default function LoginForm({ next = null, mensaje = null }) {
                     disabled={f.cargando}
                 />
             </Field>
-            <Button type="submit" loading={f.cargando} fullWidth arrow className="justify-between pl-6">
+            <Button type="submit" loading={f.cargando} fullWidth arrow>
                 Iniciar sesión
             </Button>
-            <Link href="/recuperar" className="inline-flex min-h-11 items-center self-start rounded-full px-1 text-sm font-medium text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/40">
+            <Link href="/recuperar" className="inline-flex min-h-11 items-center self-start rounded-full px-1 text-sm font-medium text-link underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/30">
                 ¿Olvidaste tu contraseña?
             </Link>
             <div className="mt-2 flex flex-col gap-4">

@@ -32,7 +32,7 @@ export default function Tabs({ tabs, value, onChange, idPrefix = 'tab', classNam
     };
 
     return (
-        <div role="tablist" className={clsx('inline-flex max-w-full gap-1 overflow-x-auto rounded-full bg-muted p-1', className)}>
+        <div role="tablist" className={clsx('flex max-w-full gap-6 overflow-x-auto border-b border-border', className)}>
             {tabs.map((t, i) => {
                 const activa = t.id === value;
                 return (
@@ -51,9 +51,11 @@ export default function Tabs({ tabs, value, onChange, idPrefix = 'tab', classNam
                         onClick={() => onChange(t.id)}
                         onKeyDown={(e) => alTeclear(e, i)}
                         className={clsx(
-                            'min-h-9 shrink-0 whitespace-nowrap rounded-full px-4 text-sm font-medium transition-[background-color,color,box-shadow] duration-200 disabled:opacity-50',
-                            'focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/40',
-                            activa ? 'bg-card text-foreground shadow-soft' : 'text-muted-foreground hover:text-foreground',
+                            'relative min-h-11 shrink-0 whitespace-nowrap pb-0.5 text-sm font-medium transition-colors duration-150 disabled:opacity-50',
+                            'focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/30 focus-visible:rounded-sm',
+                            activa
+                                ? 'text-foreground after:absolute after:inset-x-0 after:-bottom-px after:h-0.5 after:bg-foreground'
+                                : 'text-muted-foreground hover:text-foreground',
                         )}
                     >
                         {t.label}

@@ -51,7 +51,7 @@ export default function JustificanteCard({ justificante, minimoValidas, onResuel
 
     const j = justificante;
     return (
-        <article aria-label={`Justificante de ${j.alumno.nombre_completo}`} className="flex flex-col gap-4 rounded-3xl border border-border bg-card shadow-soft p-5">
+        <article aria-label={`Justificante de ${j.alumno.nombre_completo}`} className="flex flex-col gap-4 rounded-xl border border-border bg-card p-5">
             <header className="flex flex-col gap-1">
                 <Button variant="ghost" size="sm" className="self-start md:hidden" onClick={onCerrar}>
                     Volver a la lista
@@ -80,7 +80,7 @@ export default function JustificanteCard({ justificante, minimoValidas, onResuel
                 </Button>
                 {doc.url && (
                     <p className="mt-2 text-sm">
-                        <a href={doc.url} target="_blank" rel="noopener noreferrer" className="text-primary underline">
+                        <a href={doc.url} target="_blank" rel="noopener noreferrer" className="text-link underline">
                             Abrir documento
                         </a>{' '}
                         (el enlace vence en 5 minutos)

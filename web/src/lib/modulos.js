@@ -32,7 +32,8 @@ import {
 //   categoria    asistencia | analisis | administracion
 //   roles        quién lo ve (los mismos valores de api_yo().rol)
 //   estado       'activo' (tiene href) | 'pronto' (página "Próximamente", sin href)
-//   tono         paleta de la ilustración: azul | dorado | verde | violeta
+//   tono         color de la portada de la tarjeta: azul | dorado | verde | violeta | rosa
+//   portada      (opcional) 'degradado' destaca la tarjeta con el degradado de la marca; por defecto, color plano
 // =============================================================================================================
 
 export const CATEGORIAS = [
@@ -41,7 +42,7 @@ export const CATEGORIAS = [
     { id: 'administracion', etiqueta: 'Administración' },
 ];
 
-export const TONOS = ['azul', 'dorado', 'verde', 'violeta'];
+export const TONOS = ['azul', 'dorado', 'verde', 'violeta', 'rosa'];
 export const ESTADOS = ['activo', 'pronto'];
 export const ROLES = ['administrador', 'docente', 'alumno', 'tecnico'];
 
@@ -70,7 +71,7 @@ export const MODULOS = [
     // ---- Próximamente (hoja de ruta; textos provisionales, ajustables sin tocar pantallas) ----
     {
         id: 'asistente', titulo: 'Asistente SUSAN', descripcion: 'Pregunta en lenguaje natural por el ausentismo de tus grupos y recibe un resumen con acciones sugeridas.',
-        icono: Sparkles, categoria: 'analisis', roles: ['docente', 'administrador'], estado: 'pronto', tono: 'violeta',
+        icono: Sparkles, categoria: 'analisis', roles: ['docente', 'administrador'], estado: 'pronto', tono: 'violeta', portada: 'degradado',
         queIncluye: ['Resumen semanal del grupo en lenguaje claro', 'Borradores de mensaje para alumnos en riesgo', 'Explicación del cálculo de riesgo, paso a paso'],
     },
     {
@@ -80,7 +81,7 @@ export const MODULOS = [
     },
     {
         id: 'comunicados', titulo: 'Comunicados', descripcion: 'Avisos a grupos y alumnos, y recordatorios al acercarse al límite de faltas.',
-        icono: Megaphone, categoria: 'asistencia', roles: ['docente', 'administrador', 'alumno'], estado: 'pronto', tono: 'azul',
+        icono: Megaphone, categoria: 'asistencia', roles: ['docente', 'administrador', 'alumno'], estado: 'pronto', tono: 'rosa',
         queIncluye: ['Avisos por grupo con acuse de lectura', 'Recordatorio automático al llegar al 80 % del límite de faltas', 'Plantillas institucionales'],
     },
     {

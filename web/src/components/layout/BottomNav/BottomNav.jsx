@@ -19,7 +19,7 @@ export default function BottomNav({ items, pathname, onMas }) {
     return (
         <nav
             aria-label="Navegación inferior"
-            className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-card/95 pb-[env(safe-area-inset-bottom)] lg:hidden"
+            className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-card/95 pb-[env(safe-area-inset-bottom)] backdrop-blur lg:hidden"
         >
             <ul className="mx-auto flex max-w-lg items-stretch justify-around px-2">
                 {directos.map(({ href, label, icon: Icono }) => {

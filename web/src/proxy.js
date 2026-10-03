@@ -5,7 +5,7 @@ import { actualizarSesion } from '@/lib/backend/proxy.js';
 
 // /cambiar-contrasena NO se protege aqui a proposito: la sesion de recuperacion se establece en /auth/confirm (verifyOtp con el
 // token_hash del correo) o, en el mismo navegador, por PKCE en el cliente; la propia pagina comprueba si hay sesion.
-const PREFIJOS_PROTEGIDOS = ['/docente', '/alumno', '/admin', '/tecnico', '/reportes', '/analitica', '/modulos'];
+const PREFIJOS_PROTEGIDOS = ['/docente', '/alumno', '/admin', '/tecnico', '/reportes', '/analitica', '/modulos', '/bienvenida'];
 
 const esProtegida = (ruta) => PREFIJOS_PROTEGIDOS.some((p) => ruta === p || ruta.startsWith(`${p}/`));
 

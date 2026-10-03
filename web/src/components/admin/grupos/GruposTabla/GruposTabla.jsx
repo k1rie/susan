@@ -19,7 +19,7 @@ const COLUMNAS = [
         header: 'Grupo',
         primary: true,
         render: (g) => (
-            <Link href={`/admin/grupos/${g.id_grupo}`} className="text-primary underline">
+            <Link href={`/admin/grupos/${g.id_grupo}`} className="text-link underline">
                 {g.clave_grupo}
             </Link>
         ),

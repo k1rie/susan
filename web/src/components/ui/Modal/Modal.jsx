@@ -39,13 +39,13 @@ export default function Modal({
                 aria-labelledby={titleId}
                 tabIndex={-1}
                 className={clsx(
-                    'flex max-h-[90dvh] w-full animate-in flex-col rounded-3xl bg-card text-foreground shadow-lift duration-200 fade-in-0 zoom-in-95',
+                    'flex max-h-[90dvh] w-full animate-in flex-col rounded-2xl bg-card text-foreground shadow-lift duration-200 fade-in-0 zoom-in-95',
                     ANCHOS[size] || ANCHOS.md,
                     className,
                 )}
             >
                 <div className="px-6 pt-6 pb-2">
-                    <h2 id={titleId} className="text-xl font-semibold tracking-tight">
+                    <h2 id={titleId} className="text-lg font-semibold tracking-tight">
                         {title}
                     </h2>
                 </div>

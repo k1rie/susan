@@ -34,10 +34,10 @@ export default function PanelProducto() {
     const { id, titulo, texto, Vista } = ESCENAS[reducido ? 0 : indice];
 
     return (
-        <div aria-hidden="true" className="relative hidden min-h-0 flex-1 flex-col justify-between gap-8 overflow-hidden rounded-[2rem] border border-border bg-gradient-to-br from-accent via-card to-brand-gold-soft p-8 shadow-soft lg:flex xl:p-12">
+        <div aria-hidden="true" className="relative hidden min-h-0 flex-1 flex-col justify-between gap-8 overflow-hidden rounded-2xl border border-border/70 bg-muted/60 p-8 lg:flex xl:p-12">
             <div className="flex gap-1.5">
                 {ESCENAS.map((e, i) => (
-                    <span key={e.id} className={`h-1.5 rounded-full transition-all duration-500 ${i === (reducido ? 0 : indice) ? 'w-8 bg-primary' : 'w-1.5 bg-primary/25'}`} />
+                    <span key={e.id} className={`h-1.5 rounded-full transition-all duration-500 ${i === (reducido ? 0 : indice) ? 'w-8 bg-foreground' : 'w-1.5 bg-foreground/20'}`} />
                 ))}
             </div>
             <div key={id} className="mx-auto w-full max-w-md">

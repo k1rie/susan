@@ -27,7 +27,7 @@ export default function BlurText({
     return (
         <Etiqueta ref={ref} className={className} {...rest}>
             <span className="sr-only">{text}</span>
-            <span aria-hidden="true" className="inline-flex flex-wrap">
+            <span aria-hidden="true" data-anim="" className="inline-flex flex-wrap">
             {segmentos.map((segmento, i) => (
                 <span
                     key={`${segmento}-${i}`}

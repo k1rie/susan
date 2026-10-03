@@ -70,13 +70,13 @@ export function ToastProvider({ children }) {
                 {items.map((t) => (
                     <div
                         key={t.id}
-                        className={clsx('pointer-events-auto flex animate-in items-start gap-3 rounded-2xl border bg-card p-3.5 text-sm shadow-lift duration-300 fade-in-0 slide-in-from-bottom-2', TONOS[t.tone] || TONOS.info)}
+                        className={clsx('pointer-events-auto flex animate-in items-start gap-3 rounded-xl border bg-card p-3.5 text-sm shadow-lift duration-300 fade-in-0 slide-in-from-bottom-2', TONOS[t.tone] || TONOS.info)}
                     >
                         <div className="min-w-0 flex-1">
                             {t.title && <p className="font-semibold">{t.title}</p>}
                             <p>{t.message}</p>
                         </div>
-                        <button type="button" onClick={() => dismiss(t.id)} className="min-h-9 shrink-0 rounded-full px-3 text-muted-foreground underline-offset-2 hover:text-foreground hover:underline focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/40">
+                        <button type="button" onClick={() => dismiss(t.id)} className="min-h-9 shrink-0 rounded-md px-3 text-muted-foreground underline-offset-2 hover:text-foreground hover:underline focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/40">
                             Cerrar
                         </button>
                     </div>

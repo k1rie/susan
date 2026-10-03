@@ -5,58 +5,60 @@
 @custom-variant dark (&:is(.dark *));
 
 /* =========================================================================
-   SUSAN — tokens de diseño (fase 2: diseño real; ver docs/design/SISTEMA.md)
-   Vocabulario de shadcn/ui (background, card, primary, muted, accent, …) más la
-   identidad de SUSAN: lienzo cálido, azul UNACH vivo como acción, azul marino de
-   marca, dorado UNACH como acento y los estados de asistencia (siempre texto + color).
+   SUSAN — tokens de diseño (ver docs/design/SISTEMA.md)
+   Vocabulario de shadcn/ui (background, card, primary, muted, accent, …) con el
+   lenguaje de Dropbox Dash: lienzo crema, panel blanco flotante, tinta casi negra como
+   acción, bordes en lugar de sombras; marca UNACH (dorado, azul marino) como acento y los
+   estados de asistencia (siempre texto + color).
    Los componentes NUNCA usan colores crudos: solo estas utilidades semánticas.
    ========================================================================= */
 
 :root {
-  /* Lienzo y superficies */
-  --background: #f6f5f1;
-  --foreground: #14213d;
+  /* Lienzo crema y panel blanco flotante (referencia: Dropbox Dash). */
+  --background: #f7f5f2;
+  --foreground: #1e1919;
   --card: #ffffff;
-  --card-foreground: #14213d;
+  --card-foreground: #1e1919;
   --popover: #ffffff;
-  --popover-foreground: #14213d;
+  --popover-foreground: #1e1919;
 
-  /* Acción */
-  --primary: #2f5aa8;
+  /* Acción: tinta casi negra (botón "Create Stack" de Dash); el azul queda para enlaces y foco. */
+  --primary: #1e1919;
   --primary-foreground: #ffffff;
-  --primary-hover: #264a8c;
-  --secondary: #ebe9e2;
-  --secondary-foreground: #14213d;
+  --primary-hover: #3a3433;
+  --secondary: #f0ede8;
+  --secondary-foreground: #1e1919;
 
   /* Apoyo */
-  --muted: #eeece6;
-  --muted-foreground: #596478;
-  --accent: #e8eef9;
-  --accent-foreground: #1f3a5f;
+  --muted: #f0ede8;
+  --muted-foreground: #6f6a65;
+  --accent: #efece7;
+  --accent-foreground: #1e1919;
   --destructive: #b3261e;
+  --link: #0061fe;
 
   /* Contornos y foco */
-  --border: #e3e0d6;
-  --input: #d9d5c8;
-  --ring: #6f93d8;
-  --radius: 1rem;
+  --border: #e7e2dc;
+  --input: #d8d2ca;
+  --ring: #0061fe;
+  --radius: 0.625rem;
 
   /* Gráficas (recharts) */
-  --chart-1: #2f5aa8;
+  --chart-1: #0061fe;
   --chart-2: #a8842c;
   --chart-3: #1f7a47;
   --chart-4: #b3261e;
   --chart-5: #6f4fb3;
 
-  /* Barra lateral */
-  --sidebar: #fbfaf7;
-  --sidebar-foreground: #14213d;
-  --sidebar-primary: #2f5aa8;
+  /* Barra lateral: mismo lienzo, sin borde */
+  --sidebar: #f7f5f2;
+  --sidebar-foreground: #1e1919;
+  --sidebar-primary: #1e1919;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #e8eef9;
-  --sidebar-accent-foreground: #1f3a5f;
-  --sidebar-border: #e8e5db;
-  --sidebar-ring: #6f93d8;
+  --sidebar-accent: #ebe8e3;
+  --sidebar-accent-foreground: #1e1919;
+  --sidebar-border: #e7e2dc;
+  --sidebar-ring: #0061fe;
 
   /* Marca UNACH */
   --brand-navy: #1f3a5f;
@@ -66,7 +68,7 @@
   /* Semánticos */
   --success: #2e7d4f;
   --warning: #b7791f;
-  --info: #2563a8;
+  --info: #0061fe;
 
   /* Estados de asistencia: siempre texto + color (nunca solo color). */
   --presente: #1f7a47;
@@ -75,62 +77,85 @@
   --retardo-bg: #fbefd2;
   --ausente: #b3261e;
   --ausente-bg: #fbe4e1;
-  --pendiente: #475569;
-  --pendiente-bg: #e6ebf2;
+  --pendiente: #5b5651;
+  --pendiente-bg: #eeebe6;
   --justificado: #1f5fa8;
   --justificado-bg: #e1edfa;
 
-  /* Sombras suaves (referencia: tarjetas de SchoolAI) */
-  --shadow-soft: 0 1px 2px rgba(20, 33, 61, 0.04), 0 12px 32px rgba(20, 33, 61, 0.06);
-  --shadow-lift: 0 2px 4px rgba(20, 33, 61, 0.05), 0 20px 48px rgba(20, 33, 61, 0.1);
+  /* Portadas pastel de las tarjetas (fondo y trazo del icono por tono) */
+  --tono-azul: #e6eefc;
+  --tono-azul-fg: #1d5fd1;
+  --tono-dorado: #fbf1d9;
+  --tono-dorado-fg: #a8842c;
+  --tono-verde: #e5f3ee;
+  --tono-verde-fg: #1f7a47;
+  --tono-violeta: #eee9f7;
+  --tono-violeta-fg: #6f4fb3;
+  --tono-rosa: #fbe6e2;
+  --tono-rosa-fg: #c2410c;
+
+  /* Sombras casi planas (Dash separa con bordes, no con sombras) */
+  --shadow-soft: 0 1px 2px rgba(30, 25, 25, 0.04);
+  --shadow-lift: 0 10px 30px rgba(30, 25, 25, 0.12);
 }
 
 /* Paleta oscura (opcional; todavía no hay interruptor). Mismo vocabulario. */
 .dark {
-  --background: #0b1426;
-  --foreground: #eaf0fb;
-  --card: #121e36;
-  --card-foreground: #eaf0fb;
-  --popover: #121e36;
-  --popover-foreground: #eaf0fb;
-  --primary: #7aa2ea;
-  --primary-foreground: #0b1426;
-  --primary-hover: #94b4ee;
-  --secondary: #1a2a47;
-  --secondary-foreground: #eaf0fb;
-  --muted: #17243f;
-  --muted-foreground: #9fb0cc;
-  --accent: #1c2f55;
-  --accent-foreground: #dbe7ff;
+  --background: #141110;
+  --foreground: #f3f0ec;
+  --card: #1c1918;
+  --card-foreground: #f3f0ec;
+  --popover: #1c1918;
+  --popover-foreground: #f3f0ec;
+  --primary: #f3f0ec;
+  --primary-foreground: #141110;
+  --primary-hover: #d9d4cd;
+  --secondary: #262221;
+  --secondary-foreground: #f3f0ec;
+  --muted: #262221;
+  --muted-foreground: #a39d96;
+  --accent: #2c2827;
+  --accent-foreground: #f3f0ec;
   --destructive: #f0746c;
+  --link: #6aa3ff;
   --border: rgba(255, 255, 255, 0.1);
   --input: rgba(255, 255, 255, 0.16);
-  --ring: #7aa2ea;
-  --sidebar: #0e1a31;
-  --sidebar-foreground: #eaf0fb;
-  --sidebar-primary: #7aa2ea;
-  --sidebar-primary-foreground: #0b1426;
-  --sidebar-accent: #1c2f55;
-  --sidebar-accent-foreground: #dbe7ff;
+  --ring: #6aa3ff;
+  --sidebar: #141110;
+  --sidebar-foreground: #f3f0ec;
+  --sidebar-primary: #f3f0ec;
+  --sidebar-primary-foreground: #141110;
+  --sidebar-accent: #2c2827;
+  --sidebar-accent-foreground: #f3f0ec;
   --sidebar-border: rgba(255, 255, 255, 0.1);
-  --sidebar-ring: #7aa2ea;
+  --sidebar-ring: #6aa3ff;
   --brand-gold: #d9b65c;
   --brand-gold-soft: #3a3118;
   --success: #4cc38a;
   --warning: #e0a63a;
-  --info: #6aa9ec;
+  --info: #6aa3ff;
   --presente: #5fd69a;
   --presente-bg: rgba(46, 160, 98, 0.18);
   --retardo: #f0c05c;
   --retardo-bg: rgba(224, 166, 58, 0.18);
   --ausente: #f48f88;
   --ausente-bg: rgba(240, 116, 108, 0.18);
-  --pendiente: #b4c2d6;
+  --pendiente: #b9b3ab;
   --pendiente-bg: rgba(148, 163, 184, 0.16);
   --justificado: #82b8f2;
   --justificado-bg: rgba(106, 169, 236, 0.18);
-  --shadow-soft: 0 1px 2px rgba(0, 0, 0, 0.3), 0 12px 32px rgba(0, 0, 0, 0.3);
-  --shadow-lift: 0 2px 4px rgba(0, 0, 0, 0.35), 0 20px 48px rgba(0, 0, 0, 0.4);
+  --tono-azul: #1b2a45;
+  --tono-azul-fg: #8db4ff;
+  --tono-dorado: #3a3118;
+  --tono-dorado-fg: #e2c26f;
+  --tono-verde: #17302a;
+  --tono-verde-fg: #6fd1a0;
+  --tono-violeta: #2a2340;
+  --tono-violeta-fg: #b7a2e3;
+  --tono-rosa: #3b211d;
+  --tono-rosa-fg: #f4a584;
+  --shadow-soft: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-lift: 0 10px 30px rgba(0, 0, 0, 0.45);
 }
 
 @theme inline {
@@ -150,6 +175,7 @@
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
+  --color-link: var(--link);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
@@ -185,6 +211,18 @@
   --color-justificado: var(--justificado);
   --color-justificado-bg: var(--justificado-bg);
 
+  --color-tono-azul: var(--tono-azul);
+  --color-tono-azul-fg: var(--tono-azul-fg);
+  --color-tono-dorado: var(--tono-dorado);
+  --color-tono-dorado-fg: var(--tono-dorado-fg);
+  --color-tono-verde: var(--tono-verde);
+  --color-tono-verde-fg: var(--tono-verde-fg);
+  --color-tono-violeta: var(--tono-violeta);
+  --color-tono-violeta-fg: var(--tono-violeta-fg);
+  --color-tono-rosa: var(--tono-rosa);
+  --color-tono-rosa-fg: var(--tono-rosa-fg);
+
+  /* Escala: sm 6 · md 8 (botones, campos) · lg 10 · xl 14 (tarjetas) · 2xl 18 (panel principal) */
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -196,10 +234,11 @@
   --shadow-soft: var(--shadow-soft);
   --shadow-lift: var(--shadow-lift);
 
-  /* Tipografía: interfaz en sans (Inter); titulares emocionales en serif (Instrument Serif) con la utilidad font-display. */
-  --font-sans: var(--font-inter), "Inter", system-ui, sans-serif;
-  --font-heading: var(--font-inter), "Inter", system-ui, sans-serif;
-  --font-display: var(--font-display-serif), "Instrument Serif", Georgia, serif;
+  /* Tipografía: una sola grotesca para toda la interfaz (Hanken Grotesk, alternativa libre a la de Dropbox Dash);
+     la serif (EB Garamond, utilidad font-display) queda para el saludo del Home y los titulares de acceso. */
+  --font-sans: var(--font-hanken), "Hanken Grotesk", system-ui, sans-serif;
+  --font-heading: var(--font-hanken), "Hanken Grotesk", system-ui, sans-serif;
+  --font-display: var(--font-display-serif), "EB Garamond", Georgia, serif;
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
 }
 
@@ -220,6 +259,9 @@
   }
   body {
     @apply bg-background text-foreground antialiased;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    letter-spacing: -0.003em;
   }
   :focus-visible {
     outline: 2px solid var(--ring);
@@ -367,5 +409,13 @@
   }
   .no-print {
     display: none !important;
+  }
+  /* Nada animado puede quedar oculto al imprimir/exportar a PDF (las entradas por scroll no se disparan al imprimir). */
+  [data-anim],
+  [data-anim] * {
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+    transition: none !important;
   }
 }

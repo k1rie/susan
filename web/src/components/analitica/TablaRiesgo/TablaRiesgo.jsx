@@ -5,6 +5,7 @@ import { Fragment, useMemo, useState } from 'react';
 import Badge from '@/components/ui/Badge';
 import { ETIQUETA_NIVEL_RIESGO, fmtNum, fmtPct, ordenarRiesgo } from '../analitica.utils.js';
 import { PasoView } from '../PanelProcedimiento';
+import { ArrowDown, ArrowUp } from 'lucide-react';
 
 const TONO_NIVEL = { alto: 'danger', medio: 'warning', bajo: 'neutral' };
 
@@ -27,12 +28,12 @@ export default function TablaRiesgo({ items = [], hrefHistorial }) {
     const aria = (k) => (orden.clave === k ? (orden.dir === 'asc' ? 'ascending' : 'descending') : undefined);
 
     return (
-        <section className="rounded-3xl border border-border bg-card shadow-soft p-5">
+        <section className="rounded-xl border border-border bg-card p-5">
             <h2 className="text-base font-semibold">Alumnos en riesgo</h2>
             {filas.length === 0 ? (
                 <p className="mt-2 text-sm text-muted-foreground">Ningún alumno en riesgo con los datos actuales.</p>
             ) : (
-                <div className="mt-3 overflow-x-auto rounded-2xl border border-border">
+                <div className="mt-3 overflow-x-auto rounded-xl border border-border">
                     <table className="w-full min-w-max border-collapse text-sm">
                         <thead className="bg-muted text-muted-foreground">
                             <tr>
@@ -40,7 +41,7 @@ export default function TablaRiesgo({ items = [], hrefHistorial }) {
                                     <th key={c.key} scope="col" aria-sort={aria(c.key)} className="px-3 py-1 text-left font-medium">
                                         <button type="button" onClick={() => ordenarPor(c.key)} className="min-h-11 font-medium">
                                             {c.header}
-                                            {orden.clave === c.key && <span aria-hidden="true">{orden.dir === 'asc' ? ' ▲' : ' ▼'}</span>}
+                                            {orden.clave === c.key && (orden.dir === 'asc' ? <ArrowUp aria-hidden="true" className="ml-1 inline size-3.5" strokeWidth={2} /> : <ArrowDown aria-hidden="true" className="ml-1 inline size-3.5" strokeWidth={2} />)}
                                         </button>
                                     </th>
                                 ))}
@@ -72,7 +73,7 @@ export default function TablaRiesgo({ items = [], hrefHistorial }) {
                                                     type="button"
                                                     aria-expanded={expandido}
                                                     onClick={() => setAbierto(expandido ? null : clave)}
-                                                    className="min-h-11 text-primary underline"
+                                                    className="min-h-11 text-link underline"
                                                 >
                                                     {expandido ? 'Ocultar' : 'Ver factores y procedimiento'}
                                                 </button>
@@ -92,7 +93,7 @@ export default function TablaRiesgo({ items = [], hrefHistorial }) {
                                                             ))}
                                                         </ul>
                                                         {href && (
-                                                            <Link href={href} className="inline-flex min-h-11 items-center text-sm text-primary underline">
+                                                            <Link href={href} className="inline-flex min-h-11 items-center text-sm text-link underline">
                                                                 Ver historial del alumno en reportes
                                                             </Link>
                                                         )}

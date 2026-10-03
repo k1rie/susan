@@ -1,10 +1,10 @@
 import clsx from 'clsx';
 
-// Base compartida por Input/Select/Textarea: 14 px de radio, borde de entrada y anillo de foco suave.
+// Base compartida por Input/Select/Textarea: 8 px de radio, borde de entrada, 40 px de alto y anillo de foco suave.
 export const CONTROL_BASE =
-    'w-full min-h-11 rounded-[14px] border bg-card px-3.5 text-base text-foreground placeholder:text-muted-foreground ' +
-    'shadow-xs transition-[border-color,box-shadow] duration-200 ' +
-    'focus-visible:outline-none focus-visible:border-ring focus-visible:ring-4 focus-visible:ring-ring/25 ' +
+    'w-full min-h-10 rounded-md border bg-card px-3 text-sm text-foreground placeholder:text-muted-foreground ' +
+    'transition-[border-color,box-shadow] duration-150 ' +
+    'focus-visible:outline-none focus-visible:border-ring focus-visible:ring-4 focus-visible:ring-ring/20 ' +
     'disabled:bg-muted disabled:opacity-70';
 
 // Campo de texto nativo; endAdornment se coloca a la derecha dentro del borde.
@@ -15,7 +15,7 @@ export default function Input({ type = 'text', invalid, endAdornment, className,
     return (
         <div className={clsx('relative', className)}>
             {input}
-            <span className="absolute inset-y-0 right-3 flex items-center text-muted-foreground">{endAdornment}</span>
+            <span className="absolute inset-y-0 right-2 flex items-center text-muted-foreground">{endAdornment}</span>
         </div>
     );
 }

@@ -1,24 +1,28 @@
-import Card from '@/components/ui/Card';
+import { Users } from 'lucide-react';
 import EmptyState from '@/components/ui/EmptyState';
+import TarjetaFila from '@/components/ui/TarjetaFila';
 
-// Grupos del periodo mas reciente del docente, con inscritos.
+// Grupos del periodo más reciente del docente, con inscritos. Una tarjeta de fila por grupo.
 export default function MisGrupos({ grupos = [] }) {
     return (
-        <Card title="Mis grupos">
+        <section aria-labelledby="t-grupos">
+            <h2 id="t-grupos" className="mb-4 text-xl font-semibold tracking-tight">Mis grupos</h2>
             {grupos.length === 0 ? (
                 <EmptyState title="Sin grupos" description="No tienes grupos asignados en el periodo actual." />
             ) : (
-                <ul className="flex flex-col gap-2">
+                <ul className="flex flex-col gap-3">
                     {grupos.map((g) => (
-                        <li key={g.id_grupo} className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-border p-3.5 text-sm">
-                            <span>
-                                <span className="font-medium">{g.materia}</span> ({g.clave_grupo}) · Aula {g.aula} · {g.periodo}
-                            </span>
-                            <span className="text-muted-foreground">{g.inscritos} inscritos</span>
+                        <li key={g.id_grupo}>
+                            <TarjetaFila
+                                icono={Users}
+                                tono="azul"
+                                titulo={`${g.materia} (${g.clave_grupo})`}
+                                subtitulo={`Aula ${g.aula} · ${g.periodo} · ${g.inscritos} inscritos`}
+                            />
                         </li>
                     ))}
                 </ul>
             )}
-        </Card>
+        </section>
     );
 }

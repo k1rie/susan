@@ -16,7 +16,7 @@ export default function Alert({ tone = 'info', title, onClose, children, classNa
     return (
         <div
             role={urgente ? 'alert' : 'status'}
-            className={clsx('flex items-start gap-3 rounded-2xl border p-3.5 text-sm', caja, className)}
+            className={clsx('flex items-start gap-3 rounded-xl border p-3.5 text-sm', caja, className)}
             {...rest}
         >
             <Icono aria-hidden="true" className="mt-0.5 size-[18px] shrink-0" strokeWidth={1.75} />
@@ -25,7 +25,7 @@ export default function Alert({ tone = 'info', title, onClose, children, classNa
                 {children && <div className={clsx(title && 'mt-0.5')}>{children}</div>}
             </div>
             {onClose && (
-                <button type="button" onClick={onClose} className="min-h-9 shrink-0 rounded-full px-3 font-medium underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/40">
+                <button type="button" onClick={onClose} className="min-h-9 shrink-0 rounded-md px-3 font-medium underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/40">
                     Cerrar
                 </button>
             )}

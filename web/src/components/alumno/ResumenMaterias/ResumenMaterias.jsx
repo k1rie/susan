@@ -7,7 +7,7 @@ function Tarjeta({ item, seleccionada, onSeleccionar }) {
     const sinSesiones = !item.sesiones_programadas;
     const nombre = item.materia?.nombre || 'Materia';
     return (
-        <li className={`rounded-3xl border bg-card p-5 shadow-soft ${seleccionada ? 'border-primary' : 'border-border'}`}>
+        <li className={`rounded-xl border bg-card p-5 ${seleccionada ? 'border-primary' : 'border-border'}`}>
             <div className="flex flex-wrap items-start justify-between gap-2">
                 <div className="min-w-0">
                     <h3 className="font-semibold">{nombre}</h3>

@@ -13,7 +13,7 @@ export default function SelectorGrupo({ periodos = [], grupos = [], valor, onCam
         <form
             aria-label="Selección de grupo a analizar"
             onSubmit={(e) => e.preventDefault()}
-            className="grid grid-cols-1 gap-3 rounded-3xl border border-border bg-card shadow-soft p-5 sm:grid-cols-2"
+            className="grid grid-cols-1 gap-3 rounded-xl border border-border bg-card p-5 sm:grid-cols-2"
         >
             <Field label="Periodo">
                 <Select

@@ -8,7 +8,7 @@ const ALUMNOS = ['Ana Ruiz López', 'Luis Mena Díaz', 'Sofía Pérez Gil', 'Die
 
 function VistaLista() {
     return (
-        <div className="rounded-3xl border border-border bg-card p-5 shadow-lift">
+        <div className="rounded-2xl border border-border bg-card p-5 shadow-lift">
             <div className="flex items-center justify-between">
                 <div>
                     <p className="text-sm font-semibold">Matemáticas Financieras · 5C</p>
@@ -49,17 +49,17 @@ function VistaRiesgo() {
     const y = (v) => alto - (v / max) * (alto - 10) - 4;
     const puntos = SEMANAS.map((v, i) => `${i === 0 ? 'M' : 'L'}${(paso * i + paso / 2).toFixed(1)} ${y(v).toFixed(1)}`).join(' ');
     return (
-        <div className="rounded-3xl border border-border bg-card p-5 shadow-lift">
+        <div className="rounded-2xl border border-border bg-card p-5 shadow-lift">
             <div className="flex items-center justify-between">
                 <p className="text-sm font-semibold">Faltas acumuladas · 3A</p>
                 <span className="escena-entra rounded-full bg-ausente-bg px-2.5 py-0.5 text-xs font-medium text-ausente" style={{ '--d': '3.2s' }}>Riesgo alto</span>
             </div>
             <svg viewBox={`0 0 ${ancho} ${alto}`} className="mt-4 w-full" role="presentation">
                 {SEMANAS.map((v, i) => (
-                    <rect key={i} x={paso * i + 8} y={y(v)} width={paso - 16} height={alto - 4 - y(v)} rx="6" fill="var(--primary)" opacity="0.18" className="escena-barra-y" style={{ '--d': `${0.1 + i * 0.12}s` }} />
+                    <rect key={i} x={paso * i + 8} y={y(v)} width={paso - 16} height={alto - 4 - y(v)} rx="6" fill="var(--chart-1)" opacity="0.18" className="escena-barra-y" style={{ '--d': `${0.1 + i * 0.12}s` }} />
                 ))}
                 <line x1="0" x2={ancho} y1={y(20)} y2={y(20)} stroke="var(--destructive)" strokeWidth="1.5" strokeDasharray="4 4" opacity="0.7" />
-                <path d={puntos} pathLength="1" fill="none" stroke="var(--primary)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="escena-trazo" style={{ '--d': '0.9s' }} />
+                <path d={puntos} pathLength="1" fill="none" stroke="var(--chart-1)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="escena-trazo" style={{ '--d': '0.9s' }} />
             </svg>
             <div className="mt-2 flex justify-between text-xs text-muted-foreground">
                 <span>Semana 1</span>
@@ -78,7 +78,7 @@ const MATERIAS = [
 
 function VistaHistorial() {
     return (
-        <div className="rounded-3xl border border-border bg-card p-5 shadow-lift">
+        <div className="rounded-2xl border border-border bg-card p-5 shadow-lift">
             <div className="flex items-center gap-3">
                 <Avatar nombre="Ana Ruiz López" size="md" />
                 <div className="min-w-0 flex-1">
