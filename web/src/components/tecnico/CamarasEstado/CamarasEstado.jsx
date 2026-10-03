@@ -15,7 +15,8 @@ import { ESTATUS_CAMARA, haceCuanto, mensajeCambio, sinCapturar } from './camara
 
 const ARGS = { limit: 200 };
 
-export default function CamarasEstado() {
+// `soloLectura` (administrador): sin selector para cambiar el estatus; la base lo niega de todos modos.
+export default function CamarasEstado({ soloLectura = false }) {
     const q = useApiQuery(camarasEstado, ARGS, { refetchInterval: 30000 });
     const cambiar = useApiMutation(camaraCambiarEstatus);
     const { toast } = useToast();
@@ -68,15 +69,17 @@ export default function CamarasEstado() {
                                             Cámara activa sin capturas en las últimas 24 h. Revise su conexión.
                                         </Alert>
                                     )}
-                                    <label className="mt-3 block text-sm">
-                                        <span className="mb-1 block text-muted-foreground">Cambiar estatus</span>
-                                        <Select
-                                            aria-label={`Estatus de la cámara ${c.aula_clave} ${c.posicion}`}
-                                            value={c.estatus}
-                                            options={ESTATUS_CAMARA}
-                                            onChange={(e) => e.target.value !== c.estatus && setPendiente({ camara: c, estatus: e.target.value })}
-                                        />
-                                    </label>
+                                    {!soloLectura && (
+                                        <label className="mt-3 block text-sm">
+                                            <span className="mb-1 block text-muted-foreground">Cambiar estatus</span>
+                                            <Select
+                                                aria-label={`Estatus de la cámara ${c.aula_clave} ${c.posicion}`}
+                                                value={c.estatus}
+                                                options={ESTATUS_CAMARA}
+                                                onChange={(e) => e.target.value !== c.estatus && setPendiente({ camara: c, estatus: e.target.value })}
+                                            />
+                                        </label>
+                                    )}
                                 </Card>
                             </li>
                         ))}
