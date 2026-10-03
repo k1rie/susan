@@ -6,11 +6,11 @@ export default function ImpactoTiempo({ impacto }) {
     return (
         <Card title="Impacto en tiempo de clase">
             <p className="text-3xl font-semibold">{i.minutos_recuperados ?? 0} min</p>
-            <p className="text-sm text-muted">
+            <p className="text-sm text-muted-foreground">
                 recuperados (aprox. {Number(i.horas_recuperadas ?? 0).toFixed(1)} h) · {i.sesiones_automaticas ?? 0} sesiones automáticas,{' '}
                 {i.sesiones_manuales ?? 0} manuales de {i.sesiones_cerradas ?? 0} cerradas
             </p>
-            <p className="mt-2 text-xs text-muted">
+            <p className="mt-2 text-xs text-muted-foreground">
                 Estimación, no una medición: sesiones automáticas × {i.minutos_pase_lista_base ?? 5} min de pase de lista manual.
             </p>
         </Card>

@@ -18,7 +18,7 @@ export default function FiltrosReporte({ periodos = [], grupos = [], alumnos = [
         <form
             aria-label="Filtros del reporte"
             onSubmit={(e) => e.preventDefault()}
-            className="print:hidden grid grid-cols-1 gap-3 rounded-lg border border-border bg-surface p-4 sm:grid-cols-3"
+            className="print:hidden grid grid-cols-1 gap-3 rounded-lg border border-border bg-card p-4 sm:grid-cols-3"
         >
             <Field label="Periodo">
                 <Select

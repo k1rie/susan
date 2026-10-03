@@ -30,7 +30,7 @@ export default function Sidebar({ items, pathname, open, onClose }) {
             )}
             <aside
                 className={clsx(
-                    'fixed bottom-0 left-0 top-14 z-40 w-60 overflow-y-auto border-r border-border bg-surface p-2',
+                    'fixed bottom-0 left-0 top-14 z-40 w-60 overflow-y-auto border-r border-border bg-card p-2',
                     open ? 'block' : 'hidden lg:block',
                 )}
             >
@@ -46,7 +46,7 @@ export default function Sidebar({ items, pathname, open, onClose }) {
                                         aria-current={esActivo ? 'page' : undefined}
                                         className={clsx(
                                             'flex min-h-11 items-center gap-3 rounded-md px-3 text-sm font-medium',
-                                            esActivo ? 'bg-primary text-primary-foreground' : 'text-foreground hover:bg-surface-muted',
+                                            esActivo ? 'bg-primary text-primary-foreground' : 'text-foreground hover:bg-muted',
                                         )}
                                     >
                                         {Icono && <Icono aria-hidden="true" className="h-5 w-5 shrink-0" />}

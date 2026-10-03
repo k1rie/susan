@@ -14,22 +14,22 @@ export default function GraficaSerie({ tendencia, suavizado, proyeccion, resumen
     const alternar = (k) => setVer((v) => ({ ...v, [k]: !v[k] }));
     if (!tendencia?.disponible) {
         return (
-            <section className="rounded-lg border border-border bg-surface p-4">
+            <section className="rounded-lg border border-border bg-card p-4">
                 <h2 className="text-base font-semibold">Ausentismo semanal</h2>
-                <p className="mt-2 text-sm text-muted">{MENSAJE_INSUFICIENTE}</p>
+                <p className="mt-2 text-sm text-muted-foreground">{MENSAJE_INSUFICIENTE}</p>
             </section>
         );
     }
     return (
-        <section className="rounded-lg border border-border bg-surface p-4">
+        <section className="rounded-lg border border-border bg-card p-4">
             <h2 className="text-base font-semibold">Ausentismo semanal</h2>
-            <p className="text-xs text-muted">Tasa de ausentes sobre inscritos por semana, con ajuste lineal, suavizado y proyección.</p>
+            <p className="text-xs text-muted-foreground">Tasa de ausentes sobre inscritos por semana, con ajuste lineal, suavizado y proyección.</p>
             <div role="img" aria-label={resumenTextoSerie({ tendencia, resumen })} className="mt-3 h-60 w-full">
                 <ResponsiveContainer width="100%" height={240}>
                     <ComposedChart data={datos} margin={{ top: 8, right: 8, bottom: 0, left: -16 }}>
                         <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" />
-                        <XAxis dataKey="semana" tick={{ fontSize: 12 }} stroke="var(--muted)" />
-                        <YAxis tick={{ fontSize: 12 }} stroke="var(--muted)" unit=" %" />
+                        <XAxis dataKey="semana" tick={{ fontSize: 12 }} stroke="var(--muted-foreground)" />
+                        <YAxis tick={{ fontSize: 12 }} stroke="var(--muted-foreground)" unit=" %" />
                         <Tooltip formatter={fmt} labelFormatter={(s) => `Semana ${s}`} />
                         <Legend />
                         <Area dataKey="banda" name="Intervalo 95 %" stroke="none" fill="var(--primary)" fillOpacity={0.15} isAnimationActive={false} />
@@ -39,12 +39,12 @@ export default function GraficaSerie({ tendencia, suavizado, proyeccion, resumen
                         {ver.sma && <Line dataKey="sma" name="SMA" stroke="var(--presente)" dot={false} isAnimationActive={false} connectNulls />}
                         {ver.ema && <Line dataKey="ema" name="EMA" stroke="var(--retardo)" dot={false} isAnimationActive={false} connectNulls />}
                         {ver.wma && <Line dataKey="wma" name="WMA" stroke="var(--ausente)" dot={false} isAnimationActive={false} connectNulls />}
-                        <ReferenceLine y={limitePct} stroke="var(--danger)" strokeDasharray="2 2" />
+                        <ReferenceLine y={limitePct} stroke="var(--destructive)" strokeDasharray="2 2" />
                     </ComposedChart>
                 </ResponsiveContainer>
             </div>
             <fieldset className="mt-2 flex flex-wrap gap-x-4">
-                <legend className="text-xs text-muted">Medias móviles</legend>
+                <legend className="text-xs text-muted-foreground">Medias móviles</legend>
                 <Checkbox label="SMA" checked={ver.sma} onChange={() => alternar('sma')} />
                 <Checkbox label="EMA" checked={ver.ema} onChange={() => alternar('ema')} />
                 <Checkbox label="WMA" checked={ver.wma} onChange={() => alternar('wma')} />

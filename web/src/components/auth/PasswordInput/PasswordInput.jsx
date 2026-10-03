@@ -26,7 +26,7 @@ export default function PasswordInput({ id, name, value, onChange, autoComplete 
                 onClick={() => setVisible((v) => !v)}
                 aria-pressed={visible}
                 aria-label={visible ? 'Ocultar contraseña' : 'Mostrar contraseña'}
-                className="min-h-11 shrink-0 rounded-md border border-border bg-surface px-3 text-sm hover:bg-surface-muted"
+                className="min-h-11 shrink-0 rounded-md border border-border bg-card px-3 text-sm hover:bg-muted"
             >
                 {visible ? 'Ocultar' : 'Mostrar'}
             </button>

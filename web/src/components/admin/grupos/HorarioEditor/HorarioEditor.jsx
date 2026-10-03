@@ -50,7 +50,7 @@ export default function HorarioEditor({ idGrupo, horario = [], onSaved }) {
             {intentado && validacion.general.map((m) => (
                 <Alert key={m} tone="danger">{m}</Alert>
             ))}
-            {filas.length === 0 && <p className="text-sm text-muted">Este grupo aún no tiene bloques de horario.</p>}
+            {filas.length === 0 && <p className="text-sm text-muted-foreground">Este grupo aún no tiene bloques de horario.</p>}
             <ul className="grid gap-3">
                 {filas.map((f, i) => (
                     <li key={f.clave} className="grid gap-3 rounded-lg border border-border p-3 sm:grid-cols-[1fr_1fr_1fr_auto] sm:items-end">

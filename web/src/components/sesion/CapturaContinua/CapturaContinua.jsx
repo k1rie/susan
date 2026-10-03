@@ -38,7 +38,7 @@ export default function CapturaContinua({ sesion, camaras = [], activo, onFin })
     const sinFuentes = !navegadorEnUso && camarasIp.length === 0;
 
     return (
-        <section aria-label="Captura continua" className="flex flex-col gap-3 rounded-lg border border-border bg-surface p-4">
+        <section aria-label="Captura continua" className="flex flex-col gap-3 rounded-lg border border-border bg-card p-4">
             <h2 className="text-base font-semibold">Captura de asistencia</h2>
 
             {muestreo.servicioNoDisponible && (
@@ -87,19 +87,19 @@ export default function CapturaContinua({ sesion, camaras = [], activo, onFin })
                     )}
                 </div>
             )}
-            {camarasIp.length > 0 && <p className="text-sm text-muted">Camaras IP activas: {camarasIp.length}. El servidor toma su instantanea en cada ciclo.</p>}
-            {sinFuentes && <p className="text-sm text-muted">No hay ninguna fuente de captura activa en este momento.</p>}
+            {camarasIp.length > 0 && <p className="text-sm text-muted-foreground">Camaras IP activas: {camarasIp.length}. El servidor toma su instantanea en cada ciclo.</p>}
+            {sinFuentes && <p className="text-sm text-muted-foreground">No hay ninguna fuente de captura activa en este momento.</p>}
 
             <div aria-live="polite" className="text-sm">
                 {!activo ? (
-                    <p className="text-muted">El muestreo está en pausa (fuera de la ventana de tolerancia).</p>
+                    <p className="text-muted-foreground">El muestreo está en pausa (fuera de la ventana de tolerancia).</p>
                 ) : ultima ? (
                     <p>
                         Ultima captura: <strong>{ultima.rostros}</strong> rostros, <strong>{ultima.validas}</strong> válidas, <strong>{ultima.cambios?.length ?? 0}</strong> cambios
                         {muestreo.enviando ? ' · enviando...' : ''}
                     </p>
                 ) : (
-                    <p className="text-muted">{muestreo.enviando ? 'Enviando primera captura...' : 'Esperando la primera captura...'}</p>
+                    <p className="text-muted-foreground">{muestreo.enviando ? 'Enviando primera captura...' : 'Esperando la primera captura...'}</p>
                 )}
             </div>
         </section>

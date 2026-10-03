@@ -25,7 +25,7 @@ export default function Checkbox({ label, children, checked, onChange, indetermi
                 <span>{label ?? children}</span>
             </label>
             {hint && (
-                <p id={hintId} className="pl-8 text-xs text-muted">
+                <p id={hintId} className="pl-8 text-xs text-muted-foreground">
                     {hint}
                 </p>
             )}

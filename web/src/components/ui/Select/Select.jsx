@@ -3,7 +3,7 @@ import { CONTROL_BASE } from '../Input/Input.jsx';
 
 // Select nativo; con placeholder agrega una primera opción vacía deshabilitada.
 export default function Select({ options, placeholder, invalid, children, className, ...rest }) {
-    const borde = invalid || rest['aria-invalid'] ? 'border-danger' : 'border-border';
+    const borde = invalid || rest['aria-invalid'] ? 'border-destructive' : 'border-border';
     const controlado = rest.value !== undefined;
     return (
         <select

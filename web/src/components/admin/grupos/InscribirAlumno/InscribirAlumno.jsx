@@ -49,14 +49,14 @@ export default function InscribirAlumno({ idGrupo, inscritosActivos = [], onInsc
                 </Button>
             </form>
             <div aria-live="polite">
-                {q.length >= 2 && resultados.loading && <p className="text-sm text-muted">Buscando...</p>}
-                {resultados.error && <p className="text-sm text-danger">{resultados.error.message}</p>}
+                {q.length >= 2 && resultados.loading && <p className="text-sm text-muted-foreground">Buscando...</p>}
+                {resultados.error && <p className="text-sm text-destructive">{resultados.error.message}</p>}
                 {q.length >= 2 && !resultados.loading && !resultados.error && items.length === 0 && (
-                    <p className="text-sm text-muted">Sin alumnos activos que coincidan.</p>
+                    <p className="text-sm text-muted-foreground">Sin alumnos activos que coincidan.</p>
                 )}
             </div>
             {items.length > 0 && (
-                <ul className="divide-y divide-border rounded-lg border border-border bg-surface">
+                <ul className="divide-y divide-border rounded-lg border border-border bg-card">
                     {items.map((a) => {
                         const ya = inscritosActivos.includes(a.id_alumno);
                         return (
@@ -65,7 +65,7 @@ export default function InscribirAlumno({ idGrupo, inscritosActivos = [], onInsc
                                     <span className="font-medium">{a.matricula}</span> {a.nombre_completo}
                                 </span>
                                 {ya ? (
-                                    <span className="text-sm text-muted">Ya inscrito</span>
+                                    <span className="text-sm text-muted-foreground">Ya inscrito</span>
                                 ) : (
                                     <Button size="sm" loading={enCurso === a.id_alumno} onClick={() => inscribirA(a)}>
                                         Inscribir

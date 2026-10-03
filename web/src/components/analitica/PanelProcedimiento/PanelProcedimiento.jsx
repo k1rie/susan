@@ -8,11 +8,11 @@ import { seccionesProcedimiento } from '../analitica.utils.js';
 export default function PanelProcedimiento({ procedimientos = [] }) {
     const secciones = seccionesProcedimiento(procedimientos);
     return (
-        <section aria-label="Procedimiento numérico" className="rounded-lg border border-border bg-surface p-4">
+        <section aria-label="Procedimiento numérico" className="rounded-lg border border-border bg-card p-4">
             <h2 className="text-base font-semibold">Procedimiento paso a paso</h2>
-            <p className="mb-3 text-xs text-muted">Los cálculos que sustentan cada resultado, con sus tablas intermedias.</p>
+            <p className="mb-3 text-xs text-muted-foreground">Los cálculos que sustentan cada resultado, con sus tablas intermedias.</p>
             {secciones.length === 0 ? (
-                <p className="text-sm text-muted">Aún no hay procedimientos disponibles para este grupo.</p>
+                <p className="text-sm text-muted-foreground">Aún no hay procedimientos disponibles para este grupo.</p>
             ) : (
                 <div className="flex flex-col gap-2">
                     {secciones.map((s) => (

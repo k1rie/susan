@@ -51,7 +51,7 @@ export default function JustificanteCard({ justificante, minimoValidas, onResuel
 
     const j = justificante;
     return (
-        <article aria-label={`Justificante de ${j.alumno.nombre_completo}`} className="flex flex-col gap-4 rounded-lg border border-border bg-surface p-4">
+        <article aria-label={`Justificante de ${j.alumno.nombre_completo}`} className="flex flex-col gap-4 rounded-lg border border-border bg-card p-4">
             <header className="flex flex-col gap-1">
                 <Button variant="ghost" size="sm" className="self-start md:hidden" onClick={onCerrar}>
                     Volver a la lista
@@ -63,11 +63,11 @@ export default function JustificanteCard({ justificante, minimoValidas, onResuel
                         <StatusChip kind="asistencia" value={j.estado_asistencia} />
                     </span>
                 </div>
-                <p className="text-sm text-muted">Matrícula {j.alumno.matricula}</p>
+                <p className="text-sm text-muted-foreground">Matrícula {j.alumno.matricula}</p>
                 <p className="text-sm">
                     {j.materia.nombre} · Grupo {j.grupo.clave_grupo} · Sesión del {j.sesion.fecha}
                 </p>
-                <p className="text-sm text-muted">
+                <p className="text-sm text-muted-foreground">
                     Registrado por {j.registrado_por_rol === 'docente' ? 'el docente' : 'el alumno'} el {formatearFechaHora(j.fecha_registro)}
                 </p>
             </header>

@@ -4,7 +4,7 @@ function TablaSimple({ columnas = [], filas = [] }) {
     return (
         <div className="overflow-x-auto rounded-md border border-border">
             <table className="w-full min-w-max border-collapse text-sm tabular-nums">
-                <thead className="bg-surface-muted text-muted">
+                <thead className="bg-muted text-muted-foreground">
                     <tr>
                         {columnas.map((c, i) => (
                             <th key={i} scope="col" className="px-3 py-1.5 text-left font-medium">{c}</th>
@@ -30,12 +30,12 @@ export default function PasoView({ paso }) {
     return (
         <div className="flex flex-col gap-2">
             {paso.titulo && <h4 className="text-sm font-semibold">{paso.titulo}</h4>}
-            {paso.texto && <p className="text-sm text-muted">{paso.texto}</p>}
+            {paso.texto && <p className="text-sm text-muted-foreground">{paso.texto}</p>}
             {paso.valores?.length > 0 && (
                 <dl className="grid grid-cols-1 gap-x-4 gap-y-1 text-sm sm:grid-cols-[max-content_1fr]">
                     {paso.valores.map((v, i) => (
                         <div key={i} className="contents">
-                            <dt className="text-muted">{v.etiqueta}</dt>
+                            <dt className="text-muted-foreground">{v.etiqueta}</dt>
                             <dd className="break-words tabular-nums">{fmtCelda(v.valor)}</dd>
                         </div>
                     ))}

@@ -28,13 +28,13 @@ export default function Topbar({ me, onMenu, onSalir }) {
     }, [abierto]);
 
     return (
-        <header className="fixed inset-x-0 top-0 z-50 flex h-14 items-center justify-between gap-2 border-b border-border bg-surface px-3">
+        <header className="fixed inset-x-0 top-0 z-50 flex h-14 items-center justify-between gap-2 border-b border-border bg-card px-3">
             <div className="flex items-center gap-2">
                 <button
                     type="button"
                     onClick={onMenu}
                     aria-label="Abrir menú"
-                    className="inline-flex h-11 w-11 items-center justify-center rounded-md hover:bg-surface-muted lg:hidden"
+                    className="inline-flex h-11 w-11 items-center justify-center rounded-md hover:bg-muted lg:hidden"
                 >
                     <Menu aria-hidden="true" className="h-5 w-5" />
                 </button>
@@ -46,18 +46,18 @@ export default function Topbar({ me, onMenu, onSalir }) {
                     aria-haspopup="menu"
                     aria-expanded={abierto}
                     onClick={() => setAbierto((v) => !v)}
-                    className="flex min-h-11 max-w-[14rem] flex-col items-end justify-center rounded-md px-2 text-right hover:bg-surface-muted"
+                    className="flex min-h-11 max-w-[14rem] flex-col items-end justify-center rounded-md px-2 text-right hover:bg-muted"
                 >
                     <span className="max-w-full truncate text-sm font-medium">{me?.nombre}</span>
-                    <span className="text-xs text-muted">{rolEtiqueta(me?.rol)}</span>
+                    <span className="text-xs text-muted-foreground">{rolEtiqueta(me?.rol)}</span>
                 </button>
                 {abierto && (
-                    <div role="menu" className="absolute right-0 top-full mt-1 w-52 rounded-md border border-border bg-surface p-1 shadow-md">
+                    <div role="menu" className="absolute right-0 top-full mt-1 w-52 rounded-md border border-border bg-card p-1 shadow-md">
                         <Link
                             role="menuitem"
                             href="/cambiar-contrasena"
                             onClick={() => setAbierto(false)}
-                            className="flex min-h-11 items-center rounded px-3 text-sm hover:bg-surface-muted"
+                            className="flex min-h-11 items-center rounded px-3 text-sm hover:bg-muted"
                         >
                             Cambiar contraseña
                         </Link>
@@ -68,7 +68,7 @@ export default function Topbar({ me, onMenu, onSalir }) {
                                 setAbierto(false);
                                 onSalir?.();
                             }}
-                            className="flex min-h-11 w-full items-center rounded px-3 text-left text-sm hover:bg-surface-muted"
+                            className="flex min-h-11 w-full items-center rounded px-3 text-left text-sm hover:bg-muted"
                         >
                             Salir
                         </button>

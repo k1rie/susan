@@ -8,13 +8,13 @@ import { datosPatron } from '../analitica.utils.js';
 export default function PatronSemanal({ patronSemanal }) {
     const datos = useMemo(() => datosPatron(patronSemanal), [patronSemanal]);
     return (
-        <section className="rounded-lg border border-border bg-surface p-4">
+        <section className="rounded-lg border border-border bg-card p-4">
             <h2 className="text-base font-semibold">Patrón por día de la semana</h2>
             {datos.length === 0 ? (
-                <p className="mt-2 text-sm text-muted">Sin sesiones cerradas para calcular el patrón.</p>
+                <p className="mt-2 text-sm text-muted-foreground">Sin sesiones cerradas para calcular el patrón.</p>
             ) : (
                 <>
-                    <p className="text-xs text-muted">
+                    <p className="text-xs text-muted-foreground">
                         {patronSemanal.nombreDiaCritico ? `Día crítico: ${patronSemanal.nombreDiaCritico}.` : 'Sin un día claramente crítico.'}
                     </p>
                     <div
@@ -25,8 +25,8 @@ export default function PatronSemanal({ patronSemanal }) {
                         <ResponsiveContainer width="100%" height={240}>
                             <BarChart data={datos} margin={{ top: 8, right: 8, bottom: 0, left: -16 }}>
                                 <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" />
-                                <XAxis dataKey="dia" tick={{ fontSize: 12 }} stroke="var(--muted)" />
-                                <YAxis tick={{ fontSize: 12 }} stroke="var(--muted)" unit=" %" />
+                                <XAxis dataKey="dia" tick={{ fontSize: 12 }} stroke="var(--muted-foreground)" />
+                                <YAxis tick={{ fontSize: 12 }} stroke="var(--muted-foreground)" unit=" %" />
                                 <Tooltip formatter={(v) => (v == null ? '-' : `${v} %`)} />
                                 <Bar dataKey="tasa" name="Ausentismo" isAnimationActive={false}>
                                     {datos.map((d) => (
@@ -36,7 +36,7 @@ export default function PatronSemanal({ patronSemanal }) {
                             </BarChart>
                         </ResponsiveContainer>
                     </div>
-                    <ul className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted">
+                    <ul className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
                         {datos.map((d) => (
                             <li key={d.dia}>
                                 {d.dia}: {d.tasa == null ? '-' : `${d.tasa} %`} ({d.ausentes}/{d.sesiones})

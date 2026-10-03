@@ -56,11 +56,11 @@ export default function CamarasEstado() {
                             <li key={c.id_camara}>
                                 <Card title={`Aula ${c.aula_clave} · ${c.posicion}`} actions={<StatusChip kind="camara" value={c.estatus} />}>
                                     <dl className="grid grid-cols-2 gap-1 text-sm">
-                                        <dt className="text-muted">Edificio</dt><dd>{c.edificio}</dd>
-                                        <dt className="text-muted">Tipo</dt><dd>{c.tipo}</dd>
-                                        {c.direccion_ip && (<><dt className="text-muted">IP</dt><dd>{c.direccion_ip}</dd></>)}
-                                        <dt className="text-muted">Última captura</dt><dd>{haceCuanto(c.ultima_captura)}</dd>
-                                        <dt className="text-muted">Capturas 24 h</dt><dd>{c.capturas_24h}</dd>
+                                        <dt className="text-muted-foreground">Edificio</dt><dd>{c.edificio}</dd>
+                                        <dt className="text-muted-foreground">Tipo</dt><dd>{c.tipo}</dd>
+                                        {c.direccion_ip && (<><dt className="text-muted-foreground">IP</dt><dd>{c.direccion_ip}</dd></>)}
+                                        <dt className="text-muted-foreground">Última captura</dt><dd>{haceCuanto(c.ultima_captura)}</dd>
+                                        <dt className="text-muted-foreground">Capturas 24 h</dt><dd>{c.capturas_24h}</dd>
                                     </dl>
                                     {c.sesion_abierta && <p className="mt-2 text-sm font-medium">Sesión abierta en el aula</p>}
                                     {sinCapturar(c) && (
@@ -69,7 +69,7 @@ export default function CamarasEstado() {
                                         </Alert>
                                     )}
                                     <label className="mt-3 block text-sm">
-                                        <span className="mb-1 block text-muted">Cambiar estatus</span>
+                                        <span className="mb-1 block text-muted-foreground">Cambiar estatus</span>
                                         <Select
                                             aria-label={`Estatus de la cámara ${c.aula_clave} ${c.posicion}`}
                                             value={c.estatus}

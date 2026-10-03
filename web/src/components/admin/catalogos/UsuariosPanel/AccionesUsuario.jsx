@@ -158,7 +158,7 @@ function CambiarRolDialog({ fila, onClose, onGuardado }) {
                 </Field>
                 <VinculoSelect rol={rol} value={vinculo} onChange={setVinculo} error={error} />
                 {!requiereVinculo(rol) && (
-                    <p className="text-xs text-muted">Administrador y técnico no llevan docente ni alumno vinculado.</p>
+                    <p className="text-xs text-muted-foreground">Administrador y técnico no llevan docente ni alumno vinculado.</p>
                 )}
             </form>
         </Modal>

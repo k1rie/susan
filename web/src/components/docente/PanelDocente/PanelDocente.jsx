@@ -34,7 +34,7 @@ export default function PanelDocente() {
                 }
             />
             {simulado && (
-                <p className="mb-3 text-xs text-muted" role="note">
+                <p className="mb-3 text-xs text-muted-foreground" role="note">
                     Reloj simulado: {simulado.fecha} {simulado.hora}
                 </p>
             )}

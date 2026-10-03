@@ -35,10 +35,10 @@ export default function ParametroFila({ parametro, soloLectura = false, onGuarda
     };
 
     return (
-        <li className="rounded-lg border border-border bg-surface p-4">
+        <li className="rounded-lg border border-border bg-card p-4">
             <label htmlFor={id} className="block text-sm font-semibold">{parametro.clave}</label>
-            {parametro.descripcion && <p className="text-sm text-muted">{parametro.descripcion}</p>}
-            <p id={`${id}-ayuda`} className="mt-1 text-xs text-muted">
+            {parametro.descripcion && <p className="text-sm text-muted-foreground">{parametro.descripcion}</p>}
+            <p id={`${id}-ayuda`} className="mt-1 text-xs text-muted-foreground">
                 Tipo: {parametro.tipo} · Rango: {textoRango(parametro)}
             </p>
             <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-start">
@@ -59,7 +59,7 @@ export default function ParametroFila({ parametro, soloLectura = false, onGuarda
                 )}
             </div>
             {parametro.fecha_actualizacion && (
-                <p className="mt-2 text-xs text-muted">
+                <p className="mt-2 text-xs text-muted-foreground">
                     Última modificación: {fecha(parametro.fecha_actualizacion)}
                     {parametro.actualizado_por?.correo ? `, por ${parametro.actualizado_por.correo}` : ''}
                 </p>
@@ -81,7 +81,7 @@ export default function ParametroFila({ parametro, soloLectura = false, onGuarda
                 {critico && (
                     <Alert tone="warning" className="mt-3">{AVISOS_CRITICOS[parametro.clave]}</Alert>
                 )}
-                <p className="mt-3 text-xs text-muted">Cada cambio queda en bitácora con el valor anterior.</p>
+                <p className="mt-3 text-xs text-muted-foreground">Cada cambio queda en bitácora con el valor anterior.</p>
             </ConfirmDialog>
         </li>
     );

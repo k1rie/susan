@@ -57,14 +57,14 @@ export default function PasswordTemporalModal({ open, correo, contrasena, titulo
                         value={contrasena}
                         onFocus={(e) => e.target.select()}
                         autoComplete="off"
-                        className="min-h-11 w-full rounded-md border border-border bg-surface-muted px-3 font-mono text-base"
+                        className="min-h-11 w-full rounded-md border border-border bg-muted px-3 font-mono text-base"
                     />
                 </label>
                 <div className="flex flex-wrap items-center gap-3">
                     <Button variant="secondary" onClick={copiar}>
                         Copiar
                     </Button>
-                    <span role="status" aria-live="polite" className="text-sm text-muted">
+                    <span role="status" aria-live="polite" className="text-sm text-muted-foreground">
                         {copiada && 'Copiada al portapapeles.'}
                         {fallo && 'No se pudo copiar automáticamente; seleccione el texto y cópielo.'}
                     </span>

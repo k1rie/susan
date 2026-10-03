@@ -13,7 +13,7 @@ export default function Field({ label, hint, error, required = false, htmlFor, c
         <div className={clsx('flex flex-col gap-1', className)}>
             <label htmlFor={id} className="text-sm font-medium">
                 {label}
-                {required && <span aria-hidden="true" className="text-danger"> *</span>}
+                {required && <span aria-hidden="true" className="text-destructive"> *</span>}
             </label>
             {cloneElement(children, {
                 id,
@@ -22,12 +22,12 @@ export default function Field({ label, hint, error, required = false, htmlFor, c
                 required: required || children.props.required,
             })}
             {hint && (
-                <p id={hintId} className="text-xs text-muted">
+                <p id={hintId} className="text-xs text-muted-foreground">
                     {hint}
                 </p>
             )}
             {error && (
-                <p id={errorId} role="alert" className="text-sm text-danger">
+                <p id={errorId} role="alert" className="text-sm text-destructive">
                     {error}
                 </p>
             )}

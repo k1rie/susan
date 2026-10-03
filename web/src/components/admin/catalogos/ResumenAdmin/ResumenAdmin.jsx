@@ -31,7 +31,7 @@ export default function ResumenAdmin() {
                     const camaras = r.camaras ?? {};
                     return (
                         <section aria-label="Contadores" className="flex flex-col gap-2">
-                            <p className="text-sm text-muted">
+                            <p className="text-sm text-muted-foreground">
                                 Periodo {r.periodo} · {r.fecha}
                             </p>
                             <div className="grid grid-cols-1 gap-3 min-[480px]:grid-cols-2 lg:grid-cols-4">

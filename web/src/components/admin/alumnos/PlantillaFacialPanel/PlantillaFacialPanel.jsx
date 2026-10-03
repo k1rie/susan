@@ -63,7 +63,7 @@ export default function PlantillaFacialPanel({ idAlumno, version = 0, onCambio }
                                     <p>Indexada: {p.activa.indexada ? 'sí' : 'no'}</p>
                                     <p>Versión del índice: {p.activa.version_indice ?? 'pendiente de indexar'}</p>
                                     {p.plantilla.data.archivadas?.total > 0 && (
-                                        <p className="text-muted">{p.plantilla.data.archivadas.total} plantilla(s) archivada(s)</p>
+                                        <p className="text-muted-foreground">{p.plantilla.data.archivadas.total} plantilla(s) archivada(s)</p>
                                     )}
                                     <div>
                                         <Button variant="secondary" size="sm" onClick={verFoto}>
@@ -77,7 +77,7 @@ export default function PlantillaFacialPanel({ idAlumno, version = 0, onCambio }
                                     )}
                                 </div>
                             ) : (
-                                <p className="text-muted">Sin plantilla facial; el alumno pasa lista de forma manual.</p>
+                                <p className="text-muted-foreground">Sin plantilla facial; el alumno pasa lista de forma manual.</p>
                             )}
                         </section>
 

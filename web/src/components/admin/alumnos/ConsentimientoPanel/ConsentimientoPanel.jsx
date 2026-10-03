@@ -122,7 +122,7 @@ export default function ConsentimientoPanel({ idAlumno, version = 0, onCambio })
                                 <a href={enlace.url} target="_blank" rel="noopener noreferrer" className="text-primary underline">
                                     Abrir documento firmado
                                 </a>{' '}
-                                <span className="text-muted">(el enlace caduca en 5 minutos)</span>
+                                <span className="text-muted-foreground">(el enlace caduca en 5 minutos)</span>
                             </p>
                         )}
 
@@ -162,7 +162,7 @@ export default function ConsentimientoPanel({ idAlumno, version = 0, onCambio })
                                             <p className="font-medium">
                                                 Firmado {c.fecha_firma} · vigente hasta {c.vigencia_hasta}
                                             </p>
-                                            <p className="text-muted">
+                                            <p className="text-muted-foreground">
                                                 {textoEstatusItem(c)} · {c.plantillas_activas ?? 0} plantilla(s) activa(s)
                                             </p>
                                             {c.tiene_documento && (
@@ -174,7 +174,7 @@ export default function ConsentimientoPanel({ idAlumno, version = 0, onCambio })
                                     ))}
                                 </ul>
                             ) : (
-                                <p className="text-sm text-muted">Este alumno aún no tiene consentimientos registrados.</p>
+                                <p className="text-sm text-muted-foreground">Este alumno aún no tiene consentimientos registrados.</p>
                             )}
                         </div>
                     </div>

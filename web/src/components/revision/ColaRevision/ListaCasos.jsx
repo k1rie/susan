@@ -22,7 +22,7 @@ export default function ListaCasos({ tipo, items, total, seleccionadoId, onSelec
                                 onClick={() => onSeleccionar(it)}
                                 className={clsx(
                                     'flex min-h-11 w-full flex-col gap-1 rounded-md border p-3 text-left text-sm',
-                                    activo ? 'border-primary bg-surface-muted' : 'border-border bg-surface hover:bg-surface-muted',
+                                    activo ? 'border-primary bg-muted' : 'border-border bg-card hover:bg-muted',
                                 )}
                             >
                                 <span className="flex flex-wrap items-center justify-between gap-2">
@@ -33,16 +33,16 @@ export default function ListaCasos({ tipo, items, total, seleccionadoId, onSelec
                                         size="sm"
                                     />
                                 </span>
-                                <span className="text-muted">
+                                <span className="text-muted-foreground">
                                     {it.materia.nombre} · Grupo {it.grupo.clave_grupo}
                                 </span>
-                                <span className="text-muted">
+                                <span className="text-muted-foreground">
                                     Sesión {it.sesion.fecha} {String(it.sesion.hora_inicio).slice(0, 5)}
                                 </span>
                                 {tipo === 'pendiente' ? (
                                     <PlazoRestante key={it.segundos_restantes} venceEn={it.vence_en} segundosRestantes={it.segundos_restantes} />
                                 ) : (
-                                    <span className="text-muted">
+                                    <span className="text-muted-foreground">
                                         Justificante de {it.registrado_por_rol === 'docente' ? 'docente' : 'alumno'} · {formatearFechaHora(it.fecha_registro)}
                                     </span>
                                 )}

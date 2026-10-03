@@ -19,11 +19,11 @@ function Bloque({ titulo, valor }) {
     const texto = jsonLegible(valor);
     return (
         <div>
-            <p className="text-xs font-medium text-muted">{titulo}</p>
+            <p className="text-xs font-medium text-muted-foreground">{titulo}</p>
             {texto ? (
-                <pre className="max-h-64 max-w-md overflow-auto rounded-md bg-surface-muted p-2 text-xs">{texto}</pre>
+                <pre className="max-h-64 max-w-md overflow-auto rounded-md bg-muted p-2 text-xs">{texto}</pre>
             ) : (
-                <p className="text-xs text-muted">Sin valor</p>
+                <p className="text-xs text-muted-foreground">Sin valor</p>
             )}
         </div>
     );
@@ -31,7 +31,7 @@ function Bloque({ titulo, valor }) {
 
 const COLUMNAS = [
     { key: 'fecha_hora', header: 'Fecha y hora', render: (b) => formatearFechaHora(b.fecha_hora) },
-    { key: 'usuario_correo', header: 'Usuario', render: (b) => b.usuario_correo ?? <span className="text-muted">Sistema</span> },
+    { key: 'usuario_correo', header: 'Usuario', render: (b) => b.usuario_correo ?? <span className="text-muted-foreground">Sistema</span> },
     { key: 'accion', header: 'Acción', primary: true, render: (b) => etiquetaAccion(b.accion) },
     { key: 'entidad', header: 'Entidad', render: (b) => `${b.entidad}${b.id_registro != null ? ` #${b.id_registro}` : ''}` },
     { key: 'ip_origen', header: 'IP', render: (b) => b.ip_origen ?? '-' },

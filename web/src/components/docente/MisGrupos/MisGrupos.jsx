@@ -14,7 +14,7 @@ export default function MisGrupos({ grupos = [] }) {
                             <span>
                                 <span className="font-medium">{g.materia}</span> ({g.clave_grupo}) · Aula {g.aula} · {g.periodo}
                             </span>
-                            <span className="text-muted">{g.inscritos} inscritos</span>
+                            <span className="text-muted-foreground">{g.inscritos} inscritos</span>
                         </li>
                     ))}
                 </ul>

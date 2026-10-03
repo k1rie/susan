@@ -49,7 +49,7 @@ export default function ColaRevision({ pestanaInicial, casoInicial = null }) {
                     data={data}
                     onRetry={c.cola.refetch}
                     isEmpty={() => false}
-                    loadingFallback={<p role="status" className="py-10 text-center text-sm text-muted">Cargando casos…</p>}
+                    loadingFallback={<p role="status" className="py-10 text-center text-sm text-muted-foreground">Cargando casos…</p>}
                 >
                     {() =>
                         lista.length === 0 ? (
@@ -71,7 +71,7 @@ export default function ColaRevision({ pestanaInicial, casoInicial = null }) {
                                 </div>
                                 <div className={seleccionado ? '' : 'hidden md:block'}>
                                     {!seleccionado ? (
-                                        <p className="rounded-lg border border-dashed border-border p-6 text-center text-sm text-muted">
+                                        <p className="rounded-lg border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
                                             Elige un caso de la lista para ver sus lecturas.
                                         </p>
                                     ) : pestana === 'pendientes' ? (

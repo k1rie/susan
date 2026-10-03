@@ -52,11 +52,11 @@ export default function Tabs({ tabs, value, onChange, idPrefix = 'tab', classNam
                         onKeyDown={(e) => alTeclear(e, i)}
                         className={clsx(
                             'min-h-11 shrink-0 whitespace-nowrap border-b-2 px-4 text-sm font-medium disabled:opacity-50',
-                            activa ? 'border-primary text-primary' : 'border-transparent text-muted hover:text-foreground',
+                            activa ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground',
                         )}
                     >
                         {t.label}
-                        {t.count != null && <span className="ml-1 text-xs text-muted">({t.count})</span>}
+                        {t.count != null && <span className="ml-1 text-xs text-muted-foreground">({t.count})</span>}
                     </button>
                 );
             })}

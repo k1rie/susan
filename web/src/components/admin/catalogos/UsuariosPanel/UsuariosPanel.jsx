@@ -14,7 +14,7 @@ const COLUMNAS = [
     {
         key: 'vinculo',
         header: 'Vínculo',
-        render: (u) => (u.vinculo ? `${u.vinculo}${u.nombre ? ` - ${u.nombre}` : ''}` : <span className="text-muted">Sin vínculo</span>),
+        render: (u) => (u.vinculo ? `${u.vinculo}${u.nombre ? ` - ${u.nombre}` : ''}` : <span className="text-muted-foreground">Sin vínculo</span>),
     },
     { key: 'activo', header: 'Estado', render: (u) => (u.activo ? 'Activa' : 'Inactiva') },
 ];

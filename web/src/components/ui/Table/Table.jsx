@@ -25,10 +25,10 @@ export default function Table({
     const ariaSort = (col) => (sort?.key === col.key ? (sort.dir === 'asc' ? 'ascending' : 'descending') : undefined);
 
     return (
-        <div className={clsx('overflow-x-auto rounded-lg border border-border bg-surface', stickyHeader && 'max-h-[70dvh] overflow-y-auto', className)}>
+        <div className={clsx('overflow-x-auto rounded-lg border border-border bg-card', stickyHeader && 'max-h-[70dvh] overflow-y-auto', className)}>
             <table className="w-full min-w-max border-collapse text-sm">
-                {caption && <caption className="px-4 py-2 text-left text-sm text-muted">{caption}</caption>}
-                <thead className={clsx('bg-surface-muted text-muted', stickyHeader && 'sticky top-0 z-10')}>
+                {caption && <caption className="px-4 py-2 text-left text-sm text-muted-foreground">{caption}</caption>}
+                <thead className={clsx('bg-muted text-muted-foreground', stickyHeader && 'sticky top-0 z-10')}>
                     <tr>
                         {columns.map((col) => (
                             <th
@@ -59,7 +59,7 @@ export default function Table({
                     )}
                     {!loading && rows.length === 0 && (
                         <tr>
-                            <td colSpan={columns.length} className="px-3 py-8 text-center text-muted">
+                            <td colSpan={columns.length} className="px-3 py-8 text-center text-muted-foreground">
                                 {emptyMessage}
                             </td>
                         </tr>
@@ -79,7 +79,7 @@ export default function Table({
                                       }
                                     : undefined
                             }
-                            className={clsx('border-t border-border', onRowClick && 'cursor-pointer hover:bg-surface-muted')}
+                            className={clsx('border-t border-border', onRowClick && 'cursor-pointer hover:bg-muted')}
                         >
                             {columns.map((col) => (
                                 <td key={col.key} className={clsx('px-3 py-2', col.primary && 'font-medium', clasesCelda(col))}>

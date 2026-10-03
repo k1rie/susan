@@ -51,7 +51,7 @@ export default function RegistroManualDialog({ open, sesion, alumnos = [], alumn
                         <Select value={idElegido} onChange={(e) => setIdElegido(e.target.value)} placeholder="Selecciona un alumno" options={elegibles.map((a) => ({ value: String(a.id_alumno), label: `${a.matricula} - ${a.nombre}` }))} required />
                     </label>
                 )}
-                {!alumno && elegibles.length === 0 && <p className="text-sm text-muted">Todos los alumnos ya tienen lecturas válidas con consentimiento vigente.</p>}
+                {!alumno && elegibles.length === 0 && <p className="text-sm text-muted-foreground">Todos los alumnos ya tienen lecturas válidas con consentimiento vigente.</p>}
                 <label className="flex flex-col gap-1 text-sm">
                     Estado (sugerido segun la hora: {ESTADOS.find((s) => s.value === sugerirEstado(sesion))?.label})
                     <Select value={estado} onChange={(e) => setEstado(e.target.value)} options={ESTADOS} />

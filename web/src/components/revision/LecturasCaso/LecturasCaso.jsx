@@ -15,7 +15,7 @@ export default function LecturasCaso({ idAsistencia, minimoValidas }) {
 
     if (estado === 'cargando') {
         return (
-            <div className="flex items-center gap-2 text-sm text-muted">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Spinner size="sm" label="Cargando lecturas" /> Cargando lecturas…
             </div>
         );
@@ -46,12 +46,12 @@ export default function LecturasCaso({ idAsistencia, minimoValidas }) {
                     alt="Foto de registro del alumno"
                     onExpirada={recargar}
                 />
-                <span className="text-muted">
+                <span className="text-muted-foreground">
                     {data?.foto_registro ? 'Foto de registro' : 'El alumno no tiene foto de registro activa'}
                 </span>
             </div>
             {lecturas.length === 0 ? (
-                <p className="text-sm text-muted">Sin lecturas del reconocimiento facial en esta sesión</p>
+                <p className="text-sm text-muted-foreground">Sin lecturas del reconocimiento facial en esta sesión</p>
             ) : (
                 <ul className="flex flex-col gap-2">
                     {lecturas.map((l) => (
@@ -66,7 +66,7 @@ export default function LecturasCaso({ idAsistencia, minimoValidas }) {
                                 <p className="font-medium">
                                     {formatearHora(l.marca_tiempo)} · {textoCamara(l.camara_posicion)}
                                 </p>
-                                <p className="text-muted">
+                                <p className="text-muted-foreground">
                                     Minuto {Number(l.minuto_sesion).toFixed(1)} · Score {textoScore(l.score_similitud)}
                                 </p>
                                 <p className={l.es_valida ? 'text-presente' : 'text-ausente'}>

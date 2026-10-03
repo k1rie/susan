@@ -7,24 +7,24 @@ function Tarjeta({ item, seleccionada, onSeleccionar }) {
     const sinSesiones = !item.sesiones_programadas;
     const nombre = item.materia?.nombre || 'Materia';
     return (
-        <li className={`rounded-lg border bg-surface p-4 ${seleccionada ? 'border-primary' : 'border-border'}`}>
+        <li className={`rounded-lg border bg-card p-4 ${seleccionada ? 'border-primary' : 'border-border'}`}>
             <div className="flex flex-wrap items-start justify-between gap-2">
                 <div className="min-w-0">
                     <h3 className="font-semibold">{nombre}</h3>
-                    <p className="text-sm text-muted">Grupo {item.clave_grupo} · {item.docente_nombre}</p>
+                    <p className="text-sm text-muted-foreground">Grupo {item.clave_grupo} · {item.docente_nombre}</p>
                 </div>
                 <button
                     type="button"
                     onClick={() => onSeleccionar(item.id_grupo)}
                     aria-pressed={seleccionada}
-                    className="min-h-11 rounded-md border border-border px-3 text-sm font-medium hover:bg-surface-muted"
+                    className="min-h-11 rounded-md border border-border px-3 text-sm font-medium hover:bg-muted"
                 >
                     {seleccionada ? 'Viendo historial' : 'Ver historial'}
                 </button>
             </div>
             <div className="mt-3">
                 {sinSesiones ? (
-                    <p className="text-sm text-muted">Aún no hay sesiones programadas: el porcentaje se calculará al generar el horario.</p>
+                    <p className="text-sm text-muted-foreground">Aún no hay sesiones programadas: el porcentaje se calculará al generar el horario.</p>
                 ) : (
                     <BarraFaltas porcentaje={item.porcentaje_faltas} limitePct={item.limite_pct} superaLimite={item.supera_limite} enLimite={item.en_limite} />
                 )}
@@ -33,7 +33,7 @@ function Tarjeta({ item, seleccionada, onSeleccionar }) {
                 Faltas equivalentes: <strong>{item.faltas_equivalentes}</strong> de {item.faltas_maximas_permitidas} permitidas
                 {!sinSesiones && <> · te quedan <strong>{Math.max(0, item.faltas_restantes_antes_limite ?? 0)}</strong></>}
             </p>
-            <p className="mt-1 text-xs text-muted">
+            <p className="mt-1 text-xs text-muted-foreground">
                 Presentes {item.presentes} · Retardos {item.retardos} · Ausencias {item.ausencias} · Justificadas {item.justificadas} · Pendientes {item.pendientes}
             </p>
             {aviso && <Alert tone={aviso.tone} className="mt-3">{aviso.texto}</Alert>}
@@ -50,7 +50,7 @@ export default function ResumenMaterias({ items = [], idGrupoSeleccionado, onSel
                     <Tarjeta key={it.id_grupo} item={it} seleccionada={it.id_grupo === idGrupoSeleccionado} onSeleccionar={onSeleccionar} />
                 ))}
             </ul>
-            <p className="mt-3 text-xs text-muted">Los registros pendientes de revisión no cuentan hasta que el docente los resuelva.</p>
+            <p className="mt-3 text-xs text-muted-foreground">Los registros pendientes de revisión no cuentan hasta que el docente los resuelva.</p>
         </div>
     );
 }

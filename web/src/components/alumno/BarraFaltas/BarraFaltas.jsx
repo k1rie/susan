@@ -17,12 +17,12 @@ export default function BarraFaltas({ porcentaje, limitePct = 20, superaLimite, 
                 aria-valuenow={Math.round(b.pct * 100) / 100}
                 aria-valuetext={`${b.pct.toFixed(2)} % de faltas; límite ${b.limite} %. ${TEXTO[nivel]}`}
                 data-nivel={nivel}
-                className="relative h-3 w-full overflow-hidden rounded-full bg-surface-muted"
+                className="relative h-3 w-full overflow-hidden rounded-full bg-muted"
             >
                 <div className={`h-full ${COLOR[nivel]}`} style={{ width: `${b.relleno}%` }} />
                 <div data-testid="marca-limite" className="absolute inset-y-0 w-0.5 bg-foreground" style={{ left: `${b.marca}%` }} />
             </div>
-            <p className="mt-1 text-xs text-muted">
+            <p className="mt-1 text-xs text-muted-foreground">
                 {b.pct.toFixed(2)} % de faltas · límite {b.limite} % · {TEXTO[nivel]}
             </p>
         </div>

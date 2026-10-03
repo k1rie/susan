@@ -4,7 +4,7 @@ const TONOS = {
     info: 'border-info text-info bg-justificado-bg',
     success: 'border-success text-presente bg-presente-bg',
     warning: 'border-warning text-retardo bg-retardo-bg',
-    danger: 'border-danger text-ausente bg-ausente-bg',
+    danger: 'border-destructive text-ausente bg-ausente-bg',
 };
 
 // Aviso en línea. danger/warning usan role="alert" (se anuncian de inmediato); el resto role="status".

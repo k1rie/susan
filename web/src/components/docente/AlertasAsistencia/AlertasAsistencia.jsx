@@ -16,11 +16,11 @@ export default function AlertasAsistencia({ alertas = [] }) {
                         <li key={`${a.tipo}-${a.id_grupo}-${a.id_alumno}`} className="flex flex-col gap-1 rounded-md border border-border p-3 text-sm">
                             <div className="flex flex-wrap items-center justify-between gap-2">
                                 <span className="font-medium">
-                                    {a.nombre} <span className="font-normal text-muted">({a.matricula})</span>
+                                    {a.nombre} <span className="font-normal text-muted-foreground">({a.matricula})</span>
                                 </span>
                                 <Badge tone={sinDerecho(a) ? 'danger' : 'warning'}>{sinDerecho(a) ? 'Sin derecho a examen' : 'A una falta del límite'}</Badge>
                             </div>
-                            <p className="text-muted">
+                            <p className="text-muted-foreground">
                                 {a.materia} ({a.clave_grupo}) · {a.porcentaje_faltas}% de faltas equivalentes (límite {a.limite_pct}%)
                             </p>
                             {a.mensaje && <p>{a.mensaje}</p>}
