@@ -15,7 +15,7 @@ export default function ErrorState({ error, title = 'No se pudo cargar', onRetry
             <p className="font-medium text-destructive">{title}</p>
             {mensaje && <p className="max-w-md text-sm text-muted-foreground">{mensaje}</p>}
             {sinSesion ? (
-                <Link href="/login" className="mt-2 inline-flex min-h-11 items-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground">
+                <Link href="/login" className="mt-2 inline-flex min-h-11 items-center rounded-full bg-primary px-5 text-sm font-medium text-primary-foreground shadow-soft transition-colors hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/40">
                     Iniciar sesión
                 </Link>
             ) : (

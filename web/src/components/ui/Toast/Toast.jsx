@@ -5,10 +5,10 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 
 const MAX_VISIBLES = 3;
 const TONOS = {
-    info: 'border-info',
-    success: 'border-success',
-    warning: 'border-warning',
-    danger: 'border-destructive',
+    info: 'border-info/40',
+    success: 'border-success/40',
+    warning: 'border-warning/50',
+    danger: 'border-destructive/40',
 };
 
 const ToastContext = createContext(null);
@@ -70,13 +70,13 @@ export function ToastProvider({ children }) {
                 {items.map((t) => (
                     <div
                         key={t.id}
-                        className={clsx('pointer-events-auto flex items-start gap-3 rounded-md border-l-4 bg-card p-3 text-sm shadow-md', TONOS[t.tone] || TONOS.info)}
+                        className={clsx('pointer-events-auto flex animate-in items-start gap-3 rounded-2xl border bg-card p-3.5 text-sm shadow-lift duration-300 fade-in-0 slide-in-from-bottom-2', TONOS[t.tone] || TONOS.info)}
                     >
                         <div className="min-w-0 flex-1">
                             {t.title && <p className="font-semibold">{t.title}</p>}
                             <p>{t.message}</p>
                         </div>
-                        <button type="button" onClick={() => dismiss(t.id)} className="min-h-9 shrink-0 px-2 text-muted-foreground underline">
+                        <button type="button" onClick={() => dismiss(t.id)} className="min-h-9 shrink-0 rounded-full px-3 text-muted-foreground underline-offset-2 hover:text-foreground hover:underline focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/40">
                             Cerrar
                         </button>
                     </div>

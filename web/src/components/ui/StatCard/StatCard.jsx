@@ -8,13 +8,18 @@ const TONOS = {
     danger: 'text-ausente',
 };
 
-// Contador resumido; con href toda la tarjeta es un enlace.
+// Contador resumido; con href toda la tarjeta es un enlace (se eleva al pasar el cursor).
+// La cifra va en la serif de marca (font-display). Para animarla, pasar <CountUp/> como `value`.
 export default function StatCard({ label, value, hint, href, tone = 'neutral', loading = false, className, ...rest }) {
-    const clases = clsx('block rounded-lg border border-border bg-card p-4', href && 'hover:bg-muted', className);
+    const clases = clsx(
+        'block rounded-3xl border border-border bg-card p-5 shadow-soft',
+        href && 'transition-[transform,box-shadow] duration-200 hover:-translate-y-0.5 hover:shadow-lift focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/40',
+        className,
+    );
     const cuerpo = (
         <>
-            <p className={clsx('text-3xl font-semibold', TONOS[tone] || TONOS.neutral)}>{loading ? '-' : value}</p>
-            <p className="mt-1 text-sm text-muted-foreground">{label}</p>
+            <p className={clsx('font-display text-4xl leading-none tracking-tight tabular-nums', TONOS[tone] || TONOS.neutral)}>{loading ? '-' : value}</p>
+            <p className="mt-2 text-sm font-medium text-foreground">{label}</p>
             {hint && <p className="mt-1 text-xs text-muted-foreground">{hint}</p>}
         </>
     );

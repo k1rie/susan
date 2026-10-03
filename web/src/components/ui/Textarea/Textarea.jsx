@@ -3,7 +3,7 @@ import { CONTROL_BASE } from '../Input/Input.jsx';
 
 // Área de texto; con showCount + maxLength muestra "n/max" (aria-live para lectores de pantalla).
 export default function Textarea({ rows = 3, maxLength, showCount = false, invalid, value, className, ...rest }) {
-    const borde = invalid || rest['aria-invalid'] ? 'border-destructive' : 'border-border';
+    const borde = invalid || rest['aria-invalid'] ? 'border-destructive' : 'border-input';
     const longitud = typeof value === 'string' ? value.length : 0;
     return (
         <div className="flex flex-col gap-1">
