@@ -1,0 +1,411 @@
+
+=== slide1.xml ===
+DISEÑO DE BASES DE DATOS · PROYECTO INTEGRADOR
+Registro de asistencia por reconocimiento facial
+Definición del modelo de datos: entidades, atributos, relaciones y reglas de negocio.
+INTEGRANTES
+Casanova Pérez Gabriela
+Gonzalez Guerrero Diego Enrique
+Escobar Domínguez Josué Gabriel
+Peña Morales José Manuel
+Gómez Delgado Ades Yasir
+Pérez Hernández Alan Eduardo
+
+=== slide2.xml ===
+PROBLEMÁTICA
+El pase de lista manual consume tiempo de clase y produce registros poco confiables
+Hoy el docente nombra a cada alumno al inicio de la sesión y anota el resultado en una lista impresa. El conteo final se captura otra vez, a mano, al cierre del periodo.
+4 h
+de clase por grupo al semestre, con 5 minutos de pase de lista en 3 sesiones semanales durante 16 semanas.
+01
+El registro depende de que el alumno responda: se presta a suplantación y a errores de captura.
+02
+No hay historial consultable: el alumno no sabe cuántas faltas acumula hasta que es tarde.
+03
+Los datos en papel no permiten reportes por materia, grupo o periodo sin trabajo manual.
+
+=== slide3.xml ===
+DESCRIPCIÓN GENERAL
+La asistencia no se decide con una foto, sino con muchas lecturas del mismo rostro
+Durante la ventana de tolerancia, las cámaras del aula toman capturas cada pocos segundos. Cada rostro de cada captura se convierte en un vector y se busca en el índice de los alumnos inscritos en el grupo. La asistencia se marca cuando el mismo alumno acumula varias lecturas válidas en capturas distintas, lo que absorbe los rostros de perfil, tapados o mal iluminados.
+01
+Muestreo
+Capturas periódicas desde una o dos cámaras del aula.
+→
+02
+Vectorización
+Cada rostro de cada captura genera un vector.
+→
+03
+Búsqueda en FAISS
+El índice devuelve el vecino más cercano y su score.
+→
+04
+Consolidación
+Varias lecturas del mismo alumno confirman su presencia.
+→
+05
+Registro
+Un solo registro por alumno, revisable por el docente.
+
+=== slide4.xml ===
+ARQUITECTURA DE ALMACENAMIENTO
+Tres almacenes: la base relacional guarda referencias, no rostros
+POSTGRES · SUPABASE
+Base relacional
+Alumnos, grupos, sesiones, capturas, detecciones y asistencias. De cada rostro guarda únicamente su identificador en el índice y la ruta del objeto en el bucket.
+FAISS
+Índice vectorial
+Contiene los vectores de los rostros registrados y resuelve la búsqueda por similitud de cada lectura. Devuelve el vecino más cercano y su score.
+SUPABASE STORAGE
+Bucket privado
+Fotos de registro, el archivo del índice versionado y los recortes de rostro de cada lectura, con retención definida y acceso por URL firmada.
+El lenguaje y el framework del servicio de reconocimiento se definen en la siguiente etapa. El modelo de datos no depende de esa decisión.
+
+=== slide5.xml ===
+ALCANCE Y SUPUESTOS
+Qué cubre la primera versión del sistema
+INCLUYE
+Alta de alumnos, docentes, materias y grupos por periodo escolar.
+Registro de una plantilla facial por alumno, previo consentimiento.
+Muestreo periódico durante la ventana de tolerancia y consolidación de lecturas.
+Cola de revisión del docente para los casos dudosos y los justificantes.
+Reportes de asistencia por alumno, grupo y periodo.
+QUEDA FUERA DE ESTA VERSIÓN
+Entrenamiento del modelo de visión: se usa una librería existente.
+Control de acceso físico a edificios o laboratorios.
+Calificaciones, kárdex y cualquier dato académico distinto a la asistencia.
+Aplicación móvil para el alumno.
+Detección de vida para evitar el uso de fotografías.
+Supuesto: una o dos cámaras fijas por aula, colocadas al frente y al fondo para cubrir los ángulos del grupo, con conexión a la red del plantel.
+
+=== slide6.xml ===
+01
+Modelo de datos
+Entidades principales, atributos, relaciones y cardinalidades.
+
+=== slide7.xml ===
+ENTIDADES PRINCIPALES
+Doce entidades sostienen el registro de asistencia
+ALUMNO
+Persona cuya asistencia se registra.
+DOCENTE
+Responsable del grupo y de las correcciones.
+MATERIA
+Asignatura del plan de estudios.
+GRUPO
+Materia impartida en un periodo y un aula.
+INSCRIPCIÓN
+Vincula alumno y grupo. Resuelve el N:M.
+SESIÓN_CLASE
+Ocurrencia concreta de una clase, con fecha.
+ASISTENCIA
+Un solo resultado por alumno y sesión.
+JUSTIFICANTE
+Soporte de una falta, aprobado por el docente.
+PLANTILLA_FACIAL
+Referencia al vector del alumno en el índice.
+ÍNDICE_FAISS
+Versión del índice vectorial en uso.
+CÁMARA · CAPTURA
+Dispositivo del aula y cada muestra que toma.
+DETECCIÓN
+Un rostro leído dentro de una captura.
+Entidades de apoyo: CONSENTIMIENTO para el uso del dato facial y USUARIO para el acceso por rol.
+
+=== slide8.xml ===
+ATRIBUTOS · 1 DE 3
+Catálogo académico
+ALUMNO
+id_alumno PK
+INT
+matricula
+VARCHAR(10)
+nombre_completo
+VARCHAR(120)
+correo_institucional
+VARCHAR(120)
+estatus
+ENUM
+DOCENTE
+id_docente PK
+INT
+num_empleado
+VARCHAR(10)
+nombre_completo
+VARCHAR(120)
+correo_institucional
+VARCHAR(120)
+estatus
+ENUM
+MATERIA
+id_materia PK
+INT
+clave
+VARCHAR(8)
+nombre
+VARCHAR(80)
+creditos
+SMALLINT
+horas_semana
+SMALLINT
+GRUPO
+id_grupo PK
+INT
+id_materia FK
+INT
+id_docente FK
+INT
+clave_grupo
+VARCHAR(8)
+periodo
+VARCHAR(10)
+aula
+VARCHAR(10)
+
+=== slide9.xml ===
+ATRIBUTOS · 2 DE 3
+Operación de la clase
+INSCRIPCIÓN
+id_inscripcion PK
+INT
+id_alumno FK
+INT
+id_grupo FK
+INT
+fecha_alta
+DATE
+estatus
+ENUM
+SESIÓN_CLASE
+id_sesion PK
+INT
+id_grupo FK
+INT
+fecha
+DATE
+hora_inicio · hora_fin
+TIME
+tolerancia_min
+SMALLINT
+intervalo_muestreo_seg
+SMALLINT
+ASISTENCIA
+id_asistencia PK
+INT
+id_sesion FK
+INT
+id_alumno FK
+INT
+estado
+ENUM
+hora_registro · origen
+DATETIME
+conteo_detecciones
+SMALLINT
+JUSTIFICANTE
+id_justificante PK
+INT
+id_alumno FK
+INT
+id_sesion FK
+INT
+motivo
+VARCHAR(200)
+objeto_documento
+VARCHAR(255)
+estatus
+ENUM
+
+=== slide10.xml ===
+ATRIBUTOS · 3 DE 3
+Captura y módulo biométrico
+PLANTILLA_FACIAL
+id_plantilla PK
+INT
+id_alumno FK
+INT
+faiss_id
+BIGINT
+id_indice FK
+INT
+activa
+BOOLEAN
+ÍNDICE_FAISS
+id_indice PK
+INT
+version
+VARCHAR(12)
+dimension
+SMALLINT
+objeto_indice
+VARCHAR(255)
+total_vectores
+INT
+CONSENTIMIENTO
+id_consent PK
+INT
+id_alumno FK
+INT
+vigencia_hasta
+DATE
+objeto_documento
+VARCHAR(255)
+estatus
+ENUM
+CÁMARA
+id_camara PK
+INT
+aula
+VARCHAR(10)
+posicion
+ENUM
+direccion_ip
+VARCHAR(45)
+estatus
+ENUM
+CAPTURA
+id_captura PK
+BIGINT
+id_camara FK
+INT
+id_sesion FK
+INT
+marca_tiempo
+DATETIME
+rostros_detectados
+SMALLINT
+DETECCIÓN
+id_deteccion PK
+BIGINT
+id_captura FK
+BIGINT
+id_plantilla FK
+INT NULL
+score_similitud
+DECIMAL(4,3)
+objeto_recorte
+VARCHAR(255)
+Los vectores viven en el índice FAISS y las imágenes en el bucket: todo campo que empieza con objeto_ es una ruta, no un archivo.
+
+=== slide11.xml ===
+
+=== slide12.xml ===
+RELACIONES Y CARDINALIDADES
+Trece relaciones, una sola de muchos a muchos
+ENTIDAD
+RELACIÓN
+ENTIDAD
+CARDINALIDAD
+MATERIA
+se imparte en
+GRUPO
+1 : N
+DOCENTE
+imparte
+GRUPO
+1 : N
+ALUMNO
+se inscribe en
+GRUPO
+N : M · vía INSCRIPCIÓN
+GRUPO
+programa
+SESIÓN_CLASE
+1 : N
+SESIÓN_CLASE
+genera
+ASISTENCIA
+1 : N
+ALUMNO
+registra
+ASISTENCIA
+1 : N
+ALUMNO
+tiene
+PLANTILLA_FACIAL
+1 : N · una activa
+ÍNDICE_FAISS
+indexa
+PLANTILLA_FACIAL
+1 : N
+CÁMARA
+produce
+CAPTURA
+1 : N
+SESIÓN_CLASE
+contiene
+CAPTURA
+1 : N
+CAPTURA
+arroja
+DETECCIÓN
+1 : N
+PLANTILLA_FACIAL
+identifica
+DETECCIÓN
+1 : N · 0..1 por lectura
+DETECCIÓN
+respalda
+ASISTENCIA
+N : 1 · varias por registro
+
+=== slide13.xml ===
+REGLAS DE NEGOCIO · 1 DE 2
+Registro de la asistencia
+RN-01
+Un alumno solo puede registrar asistencia en sesiones de grupos donde tenga una inscripción activa.
+RN-02
+Aunque el muestreo produzca varias detecciones del mismo alumno, la sesión genera un único registro de asistencia.
+RN-03
+El estado se asigna por la hora de la primera detección válida: presente en los primeros 10 minutos, retardo hasta el minuto 20.
+RN-04
+Una detección se atribuye al alumno del vecino más cercano que devuelve el índice FAISS, y solo si su score es mayor o igual a 0.850.
+RN-05
+La asistencia se confirma con al menos tres detecciones válidas del mismo alumno en capturas distintas; con una o dos queda pendiente de revisión del docente.
+RN-06
+Una sesión solo se abre en el horario y el aula del grupo; si ninguna cámara del aula está activa, se habilita el pase de lista manual.
+RN-07
+Al cerrar la sesión, los alumnos inscritos sin detecciones suficientes quedan marcados como ausentes.
+
+=== slide14.xml ===
+REGLAS DE NEGOCIO · 2 DE 2
+Corrección, control y resguardo
+RN-08
+El docente puede corregir un registro hasta 48 horas después de la sesión; toda corrección conserva el valor anterior en bitácora, con usuario y fecha.
+RN-09
+Un justificante aprobado cambia el estado a justificado sin eliminar el registro original ni las detecciones que lo respaldan.
+RN-10
+Tres retardos en la misma materia equivalen a una ausencia.
+RN-11
+Al superar el 20 % de ausencias en el periodo, el alumno pierde derecho a examen y el sistema notifica al docente.
+RN-12
+Cada alumno mantiene una sola plantilla activa; al dar de alta una nueva, la anterior se archiva y el índice FAISS se reconstruye con una versión nueva.
+RN-13
+No se registra la plantilla facial de un alumno sin consentimiento firmado y vigente.
+
+=== slide15.xml ===
+PRIVACIDAD DEL DATO BIOMÉTRICO
+El dato facial es dato personal sensible y el modelo lo trata como tal
+La base guarda referencias
+Ningún vector ni imagen se almacena en las tablas: solo el faiss_id y la ruta del objeto. El índice puede reconstruirse sin tocar el resto del modelo.
+Bucket privado
+Ningún objeto es público: el acceso es por URL firmada de vigencia corta y los recortes de rostro se eliminan al cumplir su retención.
+Consentimiento y rol
+Sin consentimiento vigente el alumno usa el pase de lista manual. El docente ve solo sus grupos y la bitácora registra cada consulta.
+
+=== slide16.xml ===
+SIGUIENTES PASOS
+De este modelo conceptual al esquema físico
+1
+Normalización
+Revisar el modelo hasta tercera forma normal y cerrar los dominios de cada ENUM.
+2
+Esquema físico
+Escribir el script de creación con llaves, índices y restricciones de integridad.
+3
+Calibración
+Ajustar intervalo de muestreo, umbral de similitud y mínimo de detecciones con datos reales.
+4
+Servicio y lenguaje
+Elegir el lenguaje del servicio de reconocimiento y probar la carga del índice.
