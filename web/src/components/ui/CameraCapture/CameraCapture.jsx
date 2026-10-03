@@ -93,7 +93,7 @@ export default function CameraCapture({
                     </Button>
                 </Alert>
             )}
-            <div className={clsx('relative aspect-[4/3] w-full overflow-hidden rounded-lg bg-foreground', errorCamara && 'hidden')}>
+            <div className={clsx('relative aspect-[4/3] w-full overflow-hidden rounded-3xl bg-foreground shadow-soft', errorCamara && 'hidden')}>
                 <video
                     ref={videoRef}
                     playsInline

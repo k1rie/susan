@@ -25,17 +25,17 @@ export default function Table({
     const ariaSort = (col) => (sort?.key === col.key ? (sort.dir === 'asc' ? 'ascending' : 'descending') : undefined);
 
     return (
-        <div className={clsx('overflow-x-auto rounded-lg border border-border bg-card', stickyHeader && 'max-h-[70dvh] overflow-y-auto', className)}>
+        <div className={clsx('overflow-x-auto rounded-3xl border border-border bg-card shadow-soft', stickyHeader && 'max-h-[70dvh] overflow-y-auto', className)}>
             <table className="w-full min-w-max border-collapse text-sm">
                 {caption && <caption className="px-4 py-2 text-left text-sm text-muted-foreground">{caption}</caption>}
-                <thead className={clsx('bg-muted text-muted-foreground', stickyHeader && 'sticky top-0 z-10')}>
+                <thead className={clsx('bg-muted/60 text-xs uppercase tracking-wide text-muted-foreground', stickyHeader && 'sticky top-0 z-10')}>
                     <tr>
                         {columns.map((col) => (
                             <th
                                 key={col.key}
                                 scope="col"
                                 aria-sort={ariaSort(col)}
-                                className={clsx('px-3 py-2 font-medium', clasesCelda(col))}
+                                className={clsx('px-4 py-3 font-medium', clasesCelda(col))}
                             >
                                 {onSort && col.sortable !== false ? (
                                     <button type="button" onClick={() => onSort(col.key)} className="min-h-9 font-medium">
@@ -52,14 +52,14 @@ export default function Table({
                 <tbody aria-busy={loading ? 'true' : undefined}>
                     {loading && rows.length === 0 && (
                         <tr>
-                            <td colSpan={columns.length} className="px-3 py-8 text-center">
+                            <td colSpan={columns.length} className="px-4 py-10 text-center">
                                 <Spinner />
                             </td>
                         </tr>
                     )}
                     {!loading && rows.length === 0 && (
                         <tr>
-                            <td colSpan={columns.length} className="px-3 py-8 text-center text-muted-foreground">
+                            <td colSpan={columns.length} className="px-4 py-10 text-center text-muted-foreground">
                                 {emptyMessage}
                             </td>
                         </tr>
@@ -79,10 +79,10 @@ export default function Table({
                                       }
                                     : undefined
                             }
-                            className={clsx('border-t border-border', onRowClick && 'cursor-pointer hover:bg-muted')}
+                            className={clsx('border-t border-border transition-colors', onRowClick && 'cursor-pointer hover:bg-accent/60 focus-visible:bg-accent/60 focus-visible:outline-none')}
                         >
                             {columns.map((col) => (
-                                <td key={col.key} className={clsx('px-3 py-2', col.primary && 'font-medium', clasesCelda(col))}>
+                                <td key={col.key} className={clsx('px-4 py-3', col.primary && 'font-medium', clasesCelda(col))}>
                                     {col.render ? col.render(row) : row[col.key]}
                                 </td>
                             ))}

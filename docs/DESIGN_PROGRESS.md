@@ -1,6 +1,6 @@
 ---
 status: running
-heartbeat: 2026-10-03T04:21:34Z
+heartbeat: 2026-10-03T04:23:14Z
 phase: F1
 ---
 
@@ -19,7 +19,7 @@ Si `heartbeat` está más viejo (o `pending`), toma el trabajo: pon `status: run
 
 - [x] **F0** Investigación → `docs/design/REFERENCIAS.md` y `docs/design/SISTEMA.md` (SchoolAI público revisado con el navegador integrado; **Mobbin pendiente**: la extensión de Chrome no estaba conectada — ampliar REFERENCIAS.md cuando lo esté)
 - [x] **F1** Infraestructura: shadcn init, tokens, `lib/motion`, componentes ReactBits elegidos (reescritos en CSS/rAF; `Stepper` se adapta en F4)
-- [ ] **F2** ui-kit re-skineado (misma API de props)
+- [x] **F2** ui-kit re-skineado (misma API de props; nuevo `Button arrow`, `Badge tone="gold"`, `StatCard` con cifra serif)
 - [ ] **F3** Shell, registro de módulos y Home por rol (+ `/modulos/[id]`)
 - [ ] **F4** Auth: login, recuperar, cambiar contraseña, activar cuenta
 - [ ] **F5** Operación: sesión en vivo, pase manual, revisión, reportes, portal del alumno
@@ -34,7 +34,8 @@ Si `heartbeat` está más viejo (o `pending`), toma el trabajo: pon `status: run
 | — | Plan creado | 2332fc4 |
 | 2026-10-03 | F0: referencias y sistema de diseño | 232b09f |
 | 2026-10-03 | F1a: shadcn (radix-maia, JS), tokens, fuentes, codemod de utilidades | d81a575 |
-| 2026-10-03 | F1b: `lib/motion` + `components/motion` (BlurText, CountUp, Reveal, SpotlightCard, StaggerList), token `primary-hover` | (siguiente commit) |
+| 2026-10-03 | F1b: `lib/motion` + `components/motion` (BlurText, CountUp, Reveal, SpotlightCard, StaggerList), token `primary-hover` | e2fd11d |
+| 2026-10-03 | F2: ui-kit re-skineado (Button píldora + flecha circular, Card 24 px, inputs con anillo de foco, Alert con icono, Modal/Toast animados, Tabs segmentadas, StatusChip con punto, StatCard serif) | (siguiente commit) |
 
 ## Dependencias de animación añadidas (nombre · tamaño gz · dónde)
 

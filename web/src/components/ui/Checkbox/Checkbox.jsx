@@ -19,7 +19,7 @@ export default function Checkbox({ label, children, checked, onChange, indetermi
                     ref={(el) => {
                         if (el) el.indeterminate = indeterminate;
                     }}
-                    className="h-5 w-5 shrink-0 accent-primary"
+                    className="h-5 w-5 shrink-0 rounded-md accent-primary focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/40"
                     {...rest}
                 />
                 <span>{label ?? children}</span>

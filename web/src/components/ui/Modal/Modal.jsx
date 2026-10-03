@@ -27,7 +27,7 @@ export default function Modal({
     if (!open) return null;
     return (
         <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/50 p-2"
+            className="fixed inset-0 z-50 flex animate-in items-center justify-center bg-foreground/40 p-3 duration-200 fade-in-0"
             onMouseDown={(e) => {
                 if (closeOnOverlay && e.target === e.currentTarget) onClose?.();
             }}
@@ -39,18 +39,18 @@ export default function Modal({
                 aria-labelledby={titleId}
                 tabIndex={-1}
                 className={clsx(
-                    'flex max-h-[90dvh] w-full flex-col rounded-lg bg-card text-foreground shadow-lg',
+                    'flex max-h-[90dvh] w-full animate-in flex-col rounded-3xl bg-card text-foreground shadow-lift duration-200 fade-in-0 zoom-in-95',
                     ANCHOS[size] || ANCHOS.md,
                     className,
                 )}
             >
-                <div className="border-b border-border px-4 py-3">
-                    <h2 id={titleId} className="text-lg font-semibold">
+                <div className="px-6 pt-6 pb-2">
+                    <h2 id={titleId} className="text-xl font-semibold tracking-tight">
                         {title}
                     </h2>
                 </div>
-                <div className="overflow-y-auto px-4 py-4">{children}</div>
-                {footer && <div className="flex flex-wrap justify-end gap-2 border-t border-border px-4 py-3">{footer}</div>}
+                <div className="overflow-y-auto px-6 py-3">{children}</div>
+                {footer && <div className="flex flex-wrap justify-end gap-2 px-6 pt-3 pb-6">{footer}</div>}
             </div>
         </div>
     );
