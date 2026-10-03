@@ -1,79 +1,48 @@
 'use client';
 
-import Link from 'next/link';
-import { Menu } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { Menu, Search } from 'lucide-react';
 import BrandMark from '../BrandMark/BrandMark.jsx';
-import { rolEtiqueta } from '../Sidebar/navItems.js';
+import UserMenu from '../UserMenu/UserMenu.jsx';
 
-// Barra superior fija de 56 px. Presentacional: "Salir" delega en onSalir (lo cablea la página).
-export default function Topbar({ me, onMenu, onSalir }) {
-    const [abierto, setAbierto] = useState(false);
-    const raiz = useRef(null);
-
-    useEffect(() => {
-        if (!abierto) return undefined;
-        const onKey = (e) => {
-            if (e.key === 'Escape') setAbierto(false);
-        };
-        const onClick = (e) => {
-            if (raiz.current && !raiz.current.contains(e.target)) setAbierto(false);
-        };
-        document.addEventListener('keydown', onKey);
-        document.addEventListener('mousedown', onClick);
-        return () => {
-            document.removeEventListener('keydown', onKey);
-            document.removeEventListener('mousedown', onClick);
-        };
-    }, [abierto]);
-
+// Barra superior fija de 56 px: marca a la izquierda, buscador en píldora al centro (abre la paleta ⌘K) y cuenta a la
+// derecha. Presentacional: "Salir" delega en onSalir (lo cablea la página).
+export default function Topbar({ me, onMenu, onBuscar, onSalir }) {
     return (
-        <header className="fixed inset-x-0 top-0 z-50 flex h-14 items-center justify-between gap-2 border-b border-border bg-card px-3">
-            <div className="flex items-center gap-2">
+        <header className="fixed inset-x-0 top-0 z-50 flex h-14 items-center gap-2 border-b border-border/60 bg-background/90 px-3 backdrop-blur-md">
+            <div className="flex items-center gap-1 lg:w-60 lg:shrink-0">
                 <button
                     type="button"
                     onClick={onMenu}
                     aria-label="Abrir menú"
-                    className="inline-flex h-11 w-11 items-center justify-center rounded-md hover:bg-muted lg:hidden"
+                    className="inline-flex size-11 items-center justify-center rounded-full transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/40 lg:hidden"
                 >
-                    <Menu aria-hidden="true" className="h-5 w-5" />
+                    <Menu aria-hidden="true" className="size-5" strokeWidth={1.75} />
                 </button>
                 <BrandMark variant="compact" />
             </div>
-            <div ref={raiz} className="relative min-w-0">
+            <div className="flex flex-1 justify-center">
                 <button
                     type="button"
-                    aria-haspopup="menu"
-                    aria-expanded={abierto}
-                    onClick={() => setAbierto((v) => !v)}
-                    className="flex min-h-11 max-w-[14rem] flex-col items-end justify-center rounded-md px-2 text-right hover:bg-muted"
+                    onClick={onBuscar}
+                    aria-label="Buscar o ir a"
+                    aria-keyshortcuts="Control+K Meta+K"
+                    className="hidden h-10 w-full max-w-md items-center gap-2.5 rounded-full border border-border bg-card px-4 text-sm text-muted-foreground shadow-xs transition-[border-color,box-shadow] hover:border-input focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/40 md:flex"
                 >
-                    <span className="max-w-full truncate text-sm font-medium">{me?.nombre}</span>
-                    <span className="text-xs text-muted-foreground">{rolEtiqueta(me?.rol)}</span>
+                    <Search aria-hidden="true" className="size-4 shrink-0" strokeWidth={1.75} />
+                    <span className="flex-1 text-left">Buscar o ir a…</span>
+                    <kbd className="rounded-md border border-border px-1.5 py-0.5 text-xs">⌘K</kbd>
                 </button>
-                {abierto && (
-                    <div role="menu" className="absolute right-0 top-full mt-1 w-52 rounded-md border border-border bg-card p-1 shadow-md">
-                        <Link
-                            role="menuitem"
-                            href="/cambiar-contrasena"
-                            onClick={() => setAbierto(false)}
-                            className="flex min-h-11 items-center rounded px-3 text-sm hover:bg-muted"
-                        >
-                            Cambiar contraseña
-                        </Link>
-                        <button
-                            type="button"
-                            role="menuitem"
-                            onClick={() => {
-                                setAbierto(false);
-                                onSalir?.();
-                            }}
-                            className="flex min-h-11 w-full items-center rounded px-3 text-left text-sm hover:bg-muted"
-                        >
-                            Salir
-                        </button>
-                    </div>
-                )}
+            </div>
+            <div className="flex items-center gap-1">
+                <button
+                    type="button"
+                    onClick={onBuscar}
+                    aria-label="Buscar o ir a"
+                    className="inline-flex size-11 items-center justify-center rounded-full transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/40 md:hidden"
+                >
+                    <Search aria-hidden="true" className="size-5" strokeWidth={1.75} />
+                </button>
+                <UserMenu me={me} onSalir={onSalir} />
             </div>
         </header>
     );
