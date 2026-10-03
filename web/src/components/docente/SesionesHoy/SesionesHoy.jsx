@@ -40,7 +40,7 @@ export default function SesionesHoy({ sesiones = [] }) {
                                 <p className="font-medium">
                                     {s.materia} ({s.clave_grupo})
                                 </p>
-                                <p className="text-sm text-muted">
+                                <p className="text-sm text-muted-foreground">
                                     {hhmm(s.hora_inicio)} - {hhmm(s.hora_fin)} · Aula {s.aula} · {s.camaras_activas} cámaras activas
                                 </p>
                                 <div className="mt-1 flex flex-wrap gap-2">

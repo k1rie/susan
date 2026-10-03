@@ -5,7 +5,7 @@ function Renglon({ etiqueta, valor, ok }) {
     return (
         <li className="flex flex-wrap items-center justify-between gap-2 border-b border-border py-1 last:border-b-0">
             <span>
-                {etiqueta}: <span className="text-muted">{valor}</span>
+                {etiqueta}: <span className="text-muted-foreground">{valor}</span>
             </span>
             <Badge tone={ok ? 'success' : 'danger'}>{ok ? 'Correcto' : 'Revisar'}</Badge>
         </li>
@@ -28,7 +28,7 @@ export default function CalidadFotoResumen({ resultado }) {
                 <Renglon etiqueta="De frente" valor={c.frontal ? 'sí' : 'no'} ok={c.frontal === true} />
             </ul>
             {motivo && (
-                <p role="alert" className="font-medium text-danger">
+                <p role="alert" className="font-medium text-destructive">
                     Foto rechazada: {textoMotivo(motivo)}
                 </p>
             )}

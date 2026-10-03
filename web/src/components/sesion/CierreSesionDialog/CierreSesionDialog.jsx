@@ -30,7 +30,7 @@ export default function CierreSesionDialog({ open, idSesion, totales, onCancel, 
                     <li>Los alumnos con 1 o 2 lecturas quedan como pendientes de revisión.</li>
                 </ul>
                 {totales && (
-                    <p className="text-muted">
+                    <p className="text-muted-foreground">
                         Sin registro ahora: {totales.sin_registro ?? 0} · Pendientes: {totales.pendientes ?? 0}
                     </p>
                 )}

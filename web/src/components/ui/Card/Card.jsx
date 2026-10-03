@@ -7,7 +7,7 @@ export default function Card({ title, actions, as: Tag = 'section', padded = tru
     return (
         <Tag
             aria-labelledby={title ? titleId : undefined}
-            className={clsx('rounded-lg border border-border bg-surface', className)}
+            className={clsx('rounded-lg border border-border bg-card', className)}
             {...rest}
         >
             {(title || actions) && (

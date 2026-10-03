@@ -6,7 +6,7 @@ const T = {
     ausente: 'text-ausente bg-ausente-bg',
     pendiente: 'text-pendiente bg-pendiente-bg',
     justificado: 'text-justificado bg-justificado-bg',
-    neutro: 'text-muted bg-surface-muted',
+    neutro: 'text-muted-foreground bg-muted',
 };
 
 export const MAPA_ESTADOS = {

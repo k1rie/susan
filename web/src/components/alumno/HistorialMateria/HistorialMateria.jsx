@@ -8,12 +8,12 @@ export default function HistorialMateria({ items = [], total = 0, limit = 10, of
     if (!items.length) return <EmptyState title="Aún no hay sesiones registradas en esta materia." />;
     return (
         <div className="flex flex-col gap-3">
-            <ul className="divide-y divide-border rounded-lg border border-border bg-surface">
+            <ul className="divide-y divide-border rounded-lg border border-border bg-card">
                 {items.map((s) => (
                     <li key={s.id_sesion} className="flex flex-wrap items-center justify-between gap-2 px-4 py-3">
                         <div className="min-w-0">
                             <p className="font-medium">{fechaCorta(s.fecha)} · {horaCorta(s.hora_inicio)}</p>
-                            <p className="text-xs text-muted">
+                            <p className="text-xs text-muted-foreground">
                                 {s.origen ? <>Origen: <StatusChip kind="origen" value={s.origen} size="sm" /></> : 'Sin origen'}
                                 {s.hora_registro ? ` · registrado ${horaCorta(String(s.hora_registro).slice(11))}` : ''}
                             </p>
@@ -24,16 +24,16 @@ export default function HistorialMateria({ items = [], total = 0, limit = 10, of
                             ) : s.estado ? (
                                 <StatusChip kind="asistencia" value={s.estado} size="sm" />
                             ) : (
-                                <span className="text-sm text-muted">Sin registro</span>
+                                <span className="text-sm text-muted-foreground">Sin registro</span>
                             )}
                             {s.justificante && (
-                                <span className="text-xs text-muted">
+                                <span className="text-xs text-muted-foreground">
                                     Justificante: <StatusChip kind="justificante" value={s.justificante.estatus} size="sm" />
                                 </span>
                             )}
                             {s.puede_justificar && onJustificar && (
                                 <button type="button" onClick={() => onJustificar(s)}
-                                    className="min-h-11 rounded-md border border-border px-3 text-sm font-medium text-primary hover:bg-surface-muted">
+                                    className="min-h-11 rounded-md border border-border px-3 text-sm font-medium text-primary hover:bg-muted">
                                     Justificar
                                 </button>
                             )}

@@ -1,32 +1,70 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
 
 /* =========================================================================
-   SUSAN — tokens de diseño (BASE)
-   Diseño mínimo a propósito: el rediseño visual vendrá después. Por eso los
-   componentes NO usan colores crudos, solo estas utilidades semánticas
-   (bg-surface, text-muted, border-border, bg-primary, text-presente, …):
-   cambiar la apariencia = cambiar estos valores.
-   Paleta institucional UNACH: azul marino #1F3A5F + dorado #A8842C.
+   SUSAN — tokens de diseño (fase 2: diseño real; ver docs/design/SISTEMA.md)
+   Vocabulario de shadcn/ui (background, card, primary, muted, accent, …) más la
+   identidad de SUSAN: lienzo cálido, azul UNACH vivo como acción, azul marino de
+   marca, dorado UNACH como acento y los estados de asistencia (siempre texto + color).
+   Los componentes NUNCA usan colores crudos: solo estas utilidades semánticas.
    ========================================================================= */
 
 :root {
-  --background: #f3f5f9;
-  --foreground: #0f1b2d;
-  --surface: #ffffff;
-  --surface-muted: #eef1f6;
-  --border: #d9dfe8;
-  --muted: #5a6779;
+  /* Lienzo y superficies */
+  --background: #f6f5f1;
+  --foreground: #14213d;
+  --card: #ffffff;
+  --card-foreground: #14213d;
+  --popover: #ffffff;
+  --popover-foreground: #14213d;
 
-  --primary: #1f3a5f;
-  --primary-hover: #2b4c7a;
+  /* Acción */
+  --primary: #2f5aa8;
   --primary-foreground: #ffffff;
-  --accent: #a8842c;
-  --accent-foreground: #ffffff;
-  --ring: #c29b3c;
+  --secondary: #ebe9e2;
+  --secondary-foreground: #14213d;
 
+  /* Apoyo */
+  --muted: #eeece6;
+  --muted-foreground: #596478;
+  --accent: #e8eef9;
+  --accent-foreground: #1f3a5f;
+  --destructive: #b3261e;
+
+  /* Contornos y foco */
+  --border: #e3e0d6;
+  --input: #d9d5c8;
+  --ring: #6f93d8;
+  --radius: 1rem;
+
+  /* Gráficas (recharts) */
+  --chart-1: #2f5aa8;
+  --chart-2: #a8842c;
+  --chart-3: #1f7a47;
+  --chart-4: #b3261e;
+  --chart-5: #6f4fb3;
+
+  /* Barra lateral */
+  --sidebar: #fbfaf7;
+  --sidebar-foreground: #14213d;
+  --sidebar-primary: #2f5aa8;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #e8eef9;
+  --sidebar-accent-foreground: #1f3a5f;
+  --sidebar-border: #e8e5db;
+  --sidebar-ring: #6f93d8;
+
+  /* Marca UNACH */
+  --brand-navy: #1f3a5f;
+  --brand-gold: #a8842c;
+  --brand-gold-soft: #f6edd3;
+
+  /* Semánticos */
   --success: #2e7d4f;
   --warning: #b7791f;
-  --danger: #b3261e;
   --info: #2563a8;
 
   /* Estados de asistencia: siempre texto + color (nunca solo color). */
@@ -40,24 +78,97 @@
   --pendiente-bg: #e6ebf2;
   --justificado: #1f5fa8;
   --justificado-bg: #e1edfa;
+
+  /* Sombras suaves (referencia: tarjetas de SchoolAI) */
+  --shadow-soft: 0 1px 2px rgba(20, 33, 61, 0.04), 0 12px 32px rgba(20, 33, 61, 0.06);
+  --shadow-lift: 0 2px 4px rgba(20, 33, 61, 0.05), 0 20px 48px rgba(20, 33, 61, 0.1);
+}
+
+/* Paleta oscura (opcional; todavía no hay interruptor). Mismo vocabulario. */
+.dark {
+  --background: #0b1426;
+  --foreground: #eaf0fb;
+  --card: #121e36;
+  --card-foreground: #eaf0fb;
+  --popover: #121e36;
+  --popover-foreground: #eaf0fb;
+  --primary: #7aa2ea;
+  --primary-foreground: #0b1426;
+  --secondary: #1a2a47;
+  --secondary-foreground: #eaf0fb;
+  --muted: #17243f;
+  --muted-foreground: #9fb0cc;
+  --accent: #1c2f55;
+  --accent-foreground: #dbe7ff;
+  --destructive: #f0746c;
+  --border: rgba(255, 255, 255, 0.1);
+  --input: rgba(255, 255, 255, 0.16);
+  --ring: #7aa2ea;
+  --sidebar: #0e1a31;
+  --sidebar-foreground: #eaf0fb;
+  --sidebar-primary: #7aa2ea;
+  --sidebar-primary-foreground: #0b1426;
+  --sidebar-accent: #1c2f55;
+  --sidebar-accent-foreground: #dbe7ff;
+  --sidebar-border: rgba(255, 255, 255, 0.1);
+  --sidebar-ring: #7aa2ea;
+  --brand-gold: #d9b65c;
+  --brand-gold-soft: #3a3118;
+  --success: #4cc38a;
+  --warning: #e0a63a;
+  --info: #6aa9ec;
+  --presente: #5fd69a;
+  --presente-bg: rgba(46, 160, 98, 0.18);
+  --retardo: #f0c05c;
+  --retardo-bg: rgba(224, 166, 58, 0.18);
+  --ausente: #f48f88;
+  --ausente-bg: rgba(240, 116, 108, 0.18);
+  --pendiente: #b4c2d6;
+  --pendiente-bg: rgba(148, 163, 184, 0.16);
+  --justificado: #82b8f2;
+  --justificado-bg: rgba(106, 169, 236, 0.18);
+  --shadow-soft: 0 1px 2px rgba(0, 0, 0, 0.3), 0 12px 32px rgba(0, 0, 0, 0.3);
+  --shadow-lift: 0 2px 4px rgba(0, 0, 0, 0.35), 0 20px 48px rgba(0, 0, 0, 0.4);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --color-surface: var(--surface);
-  --color-surface-muted: var(--surface-muted);
-  --color-border: var(--border);
-  --color-muted: var(--muted);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
   --color-primary: var(--primary);
-  --color-primary-hover: var(--primary-hover);
   --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  --color-brand-navy: var(--brand-navy);
+  --color-brand-gold: var(--brand-gold);
+  --color-brand-gold-soft: var(--brand-gold-soft);
   --color-success: var(--success);
   --color-warning: var(--warning);
-  --color-danger: var(--danger);
   --color-info: var(--info);
 
   --color-presente: var(--presente);
@@ -71,36 +182,50 @@
   --color-justificado: var(--justificado);
   --color-justificado-bg: var(--justificado-bg);
 
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+
+  --shadow-soft: var(--shadow-soft);
+  --shadow-lift: var(--shadow-lift);
+
+  /* Tipografía: interfaz en sans (Inter); titulares emocionales en serif (Instrument Serif) con la utilidad font-display. */
   --font-sans: var(--font-inter), "Inter", system-ui, sans-serif;
+  --font-heading: var(--font-inter), "Inter", system-ui, sans-serif;
+  --font-display: var(--font-display-serif), "Instrument Serif", Georgia, serif;
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
 }
 
 /* ---- Base ---- */
-html {
-  -webkit-text-size-adjust: 100%;
-  text-size-adjust: 100%;
-}
-
-html,
-body {
-  max-width: 100vw;
-  overflow-x: hidden;
-}
-
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-sans);
-}
-
-:focus-visible {
-  outline: 2px solid var(--ring);
-  outline-offset: 2px;
-}
-
-button:not(:disabled),
-[role="button"]:not([aria-disabled="true"]) {
-  cursor: pointer;
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    @apply font-sans;
+  }
+  html,
+  body {
+    max-width: 100vw;
+    overflow-x: hidden;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]) {
+    cursor: pointer;
+  }
 }
 
 /* iOS hace auto-zoom al enfocar campos con font-size < 16px (patrón MVP-FITNESS). */
@@ -109,6 +234,18 @@ button:not(:disabled),
   textarea,
   select {
     font-size: 16px !important;
+  }
+}
+
+/* Movimiento: respeta "reducir movimiento" en TODA la app (regla del plan de diseño, §3). */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
 

@@ -1,7 +1,7 @@
 import clsx from 'clsx';
 
 const TONOS = {
-    neutral: 'bg-surface-muted text-muted',
+    neutral: 'bg-muted text-muted-foreground',
     info: 'text-justificado bg-justificado-bg',
     success: 'text-presente bg-presente-bg',
     warning: 'text-retardo bg-retardo-bg',

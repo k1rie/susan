@@ -27,7 +27,7 @@ function DetalleAlumno({ detalle }) {
             ) : (
                 <div className="overflow-x-auto">
                     <table className="w-full min-w-max text-sm">
-                        <thead className="text-left text-muted">
+                        <thead className="text-left text-muted-foreground">
                             <tr>
                                 {['Fecha', 'Hora', 'Estado', 'Origen', 'Justificante'].map((c) => <th key={c} scope="col" className="px-3 py-2 font-medium">{c}</th>)}
                             </tr>
@@ -69,7 +69,7 @@ export default function ReporteAsistencia({ filtrosIniciales = {} }) {
                     actions={
                         <>
                             {hayGrupo && (
-                                <Link href={`/analitica?grupo=${r.valor.idGrupo}`} className="inline-flex min-h-11 items-center rounded-md border border-border bg-surface px-4 text-sm font-medium hover:bg-surface-muted">
+                                <Link href={`/analitica?grupo=${r.valor.idGrupo}`} className="inline-flex min-h-11 items-center rounded-md border border-border bg-card px-4 text-sm font-medium hover:bg-muted">
                                     Ver analítica
                                 </Link>
                             )}
@@ -94,7 +94,7 @@ export default function ReporteAsistencia({ filtrosIniciales = {} }) {
                                     isEmpty={() => false}>
                                     {(g) => (
                                         <div className="flex flex-col gap-4">
-                                            <p className="text-sm text-muted">
+                                            <p className="text-sm text-muted-foreground">
                                                 {g.grupo.materia_nombre} · Grupo {g.grupo.clave_grupo} · Docente: {g.grupo.docente_nombre}
                                             </p>
                                             {g.kpis.sesiones_programadas === 0 && (

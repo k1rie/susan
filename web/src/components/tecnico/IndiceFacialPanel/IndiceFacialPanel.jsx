@@ -15,8 +15,8 @@ const fecha = (iso) => (iso ? new Date(iso).toLocaleString('es-MX') : '-');
 
 function Dato({ k, v }) {
     return (
-        <div className="rounded-md bg-surface-muted p-3">
-            <dt className="text-xs text-muted">{k}</dt>
+        <div className="rounded-md bg-muted p-3">
+            <dt className="text-xs text-muted-foreground">{k}</dt>
             <dd className="text-lg font-semibold">{v}</dd>
         </div>
     );
@@ -67,7 +67,7 @@ export default function IndiceFacialPanel({ soloLectura = false }) {
                                         <Dato k="Construida" v={fecha(d.en_uso.fecha_construccion)} />
                                     </dl>
                                 ) : (
-                                    <p className="text-sm text-muted">Aún no hay una versión del índice en uso.</p>
+                                    <p className="text-sm text-muted-foreground">Aún no hay una versión del índice en uso.</p>
                                 )}
                                 {d.dimension_coincide === false && (
                                     <Alert tone="danger" className="mt-3">
@@ -129,7 +129,7 @@ export default function IndiceFacialPanel({ soloLectura = false }) {
                                         </table>
                                     </div>
                                 ) : (
-                                    <p className="text-sm text-muted">Sin versiones construidas.</p>
+                                    <p className="text-sm text-muted-foreground">Sin versiones construidas.</p>
                                 )}
                             </Card>
                         </>

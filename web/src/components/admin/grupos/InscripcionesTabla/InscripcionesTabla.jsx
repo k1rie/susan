@@ -68,7 +68,7 @@ export default function InscripcionesTabla({ idGrupo, capacidadAula, onChanged }
     return (
         <div className="grid gap-4">
             {capacidadAula != null && (
-                <p className="text-sm text-muted">
+                <p className="text-sm text-muted-foreground">
                     Inscritos activos: {activos.length} de {capacidadAula} lugares del aula.
                 </p>
             )}

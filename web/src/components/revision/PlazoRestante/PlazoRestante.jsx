@@ -18,7 +18,7 @@ export default function PlazoRestante({ venceEn, segundosRestantes }) {
     const vencido = segundos <= 0;
     const limite = formatearFechaLimite(venceEn);
     return (
-        <span className={vencido ? 'text-ausente' : 'text-muted'}>
+        <span className={vencido ? 'text-ausente' : 'text-muted-foreground'}>
             <span className="font-medium">{formatearPlazo(segundos)}</span>
             {limite && <span className="text-xs"> (límite: {limite})</span>}
         </span>

@@ -39,7 +39,7 @@ export function FormularioJustificante({ registros, idSesionInicial = null, onRe
     };
 
     return (
-        <form onSubmit={alEnviar} noValidate className="flex flex-col gap-4 rounded-lg border border-border bg-surface p-4" aria-label="Registrar justificante">
+        <form onSubmit={alEnviar} noValidate className="flex flex-col gap-4 rounded-lg border border-border bg-card p-4" aria-label="Registrar justificante">
             {h.error && <Alert tone="danger">{h.error}</Alert>}
             <Field label="Falta o retardo a justificar" required error={h.errores.idSesion}>
                 <Select
@@ -53,13 +53,13 @@ export function FormularioJustificante({ registros, idSesionInicial = null, onRe
                 <Textarea value={motivo} onChange={(e) => setMotivo(e.target.value)} maxLength={MOTIVO_MAX} showCount rows={3} />
             </Field>
             <div className="flex flex-col gap-1">
-                <span className="text-sm font-medium">Documento <span aria-hidden="true" className="text-danger">*</span></span>
+                <span className="text-sm font-medium">Documento <span aria-hidden="true" className="text-destructive">*</span></span>
                 <FileInput value={archivo} onSelect={setArchivo} accept={ACCEPT} maxBytes={MAX_BYTES}
                     label="Elegir documento (PDF, JPG o PNG, máx. 5 MB)" error={h.errores.archivo} />
             </div>
             <div className="flex flex-wrap items-center gap-3">
                 <Button type="submit" loading={h.ocupado}>Enviar justificante</Button>
-                <p role="status" aria-live="polite" className="text-sm text-muted">{TEXTO_FASE[h.fase] || ''}</p>
+                <p role="status" aria-live="polite" className="text-sm text-muted-foreground">{TEXTO_FASE[h.fase] || ''}</p>
             </div>
         </form>
     );

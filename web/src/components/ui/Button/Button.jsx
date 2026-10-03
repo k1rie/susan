@@ -4,9 +4,9 @@ import Spinner from '../Spinner/Spinner.jsx';
 
 const VARIANTES = {
     primary: 'bg-primary text-primary-foreground hover:bg-primary-hover border border-transparent',
-    secondary: 'bg-surface text-foreground border border-border hover:bg-surface-muted',
-    danger: 'bg-danger text-primary-foreground border border-transparent hover:opacity-90',
-    ghost: 'bg-transparent text-foreground border border-transparent hover:bg-surface-muted',
+    secondary: 'bg-card text-foreground border border-border hover:bg-muted',
+    danger: 'bg-destructive text-primary-foreground border border-transparent hover:opacity-90',
+    ghost: 'bg-transparent text-foreground border border-transparent hover:bg-muted',
 };
 const TAMANOS = { md: 'min-h-11 px-4 text-sm', sm: 'min-h-9 px-3 text-sm' };
 

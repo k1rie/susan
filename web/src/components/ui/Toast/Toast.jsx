@@ -8,7 +8,7 @@ const TONOS = {
     info: 'border-info',
     success: 'border-success',
     warning: 'border-warning',
-    danger: 'border-danger',
+    danger: 'border-destructive',
 };
 
 const ToastContext = createContext(null);
@@ -70,13 +70,13 @@ export function ToastProvider({ children }) {
                 {items.map((t) => (
                     <div
                         key={t.id}
-                        className={clsx('pointer-events-auto flex items-start gap-3 rounded-md border-l-4 bg-surface p-3 text-sm shadow-md', TONOS[t.tone] || TONOS.info)}
+                        className={clsx('pointer-events-auto flex items-start gap-3 rounded-md border-l-4 bg-card p-3 text-sm shadow-md', TONOS[t.tone] || TONOS.info)}
                     >
                         <div className="min-w-0 flex-1">
                             {t.title && <p className="font-semibold">{t.title}</p>}
                             <p>{t.message}</p>
                         </div>
-                        <button type="button" onClick={() => dismiss(t.id)} className="min-h-9 shrink-0 px-2 text-muted underline">
+                        <button type="button" onClick={() => dismiss(t.id)} className="min-h-9 shrink-0 px-2 text-muted-foreground underline">
                             Cerrar
                         </button>
                     </div>

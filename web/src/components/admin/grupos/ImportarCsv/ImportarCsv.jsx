@@ -62,7 +62,7 @@ export default function ImportarCsv({ idGrupo, onImported }) {
 
     return (
         <div className="grid gap-3">
-            <p className="text-sm text-muted">
+            <p className="text-sm text-muted-foreground">
                 CSV con encabezado. Columnas: {COLUMNAS.join(', ')}. Con la matrícula basta si el alumno ya existe; para un alumno nuevo
                 se requieren apellido_paterno, nombres y correo. Máximo {MAX_FILAS} filas.
             </p>

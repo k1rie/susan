@@ -28,7 +28,7 @@ export default function CasoPendiente({ caso, minimoValidas, historial = [], onR
     };
 
     return (
-        <article aria-label={`Caso de ${caso.alumno.nombre_completo}`} className="flex flex-col gap-4 rounded-lg border border-border bg-surface p-4">
+        <article aria-label={`Caso de ${caso.alumno.nombre_completo}`} className="flex flex-col gap-4 rounded-lg border border-border bg-card p-4">
             <header className="flex flex-col gap-1">
                 <Button variant="ghost" size="sm" className="self-start md:hidden" onClick={onCerrar}>
                     Volver a la lista
@@ -37,11 +37,11 @@ export default function CasoPendiente({ caso, minimoValidas, historial = [], onR
                     <h2 className="text-lg font-semibold">{caso.alumno.nombre_completo}</h2>
                     <StatusChip kind="asistencia" value="pendiente" />
                 </div>
-                <p className="text-sm text-muted">Matrícula {caso.alumno.matricula}</p>
+                <p className="text-sm text-muted-foreground">Matrícula {caso.alumno.matricula}</p>
                 <p className="text-sm">
                     {caso.materia.nombre} · Grupo {caso.grupo.clave_grupo}
                 </p>
-                <p className="text-sm text-muted">
+                <p className="text-sm text-muted-foreground">
                     Sesión del {caso.sesion.fecha}, {String(caso.sesion.hora_inicio).slice(0, 5)} a {String(caso.sesion.hora_fin).slice(0, 5)}
                 </p>
                 <p className="text-sm">
@@ -56,7 +56,7 @@ export default function CasoPendiente({ caso, minimoValidas, historial = [], onR
             {historial.length > 0 && (
                 <section aria-label="Bitácora del caso">
                     <h3 className="mb-1 text-sm font-semibold">Bitácora</h3>
-                    <ul className="flex flex-col gap-1 text-sm text-muted">
+                    <ul className="flex flex-col gap-1 text-sm text-muted-foreground">
                         {historial.map((h) => (
                             <li key={h.id_bitacora}>
                                 {h.estado_anterior} a {h.estado_nuevo} · {h.automatica ? 'Automática (plazo vencido)' : h.usuario?.rol} ·{' '}

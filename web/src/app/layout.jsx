@@ -1,8 +1,10 @@
-import { Inter, Geist_Mono } from 'next/font/google';
+import { Inter, Instrument_Serif, Geist_Mono } from 'next/font/google';
 import './globals.css';
 
-// Auto-hospedada por Next (sin request a Google en runtime), como en MVP-FITNESS.
+// Fuentes autoalojadas por Next (sin request a Google en runtime). Interfaz: Inter. Titulares emocionales: Instrument Serif
+// (utilidad `font-display`; ver docs/design/SISTEMA.md). Solo subconjuntos latinos y los pesos usados.
 const inter = Inter({ subsets: ['latin'], display: 'swap', variable: '--font-inter' });
+const displaySerif = Instrument_Serif({ subsets: ['latin'], weight: '400', style: ['normal', 'italic'], display: 'swap', variable: '--font-display-serif' });
 const mono = Geist_Mono({ subsets: ['latin'], variable: '--font-geist-mono' });
 
 export const metadata = {
@@ -16,13 +18,13 @@ export const viewport = {
     width: 'device-width',
     initialScale: 1,
     viewportFit: 'cover',
-    themeColor: '#1f3a5f',
+    themeColor: '#f6f5f1',
 };
 
 export default function RootLayout({ children }) {
     return (
-        <html lang="es" className={`${inter.variable} ${mono.variable}`}>
-            <body className="min-h-screen antialiased">{children}</body>
+        <html lang="es" className={`${inter.variable} ${displaySerif.variable} ${mono.variable}`}>
+            <body className="min-h-screen">{children}</body>
         </html>
     );
 }

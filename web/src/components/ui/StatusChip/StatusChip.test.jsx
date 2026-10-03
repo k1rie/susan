@@ -27,7 +27,7 @@ describe('StatusChip', () => {
     it('muestra el valor tal cual con tokens neutros si es desconocido', () => {
         render(<StatusChip kind="asistencia" value="raro" />);
         const chip = screen.getByText('raro');
-        expect(chip).toHaveClass('text-muted');
+        expect(chip).toHaveClass('text-muted-foreground');
         expect(etiqueta('kind_inexistente', 'x')).toBe('x');
     });
 

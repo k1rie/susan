@@ -3,10 +3,10 @@ import { porcentaje } from '../reporte.utils.js';
 // Vista del periodo: una fila por grupo; al pulsar el nombre se abre el reporte del grupo.
 export default function TablaPeriodo({ items = [], onAbrirGrupo }) {
     return (
-        <div className="overflow-x-auto rounded-lg border border-border bg-surface">
+        <div className="overflow-x-auto rounded-lg border border-border bg-card">
             <table className="w-full min-w-max border-collapse text-sm">
                 <caption className="sr-only">Resumen por grupo del periodo</caption>
-                <thead className="bg-surface-muted text-muted">
+                <thead className="bg-muted text-muted-foreground">
                     <tr>
                         {['Grupo', 'Materia', 'Docente', 'Inscritos', 'Sesiones cerradas', 'Asistencia promedio', 'En el límite', 'Sin derecho'].map((c, i) => (
                             <th key={c} scope="col" className={`px-3 py-2 font-medium ${i < 3 ? 'text-left' : 'text-right'}`}>{c}</th>

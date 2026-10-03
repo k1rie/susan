@@ -58,7 +58,7 @@ export default function CuentaAccesoPanel({ alumno }) {
                     </p>
                     <p>
                         Contraseña temporal:{' '}
-                        <code data-testid="contrasena-temporal" className="rounded bg-surface-muted px-2 py-1 text-base">
+                        <code data-testid="contrasena-temporal" className="rounded bg-muted px-2 py-1 text-base">
                             {cuenta.contrasena}
                         </code>
                     </p>

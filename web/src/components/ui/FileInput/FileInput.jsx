@@ -75,7 +75,7 @@ export default function FileInput({
                 )}
             </div>
             {mensaje && (
-                <p id={errorId} role="alert" className="text-sm text-danger">
+                <p id={errorId} role="alert" className="text-sm text-destructive">
                     {mensaje}
                 </p>
             )}

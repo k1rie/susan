@@ -39,7 +39,7 @@ export default function Modal({
                 aria-labelledby={titleId}
                 tabIndex={-1}
                 className={clsx(
-                    'flex max-h-[90dvh] w-full flex-col rounded-lg bg-surface text-foreground shadow-lg',
+                    'flex max-h-[90dvh] w-full flex-col rounded-lg bg-card text-foreground shadow-lg',
                     ANCHOS[size] || ANCHOS.md,
                     className,
                 )}

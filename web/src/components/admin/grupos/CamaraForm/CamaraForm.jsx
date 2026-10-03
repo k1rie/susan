@@ -59,7 +59,7 @@ export default function CamaraForm({ idAula, posicion, camara, onSaved }) {
     return (
         <form onSubmit={enviar} noValidate className="grid gap-3" aria-label={`Cámara de ${posicion}`}>
             <h3 className="font-medium">{etiquetaPosicion(posicion)}</h3>
-            {!camara && <p className="text-sm text-muted">Sin cámara configurada en esta posición.</p>}
+            {!camara && <p className="text-sm text-muted-foreground">Sin cámara configurada en esta posición.</p>}
             <Field label="Tipo">
                 <Select value={valores.tipo} onChange={cambiar('tipo')} options={TIPOS} />
             </Field>
@@ -82,7 +82,7 @@ export default function CamaraForm({ idAula, posicion, camara, onSaved }) {
                 )}
             </div>
             {camara && camara.tipo === 'navegador' && (
-                <p className="text-xs text-muted">La webcam del navegador se prueba al abrir la sesión de captura.</p>
+                <p className="text-xs text-muted-foreground">La webcam del navegador se prueba al abrir la sesión de captura.</p>
             )}
             <div aria-live="polite">
                 {prueba && (

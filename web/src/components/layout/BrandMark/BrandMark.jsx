@@ -11,7 +11,7 @@ export default function BrandMark({ variant = 'full', showFca, className }) {
             <Image src="/brand/unach-escudo.png" alt="Escudo de la UNACH" width={40} height={40} className="h-10 w-10 object-contain" />
             <div className="leading-tight">
                 <p className="text-lg font-bold tracking-wide">SUSAN</p>
-                {completo && <p className="text-xs text-muted">Registro de asistencia</p>}
+                {completo && <p className="text-xs text-muted-foreground">Registro de asistencia</p>}
             </div>
             {mostrarFca && (
                 <Image src="/brand/fca-escudo.png" alt="Escudo de la FCA C-I" width={40} height={40} className="h-10 w-10 object-contain" />

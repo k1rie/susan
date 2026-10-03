@@ -27,14 +27,14 @@ export default function TablaRiesgo({ items = [], hrefHistorial }) {
     const aria = (k) => (orden.clave === k ? (orden.dir === 'asc' ? 'ascending' : 'descending') : undefined);
 
     return (
-        <section className="rounded-lg border border-border bg-surface p-4">
+        <section className="rounded-lg border border-border bg-card p-4">
             <h2 className="text-base font-semibold">Alumnos en riesgo</h2>
             {filas.length === 0 ? (
-                <p className="mt-2 text-sm text-muted">Ningún alumno en riesgo con los datos actuales.</p>
+                <p className="mt-2 text-sm text-muted-foreground">Ningún alumno en riesgo con los datos actuales.</p>
             ) : (
                 <div className="mt-3 overflow-x-auto rounded-md border border-border">
                     <table className="w-full min-w-max border-collapse text-sm">
-                        <thead className="bg-surface-muted text-muted">
+                        <thead className="bg-muted text-muted-foreground">
                             <tr>
                                 {COLUMNAS.map((c) => (
                                     <th key={c.key} scope="col" aria-sort={aria(c.key)} className="px-3 py-1 text-left font-medium">
@@ -57,7 +57,7 @@ export default function TablaRiesgo({ items = [], hrefHistorial }) {
                                         <tr className="border-t border-border align-top">
                                             <td className="px-3 py-2">
                                                 <p className="font-medium">{a.nombre || '-'}</p>
-                                                <p className="text-xs text-muted">{a.matricula}</p>
+                                                <p className="text-xs text-muted-foreground">{a.matricula}</p>
                                             </td>
                                             <td className="px-3 py-2 tabular-nums">{fmtNum(a.puntaje, 0)} / 100</td>
                                             <td className="px-3 py-2">
@@ -79,7 +79,7 @@ export default function TablaRiesgo({ items = [], hrefHistorial }) {
                                             </td>
                                         </tr>
                                         {expandido && (
-                                            <tr className="border-t border-border bg-surface-muted">
+                                            <tr className="border-t border-border bg-muted">
                                                 <td colSpan={COLUMNAS.length + 1} className="px-3 py-3">
                                                     <div className="flex max-w-[calc(100vw-4rem)] flex-col gap-3 whitespace-normal sm:max-w-3xl">
                                                         <p className="text-sm"><strong>Acción sugerida:</strong> {a.accion}</p>
@@ -87,7 +87,7 @@ export default function TablaRiesgo({ items = [], hrefHistorial }) {
                                                             {(a.factores || []).map((f) => (
                                                                 <li key={f.id}>
                                                                     <span className="font-medium">{f.nombre}</span>{' '}
-                                                                    <span className="tabular-nums text-muted">({fmtNum(f.aporte, 1)} de {f.maximo})</span>: {f.explicacion}
+                                                                    <span className="tabular-nums text-muted-foreground">({fmtNum(f.aporte, 1)} de {f.maximo})</span>: {f.explicacion}
                                                                 </li>
                                                             ))}
                                                         </ul>

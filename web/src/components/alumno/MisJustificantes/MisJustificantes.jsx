@@ -23,12 +23,12 @@ export default function MisJustificantes({ refreshKey = 0 }) {
             isEmpty={(d) => !(d.items || []).length}
             empty={<EmptyState title="Aún no has enviado justificantes." />}>
             {(d) => (
-                <ul className="divide-y divide-border rounded-lg border border-border bg-surface">
+                <ul className="divide-y divide-border rounded-lg border border-border bg-card">
                     {d.items.map((j) => (
                         <li key={j.id_justificante} className="flex flex-wrap items-start justify-between gap-2 px-4 py-3">
                             <div className="min-w-0">
                                 <p className="font-medium">{nombreMateria(j.materia)} · {claveGrupo(j.grupo)}</p>
-                                <p className="text-sm text-muted">Sesión del {fechaCorta(j.fecha)} · enviado el {fechaCorta(j.fecha_registro)}</p>
+                                <p className="text-sm text-muted-foreground">Sesión del {fechaCorta(j.fecha)} · enviado el {fechaCorta(j.fecha_registro)}</p>
                                 <p className="mt-1 break-words text-sm">{j.motivo}</p>
                             </div>
                             <StatusChip kind="justificante" value={j.estatus} />
