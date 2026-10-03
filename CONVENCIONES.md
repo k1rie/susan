@@ -60,12 +60,18 @@ SUSAN/
   `components/motion/`, piezas del Home en `components/home/`, layout en `components/layout/<Nombre>/`.
   Las páginas (`src/app/**/page.jsx`) son delgadas: solo componen componentes y cargan datos.
 - Estilos: clases de Tailwind con los **tokens semánticos** de `src/app/globals.css` (vocabulario shadcn:
-  `bg-background`, `bg-card`, `bg-muted`, `text-foreground`, `text-muted-foreground`, `border-border`, `bg-primary`,
-  `text-destructive`, `bg-accent`…; marca: `text-brand-gold`, `bg-brand-gold-soft`; estados: `text-presente`,
-  `bg-ausente-bg`…). Nunca colores hex crudos en componentes. Estados de asistencia: siempre etiqueta de texto +
-  color (componente `StatusChip`). Titulares en serif con `font-display`; interfaz en Inter.
-- **Forma**: tarjetas `rounded-3xl` con `shadow-soft`; botones, chips y buscadores en píldora (`rounded-full`);
-  inputs `rounded-[14px]`; foco visible con anillo (`focus-visible:ring-4 ring-ring/40`). Iconos: `lucide-react`.
+  `bg-background` (lienzo crema), `bg-card` (panel blanco), `bg-muted`, `bg-accent`, `text-foreground`,
+  `text-muted-foreground`, `border-border`, `bg-primary` (tinta casi negra), `text-link` (azul de enlaces),
+  `text-destructive`…; marca: `text-brand-gold`; portadas: `bg-tono-azul`/`text-tono-azul-fg`…; estados:
+  `text-presente`, `bg-ausente-bg`…). Nunca colores hex crudos. Estados de asistencia: siempre etiqueta de texto +
+  color (`StatusChip`). Interfaz en **Hanken Grotesk** 14 px; la serif (`font-display`, EB Garamond) SOLO en el
+  saludo del Home y los titulares de acceso/onboarding.
+- **Iconos: SIEMPRE Lucide** (`lucide-react`, `aria-hidden="true"`, `strokeWidth` 1.5–1.75). Prohibido el SVG a
+  mano para iconos, los emojis y los símbolos de texto (`▲ → ✓`) como icono. (Orden explícita del usuario.)
+- **Forma (referencia: Dropbox Dash, ver `docs/design/SISTEMA.md`)**: contenido en el panel blanco flotante del
+  `AppShell`; tarjetas `rounded-xl border border-border bg-card` **sin sombra**; botones y campos `rounded-md`
+  (8 px); botón primario negro; filtros con `ui/Pills`; pestañas con `ui/Tabs` (subrayadas); tarjetas de módulo con
+  `ui/TarjetaPortada` y listas de filas con `ui/TarjetaFila`; foco visible con `focus-visible:ring-4 ring-ring/30`.
 - **Movimiento**: solo con `components/motion/*` y `lib/motion` (CSS + IntersectionObserver/rAF; sin gsap ni
   `motion`). Solo `transform`/`opacity`; una vez al entrar en vista; apagado con "reducir movimiento". No agregues
   librerías de animación sin medir con `scripts/measure-bundle.mjs` (presupuesto: `/docente` ≤ +15 % vs. la base).

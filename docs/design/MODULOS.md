@@ -18,7 +18,7 @@ cada módulo activo exista en la navegación de sus roles y que cada ítem de na
 1. Agrega una entrada a `MODULOS` (campos: `id`, `titulo`, `descripcion`, `icono` de `lucide-react`, `categoria`, `roles`, `estado`, `tono`; los `pronto` llevan además `queIncluye` con 2–4 viñetas y **no** llevan `href`).
 2. Para una función **nueva ya construida**: `estado: 'activo'` + `href`, y agrega el ítem a `NAV_POR_ROL` (`navItems.js`) de los roles que la ven. `npm test` avisa si falta alguno.
 3. Para pasar un `pronto` a `activo`: cambia `estado`, quita `queIncluye` (opcional) y pon `href`. La página «Pronto» deja de usarse sola (redirige).
-4. No hace falta tocar pantallas: Home, catálogo, paleta y riel se actualizan solos. El icono y el `tono` (azul · dorado · verde · violeta) definen la ilustración duotono de la tarjeta.
+4. No hace falta tocar pantallas: Home, catálogo, paleta y riel se actualizan solos. El icono y el `tono` (azul · dorado · verde · violeta · rosa) definen la portada de la `TarjetaPortada`; `portada: 'degradado'` destaca una tarjeta con el degradado de la marca.
 
 > Las entradas `pronto` actuales (Asistente SUSAN, Tutorías, Comunicados, Calificaciones, Horarios inteligentes, Acceso al campus, Notificaciones) son **hoja de ruta provisional**
 > pensada para el diseño; sus textos y roles se ajustan libremente en `modulos.js`. Ninguna tiene backend todavía.

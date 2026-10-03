@@ -261,19 +261,20 @@ Además: `GET /health`, `GET /v1/index`, `POST /v1/photo/check`, `POST /v1/index
 
 ## 14. Sistema de diseño (capa de presentación)
 
-Resumen técnico; la identidad, los componentes firma y la tabla de movimiento están en [`docs/design/SISTEMA.md`](design/SISTEMA.md), las referencias en
-[`docs/design/REFERENCIAS.md`](design/REFERENCIAS.md) y el registro de módulos en [`docs/design/MODULOS.md`](design/MODULOS.md).
+Resumen técnico; identidad, componentes firma, tipografía y armazón en [`docs/design/SISTEMA.md`](design/SISTEMA.md), referencias medidas en [`docs/design/REFERENCIAS.md`](design/REFERENCIAS.md)
+y registro de módulos en [`docs/design/MODULOS.md`](design/MODULOS.md).
 
-- **Tokens**: `web/src/app/globals.css` define el vocabulario de shadcn/ui (`--background`, `--card`, `--primary`, `--muted`, `--accent`, `--destructive`, `--border`, `--ring`…), la marca UNACH
-  (`--brand-navy/-gold/-gold-soft`), los estados de asistencia (`--presente/-bg`, `--retardo`, `--ausente`, `--pendiente`, `--justificado`), sombras (`--shadow-soft/-lift`) y una paleta `.dark`
-  (todavía sin interruptor). `@theme inline` los expone como utilidades de Tailwind 4. Fuentes con `next/font`: Inter (interfaz), Instrument Serif (`font-display`) y Geist Mono.
-- **Capas de componentes**: `components/shadcn/` = primitivas vendorizadas (CLI `shadcn`, estilo radix-maia, JS); `components/ui/` = API estable de SUSAN que las pantallas usan (mismas props que en la base);
-  `components/motion/` = BlurText, CountUp, Reveal, SpotlightCard, StaggerList (CSS + IntersectionObserver/rAF); `components/home/` = Resaltado, ModuloCard, FilaModulos, CampoComando, HomeRol, CatalogoModulos;
-  `components/layout/` = AppShell (riel, barra superior, barra inferior móvil, paleta ⌘K); `components/auth/` = pantalla dividida con PanelProducto.
-- **Registro de módulos** (`lib/modulos.js`): fuente única del Home por rol, `/modulos`, `/modulos/[id]`, la paleta de comandos y la sección «Próximamente» del riel. Los componentes cliente lo importan
-  (las entradas llevan componentes de icono y no cruzan de servidor a cliente como props).
-- **Reglas de movimiento**: ver `components/motion/README.md`. Presupuesto de JS y mediciones en `docs/DESIGN_PROGRESS.md` (`scripts/measure-bundle.mjs`).
-- **Accesibilidad**: foco visible en anillo, `aria-current` en navegación, combobox/listbox en la paleta, texto `sr-only` para titulares y cifras animadas, panel de producto del login `aria-hidden` y sin controles,
-  estados siempre con texto además de color, objetivos táctiles ≥ 44 px en controles principales.
-- **Hidratación**: el HTML del servidor y la primera pasada del cliente deben coincidir. Lo que depende del navegador (hora local, preferencia de movimiento) usa `useSyncExternalStore` con instantánea de servidor
-  (`HomeRol` → «Hola»; `usePrefersReducedMotion` → `false`) o se activa tras montar (`Reveal immediate`).
+- **Tokens**: `web/src/app/globals.css` define el vocabulario de shadcn/ui (`--background`, `--card`, `--primary`, `--muted`, `--accent`, `--destructive`, `--border`, `--ring`, `--link`…), la marca UNACH, las
+  portadas pastel (`--tono-*`), los estados de asistencia y una paleta `.dark` (sin interruptor aún). `@theme inline` los expone a Tailwind 4. Fuentes con `next/font`: Hanken Grotesk (interfaz), EB Garamond
+  (`font-display`, solo saludo/titulares de acceso) y Geist Mono.
+- **Capas de componentes**: `components/shadcn/` = primitivas vendorizadas (CLI `shadcn`); `components/ui/` = API estable de SUSAN que usan las pantallas (Button, Card, Tabs, Pills, TarjetaPortada, TarjetaFila,
+  Avatar, StatusChip…); `components/motion/` = BlurText, CountUp, Reveal, SpotlightCard, StaggerList; `components/home/` = Resaltado, ModuloCard, FilaModulos, CampoComando, HomeRol, CatalogoModulos;
+  `components/layout/` = AppShell (riel + panel flotante + barra móvil + paleta ⌘K), Sidebar, MenuCuenta, TopbarMovil, BottomNav; `components/auth/` = pantalla dividida con PanelProducto y el asistente `Onboarding`.
+- **Registro de módulos** (`lib/modulos.js`): fuente única del Home por rol, `/modulos`, `/modulos/[id]`, la paleta y la sección «Próximamente» del riel. Los componentes cliente lo importan (las entradas llevan
+  componentes de icono y no cruzan de servidor a cliente como props).
+- **Preferencias de perfil** (`lib/perfil.js`): color del avatar y marcas del onboarding en `localStorage` por usuario (sin columna en la base; sin datos sensibles).
+- **Iconos**: siempre `lucide-react`. **Movimiento**: ver `components/motion/README.md`; presupuesto de JS y mediciones en `docs/DESIGN_PROGRESS.md` (`scripts/measure-bundle.mjs`).
+- **Accesibilidad**: foco visible en anillo, `aria-current` en la navegación, combobox/listbox en la paleta, texto `sr-only` para titulares y cifras animadas, panel de producto del login `aria-hidden` y sin controles,
+  estados siempre con texto además de color, asistente de onboarding con foco al título y progreso anunciado.
+- **Hidratación**: el HTML del servidor y la primera pasada del cliente deben coincidir. Lo que depende del navegador (hora local, preferencia de movimiento, localStorage) usa `useSyncExternalStore` con instantánea de
+  servidor o se activa tras montar (`Reveal immediate`).
