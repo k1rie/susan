@@ -14,7 +14,7 @@ import RegistrarJustificanteForm from '../RegistrarJustificanteForm';
 import usePortalAlumno, { FILAS_HISTORIAL } from './usePortalAlumno.js';
 
 // Contenedor de P-08: resumen por materia, historial de la materia elegida y justificantes.
-export default function PortalAlumno({ idSesionInicial = null }) {
+export default function PortalAlumno({ idSesionInicial = null, encabezado = true }) {
     const p = usePortalAlumno({ idSesionInicial });
     const seccionJustificantes = useRef(null);
     const periodos = p.resumen.data?.periodos_disponibles || [];
@@ -26,7 +26,7 @@ export default function PortalAlumno({ idSesionInicial = null }) {
 
     return (
         <div className="flex flex-col gap-6">
-            <PageHeader title="Mi asistencia" subtitle="Tu avance por materia frente al límite de faltas para tener derecho a examen." />
+            {encabezado && <PageHeader title="Mi asistencia" subtitle="Tu avance por materia frente al límite de faltas para tener derecho a examen." />}
             <DataState loading={p.resumen.loading} error={p.resumen.error} data={p.resumen.data} onRetry={p.resumen.refetch}
                 isEmpty={(d) => !(d.items || []).length}
                 empty={<EmptyState title="No tienes materias inscritas en este periodo." />}>

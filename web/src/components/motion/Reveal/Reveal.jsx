@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
 import { EASE, useEnVista, usePrefersReducedMotion } from '@/lib/motion';
 
@@ -16,7 +16,9 @@ const DESPLAZAMIENTO = {
 // FadeContent/AnimatedContent de ReactBits, que dependen de gsap (~70 KB): aquí es una transición CSS disparada por
 // un IntersectionObserver (0 KB extra, sin JS por fotograma). Con "reducir movimiento" no oculta ni anima nada.
 //   direction  up | down | left | right | none     delay/duration en segundos
-//   immediate  anima al montar (para contenido sobre el pliegue) en vez de esperar al viewport
+//   immediate  anima al montar (para contenido sobre el pliegue) en vez de esperar al viewport. La primera pasada
+//              se pinta oculta igual que en el servidor (si no, la hidratación no coincide); se muestra en el
+//              siguiente fotograma.
 export default function Reveal({
     as: Etiqueta = 'div',
     direction = 'up',
@@ -33,8 +35,14 @@ export default function Reveal({
 }) {
     const ref = useRef(null);
     const reducido = usePrefersReducedMotion();
-    const enVista = useEnVista(ref, { once, desactivado: reducido });
-    const visible = reducido || enVista || (immediate && typeof window !== 'undefined');
+    const enVista = useEnVista(ref, { once, desactivado: reducido || immediate });
+    const [montado, setMontado] = useState(false);
+    useEffect(() => {
+        if (!immediate) return undefined;
+        const cuadro = requestAnimationFrame(() => setMontado(true));
+        return () => cancelAnimationFrame(cuadro);
+    }, [immediate]);
+    const visible = reducido || enVista || montado;
     const desde = (DESPLAZAMIENTO[direction] || DESPLAZAMIENTO.up)(distance);
 
     return (

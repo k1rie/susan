@@ -1,12 +1,12 @@
 'use client';
 
 import { useRef } from 'react';
-import { cn } from '@/lib/utils';
 import { EASE, useEnVista, usePrefersReducedMotion } from '@/lib/motion';
 
 // Titular que entra palabra por palabra (o letra por letra) desde desenfoque. Basado en BlurText de ReactBits,
 // reescrito con transiciones CSS (sin `motion`): una sola transición por palabra sobre opacity/transform/filter,
-// escalonada con transition-delay. El texto completo se expone a lectores de pantalla en `aria-label`.
+// escalonada con transition-delay. El texto completo se expone a lectores de pantalla como texto `sr-only` y los
+// segmentos animados van en un contenedor aria-hidden (aria-label sobre un span genérico no se anuncia de forma fiable).
 //   animateBy  words | letters      direction  top | bottom     delay = ms entre segmentos
 export default function BlurText({
     text = '',
@@ -25,11 +25,12 @@ export default function BlurText({
     const desplazamiento = direction === 'bottom' ? '0.5em' : '-0.5em';
 
     return (
-        <Etiqueta ref={ref} aria-label={text} className={cn('inline-flex flex-wrap', className)} {...rest}>
+        <Etiqueta ref={ref} className={className} {...rest}>
+            <span className="sr-only">{text}</span>
+            <span aria-hidden="true" className="inline-flex flex-wrap">
             {segmentos.map((segmento, i) => (
                 <span
                     key={`${segmento}-${i}`}
-                    aria-hidden="true"
                     className="inline-block"
                     style={{
                         opacity: visible ? 1 : 0,
@@ -42,6 +43,7 @@ export default function BlurText({
                     {animateBy === 'words' && i < segmentos.length - 1 ? ' ' : null}
                 </span>
             ))}
+            </span>
         </Etiqueta>
     );
 }

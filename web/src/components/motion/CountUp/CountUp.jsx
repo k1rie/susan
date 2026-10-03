@@ -7,7 +7,7 @@ import { decimalesDe, formatearNumero } from './countUp.utils.js';
 // Contador animado (basado en CountUp de ReactBits) con un tween por requestAnimationFrame y easeOutCubic. Escribe
 // directo en el nodo de texto: cero re-renders de React durante la animación. Arranca al entrar al viewport.
 // El HTML del servidor ya trae el valor final (sin parpadeo de "0" ni dependencia de JS) y los lectores de
-// pantalla leen siempre el valor final (aria-label). Con "reducir movimiento" no anima.
+// pantalla leen siempre el valor final (texto sr-only). Con "reducir movimiento" no anima.
 //   to  valor final    from  valor inicial    duration  segundos    delay  segundos
 export default function CountUp({ to, from = 0, duration = 1.4, delay = 0, locale = 'es-MX', separador = true, prefix = '', suffix = '', className }) {
     const ref = useRef(null);
@@ -47,7 +47,8 @@ export default function CountUp({ to, from = 0, duration = 1.4, delay = 0, local
     }, [enVista, reducido, from, to, duration, delay, decimales, locale, separador, prefix, suffix, textoFinal]);
 
     return (
-        <span aria-label={textoFinal} className={className}>
+        <span className={className}>
+            <span className="sr-only">{textoFinal}</span>
             <span ref={ref} aria-hidden="true">{textoFinal}</span>
         </span>
     );

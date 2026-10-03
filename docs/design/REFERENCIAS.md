@@ -7,7 +7,7 @@
 | Fuente | Estado |
 |---|---|
 | Sitio público `schoolai.com` (landing) y `app.schoolai.com` (pantalla *Discover* abierta sin cuenta, *Sign Up*) | **Revisado** (navegador integrado, 2026-10-02) |
-| Mobbin (pantallas de Home, login y signup de SchoolAI) desde el Chrome del usuario | **Pendiente**: la extensión de Chrome no estaba conectada. Cuando lo esté, ampliar este documento (Home autenticado, onboarding, estados vacíos, login) sin cambiar las decisiones ya tomadas salvo que Mobbin las contradiga. |
+| Mobbin (SchoolAI Web: 2 pantallas *Home*, flujo *Onboarding* de 25 pantallas: landing, inicio de sesión, registro por correo) desde el Chrome del usuario | **Revisado** (2026-10-03). Resumen en la sección «Mobbin»; **no se guardan capturas** (material con derechos): solo notas propias. |
 
 ## Patrones observados (en mis palabras)
 
@@ -26,6 +26,36 @@
 ### Registro (*Create your free account*)
 - **Pantalla dividida**: columna izquierda con el formulario y columna derecha con un **panel blanco redondeado que muestra una vista previa animada del producto** (una conversación que se va escribiendo), no un fondo decorativo.
 - Izquierda: etiqueta verde pequeña de propuesta de valor, titular serif, subtítulo gris, **botones de SSO** apilados de ancho completo con contorno (Google, Microsoft; después Clever/ClassLink; después correo), separador "o", **lista de beneficios con palomitas** y letra legal discreta.
+
+## Mobbin: SchoolAI Web (revisión del 2026-10-03)
+
+Solo observaciones propias; las capturas no se versionan.
+
+### Home autenticado (*Discover*, 1512×945)
+- **Riel izquierdo sin borde ni tarjeta**: mismo lienzo gris-blanco que el contenido. Logotipo arriba con botón para colapsar; ocho ítems *icono de línea + etiqueta*; el activo es una **píldora de fondo lavanda muy claro** (radio ~10 px, sin sombra). Al fondo: insignia de nivel ("Level 1") y **avatar + nombre del usuario**.
+- **Barra superior ligera**: un solo **buscador en píldora centrado** (con lupa, borde fino) y, a la derecha, el CTA primario en píldora azul con icono ("Crear un espacio"). No hay migas de pan ni título de página en la barra.
+- **Hero en carrusel** a ancho completo: ilustración con degradado oscuro abajo, título blanco grande, **chips traslúcidos** (Popular · K-12 · Exploration), una línea de descripción y un botón blanco "Check it out"; flechas laterales y puntos de paginación.
+- **Secciones con encabezado doble**: título en negrita + subtítulo gris; a la derecha el enlace azul **"Ver todo (10) →"**.
+- **Tarjetas de ilustración** (5 por fila): blancas, radio ~14 px, sombra casi imperceptible, **ilustración duotono con grano** dentro del marco (con su propio radio), título en negrita con **etiqueta suave** en la misma línea ("Actualizado", "Antes: Sidekick"), descripción de 2 líneas y **pie con autor + contador** (icono de cohete).
+- **"Essential tools"**: fila de **filtros en píldora** dentro de un contenedor gris redondeado (el activo = píldora oscura con palomita; los demás icono + texto), debajo **cuadrícula de 4 columnas** de tarjetas compactas: **icono de trazo en color de marca**, título y descripción; la última celda es **"Ver todo (19) ↓"** con borde.
+- "Recently viewed": una sola tarjeta horizontal pequeña (miniatura + título + autor). Botón de ayuda flotante (círculo morado) abajo a la derecha.
+
+### Landing
+- Titular sans de peso alto y apretado, con **una frase subrayada a mano en amarillo**; selector segmentado de audiencia (*Teachers · Leaders · Students · Higher Ed*) en píldora blanca con sombra; CTA primario azul con **círculo + flecha** y secundario blanco con círculo negro; insignias de cumplimiento en una píldora; **mosaico de teselas ilustradas** de tamaños distintos con radios grandes (~28 px) alineadas como "masonry".
+
+### Inicio de sesión / registro (pantalla dividida)
+- Izquierda: **orbe con degradado** como logotipo, titular centrado en sans negrita, párrafo legal diminuto con enlaces, y **botones apilados de ancho completo con contorno y esquinas redondeadas** (Google, Microsoft, Clever, ClassLink, correo); al pie "¿Quieres iniciar sesión?".
+- Derecha: **tarjeta blanca grande** (radio ~24 px, sombra suave) con **vista previa del producto que cambia con el titular**: con *"Know when they're struggling."* aparece una lista de alumnos (foto circular + barra segmentada que se llena en verde/amarillo/azul); con *"Personalized learning for each student."* aparece una conversación que se escribe. **Cada titular rota y su panel se anima** (la propuesta de valor se demuestra, no se describe).
+- Registro por correo: se reemplaza la lista de proveedores por el formulario (Nombre, Correo, Contraseña) con **botón de regreso (flecha) en un cuadro con borde**, título "Sign up with Email" y **lista de reglas de contraseña** bajo el campo (≥ 10 caracteres, mayúsculas y minúsculas, número, carácter especial); botón "Sign up" de ancho completo que se habilita al cumplirlas. Los campos activos se resaltan con un **anillo azul doble**.
+- Onboarding posterior: "Choose your look" (selector de avatar circular) y recorte de foto de perfil en modal con máscara circular.
+
+### Qué refuerza o cambia respecto a las decisiones anteriores
+1. El **riel no lleva borde** y comparte lienzo con la página: en SUSAN el riel pasa a `bg-sidebar` casi igual al lienzo, **sin `border-r`** (solo sombra mínima en móvil/cajón).
+2. La barra superior queda mínima: **buscador/paleta en píldora al centro** + acción primaria a la derecha (en SUSAN: "Abrir sesión" para docentes, "Nuevo alumno" para administración).
+3. La **fila "Ver todo (n) →"** y las **etiquetas suaves junto al título** (Nuevo / Pronto) se adoptan tal cual en `ModuloCard` y `FilaModulos`.
+4. **Filtros en píldora con contenedor gris** para categorías de módulos (Asistencia · Análisis · Administración · Pronto).
+5. Login: **titulares que rotan** (3) y **panel derecho que demuestra el producto** (lista de alumnos que pasan a *presente*, barra de riesgo que sube, reporte que se genera). Reglas de contraseña visibles en "Activar mi cuenta" y "Cambiar contraseña".
+6. El **avatar + nombre al fondo del riel** reemplaza el menú de usuario arriba a la derecha en escritorio (en móvil sigue en la barra superior).
 
 ## Lo que se adapta a SUSAN (decisiones)
 

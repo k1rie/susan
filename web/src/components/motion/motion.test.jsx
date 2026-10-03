@@ -30,6 +30,14 @@ describe('Reveal', () => {
         expect(screen.getByTestId('r')).toHaveAttribute('data-reveal', 'visible');
         expect(screen.getByTestId('r').style.opacity).toBe('1');
     });
+    it('immediate: la primera pasada sale oculta (coincide con el servidor) y se muestra en el siguiente fotograma', async () => {
+        conMovimiento();
+        render(<Reveal immediate data-testid="r">hola</Reveal>);
+        expect(screen.getByTestId('r')).toHaveAttribute('data-reveal', 'oculto');
+        await act(async () => { await new Promise((r) => requestAnimationFrame(() => r())); });
+        expect(screen.getByTestId('r')).toHaveAttribute('data-reveal', 'visible');
+        expect(ObservadorFalso.instancias).toHaveLength(0);
+    });
     it('con reducir movimiento nunca oculta ni anima', () => {
         conMovimiento(true);
         render(<Reveal data-testid="r">hola</Reveal>);
@@ -48,18 +56,18 @@ describe('BlurText', () => {
     it('expone el texto completo a lectores de pantalla y parte en palabras', () => {
         conMovimiento(true);
         const { container } = render(<BlurText text="Pasa lista en segundos" />);
-        expect(screen.getByLabelText('Pasa lista en segundos')).toBeInTheDocument();
-        expect(container.querySelectorAll('span[aria-hidden="true"]')).toHaveLength(4);
+        expect(screen.getByText('Pasa lista en segundos')).toHaveClass('sr-only');
+        expect(container.querySelector('span[aria-hidden="true"]').children).toHaveLength(4);
     });
     it('puede animar por letras', () => {
         conMovimiento(true);
         const { container } = render(<BlurText text="SUSAN" animateBy="letters" />);
-        expect(container.querySelectorAll('span[aria-hidden="true"]')).toHaveLength(5);
+        expect(container.querySelector('span[aria-hidden="true"]').children).toHaveLength(5);
     });
     it('escalona el retraso por segmento', () => {
         conMovimiento();
         const { container } = render(<BlurText text="uno dos tres" delay={100} />);
-        const [a, , c] = container.querySelectorAll('span[aria-hidden="true"]');
+        const [a, , c] = container.querySelector('span[aria-hidden="true"]').children;
         expect(a.style.transition).toContain(' 0s');
         expect(c.style.transition).toContain(' 0.2s');
     });
@@ -69,7 +77,7 @@ describe('CountUp', () => {
     it('con reducir movimiento muestra el valor final con formato es-MX', () => {
         conMovimiento(true);
         render(<CountUp to={12345} suffix=" faltas" />);
-        expect(screen.getByLabelText(/12[,\s]345 faltas/)).toBeInTheDocument();
+        expect(screen.getAllByText(/12[,\s]345 faltas/)[0]).toHaveClass('sr-only');
     });
     it('antes de entrar al viewport muestra el inicial y al terminar el final', async () => {
         conMovimiento();

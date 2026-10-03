@@ -11,28 +11,32 @@ import IndicadoresPendientes from '../IndicadoresPendientes';
 import MisGrupos from '../MisGrupos';
 import SesionesHoy from '../SesionesHoy';
 
-// P-02: panel del docente.
-export default function PanelDocente() {
+// P-02: panel del docente. `encabezado={false}` lo omite cuando la portada (HomeRol) ya aporta el h1.
+export default function PanelDocente({ encabezado = true }) {
     const panel = useApiQuery(docentePanel, {});
     const reloj = useApiQuery(ahora, {});
     const simulado = reloj.data?.reloj_simulado ? reloj.data : null;
 
     return (
         <div>
-            <PageHeader
-                title="Panel del docente"
-                subtitle={panel.data?.fecha ? `Hoy: ${panel.data.fecha}` : undefined}
-                actions={
-                    <>
-                        <Button variant="secondary" href="/reportes">
-                            Reportes
-                        </Button>
-                        <Button variant="secondary" href="/analitica">
-                            Analítica
-                        </Button>
-                    </>
-                }
-            />
+            {encabezado ? (
+                <PageHeader
+                    title="Panel del docente"
+                    subtitle={panel.data?.fecha ? `Hoy: ${panel.data.fecha}` : undefined}
+                    actions={
+                        <>
+                            <Button variant="secondary" href="/reportes">
+                                Reportes
+                            </Button>
+                            <Button variant="secondary" href="/analitica">
+                                Analítica
+                            </Button>
+                        </>
+                    }
+                />
+            ) : (
+                panel.data?.fecha && <p className="mb-3 text-sm text-muted-foreground">Hoy: {panel.data.fecha}</p>
+            )}
             {simulado && (
                 <p className="mb-3 text-xs text-muted-foreground" role="note">
                     Reloj simulado: {simulado.fecha} {simulado.hora}

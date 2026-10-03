@@ -19,12 +19,13 @@ const ACCESOS = [
 ];
 
 // Portada del administrador: contadores de api_admin_resumen y accesos a los catálogos.
-export default function ResumenAdmin() {
+// `encabezado={false}`: la portada (HomeRol) aporta el h1 y las tarjetas de módulos reemplazan a los accesos rápidos.
+export default function ResumenAdmin({ encabezado = true }) {
     const consulta = useApiQuery(adminResumen, {});
 
     return (
         <div className="flex flex-col gap-4">
-            <PageHeader title="Administración" subtitle="Resumen del periodo y accesos rápidos" />
+            {encabezado && <PageHeader title="Administración" subtitle="Resumen del periodo y accesos rápidos" />}
             <DataState loading={consulta.loading} error={consulta.error} data={consulta.data} onRetry={consulta.refetch} isEmpty={() => false}>
                 {(r) => {
                     const sesiones = r.sesiones_hoy ?? {};
@@ -68,13 +69,15 @@ export default function ResumenAdmin() {
                     );
                 }}
             </DataState>
-            <nav aria-label="Accesos" className="flex flex-wrap gap-2">
-                {ACCESOS.map((a) => (
-                    <Button key={a.href} href={a.href} variant="secondary">
-                        {a.label}
-                    </Button>
-                ))}
-            </nav>
+            {encabezado && (
+                <nav aria-label="Accesos" className="flex flex-wrap gap-2">
+                    {ACCESOS.map((a) => (
+                        <Button key={a.href} href={a.href} variant="secondary">
+                            {a.label}
+                        </Button>
+                    ))}
+                </nav>
+            )}
         </div>
     );
 }
