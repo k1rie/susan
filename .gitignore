@@ -28,3 +28,4 @@ __pycache__
 # CLI de Supabase (estado temporal / enlace de proyecto)
 supabase/.temp
 supabase/.branches
+supabase/dist
