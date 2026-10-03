@@ -1,7 +1,7 @@
 import { requerirSesion } from '@/lib/server/auth';
 
-// Guarda del area tecnica: solo el rol tecnico (el administrador ve parametros e indice desde sus propias rutas).
+// Guarda del área técnica: el técnico (edita) y el administrador (solo consulta; lo aplica la base y la pantalla lo refleja).
 export default async function TecnicoLayout({ children }) {
-    await requerirSesion(['tecnico']);
+    await requerirSesion('tecnico');
     return children;
 }

@@ -13,17 +13,18 @@ const PESTANAS = [
     { id: 'indice', label: 'Índice facial' },
 ];
 
-// Consola del técnico: cámaras (RF-22), parámetros (RNF-02) e índice facial (RNF-09/RNF-14).
-export default function ConsolaTecnico({ encabezado = true }) {
+// Consola del técnico: cámaras (RF-22), parámetros (RNF-02) e índice facial (RNF-09/RNF-14). `soloLectura` (administrador):
+// sin botones de guardar ni de reconstruir; la base lo aplica de todos modos.
+export default function ConsolaTecnico({ encabezado = true, soloLectura = false }) {
     const [activa, setActiva] = useState('camaras');
     return (
         <div>
             {encabezado && <PageHeader title="Consola técnica" subtitle="Cámaras, parámetros del sistema e índice facial." />}
             <Tabs tabs={PESTANAS} value={activa} onChange={setActiva} idPrefix="tec" />
             <div role="tabpanel" id={`tec-panel-${activa}`} aria-labelledby={`tec-${activa}`} className="mt-4">
-                {activa === 'camaras' && <CamarasEstado />}
-                {activa === 'parametros' && <ParametrosEditor />}
-                {activa === 'indice' && <IndiceFacialPanel />}
+                {activa === 'camaras' && <CamarasEstado soloLectura={soloLectura} />}
+                {activa === 'parametros' && <ParametrosEditor soloLectura={soloLectura} />}
+                {activa === 'indice' && <IndiceFacialPanel soloLectura={soloLectura} />}
             </div>
         </div>
     );

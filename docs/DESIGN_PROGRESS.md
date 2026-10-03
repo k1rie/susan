@@ -22,10 +22,10 @@ Si `heartbeat` está más viejo (o `pending`), toma el trabajo: pon `status: run
 - [x] **F2** ui-kit re-skineado (misma API de props; nuevo `Button arrow`, `Badge tone="gold"`, `StatCard` con cifra serif)
 - [x] **F3** Shell, registro de módulos y Home por rol (+ `/modulos` y `/modulos/[id]`): riel sin borde con «Próximamente», barra superior con buscador/paleta ⌘K, barra inferior móvil, `HomeRol` (saludo en serif + subrayado dorado + campo de comando + filas de módulos), `docs/design/MODULOS.md`
 - [x] **F4** Auth: login, recuperar, cambiar contraseña, activar cuenta (pantalla dividida + panel de producto animado con 3 escenas rotativas, reglas de contraseña en vivo, `/activar-cuenta` como destino de la invitación)
-- [ ] **F5** Operación: sesión en vivo, pase manual, revisión, reportes, portal del alumno
-- [ ] **F6** Admin, técnico y analítica
-- [ ] **F7** Pulido de movimiento, presupuesto de rendimiento, reduced-motion, a11y
-- [ ] **F8** Cierre: recorrido desktop + 360 px, documentación, todo verde y subido
+- [x] **F5** Operación: sesión en vivo, pase manual, revisión, reportes, portal del alumno (heredan ui-kit y tokens; radios, sombras y enlaces-botón migrados; sin desbordes a 360 px)
+- [x] **F6** Admin, técnico y analítica (misma migración; corregido el acceso del administrador a `/tecnico` en solo lectura)
+- [x] **F7** Pulido de movimiento, presupuesto de rendimiento (medido, ver abajo), reduced-motion y a11y (StatCard con CountUp, paleta combobox, texto sr-only en titulares/cifras animados)
+- [x] **F8** Cierre: recorrido desktop + 360 px por rol, documentación (README, CLAUDE.md, ARCHITECTURE §14, docs/design/*), todo verde y subido
 
 ## Registro
 
@@ -37,7 +37,11 @@ Si `heartbeat` está más viejo (o `pending`), toma el trabajo: pon `status: run
 | 2026-10-03 | F1b: `lib/motion` + `components/motion` (BlurText, CountUp, Reveal, SpotlightCard, StaggerList), token `primary-hover` | e2fd11d |
 | 2026-10-03 | F2: ui-kit re-skineado (Button píldora + flecha circular, Card 24 px, inputs con anillo de foco, Alert con icono, Modal/Toast animados, Tabs segmentadas, StatusChip con punto, StatCard serif) | 06fc475 |
 | 2026-10-03 | Mobbin revisado con Chrome del usuario (Home, landing, login con panel de producto, registro) → `docs/design/REFERENCIAS.md` | (siguiente commit) |
-| 2026-10-03 | F3: shell, paleta ⌘K, registro de módulos, `/modulos`, Home por rol | (siguiente commit) |
+| 2026-10-03 | F3: shell, paleta ⌘K, registro de módulos, `/modulos`, Home por rol | 1698f27 |
+| 2026-10-03 | F4: pantallas de acceso con panel de producto animado, `/activar-cuenta` | ddf24c5 |
+| 2026-10-03 | F5/F6: radios y sombras coherentes en todas las pantallas; presupuesto de bundle medido | d9c3b5d |
+| 2026-10-03 | Documentación del sistema de diseño; StatCard animado | 444b229 |
+| 2026-10-03 | Cierre: acceso del administrador a `/tecnico` (solo lectura) y verificación final | (último commit) |
 
 ## Dependencias de animación añadidas (nombre · tamaño gz · dónde)
 
