@@ -5,20 +5,33 @@ import DataState from '@/components/ui/DataState';
 import EmptyState from '@/components/ui/EmptyState';
 import Field from '@/components/ui/Field';
 import Select from '@/components/ui/Select';
+import Spinner from '@/components/ui/Spinner';
 import PageHeader from '@/components/layout/PageHeader';
+import CalendarioRacha from '../CalendarioRacha';
+import CifrasMateria from '../CifrasMateria';
 import GraficasAsistencia from '../GraficasAsistencia';
 import ResumenMaterias from '../ResumenMaterias';
 import HistorialMateria from '../HistorialMateria';
 import MisJustificantes from '../MisJustificantes';
 import RegistrarJustificanteForm from '../RegistrarJustificanteForm';
-import { resumenHistorial } from '../alumno.utils.js';
+import { nombreMateria, resumenHistorial } from '../alumno.utils.js';
 import usePortalAlumno, { FILAS_HISTORIAL } from './usePortalAlumno.js';
 
-// Contenedor de P-08: gráficas y resumen por materia, historial de la materia elegida y justificantes.
+// Mientras llega el calendario se reserva una tarjeta de su alto aproximado (no un círculo suelto): la página no salta al aparecer.
+const CARGANDO_CALENDARIO = (
+    <div className="flex min-h-48 items-center justify-center rounded-xl border border-border bg-card">
+        <Spinner label="Cargando calendario" />
+    </div>
+);
+
+// Contenedor de P-08. De arriba abajo: la tarjeta principal de asistencia y las materias (resumen), y la vista de la materia elegida
+// (casillas de cifras, calendario con la racha, historial por sesión); al final, los justificantes.
 export default function PortalAlumno({ idSesionInicial = null, encabezado = true }) {
     const p = usePortalAlumno({ idSesionInicial });
     const seccionJustificantes = useRef(null);
     const periodos = p.resumen.data?.periodos_disponibles || [];
+    // Fila del resumen de la materia elegida: de ahí salen las casillas de cifras y el texto bajo «Historial».
+    const materiaActiva = p.resumen.data?.items?.find((i) => i.id_grupo === p.grupoActivo);
 
     const alJustificar = (s) => {
         p.justificar(s);
@@ -41,7 +54,7 @@ export default function PortalAlumno({ idSesionInicial = null, encabezado = true
                         )}
                         <section aria-labelledby="t-materias" className="flex flex-col gap-3">
                             <h2 id="t-materias" className="text-xl font-semibold tracking-tight">Resumen por materia</h2>
-                            {/* Con una sola materia la dona y la tarjeta van lado a lado; con varias, las gráficas arriba y las tarjetas debajo. */}
+                            {/* Con una sola materia las gráficas (medidor y anillo) y la tarjeta van lado a lado; con varias, las gráficas arriba y las tarjetas debajo. */}
                             <div className={d.items.length === 1 ? 'grid items-start gap-3 lg:grid-cols-2' : 'flex flex-col gap-3'}>
                                 <GraficasAsistencia items={d.items} />
                                 <ResumenMaterias items={d.items} idGrupoSeleccionado={p.grupoActivo} onSeleccionar={p.elegirGrupo} />
@@ -50,19 +63,27 @@ export default function PortalAlumno({ idSesionInicial = null, encabezado = true
                         <section aria-labelledby="t-historial" className="flex flex-col gap-3">
                             <div>
                                 <h2 id="t-historial" className="text-xl font-semibold tracking-tight">
-                                    Historial{p.historial.data?.grupo?.materia ? ` · ${p.historial.data.grupo.materia.nombre ?? p.historial.data.grupo.materia}` : ''}
+                                    Historial{p.historial.data?.grupo?.materia ? ` · ${nombreMateria(p.historial.data.grupo.materia)}` : ''}
                                 </h2>
                                 {p.historial.data && (
                                     <p className="mt-0.5 text-sm text-muted-foreground">
-                                        {resumenHistorial(p.historial.data.total, d.items.find((i) => i.id_grupo === p.grupoActivo))}
+                                        {resumenHistorial(p.historial.data.total, materiaActiva)}
                                     </p>
                                 )}
                             </div>
+                            <CifrasMateria item={materiaActiva} />
+                            <DataState loading={p.calendario.loading} error={p.calendario.error} data={p.calendario.data} onRetry={p.calendario.refetch}
+                                isEmpty={() => false} loadingFallback={CARGANDO_CALENDARIO}>
+                                {(c) => <CalendarioRacha items={c.items || []} materia={nombreMateria(c.grupo?.materia) || nombreMateria(materiaActiva?.materia)} />}
+                            </DataState>
                             <DataState loading={p.historial.loading} error={p.historial.error} data={p.historial.data} onRetry={p.historial.refetch}
                                 isEmpty={() => false}>
                                 {(h) => (
-                                    <HistorialMateria items={h.items} total={h.total} limit={FILAS_HISTORIAL} offset={p.offset}
-                                        onPagina={p.setOffset} onJustificar={alJustificar} />
+                                    <div className="flex flex-col gap-3">
+                                        {h.items.length > 0 && <h3 className="text-base font-semibold tracking-tight">Por sesión</h3>}
+                                        <HistorialMateria items={h.items} total={h.total} limit={FILAS_HISTORIAL} offset={p.offset}
+                                            onPagina={p.setOffset} onJustificar={alJustificar} />
+                                    </div>
                                 )}
                             </DataState>
                         </section>

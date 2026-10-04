@@ -51,6 +51,40 @@ export function sugerirEstado(sesion) {
 /** El cierre se habilita cuando la sesion esta abierta y la ventana de tolerancia ya termino. */
 export const cierreHabilitado = (sesion) => sesion?.estatus === 'abierta' && sesion.en_ventana === false;
 
+/** Lecturas validas en capturas distintas que confirman la asistencia (min_detecciones_validas del servidor, RF-03). */
+export const LECTURAS_REQUERIDAS = 3;
+
+// null, '' y undefined no son numeros (Number(null) daria 0 y se creeria que la clase va en el minuto 0).
+const numeroONaN = (v) => (v == null || v === '' ? Number.NaN : Number(v));
+
+/** Minutos que faltan para que termine la tolerancia (y se habilite el cierre), redondeados hacia arriba; null si no se saben. */
+export function minutosParaCierre(sesion) {
+    const total = numeroONaN(sesion?.tolerancia_min);
+    const minuto = numeroONaN(sesion?.minuto_actual);
+    if (!Number.isFinite(total) || !Number.isFinite(minuto)) return null;
+    return Math.max(1, Math.ceil(total - minuto));
+}
+
+/**
+ * Por que el cierre aun no esta disponible, en una frase con los minutos que faltan; null si ya se puede cerrar (o la sesion no esta
+ * abierta). Es el texto que acompana al boton deshabilitado: un boton gris sin motivo no dice que hay que esperar.
+ */
+export function motivoCierre(sesion) {
+    if (sesion?.estatus !== 'abierta' || cierreHabilitado(sesion)) return null;
+    const falta = minutosParaCierre(sesion);
+    const total = numeroONaN(sesion?.tolerancia_min);
+    if (falta == null) return `El cierre se habilita al terminar la tolerancia${Number.isFinite(total) ? ` (${total} min)` : ''}.`;
+    return `El cierre se habilita al terminar la tolerancia: ${falta === 1 ? 'falta 1 min' : `faltan ${falta} min`}.`;
+}
+
+/** «hace 8 s», «hace 2 min»: tiempo transcurrido desde un instante (en segundos) con la granularidad que importa al docente. */
+export function textoHace(segundos) {
+    const s = Math.max(0, Math.floor(Number(segundos) || 0));
+    if (s < 60) return `hace ${s} s`;
+    const min = Math.floor(s / 60);
+    return min < 60 ? `hace ${min} min` : `hace ${Math.floor(min / 60)} h`;
+}
+
 export const ETIQUETA_FASE = {
     presente: 'Presente (dentro del limite de puntualidad)',
     retardo: 'Retardo',
@@ -100,13 +134,38 @@ export function porcentajeAsistencia(totales) {
     return pct(num(t.presentes) + num(t.retardos), num(t.inscritos), 0);
 }
 
-/** Texto del centro de la dona: «83 %» y la etiqueta. */
+/** Texto del centro del anillo de una sesión cerrada: «83 %» y la etiqueta. */
 export function centroAsistencia(totales) {
     return { valor: `${porcentajeAsistencia(totales)} %`, etiqueta: 'asistencia' };
 }
 
+/**
+ * Centro del anillo en la sesión en curso: el número de inscritos. El % de asistencia ya lo dice el medidor líquido que va al lado
+ * (ver `presentesAhora`); repetirlo en el centro pondría la misma cifra dos veces en la misma tarjeta.
+ */
+export function centroInscritos(totales) {
+    return { valor: num(totales?.inscritos), etiqueta: 'Inscritos' };
+}
+
+/**
+ * Datos del medidor «Presentes ahora»: `valor` = (presentes + retardos) sobre inscritos, entero y acotado a 0-100, y la línea de apoyo
+ * «N de M inscritos». `null` sin inscritos: un medidor en 0 % de nadie no dice nada y el anillo ya avisa que no hay alumnos.
+ */
+export function presentesAhora(totales) {
+    const t = totales ?? {};
+    const inscritos = num(t.inscritos);
+    if (inscritos <= 0) return null;
+    const asistentes = num(t.presentes) + num(t.retardos);
+    return {
+        valor: Math.min(100, porcentajeAsistencia(totales)),
+        asistentes,
+        inscritos,
+        descripcion: `${asistentes} de ${inscritos} inscritos`,
+    };
+}
+
 // Claves de `totales` que alimentan cada grafica. El sondeo (cada 5 s) trae un objeto nuevo aunque los valores no cambien:
-// comparar por valor evita que recharts vuelva a dibujar la grafica sin que haya un dato nuevo.
+// comparar por valor evita volver a renderizar la grafica (y su medidor) sin que haya un dato nuevo.
 export const CLAVES_ASISTENCIA = ['inscritos', 'presentes', 'retardos', 'sin_registro', 'ausentes', 'justificados', 'pendientes'];
 export const CLAVES_ACTIVIDAD = ['capturas', 'detecciones', 'detecciones_validas'];
 

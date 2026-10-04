@@ -14,6 +14,12 @@ describe('agruparNav', () => {
         expect(grupos.map((g) => g.grupo)).toEqual(['Catálogos', 'Cuentas y auditoría', 'Análisis', 'Sistema']);
         expect(grupos[0].items.map((i) => i.label)).toEqual(['Grupos', 'Alumnos', 'Docentes', 'Materias', 'Aulas']);
     });
+    it('docente: «Pasar lista» queda en un grupo sin título, antes de «Asistencia» (justo bajo el Panel)', () => {
+        const { inicio, grupos } = agruparNav(navParaRol('docente'));
+        expect(inicio.href).toBe('/docente');
+        expect(grupos.map((g) => g.grupo)).toEqual(['', 'Asistencia', 'Análisis']);
+        expect(grupos[0].items.map((i) => i.label)).toEqual(['Pasar lista']);
+    });
     it('un rol con un solo ítem no tiene grupos; sin ítems no falla', () => {
         expect(agruparNav(navParaRol('alumno')).grupos).toEqual([]);
         expect(agruparNav([])).toEqual({ inicio: null, grupos: [] });
@@ -32,6 +38,12 @@ describe('Sidebar estilo Dash', () => {
         expect(within(prox).getAllByRole('link').length).toBeGreaterThanOrEqual(4);
         expect(within(prox).getByText('Asistente SUSAN').closest('a')).toHaveAttribute('href', '/modulos/asistente');
         expect(screen.getByRole('link', { name: 'Módulos' })).toHaveAttribute('href', '/modulos');
+    });
+    it('«Pasar lista» aparece justo después de «Buscar», antes del título «Asistencia»', () => {
+        render(<Sidebar {...props} />);
+        const nav = screen.getByRole('navigation', { name: 'Principal' });
+        const orden = [...nav.querySelectorAll('a, button, p')].map((e) => e.textContent.replace(/\s+/g, ' ').trim());
+        expect(orden.slice(0, 5)).toEqual(['Panel', expect.stringMatching(/^Buscar/), 'Pasar lista', 'Asistencia', 'Revisión']);
     });
     it('«Buscar» abre la paleta y cierra el cajón', async () => {
         const onBuscar = vi.fn();

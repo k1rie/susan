@@ -55,18 +55,26 @@ async function conBloqueo(admin, fn) {
     }
 }
 
-/** Entradas del build: las que ya están en la base se conservan (keep), las nuevas llevan su foto. */
-function entradasDeBuild(plan) {
-    return plan.entries.map((e) => (e.en_base
-        ? { id_plantilla: e.id_plantilla, faiss_id: e.faiss_id, keep: true }
-        : { id_plantilla: e.id_plantilla, faiss_id: e.faiss_id, objeto_foto: e.objeto_foto }));
+/**
+ * Entradas del build: las que ya están en la base se conservan (keep); las nuevas llevan su foto. Una plantilla de
+ * varias fotos (el plan trae `objetos_foto` con más de una ruta) viaja como {objetos_foto} y el servicio promedia
+ * sus embeddings en UN vector; con una sola foto se emite {objeto_foto} exactamente como antes, así un servicio
+ * anterior a la mejora sigue entendiendo todo lo que no sea multifoto.
+ */
+export function entradasDeBuild(plan) {
+    return plan.entries.map((e) => {
+        const base = { id_plantilla: e.id_plantilla, faiss_id: e.faiss_id };
+        if (e.en_base) return { ...base, keep: true };
+        if (Array.isArray(e.objetos_foto) && e.objetos_foto.length > 1) return { ...base, objetos_foto: e.objetos_foto };
+        return { ...base, objeto_foto: e.objeto_foto };
+    });
 }
 
 /**
  * Reconstruye y activa una versión completa del índice.
  * @param {{ completa?: boolean, admin?: object }} [opts] completa = reprocesar todas las fotos
  * @returns {Promise<{ estado: 'activada' | 'sin_cambios', version: string | null, id_indice: number | null,
- *   total_vectores: number, plantillas_asignadas?: number, plantillas_pendientes?: number, anterior?: object | null,
+ *   total_vectores: number, muestras?: object[], plantillas_asignadas?: number, plantillas_pendientes?: number, anterior?: object | null,
  *   ya_activo?: boolean }>}
  * @throws {ApiError} RECONSTRUCCION_EN_CURSO | INDICE_CONSTRUCCION_FALLIDA (details.errores) | el de la fase que falló
  */
@@ -141,6 +149,7 @@ export async function reconstruirIndice({ completa = false, admin } = {}) {
             version,
             id_indice: registro.id_indice,
             total_vectores: build.ntotal,
+            muestras: build.muestras ?? [],
             plantillas_asignadas: activacion.plantillas_asignadas,
             plantillas_pendientes: activacion.plantillas_pendientes,
             anterior: activacion.anterior ?? null,

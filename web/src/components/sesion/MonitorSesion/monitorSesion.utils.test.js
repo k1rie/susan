@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
     actividadReconocimiento,
     centroAsistencia,
+    centroInscritos,
     cierreHabilitado,
     distribucionSesionAbierta,
     distribucionSesionCerrada,
@@ -10,12 +11,17 @@ import {
     estadoMostrado,
     formatearFecha,
     formatearHora,
+    LECTURAS_REQUERIDAS,
+    minutosParaCierre,
     mismosValores,
+    motivoCierre,
     motivoRegistroManual,
     porcentajeAsistencia,
+    presentesAhora,
     requiereRegistroManual,
     resumenActividad,
     sugerirEstado,
+    textoHace,
 } from './monitorSesion.utils.js';
 
 describe('monitorSesion.utils', () => {
@@ -96,12 +102,73 @@ describe('monitorSesion.utils', () => {
             expect(porcentajeAsistencia(undefined)).toBe(0);
             expect(centroAsistencia(totales)).toEqual({ valor: '80 %', etiqueta: 'asistencia' });
         });
+        it('el medidor «Presentes ahora» cuenta presentes y retardos sobre inscritos, con su línea de apoyo', () => {
+            expect(presentesAhora(totales)).toEqual({ valor: 80, asistentes: 24, inscritos: 30, descripcion: '24 de 30 inscritos' });
+            expect(presentesAhora({ inscritos: 3, presentes: 1 })).toMatchObject({ valor: 33, descripcion: '1 de 3 inscritos' });
+        });
+        it('sin inscritos (o con totales ausentes o raros) no hay medidor', () => {
+            expect(presentesAhora(undefined)).toBeNull();
+            expect(presentesAhora({})).toBeNull();
+            expect(presentesAhora({ inscritos: 0, presentes: 3 })).toBeNull();
+            expect(presentesAhora({ inscritos: 'x', presentes: 3 })).toBeNull();
+        });
+        it('el medidor nunca pasa de 100 aunque los totales lleguen inconsistentes', () => {
+            expect(presentesAhora({ inscritos: 4, presentes: 4, retardos: 2 }).valor).toBe(100);
+        });
+        it('el centro del anillo en curso lleva los inscritos (el % lo dice el medidor)', () => {
+            expect(centroInscritos(totales)).toEqual({ valor: 30, etiqueta: 'Inscritos' });
+            expect(centroInscritos(undefined)).toEqual({ valor: 0, etiqueta: 'Inscritos' });
+        });
         it('arma la actividad de reconocimiento y devuelve vacio sin actividad', () => {
             const f = actividadReconocimiento(totales);
             expect(f).toEqual([{ etapa: 'Capturas', cantidad: 12 }, { etapa: 'Detecciones', cantidad: 40 }, { etapa: 'Det. válidas', cantidad: 31 }]);
             expect(resumenActividad(f)).toBe('Capturas: 12; Detecciones: 40; Det. válidas: 31');
             expect(actividadReconocimiento({ capturas: 0, detecciones: 0 })).toEqual([]);
             expect(resumenActividad([])).toBe('Aún no hay capturas ni detecciones.');
+        });
+    });
+
+    describe('cierre de la sesión', () => {
+        const abierta = { estatus: 'abierta', en_ventana: true, tolerancia_min: 20, minuto_actual: 5.5 };
+        it('los minutos que faltan se redondean hacia arriba y nunca bajan de 1', () => {
+            expect(minutosParaCierre(abierta)).toBe(15);
+            expect(minutosParaCierre({ ...abierta, minuto_actual: 19.99 })).toBe(1);
+            expect(minutosParaCierre({ ...abierta, minuto_actual: 25 })).toBe(1);
+        });
+        it('sin minuto o sin tolerancia no se inventa una cuenta (null no es el minuto 0)', () => {
+            expect(minutosParaCierre({ ...abierta, minuto_actual: null })).toBeNull();
+            expect(minutosParaCierre({ ...abierta, minuto_actual: undefined })).toBeNull();
+            expect(minutosParaCierre({ ...abierta, tolerancia_min: null })).toBeNull();
+            expect(minutosParaCierre(undefined)).toBeNull();
+        });
+        it('el motivo dice cuánto falta; en singular con 1 min', () => {
+            expect(motivoCierre(abierta)).toBe('El cierre se habilita al terminar la tolerancia: faltan 15 min.');
+            expect(motivoCierre({ ...abierta, minuto_actual: 19.5 })).toBe('El cierre se habilita al terminar la tolerancia: falta 1 min.');
+        });
+        it('sin minuto conocido el motivo cita la tolerancia; sin ella, solo la regla', () => {
+            expect(motivoCierre({ ...abierta, minuto_actual: null })).toBe('El cierre se habilita al terminar la tolerancia (20 min).');
+            expect(motivoCierre({ ...abierta, minuto_actual: null, tolerancia_min: null })).toBe('El cierre se habilita al terminar la tolerancia.');
+        });
+        it('no hay motivo cuando ya se puede cerrar ni cuando la sesión no está abierta', () => {
+            expect(motivoCierre({ ...abierta, en_ventana: false })).toBeNull();
+            expect(motivoCierre({ ...abierta, estatus: 'cerrada' })).toBeNull();
+            expect(motivoCierre({ ...abierta, estatus: 'programada' })).toBeNull();
+        });
+        it('el mínimo de lecturas que confirman es el del servidor', () => {
+            expect(LECTURAS_REQUERIDAS).toBe(3);
+        });
+    });
+
+    describe('textoHace', () => {
+        it('segundos, minutos y horas; un reloj atrasado no da negativos', () => {
+            expect(textoHace(0)).toBe('hace 0 s');
+            expect(textoHace(8.9)).toBe('hace 8 s');
+            expect(textoHace(59)).toBe('hace 59 s');
+            expect(textoHace(60)).toBe('hace 1 min');
+            expect(textoHace(185)).toBe('hace 3 min');
+            expect(textoHace(7300)).toBe('hace 2 h');
+            expect(textoHace(-4)).toBe('hace 0 s');
+            expect(textoHace(undefined)).toBe('hace 0 s');
         });
     });
 });

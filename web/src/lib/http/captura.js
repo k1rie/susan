@@ -3,7 +3,10 @@ import { postForm, postJSON } from './client.js';
 
 /**
  * Envía un fotograma. Cámara del navegador: `imagen` (Blob JPEG). Cámara IP: sin imagen (el servidor la jala).
- * Conviene enviar siempre `marcaTiempo` (ISO 8601): hace idempotente el reintento tras un fallo de red.
+ * `marcaTiempo` es OPCIONAL y la pantalla de la sesión ya no la manda: la hora de la captura la estampa el servidor con la hora de
+ * negocio (la real en producción; con el reloj de demostración, la simulada). La hora del equipo no es una fuente fiable: si difiere de
+ * la del plantel, el servidor rechaza la captura como MARCA_FUTURA. Solo hace falta pasarla para reintentar el MISMO fotograma tras un
+ * fallo de red (la captura es idempotente por cámara + marca); el muestreo no reintenta fotogramas, toma uno nuevo en el siguiente ciclo.
  * Un 409 con details.fin_muestreo = true significa "deja de muestrear esta sesión".
  * @param {{ idSesion: number, idCamara: number, imagen?: Blob | null, marcaTiempo?: string | Date, signal?: AbortSignal }} p
  * @returns {Promise<{ id_captura: number, marca_tiempo: string, camara: object, rostros: number, validas: number,

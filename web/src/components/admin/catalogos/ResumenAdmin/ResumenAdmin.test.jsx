@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const resumen = vi.hoisted(() => vi.fn());
@@ -18,17 +18,55 @@ beforeEach(() => resumen.mockReset());
 describe('ResumenAdmin', () => {
     it('deja tres contadores y dos gráficas con texto alternativo', async () => {
         resumen.mockResolvedValue(base);
-        const { container } = render(<ResumenAdmin encabezado={false} />);
+        render(<ResumenAdmin encabezado={false} />);
         expect(await screen.findByText('Alumnos activos')).toBeInTheDocument();
         expect(screen.getByText('Docentes activos')).toBeInTheDocument();
         expect(screen.getByText('Grupos del periodo')).toBeInTheDocument();
         expect(screen.queryByText('Cámaras activas')).not.toBeInTheDocument();
         expect(screen.getByRole('group', { name: 'Sesiones de hoy' })).toHaveAccessibleDescription(/Abiertas: 1.*Programadas: 2.*Cerradas: 3/);
         expect(screen.getByRole('group', { name: 'Cámaras' })).toHaveAccessibleDescription(/Activas: 5.*Inactivas: 1/);
-        expect(container.querySelectorAll('[data-slot="chart"]')).toHaveLength(2);
         expect(screen.getByRole('link', { name: /Ver cámaras/ })).toHaveAttribute('href', '/tecnico');
     });
-    it('incluye las sesiones suspendidas en la dona y en su texto alternativo', async () => {
+    it('cada contador es un enlace a su listado con su cifra final y un icono decorativo en pastilla neutra', async () => {
+        resumen.mockResolvedValue(base);
+        render(<ResumenAdmin encabezado={false} />);
+        await screen.findByText('Alumnos activos');
+        const casos = [['Alumnos activos', '/admin/alumnos', '120'], ['Docentes activos', '/admin/docentes', '14'], ['Grupos del periodo', '/admin/grupos', '9']];
+        for (const [nombre, href, cifra] of casos) {
+            const tarjeta = screen.getByRole('link', { name: new RegExp(nombre) });
+            expect(tarjeta).toHaveAttribute('href', href);
+            // La cifra final va en el texto sr-only de CountUp (la visible puede estar a media cuenta).
+            expect(tarjeta.querySelector('p.tabular-nums .sr-only')).toHaveTextContent(cifra);
+            const [icono, flecha] = tarjeta.querySelectorAll('svg');
+            expect(icono).toHaveAttribute('aria-hidden', 'true');
+            expect(icono.parentElement).toHaveClass('bg-muted', 'text-muted-foreground');
+            expect(flecha).toHaveAttribute('aria-hidden', 'true');
+        }
+    });
+    it('a ancho de teléfono los contadores van en dos columnas y el tercero a todo el ancho', async () => {
+        resumen.mockResolvedValue(base);
+        render(<ResumenAdmin encabezado={false} />);
+        const zona = await screen.findByRole('region', { name: 'Contadores' });
+        const rejilla = zona.querySelector('.grid');
+        expect(rejilla).toHaveClass('grid-cols-2', 'min-[480px]:grid-cols-3');
+        expect(rejilla).not.toHaveClass('grid-cols-1');
+        expect(screen.getByRole('link', { name: /Grupos del periodo/ })).toHaveClass('col-span-2', 'min-[480px]:col-span-1');
+    });
+    it('cada anillo dice sus cifras en la leyenda y el total al centro', async () => {
+        resumen.mockResolvedValue(base);
+        render(<ResumenAdmin encabezado={false} />);
+        // Fila de leyenda = [punto de color, nombre, cifra, porcentaje]: se leen por separado para no depender del texto pegado.
+        const leyenda = (grupo) => within(grupo).getAllByRole('listitem').map((li) => [...li.children].slice(1).map((c) => c.textContent));
+        const sesiones = await screen.findByRole('group', { name: 'Sesiones de hoy' });
+        expect(leyenda(sesiones)).toEqual([['Abiertas', '1', '17 %'], ['Programadas', '2', '33 %'], ['Cerradas', '3', '50 %'], ['Suspendidas', '0', '0 %']]);
+        expect(within(sesiones).getByText('6')).toBeInTheDocument();
+        expect(within(sesiones).getByText('Sesiones', { selector: 'span.text-xs' })).toBeInTheDocument();
+        const camaras = screen.getByRole('group', { name: 'Cámaras' });
+        expect(leyenda(camaras)).toEqual([['Activas', '5', '83 %'], ['Inactivas', '1', '17 %']]);
+        expect(within(camaras).getByText('6')).toBeInTheDocument();
+        expect(within(camaras).getByText('Cámaras', { selector: 'span.text-xs' })).toBeInTheDocument();
+    });
+    it('incluye las sesiones suspendidas en el anillo y en su texto alternativo', async () => {
         resumen.mockResolvedValue({ ...base, sesiones_hoy: { total: 8, abiertas: 1, programadas: 2, cerradas: 3, suspendidas: 2 } });
         render(<ResumenAdmin encabezado={false} />);
         expect(await screen.findByRole('group', { name: 'Sesiones de hoy' })).toHaveAccessibleDescription(/Suspendidas: 2/);

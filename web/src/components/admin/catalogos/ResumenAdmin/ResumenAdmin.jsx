@@ -1,10 +1,10 @@
 'use client';
 
-import { CalendarClock, ChevronRight, CheckCircle2, ScanFace } from 'lucide-react';
+import { CalendarClock, CheckCircle2, ChevronRight, GraduationCap, Presentation, ScanFace, Users } from 'lucide-react';
 import PageHeader from '@/components/layout/PageHeader';
+import AnilloEstados from '@/components/ui/AnilloEstados';
 import Button from '@/components/ui/Button';
 import DataState from '@/components/ui/DataState';
-import GraficaDona from '@/components/ui/GraficaDona';
 import StatCard from '@/components/ui/StatCard';
 import TarjetaFila from '@/components/ui/TarjetaFila';
 import TarjetaGrafica from '@/components/ui/TarjetaGrafica';
@@ -43,10 +43,11 @@ export default function ResumenAdmin({ encabezado = true }) {
                         <>
                             <section aria-label="Contadores" className="flex flex-col gap-3">
                                 <p className="text-sm text-muted-foreground">Periodo {r.periodo} · {r.fecha}</p>
-                                <div className="grid grid-cols-1 gap-3 min-[480px]:grid-cols-3">
-                                    <StatCard animated label="Alumnos activos" value={r.alumnos_activos} href="/admin/alumnos" />
-                                    <StatCard animated label="Docentes activos" value={r.docentes_activos} href="/admin/docentes" />
-                                    <StatCard animated label="Grupos del periodo" value={r.grupos_periodo} href="/admin/grupos" />
+                                {/* A 360 px dos tarjetas por fila y la tercera a todo el ancho (tres columnas dejarían ~60 px a cada etiqueta). */}
+                                <div className="grid grid-cols-2 gap-3 min-[480px]:grid-cols-3">
+                                    <StatCard animated icon={GraduationCap} label="Alumnos activos" value={r.alumnos_activos} href="/admin/alumnos" />
+                                    <StatCard animated icon={Presentation} label="Docentes activos" value={r.docentes_activos} href="/admin/docentes" />
+                                    <StatCard animated icon={Users} label="Grupos del periodo" value={r.grupos_periodo} href="/admin/grupos" className="col-span-2 min-[480px]:col-span-1" />
                                 </div>
                             </section>
                             <section aria-label="Sesiones y cámaras" className="grid grid-cols-1 gap-3 lg:grid-cols-2">
@@ -55,7 +56,7 @@ export default function ResumenAdmin({ encabezado = true }) {
                                     descripcion="Por estado"
                                     resumen={resumenTexto(sesiones, CONFIG_SESIONES)}
                                 >
-                                    <GraficaDona datos={sesiones} config={CONFIG_SESIONES} centro={{ etiqueta: 'Sesiones' }} alto={220} vacio="Hoy no hay sesiones" />
+                                    <AnilloEstados datos={sesiones} config={CONFIG_SESIONES} centro={{ etiqueta: 'Sesiones' }} alto={260} vacio="Hoy no hay sesiones" />
                                 </TarjetaGrafica>
                                 <TarjetaGrafica
                                     titulo="Cámaras"
@@ -63,7 +64,7 @@ export default function ResumenAdmin({ encabezado = true }) {
                                     acciones={<Button href="/tecnico" variant="ghost" size="sm" arrow>Ver cámaras</Button>}
                                     resumen={resumenTexto(camaras, CONFIG_CAMARAS)}
                                 >
-                                    <GraficaDona datos={camaras} config={CONFIG_CAMARAS} centro={{ etiqueta: 'Cámaras' }} alto={220} vacio="No hay cámaras registradas" />
+                                    <AnilloEstados datos={camaras} config={CONFIG_CAMARAS} centro={{ etiqueta: 'Cámaras' }} alto={260} vacio="No hay cámaras registradas" />
                                 </TarjetaGrafica>
                             </section>
                             <section aria-labelledby="t-atencion" className="flex flex-col gap-3">

@@ -1,8 +1,7 @@
 // @vitest-environment jsdom
 import { render } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
-import { CONFIG_ACUMULADO, CONFIG_SERIE } from '../analitica.utils.js';
-import MuestraSerie, { conIconos } from './index.js';
+import MuestraSerie from './index.js';
 
 describe('MuestraSerie', () => {
     it('cada forma se distingue sin depender del color y se oculta a los lectores de pantalla', () => {
@@ -24,31 +23,9 @@ describe('MuestraSerie', () => {
         expect(muestras[0].style.backgroundColor).toBe('var(--chart-1)');
         expect(muestras[1].style.borderColor).toBe('var(--chart-1)');
     });
-});
-
-describe('conIconos', () => {
-    it('añade un icono por serie con forma, estable entre llamadas y sin mutar la configuración', () => {
-        const antes = JSON.stringify(CONFIG_SERIE);
-        const a = conIconos(CONFIG_SERIE);
-        const b = conIconos(CONFIG_SERIE);
-        expect(JSON.stringify(CONFIG_SERIE)).toBe(antes);
-        for (const clave of Object.keys(CONFIG_SERIE)) {
-            expect(typeof a[clave].icon).toBe('function');
-            expect(a[clave].icon).toBe(b[clave].icon);
-            expect(a[clave].label).toBe(CONFIG_SERIE[clave].label);
-        }
-        expect(conIconos({ sinForma: { label: 'X', color: 'var(--chart-1)' } }).sinForma.icon).toBeUndefined();
-    });
-    it('ajuste, proyección e intervalo comparten color pero no forma (ni icono)', () => {
-        const c = conIconos(CONFIG_SERIE);
-        expect(new Set(['ajuste', 'proyeccion', 'banda'].map((k) => c[k].color)).size).toBe(1);
-        expect(new Set(['ajuste', 'proyeccion', 'banda'].map((k) => c[k].icon)).size).toBe(3);
-        const Icono = c.proyeccion.icon;
-        const { container } = render(<Icono />);
-        expect(container.firstChild).toHaveAttribute('data-forma', 'discontinua');
-    });
-    it('el acumulado reutiliza las formas de la serie semanal', () => {
-        for (const clave of ['ajuste', 'proyeccion', 'banda']) expect(CONFIG_ACUMULADO[clave].forma).toBe(CONFIG_SERIE[clave].forma);
-        expect(conIconos(CONFIG_ACUMULADO).acumulado.icon).toBeTypeOf('function');
+    it('mide lo mismo que las muestras de la leyenda de GraficaLinea (punto de 10 px)', () => {
+        const { container } = render(<MuestraSerie forma="punto" color="var(--foreground)" className="extra" />);
+        expect(container.firstChild.className).toContain('size-2.5');
+        expect(container.firstChild.className).toContain('extra');
     });
 });

@@ -8,6 +8,13 @@ export const LIMITE_FALTAS_DEFECTO = 20;
 export const TOP_ALUMNOS = 8;
 export const TOP_GRUPOS = 10;
 
+/**
+ * Máximo de caracteres de la etiqueta de un alumno o de un grupo en las barras. Las barras en fila parten el nombre en 2 líneas
+ * (en la columna de nombres caben ~18 por línea), así que el tope puede ser holgado.
+ */
+export const MAX_ETIQUETA_ALUMNO = 24;
+export const MAX_ETIQUETA_GRUPO = 30;
+
 const num = (v) => {
     const n = Number(v);
     return Number.isFinite(n) ? n : 0;
@@ -46,7 +53,7 @@ function etiquetasUnicas(filas, extra) {
     });
 }
 
-/** Distribución agregada de estados sumando a los alumnos: siempre 5 entradas [{ clave, valor }] (la dona omite los ceros). */
+/** Distribución agregada de estados sumando a los alumnos: siempre 5 entradas [{ clave, valor }] (el anillo no dibuja arco para los ceros, pero sí los lista). */
 export function distribucionAsistencia(items = []) {
     const suma = (campo) => (items || []).reduce((a, i) => a + num(i[campo]), 0);
     return [
@@ -58,28 +65,28 @@ export function distribucionAsistencia(items = []) {
     ];
 }
 
-/** Centro de la dona: la asistencia promedio del reporte redondeada; sin dato, undefined (la dona muestra el total). */
+/** Centro del anillo: la asistencia promedio del reporte redondeada; sin dato, undefined (el anillo muestra el total). */
 export function centroAsistencia(asistenciaPromedio) {
     if (!hayDato(asistenciaPromedio)) return undefined;
     return { valor: `${Math.round(Number(asistenciaPromedio))} %`, etiqueta: 'Asistencia' };
 }
 
 /**
- * Centro de la dona del resumen de grupo. La asistencia promedio es del GRUPO completo: con un alumno seleccionado la dona
- * grafica solo sus registros y esa cifra no le corresponde, así que no se pone (la dona muestra el total de registros).
+ * Centro del anillo del resumen de grupo. La asistencia promedio es del GRUPO completo: con un alumno seleccionado el anillo
+ * grafica solo sus registros y esa cifra no le corresponde, así que no se pone (el anillo muestra el total de registros).
  * Tampoco se pone sin sesiones programadas (no hay porcentaje que decir).
  */
-export function centroDonaGrupo({ asistenciaPromedio, sinSesiones = false, deAlumno = false } = {}) {
+export function centroAnilloGrupo({ asistenciaPromedio, sinSesiones = false, deAlumno = false } = {}) {
     if (sinSesiones || deAlumno) return undefined;
     return centroAsistencia(asistenciaPromedio);
 }
 
-/** Etiqueta corta del alumno para el eje: primer nombre + apellido paterno (o el nombre completo si faltan). */
+/** Etiqueta corta del alumno para el eje: primer nombre + apellido paterno (o el nombre completo si faltan), acortada. */
 export function etiquetaAlumno(a) {
     const nombre = String(a?.nombres || '').trim().split(/\s+/)[0];
     const apellido = String(a?.apellido_paterno || '').trim();
     const corta = [nombre, apellido].filter(Boolean).join(' ') || String(a?.nombre_completo || a?.matricula || 'Alumno');
-    return acortar(corta, 18);
+    return acortar(corta, MAX_ETIQUETA_ALUMNO);
 }
 
 /**
@@ -111,7 +118,7 @@ export function dominioFaltas(datos = [], limite = LIMITE_FALTAS_DEFECTO) {
 
 // Etiqueta de grupo para el eje: "3A · Finanzas" acortada.
 function etiquetaGrupo(g) {
-    return acortar([g.clave_grupo, g.materia_nombre].filter(Boolean).join(' · '), 17);
+    return acortar([g.clave_grupo, g.materia_nombre].filter(Boolean).join(' · '), MAX_ETIQUETA_GRUPO);
 }
 
 /**

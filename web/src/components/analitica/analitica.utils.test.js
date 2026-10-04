@@ -1,10 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { analizarGrupo } from '@/lib/numerics';
 import {
-    CONFIG_RIESGO, CONFIG_SERIE, datosPatronBarras, descripcionTendencia, distribucionRiesgo, dividirTexto, nombreCorto, partirAlertas, resumenTextoAcumulado, resumenTextoPatron,
-    resumenTextoSerie, resumenTextoTop, tendenciaAlumno, topRiesgo,
+    abreviarDia, CONFIG_ACUMULADO, CONFIG_RIESGO, CONFIG_SERIE, CONFIG_USO_LIMITE, datosTiraPatron, datosUsoLimite, descripcionTendencia, distribucionRiesgo, dividirTexto, fmtEjePct,
+    indiceDiaCritico, nombreCorto, partirAlertas, resumenTextoAcumulado, resumenTextoPatron, resumenTextoSerie, resumenTextoTop, serieDeConfig, seriesAcumulado, seriesSemanal,
+    seriesTarjetas, tendenciaAlumno, textoSesiones, textoValorSerie, topRiesgo,
     columnasTraza, construirCsvAnalisis, construirSerieAcumulado, construirSerieSemanal, datosPatron, datosTarjetas,
-    escaparCeldaCsv, fmtCelda, fmtSigno, ordenarRiesgo, seccionesProcedimiento,
+    escaparCeldaCsv, fmtCelda, fmtNum, fmtPct, fmtSigno, ordenarRiesgo, seccionesProcedimiento,
 } from './analitica.utils.js';
 
 const LUNES0 = Date.UTC(2026, 7, 17);
@@ -84,7 +85,9 @@ describe('datos de gráficas', () => {
 describe('tarjetas', () => {
     it('formatea con datos suficientes', () => {
         const t = datosTarjetas({ ...analisis, limitePct: 20 });
-        expect(t.actual.valor).toMatch(/%$/);
+        // la cifra y su unidad van por separado: la tarjeta pinta el «%» como sufijo pequeño
+        expect(t.actual).toMatchObject({ valor: fmtNum(analisis.resumen.tasaActual), unidad: '%' });
+        expect(t.actual.valor).toMatch(/^\d+\.\d$/);
         // la tendencia ya no es una tarjeta: vive en la descripción de la gráfica (descripcionTendencia)
         expect(t).not.toHaveProperty('tendencia');
         const c = analisis.cruceLimite;
@@ -97,6 +100,35 @@ describe('tarjetas', () => {
         expect(t.proyeccion.nota).toBe('Faltan semanas');
         expect(t.cruce.valor).toBe('-');
         expect(t.cruce.nota).toBe('Faltan semanas');
+    });
+});
+
+describe('tarjetas: cifra y unidad por separado', () => {
+    it('ausentismo actual y proyección dan la cifra con 1 decimal y «%» aparte (mismo texto que fmtPct al juntarlos)', () => {
+        const t = datosTarjetas({
+            resumen: { suficiente: true, tasaActual: 26.4, variacionPP: 9.7 },
+            proyeccion: { disponible: true, puntos: [{ semana: 12, valor: 0.3125, inferior: 0.2, superior: 0.4 }] },
+            cruceLimite: null,
+            limitePct: 20,
+        });
+        expect(t.actual).toMatchObject({ valor: '26.4', unidad: '%', tono: 'danger', nota: '+9.7 pp vs. semana previa' });
+        expect(`${t.actual.valor} ${t.actual.unidad}`).toBe(fmtPct(26.4));
+        expect(t.proyeccion).toMatchObject({ valor: '31.3', unidad: '%', nota: 'Semana 12 (20 % a 40 %)' });
+        expect(`${t.proyeccion.valor} ${t.proyeccion.unidad}`).toBe(fmtPct(31.25));
+    });
+    it('sin dato: guion y sin unidad (el «%» no acompaña a un guion)', () => {
+        const t = datosTarjetas({ resumen: undefined, proyeccion: undefined, cruceLimite: null });
+        expect(t.actual.valor).toBe('-');
+        expect(t.actual.unidad).toBeUndefined();
+        expect(t.proyeccion.valor).toBe('-');
+        expect(t.proyeccion.unidad).toBeUndefined();
+        // una proyección con valor no numérico tampoco dibuja unidad
+        expect(datosTarjetas({ proyeccion: { disponible: true, puntos: [{ semana: 3 }] } }).proyeccion.unidad).toBeUndefined();
+    });
+    it('el cruce y los alumnos en riesgo son texto o conteo: no llevan unidad', () => {
+        const t = datosTarjetas({ resumen: { suficiente: true, alumnosEvaluados: 12, alumnosEnRiesgo: 4 }, cruceLimite: { estado: 'cruza', semana: 14 } });
+        expect(t.cruce).not.toHaveProperty('unidad');
+        expect(t.riesgo).not.toHaveProperty('unidad');
     });
 });
 
@@ -201,16 +233,16 @@ describe('top de riesgo', () => {
         top.forEach((f) => expect((f.alto == null) !== (f.medio == null)).toBe(true));
     });
     it('etiquetas únicas aunque los nombres cortos choquen, y sin mutar la entrada', () => {
-        const items = [mk(1, 'alto', 80, 'Mismo Nombre Completo Largo A'), mk(2, 'medio', 50, 'Mismo Nombre Completo Largo B')];
+        const items = [mk(1, 'alto', 80, 'Mismo Nombre Completo Muy Largo'), mk(2, 'medio', 50, 'Mismo Nombre Completo Muy Largo')];
         const copia = JSON.parse(JSON.stringify(items));
         const top = topRiesgo(items);
         expect(new Set(top.map((f) => f.alumno)).size).toBe(2);
         expect(top[0].alumno).toContain('M1');
         expect(items).toEqual(copia);
     });
-    it('si los nombres cortos chocan, el sufijo es solo el final de la matrícula y cabe en el eje', () => {
+    it('si los nombres cortos chocan, el sufijo es solo el final de la matrícula y cabe en la columna de nombres', () => {
         const items = [
-            mk(1, 'alto', 90, 'González Campos María Fernanda'), mk(2, 'medio', 60, 'González Campos Mario Federico'),
+            mk(1, 'alto', 90, 'González Campos María Fernanda Guadalupe'), mk(2, 'medio', 60, 'González Campos Mario Federico Guadalupe'),
             mk(3, 'medio', 40, 'Pérez Luna Ana'),
         ].map((a, i) => ({ ...a, matricula: i < 2 ? `A012345${i + 6}` : 'A0000003' }));
         const top = topRiesgo(items);
@@ -218,13 +250,18 @@ describe('top de riesgo', () => {
         expect(top[1].alumno).toMatch(/ #3457$/);
         expect(top[0].alumno).not.toContain('A0123456');
         expect(top[2].alumno).toBe('Pérez Luna Ana');
-        top.forEach((f) => expect(f.alumno.length).toBeLessThanOrEqual(16));
+        top.forEach((f) => expect(f.alumno.length).toBeLessThanOrEqual(28));
+    });
+    it('un nombre y un apellido enteros ya no se abrevian: BarrasPildora los reparte en 2 líneas', () => {
+        const top = topRiesgo([mk(1, 'alto', 80, 'González Campos Mauricio'), mk(2, 'medio', 50, 'Rodríguez Domínguez Daniela Alejandra')]);
+        expect(top[0].alumno).toBe('González Campos Mauricio');
+        expect(top[1].alumno).toBe('Rodríguez D. D. A.');
     });
     it('aun sin matrícula ni nada que distinga a los homónimos, las etiquetas siguen siendo únicas y cortas', () => {
         const items = [1, 2, 3].map((i) => ({ idAlumno: undefined, nombre: 'Anastasio Montenegro Fernández de la Cruz', nivel: 'medio', puntaje: 50 - i }));
         const top = topRiesgo(items);
         expect(new Set(top.map((f) => f.alumno)).size).toBe(3);
-        top.forEach((f) => expect(f.alumno.length).toBeLessThanOrEqual(16));
+        top.forEach((f) => expect(f.alumno.length).toBeLessThanOrEqual(28));
     });
     it('vacío y nombres', () => {
         expect(topRiesgo([])).toEqual([]);
@@ -304,16 +341,131 @@ describe('alertas y textos', () => {
     it('resumen del acumulado y del patrón', () => {
         expect(resumenTextoAcumulado(analisis.cruceLimite, 20)).toContain(analisis.cruceLimite.mensaje);
         expect(resumenTextoAcumulado({ estado: 'insuficiente' })).toMatch(/insuficientes/);
-        expect(resumenTextoPatron(analisis.patronSemanal)).toMatch(/de \d+ sesiones/);
+        expect(resumenTextoPatron(analisis.patronSemanal)).toMatch(/\d+ ausencias? en \d+ sesiones?/);
         expect(resumenTextoPatron(null)).toMatch(/sin sesiones/);
     });
-    it('barras del patrón: el día crítico va en su propia serie', () => {
-        const patron = { dias: [{ nombre: 'Lun', tasa: 0.2, sesiones: 5, ausentes: 4, critico: true }, { nombre: 'Mié', tasa: 0.05, sesiones: 5, ausentes: 1, critico: false }, { nombre: 'Vie', tasa: null, sesiones: 0, ausentes: 0, critico: false }] };
-        expect(datosPatronBarras(patron)).toEqual([
-            { dia: 'Lun', normal: null, critico: 20 },
-            { dia: 'Mié', normal: 5, critico: null },
-            { dia: 'Vie', normal: null, critico: null },
+    it('mapa de calor del patrón: una casilla por día con el nombre en 3 letras y la tasa en %; sin dato es null, no 0', () => {
+        const patron = { dias: [{ nombre: 'Lunes', tasa: 0.2, sesiones: 5, ausentes: 4, critico: true }, { nombre: 'Miércoles', tasa: 0.05, sesiones: 5, ausentes: 1, critico: false }, { nombre: 'Viernes', tasa: null, sesiones: 0, ausentes: 0, critico: false }] };
+        expect(datosTiraPatron(patron)).toEqual([
+            { etiqueta: 'Lun', valor: 20 },
+            { etiqueta: 'Mié', valor: 5 },
+            { etiqueta: 'Vie', valor: null },
         ]);
-        expect(datosPatronBarras(null)).toEqual([]);
+        expect(datosTiraPatron(null)).toEqual([]);
+        expect(abreviarDia('Sábado')).toBe('Sáb');
+        expect(abreviarDia('Lun')).toBe('Lun');
+        expect(abreviarDia('')).toBe('-');
+        expect(abreviarDia(undefined)).toBe('-');
+    });
+    it('indiceDiaCritico da la posición de la casilla crítica o -1', () => {
+        const dias = (criticos) => ({ dias: criticos.map((critico, i) => ({ nombre: `D${i}`, tasa: 0.1, sesiones: 1, ausentes: 1, critico })) });
+        expect(indiceDiaCritico(dias([false, false, true]))).toBe(2);
+        expect(indiceDiaCritico(dias([false, false]))).toBe(-1);
+        expect(indiceDiaCritico(null)).toBe(-1);
+        const critico = analisis.patronSemanal.dias.findIndex((d) => d.critico);
+        expect(indiceDiaCritico(analisis.patronSemanal)).toBe(critico);
+    });
+    it('las ausencias son de alumnos sumadas por día: se dicen "ausencias en N sesiones", no "N de M sesiones"', () => {
+        expect(textoSesiones({ ausentes: 36, sesiones: 6 })).toBe('36 ausencias en 6 sesiones');
+        expect(textoSesiones({ ausentes: 1, sesiones: 1 })).toBe('1 ausencia en 1 sesión');
+        expect(resumenTextoPatron({ dias: [{ nombre: 'Lunes', tasa: 0.2, sesiones: 5, ausentes: 4, critico: true }] })).toBe('Ausentismo por día de la semana: Lunes 20.0 % (4 ausencias en 5 sesiones, día crítico).');
+    });
+});
+
+describe('series de las gráficas de línea', () => {
+    it('serieDeConfig traduce la forma de la configuración al tipo y trazo de GraficaLinea', () => {
+        expect(serieDeConfig('observada', CONFIG_SERIE)).toEqual({ clave: 'observada', etiqueta: 'Observada', color: 'var(--foreground)', tipo: 'puntos' });
+        expect(serieDeConfig('ajuste', CONFIG_SERIE)).toMatchObject({ tipo: 'linea', color: 'var(--chart-1)' });
+        expect(serieDeConfig('ajuste', CONFIG_SERIE).discontinua).toBeUndefined();
+        expect(serieDeConfig('proyeccion', CONFIG_SERIE)).toMatchObject({ tipo: 'linea', discontinua: true });
+        expect(serieDeConfig('banda', CONFIG_SERIE)).toMatchObject({ tipo: 'banda', etiqueta: 'Intervalo 95 %' });
+        expect(serieDeConfig('sma', CONFIG_SERIE, { grosor: 1.75 }).grosor).toBe(1.75);
+    });
+    it('ajuste, proyección e intervalo comparten color pero cada uno tiene su forma', () => {
+        const comparten = ['ajuste', 'proyeccion', 'banda'];
+        expect(new Set(comparten.map((k) => CONFIG_SERIE[k].color)).size).toBe(1);
+        expect(new Set(comparten.map((k) => CONFIG_SERIE[k].forma)).size).toBe(3);
+        // el acumulado reutiliza las formas de la serie semanal
+        for (const clave of comparten) expect(CONFIG_ACUMULADO[clave].forma).toBe(CONFIG_SERIE[clave].forma);
+    });
+    it('la serie semanal siempre lleva observada, ajuste, proyección e intervalo; las medias entran según su interruptor', () => {
+        const claves = (ver) => seriesSemanal(ver).map((s) => s.clave);
+        expect(claves({})).toEqual(['observada', 'ajuste', 'proyeccion', 'banda']);
+        expect(claves({ sma: false, ema: true, wma: false })).toEqual(['observada', 'ajuste', 'proyeccion', 'banda', 'ema']);
+        expect(claves({ sma: true, ema: true, wma: true })).toEqual(['observada', 'ajuste', 'proyeccion', 'banda', 'sma', 'ema', 'wma']);
+        expect(seriesSemanal({ wma: true }).at(-1)).toMatchObject({ clave: 'wma', tipo: 'linea', grosor: 1.75 });
+        expect(seriesSemanal()).toHaveLength(4);
+    });
+    it('la serie de acumulado: acumulado (puntos), ajuste, proyección discontinua e intervalo', () => {
+        const series = seriesAcumulado();
+        expect(series.map((s) => s.clave)).toEqual(['acumulado', 'ajuste', 'proyeccion', 'banda']);
+        expect(series.map((s) => s.tipo)).toEqual(['puntos', 'linea', 'linea', 'banda']);
+        expect(series[2].discontinua).toBe(true);
+    });
+    it('todos los colores son tokens (nunca hex)', () => {
+        for (const s of [...seriesSemanal({ sma: true, ema: true, wma: true }), ...seriesAcumulado()]) expect(s.color).toMatch(/^var\(--[a-z0-9-]+\)$/);
+    });
+    it('eje Y en %: entero sin decimal y con un decimal si no lo es', () => {
+        expect(fmtEjePct(10)).toBe('10 %');
+        expect(fmtEjePct(0)).toBe('0 %');
+        expect(fmtEjePct(2.5)).toBe('2.5 %');
+    });
+    it('el tooltip escribe un decimal, la banda como rango y el hueco como guion', () => {
+        expect(textoValorSerie(12.5)).toBe('12.5 %');
+        expect(textoValorSerie(10)).toBe('10.0 %');
+        expect(textoValorSerie([8, 12.25])).toBe('8.0 % a 12.3 %');
+        expect(textoValorSerie(null)).toBe('-');
+        expect(textoValorSerie(undefined)).toBe('-');
+    });
+});
+
+describe('líneas de tendencia de las tarjetas', () => {
+    it('ausentismo actual: las tasas semanales observadas en %, sin las semanas sin clase', () => {
+        const s = seriesTarjetas({ tendencia: { tasas: [0.1, null, 0.125, 0.2] }, cruceLimite: null });
+        expect(s.actual).toEqual([10, 12.5, 20]);
+        expect(s.cruce).toEqual([]);
+    });
+    it('cruce: el acumulado observado (ya en %), salvo con datos insuficientes', () => {
+        const acumulado = { semanas: [1, 2, 3], valores: [1, 2.5, 4] };
+        expect(seriesTarjetas({ cruceLimite: { estado: 'cruza', acumulado } }).cruce).toEqual([1, 2.5, 4]);
+        expect(seriesTarjetas({ cruceLimite: { estado: 'superado', acumulado } }).cruce).toEqual([1, 2.5, 4]);
+        expect(seriesTarjetas({ cruceLimite: { estado: 'insuficiente', acumulado } }).cruce).toEqual([]);
+    });
+    it('sin datos no inventa nada', () => {
+        expect(seriesTarjetas()).toEqual({ actual: [], cruce: [] });
+        expect(seriesTarjetas({ tendencia: { tasas: [null, NaN, 'x'] }, cruceLimite: { estado: 'cruza', acumulado: { valores: [null] } } })).toEqual({ actual: [], cruce: [] });
+    });
+    it('con datos reales las series salen del análisis (mismas semanas con datos)', () => {
+        const s = seriesTarjetas(analisis);
+        expect(s.actual).toHaveLength(analisis.tendencia.tasas.filter((t) => t != null).length);
+        expect(s.actual.at(-1)).toBeCloseTo(analisis.resumen.tasaActual, 2);
+        expect(s.cruce.at(-1)).toBeCloseTo(analisis.resumen.acumuladoActualPct, 8);
+    });
+});
+
+describe('uso del límite de faltas por alumno', () => {
+    it('faltas y restantes suman las faltas permitidas', () => {
+        const u = datosUsoLimite({ faltasEq: 4, faltasMaximas: 9, faltasRestantes: 5 });
+        expect(u.datos).toEqual([{ clave: 'faltas', valor: 4 }, { clave: 'restantes', valor: 5 }]);
+        expect(u.etiqueta).toBe('4 de 9 faltas permitidas');
+        expect(Object.keys(CONFIG_USO_LIMITE)).toEqual(['faltas', 'restantes']);
+    });
+    it('con el límite superado no quedan restantes y la etiqueta lo dice', () => {
+        const u = datosUsoLimite({ faltasEq: 11, faltasMaximas: 9 });
+        expect(u.datos[1].valor).toBe(0);
+        expect(u.etiqueta).toBe('Superó el límite: 11 faltas de 9 permitidas');
+    });
+    it('sin faltas ni faltas permitidas, o con datos que no son números, no hay barra', () => {
+        expect(datosUsoLimite({ faltasEq: 0, faltasMaximas: 0 })).toBeNull();
+        expect(datosUsoLimite({ faltasEq: 3 })).toBeNull();
+        expect(datosUsoLimite({ faltasEq: -1, faltasMaximas: 5 })).toBeNull();
+        expect(datosUsoLimite(null)).toBeNull();
+        expect(datosUsoLimite({ faltasEq: 0, faltasMaximas: 5 }).datos[0].valor).toBe(0);
+    });
+    it('con datos reales cuadra con las faltas restantes del análisis', () => {
+        for (const a of analisis.alumnosEnRiesgo) {
+            const u = datosUsoLimite(a);
+            if (u) expect(u.datos[1].valor).toBe(a.faltasRestantes);
+        }
     });
 });

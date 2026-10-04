@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
     activarIndice, construirIndice, infoIndice, manifiestoIndice, reconocer, recognitionFetch, sinVectores,
-    verificarFotoServicio,
+    validarFormaConjunto, verificarFotoServicio, verificarFotosServicio,
 } from './recognition.js';
 import { BYTES_JPEG } from './testing.js';
 
@@ -140,5 +140,127 @@ describe('otros endpoints', () => {
         expect((await infoIndice()).version).toBe('v004');
         expect((await manifiestoIndice('v004')).refs).toHaveLength(1);
         await expect(manifiestoIndice('../x')).rejects.toMatchObject({ code: 'VALIDACION' });
+    });
+});
+
+describe('photo/check: motivo_codigo', () => {
+    const CALIDAD = { brillo: 120, nitidez: 80, tamano_rostro_px: 150, frontal: false };
+
+    it('conserva el código estable cuando el servicio lo manda y lo deja en null si no (servicio anterior)', async () => {
+        const base = { rostros: 1, un_solo_rostro: true, calidad: CALIDAD, motivo_rechazo: 'El rostro no esta de frente.' };
+        vi.stubGlobal('fetch', vi.fn(async () => jsonRes({ ...base, motivo_codigo: 'NO_FRONTAL' })));
+        expect((await verificarFotoServicio(imagen())).motivo_codigo).toBe('NO_FRONTAL');
+        vi.stubGlobal('fetch', vi.fn(async () => jsonRes(base)));
+        expect((await verificarFotoServicio(imagen())).motivo_codigo).toBeNull();
+    });
+});
+
+describe('verificarFotosServicio (check-set)', () => {
+    const CALIDAD = { brillo: 120.5, nitidez: 88.2, tamano_rostro_px: 210, frontal: true };
+    const foto = (indice, extra = {}) => ({
+        indice, estado: 'aceptada', rostros: 1, un_solo_rostro: true, calidad: CALIDAD,
+        motivo_rechazo: null, motivo_codigo: null, coseno_resto: 0.8, ...extra,
+    });
+    const conjunto = (fotos, extra = {}) => ({
+        total: fotos.length, aceptadas: fotos.length, minimo: 3, maximo: 8, suficiente: true, consistente: true,
+        ambiguo: false, umbral_coseno: 0.35, coseno_min: 0.6, coseno_medio: 0.8, coseno_max_par: 0.93,
+        advertencias: [], fotos, ...extra,
+    });
+    const blobs = (n) => Array.from({ length: n }, imagen);
+
+    it('envía "images" repetido con X-API-Key, 30 s de margen y devuelve la forma validada', async () => {
+        const fetchMock = vi.fn(async () => jsonRes(conjunto([foto(0), foto(1), foto(2)])));
+        vi.stubGlobal('fetch', fetchMock);
+        const r = await verificarFotosServicio(blobs(3));
+        const [url, init] = fetchMock.mock.calls[0];
+        expect(url).toBe('http://svc.test:8000/v1/photo/check-set');
+        expect(init.headers['X-API-Key']).toBe('clave-de-prueba');
+        expect(init.body.getAll('images')).toHaveLength(3);
+        expect(r).toMatchObject({ total: 3, aceptadas: 3, suficiente: true, consistente: true, umbral_coseno: 0.35 });
+        expect(r.fotos[1]).toMatchObject({ indice: 1, estado: 'aceptada', coseno_resto: 0.8 });
+    });
+
+    it('descarta cualquier vector o embedding que el servicio mandara por error (RNF-03)', async () => {
+        vi.stubGlobal('fetch', vi.fn(async () => jsonRes({
+            ...conjunto([foto(0)]), embedding: [0.1], fotos: [{ ...foto(0), vector: [0.2], query_vector: [0.3] }],
+        })));
+        expect(JSON.stringify(await verificarFotosServicio(blobs(1)))).not.toMatch(/vector|embedding/);
+    });
+
+    it('rellena los valores por omisión de un servicio mínimo y acepta fotos ilegibles sin calidad', async () => {
+        const ilegible = { indice: 1, estado: 'ilegible', calidad: null, motivo_codigo: 'IMAGEN_INVALIDA' };
+        vi.stubGlobal('fetch', vi.fn(async () => jsonRes({
+            total: 2, aceptadas: 1, minimo: 3, maximo: 8, suficiente: false, umbral_coseno: 0.35, fotos: [foto(0), ilegible],
+        })));
+        const r = await verificarFotosServicio(blobs(2));
+        expect(r).toMatchObject({ consistente: null, ambiguo: false, advertencias: [], coseno_medio: null });
+        expect(r.fotos[1]).toMatchObject({ estado: 'ilegible', calidad: null, rostros: null, motivo_rechazo: null, coseno_resto: null });
+    });
+
+    it('la respuesta debe cubrir exactamente las n fotos y en orden, o es 502 SERVICIO_RECONOCIMIENTO_ERROR', async () => {
+        vi.stubGlobal('fetch', vi.fn(async () => jsonRes(conjunto([foto(0), foto(1)]))));
+        await expect(verificarFotosServicio(blobs(3))).rejects.toMatchObject({ code: 'SERVICIO_RECONOCIMIENTO_ERROR', status: 502 });
+        vi.stubGlobal('fetch', vi.fn(async () => jsonRes(conjunto([foto(1), foto(0)]))));
+        await expect(verificarFotosServicio(blobs(2))).rejects.toMatchObject({ code: 'SERVICIO_RECONOCIMIENTO_ERROR' });
+        expect(() => validarFormaConjunto(conjunto([foto(0), foto(0)]), 2)).toThrow();
+        expect(validarFormaConjunto(conjunto([foto(0), foto(1)]), 2).fotos).toHaveLength(2);
+    });
+
+    it('un estado desconocido o una forma rota es SERVICIO_RECONOCIMIENTO_ERROR', async () => {
+        vi.stubGlobal('fetch', vi.fn(async () => jsonRes(conjunto([foto(0, { estado: 'rara' })]))));
+        await expect(verificarFotosServicio(blobs(1))).rejects.toMatchObject({ code: 'SERVICIO_RECONOCIMIENTO_ERROR' });
+        vi.stubGlobal('fetch', vi.fn(async () => jsonRes({ fotos: 'no' })));
+        await expect(verificarFotosServicio(blobs(1))).rejects.toMatchObject({ code: 'SERVICIO_RECONOCIMIENTO_ERROR' });
+    });
+
+    it('sin imágenes no llama al servicio; un 422 del servicio es VALIDACION; sin servicio, 503 tras un reintento', async () => {
+        const fetchMock = vi.fn();
+        vi.stubGlobal('fetch', fetchMock);
+        await expect(verificarFotosServicio([])).rejects.toMatchObject({ code: 'VALIDACION' });
+        expect(fetchMock).not.toHaveBeenCalled();
+        vi.stubGlobal('fetch', vi.fn(async () => jsonRes({ code: 'VALIDATION_ERROR' }, 422)));
+        await expect(verificarFotosServicio(blobs(2))).rejects.toMatchObject({ code: 'VALIDACION', status: 422 });
+        const caido = vi.fn(async () => { throw new TypeError('fetch failed'); });
+        vi.stubGlobal('fetch', caido);
+        await expect(verificarFotosServicio(blobs(2))).rejects.toMatchObject({ code: 'SERVICIO_RECONOCIMIENTO_NO_DISPONIBLE', status: 503 });
+        expect(caido).toHaveBeenCalledTimes(2);
+    });
+});
+
+describe('construirIndice: forma multifoto', () => {
+    const BUILD = { version: 'v004', objeto_indice: 'indice/v004.json', dimension: 512, ntotal: 1, mapeo: [{ id_plantilla: 41, faiss_id: 1043 }], errores: [] };
+
+    it('envía {objetos_foto} tal cual y trae muestras (escalares) sin vectores', async () => {
+        const fetchMock = vi.fn(async () => jsonRes({
+            ...BUILD,
+            muestras: [{
+                id_plantilla: 41, total: 5, usadas: 4,
+                descartadas: [{ indice: 2, motivo: 'inconsistente', coseno_resto: 0.21 }],
+                coseno_min: 0.51, coseno_medio: 0.74, degradada: true, centroide: [0.1], vector: [0.2],
+            }],
+        }));
+        vi.stubGlobal('fetch', fetchMock);
+        const entries = [{ id_plantilla: 41, faiss_id: 1043, objetos_foto: ['registro/17/a.jpg', 'registro/17/b.jpg'] }];
+        const r = await construirIndice({ version: 'v004', baseVersion: null, entries });
+        expect(JSON.parse(fetchMock.mock.calls[0][1].body).entries).toEqual(entries);
+        expect(r.muestras).toEqual([{
+            id_plantilla: 41, total: 5, usadas: 4,
+            descartadas: [{ indice: 2, motivo: 'inconsistente', coseno_resto: 0.21 }],
+            coseno_min: 0.51, coseno_medio: 0.74, degradada: true,
+        }]);
+        expect(JSON.stringify(r)).not.toMatch(/vector|embedding|centroide/);
+    });
+
+    it('un servicio anterior sin muestras da []; los errores conservan su codigo', async () => {
+        vi.stubGlobal('fetch', vi.fn(async () => jsonRes(BUILD)));
+        expect((await construirIndice({ version: 'v004', entries: [] })).muestras).toEqual([]);
+        vi.stubGlobal('fetch', vi.fn(async () => jsonRes({
+            ...BUILD, objeto_indice: null, mapeo: [],
+            errores: [{ id_plantilla: 41, motivo: 'Ninguna de las 5 fotos es utilizable.', codigo: 'SIN_MUESTRAS_UTILIZABLES' }],
+            muestras: [{ id_plantilla: 41, total: 5, usadas: 0, descartadas: [], coseno_min: null, coseno_medio: null, degradada: true }],
+        })));
+        const r = await construirIndice({ version: 'v004', entries: [] });
+        expect(r.errores[0]).toEqual({ id_plantilla: 41, motivo: 'Ninguna de las 5 fotos es utilizable.', codigo: 'SIN_MUESTRAS_UTILIZABLES' });
+        expect(r.muestras[0].coseno_medio).toBeNull();
     });
 });

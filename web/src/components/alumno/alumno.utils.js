@@ -12,18 +12,22 @@ export const horaCorta = (valor) => String(valor || '').slice(0, 5);
 export const nombreMateria = (m) => (m && typeof m === 'object' ? m.nombre : m) || '';
 export const claveGrupo = (g) => (g && typeof g === 'object' ? g.clave_grupo : g) || '';
 
-/** Aviso previo a perder el derecho a examen según el resumen de la materia; null si no hay nada que avisar. */
+/**
+ * Aviso previo a perder el derecho a examen según el resumen de la materia; null si no hay nada que avisar.
+ * `texto` es la frase completa (para el Alert de la tarjeta) y `corto` la versión de una línea para la casilla de cifras: las dos
+ * salen de las mismas condiciones, así la tarjeta y la casilla nunca se contradicen.
+ */
 export function avisoMateria(item) {
     if (!item) return null;
     if (item.supera_limite || item.derecho_examen === false) {
-        return { tone: 'danger', texto: 'Superaste el límite de faltas: sin derecho a examen.' };
+        return { tone: 'danger', texto: 'Superaste el límite de faltas: sin derecho a examen.', corto: 'Sin derecho a examen' };
     }
     if (item.en_limite) {
-        return { tone: 'warning', texto: 'Estás en el límite: una falta más y pierdes el derecho a examen.' };
+        return { tone: 'warning', texto: 'Estás en el límite: una falta más y pierdes el derecho a examen.', corto: 'Una falta más y pierdes el derecho' };
     }
     const r = item.faltas_restantes_antes_limite;
     if (typeof r === 'number' && r <= UMBRAL_AVISO_FALTAS) {
-        return { tone: 'info', texto: `Te quedan ${r} falta${r === 1 ? '' : 's'} antes del límite.` };
+        return { tone: 'info', texto: `Te quedan ${r} falta${r === 1 ? '' : 's'} antes del límite.`, corto: 'Cerca del límite' };
     }
     return null;
 }
@@ -46,4 +50,15 @@ export function resumenHistorial(total, item) {
         partes.push(`${a} ausencia${a === 1 ? '' : 's'}`);
     }
     return partes.join(' · ');
+}
+
+/** Mezcla de registros resueltos de una materia para la barra segmentada: [{ clave, valor }] en el orden del anillo (los pendientes no cuentan). */
+export function composicionRegistros(item) {
+    const n = (v) => (Number.isFinite(Number(v)) ? Math.max(0, Number(v)) : 0);
+    return [
+        { clave: 'presente', valor: n(item?.presentes) },
+        { clave: 'retardo', valor: n(item?.retardos) },
+        { clave: 'ausente', valor: n(item?.ausencias) },
+        { clave: 'justificado', valor: n(item?.justificadas) },
+    ];
 }

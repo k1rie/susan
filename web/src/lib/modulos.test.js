@@ -50,6 +50,26 @@ describe('registro de módulos', () => {
     });
 });
 
+describe('Pasar lista (acción principal del docente)', () => {
+    const m = buscarModulo('pasar-lista');
+
+    it('es un módulo activo, solo del docente, en la categoría Asistencia y con su ruta', () => {
+        expect(m).toMatchObject({ titulo: 'Pasar lista', estado: 'activo', href: '/docente/pasar-lista', roles: ['docente'], categoria: 'asistencia' });
+        expect(m.icono).toBeTruthy();
+        expect(m.descripcion).toMatch(/cámara/i);
+        for (const rol of ['administrador', 'alumno', 'tecnico']) expect(puedeVer(m, rol)).toBe(false);
+    });
+
+    it('sale justo después de «Mi panel» en las herramientas del docente (Home, /modulos y paleta) y en su riel', () => {
+        expect(modulosActivos('docente').slice(0, 2).map((x) => x.id)).toEqual(['panel-docente', 'pasar-lista']);
+        expect(navParaRol('docente').slice(0, 2).map((i) => i.href)).toEqual(['/docente', '/docente/pasar-lista']);
+    });
+
+    it('entra en el filtro Asistencia del catálogo', () => {
+        expect(aplicarFiltro(modulosParaRol('docente'), 'asistencia').map((x) => x.id)).toContain('pasar-lista');
+    });
+});
+
 describe('consultas', () => {
     it('separa activos y próximos por rol', () => {
         expect(modulosActivos('alumno').map((m) => m.id)).toEqual(['mi-asistencia']);

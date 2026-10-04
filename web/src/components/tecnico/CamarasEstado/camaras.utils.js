@@ -42,27 +42,22 @@ export function contadoresCamaras(items = []) {
 export const CONFIG_CAPTURAS = { capturas: { label: 'Capturas en 24 h', color: 'var(--chart-1)' } };
 
 export const MAX_BARRAS = 12;
-const MAX_ETIQUETA = 18;
-
-const recortar = (s) => (s.length > MAX_ETIQUETA ? `${s.slice(0, MAX_ETIQUETA - 1)}…` : s);
 
 /**
  * Filas de "Capturas en 24 h por cámara": las `max` con más capturas (de mayor a menor). Si dos cámaras comparten aula y posición
- * se añade su id para que no se mezclen en el eje. `omitidas` = cuántas quedaron fuera.
+ * se añade su id para que no se mezclen en la lista. `omitidas` = cuántas quedaron fuera. El nombre va completo: la columna de nombres
+ * de BarrasPildora lo parte en 2 líneas y su `title` lo trae entero, así que no hace falta recortarlo.
  */
 export function datosCapturas(items = [], max = MAX_BARRAS) {
     const lista = [...(items || [])].sort((a, b) => (Number(b.capturas_24h) || 0) - (Number(a.capturas_24h) || 0));
     const nombres = lista.map((c) => `${c.aula_clave} · ${c.posicion}`);
     const repetidos = new Set(nombres.filter((n, i) => nombres.indexOf(n) !== i));
     const filas = lista.slice(0, max).map((c, i) => ({
-        camara: recortar(repetidos.has(nombres[i]) ? `${nombres[i]} #${c.id_camara}` : nombres[i]),
+        camara: repetidos.has(nombres[i]) ? `${nombres[i]} #${c.id_camara}` : nombres[i],
         capturas: Number(c.capturas_24h) || 0,
     }));
     return { filas, omitidas: Math.max(0, lista.length - filas.length) };
 }
-
-/** Alto de la gráfica según el número de barras (≈ 34 px por barra). */
-export const altoCapturas = (n) => Math.min(460, Math.max(160, 56 + n * 34));
 
 /** Texto alternativo de la gráfica de capturas. */
 export function resumenCapturas({ filas, omitidas }) {

@@ -29,7 +29,12 @@ export const CONFIG_SCORES = {
     no_valida: { label: 'No válida', color: 'var(--ausente)' },
 };
 
-export const MAX_BARRAS_SCORE = 20;
+// Tope de columnas de «Score por lectura»: a 360 px (tarjeta de ~245 px de ancho útil) caben 12 con su número de lectura de 2 dígitos
+// completo y sus cifras; con 20 los números de 10 en adelante se cortaban en «1.», ilegibles. La lista de abajo trae todas las lecturas.
+export const MAX_BARRAS_SCORE = 12;
+
+// Number(null) es 0: una lectura sin score no se grafica como 0 %.
+const tieneScore = (l) => l.score_similitud != null && Number.isFinite(Number(l.score_similitud));
 
 const instante = (l) => {
     const t = new Date(l?.marca_tiempo).getTime();
@@ -56,14 +61,18 @@ export function lecturasNumeradas(lecturas) {
 export function datosScores(lecturas, max = MAX_BARRAS_SCORE) {
     return (
         lecturasNumeradas(lecturas)
-            // Number(null) es 0: una lectura sin score no se grafica como 0 %.
-            .filter((l) => l.score_similitud != null && Number.isFinite(Number(l.score_similitud)))
+            .filter(tieneScore)
             .slice(-max)
             .map((l) => {
                 const valor = Math.min(100, Math.max(0, Math.round(Number(l.score_similitud) * 100)));
                 return { lectura: String(l.numero), [l.es_valida ? 'valida' : 'no_valida']: valor };
             })
     );
+}
+
+/** Cuántas lecturas se pueden graficar (tienen score): con más que `max` la gráfica solo muestra las más recientes y hay que decirlo. */
+export function contarConScore(lecturas) {
+    return lecturasNumeradas(lecturas).filter(tieneScore).length;
 }
 
 /** Texto alternativo de la gráfica de scores. */

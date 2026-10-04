@@ -11,8 +11,16 @@ function soportado() {
 function suscribir(avisar) {
     if (!soportado()) return () => {};
     const mq = window.matchMedia(CONSULTA);
-    mq.addEventListener('change', avisar);
-    return () => mq.removeEventListener('change', avisar);
+    // Safari anterior a 14 solo trae addListener/removeListener; sin ninguno de los dos se lee el valor al renderizar y no se avisa.
+    if (typeof mq.addEventListener === 'function') {
+        mq.addEventListener('change', avisar);
+        return () => mq.removeEventListener('change', avisar);
+    }
+    if (typeof mq.addListener === 'function') {
+        mq.addListener(avisar);
+        return () => mq.removeListener?.(avisar);
+    }
+    return () => {};
 }
 
 // true si la persona pidió "reducir movimiento". En el servidor devuelve false (se corrige al hidratar).

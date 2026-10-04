@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ApiError, fromRpcError } from '@/lib/api/errors.js';
+import { EVENTO_RELOJ_CAMBIO } from './eventos.js';
 
 const INTERVALO_MINIMO_MS = 500;
 
@@ -40,6 +41,9 @@ export function useApiQuery(fn, args, { enabled = true, refetchInterval, initial
 
         const programar = () => {
             if (!activo || !refetchInterval) return;
+            // Un refetch forzado (evento del reloj de demostracion) puede llegar con un temporizador ya pendiente:
+            // sin esto el sondeo se duplicaria para siempre.
+            clearTimeout(temporizador);
             temporizador = setTimeout(() => {
                 if (typeof document !== 'undefined' && document.hidden) {
                     pausado = true;
@@ -87,12 +91,17 @@ export function useApiQuery(fn, args, { enabled = true, refetchInterval, initial
         };
         if (refetchInterval && typeof document !== 'undefined') document.addEventListener('visibilitychange', alVolver);
 
+        // Reloj de demostracion: tras moverlo, lo que la pantalla muestra (estados, ventanas, cierre) esta desactualizado.
+        const alCambiarReloj = () => { cargar(true); };
+        if (typeof window !== 'undefined') window.addEventListener(EVENTO_RELOJ_CAMBIO, alCambiarReloj);
+
         cargarRef.current = cargar;
         cargar(false);
         return () => {
             activo = false;
             clearTimeout(temporizador);
             if (typeof document !== 'undefined') document.removeEventListener('visibilitychange', alVolver);
+            if (typeof window !== 'undefined') window.removeEventListener(EVENTO_RELOJ_CAMBIO, alCambiarReloj);
             cargarRef.current = null;
         };
     }, [fn, key, enabled, refetchInterval]);

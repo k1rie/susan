@@ -11,6 +11,13 @@ export const MAX_URL_SEGUNDOS = 300; // RNF-04: tope duro, independiente del par
 export const MAX_ARCHIVO_BYTES = 5 * 1024 * 1024; // 5 MiB: justificantes y fotos de plantilla
 export const MAX_CONSENTIMIENTO_BYTES = 10 * 1024 * 1024; // el PDF firmado escaneado puede pesar más (UI: 10 MB)
 
+// Plantilla facial de varias fotos. El techo de fotos lo comparten SQL (plantilla_foto.orden 1..8), el servicio de
+// reconocimiento (TEMPLATE_MAX_PHOTOS <= 8) y esta capa; el mínimo no vive aquí: lo informa el servicio.
+export const MAX_FOTOS_PLANTILLA = 8;
+// El proxy de Next buferiza como máximo 10 MB por petición y TRUNCA en silencio lo que pase de ahí (el multipart
+// llegaría roto). 9 MiB de fotos + el margen del multipart quedan siempre por debajo; un cuerpo mayor da 413 limpio.
+export const MAX_PLANTILLA_BYTES_TOTAL = 9 * 1024 * 1024;
+
 const UUID = '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}';
 
 /** Patrones válidos de ruta por prefijo. El recorte admite {id_camara}-{epochMs} (ver captura/route.js). */

@@ -33,7 +33,10 @@ describe('ReporteAsistencia', () => {
         render(<ReporteAsistencia filtrosIniciales={{ periodo: '2026-2', idGrupo: 1 }} />);
         expect((await screen.findAllByText('Luis Gómez')).length).toBeGreaterThan(0);
         expect(screen.getAllByText('Sin derecho').length).toBeGreaterThan(0);
-        expect(screen.getByText('82.35 %')).toBeInTheDocument();
+        // La cifra y su «%» van en nodos distintos (la unidad es un sufijo pequeño de la tarjeta).
+        const asistencia = within(screen.getByText('Asistencia promedio').closest('.rounded-xl'));
+        expect(asistencia.getByText('82.35')).toBeInTheDocument();
+        expect(asistencia.getByText('%')).toBeInTheDocument();
         expect(await screen.findByText(/Estimación, no una medición/)).toBeInTheDocument();
         expect(screen.getByRole('button', { name: 'Exportar CSV' })).toBeEnabled();
     });
@@ -87,9 +90,10 @@ describe('ReporteAsistencia', () => {
         expect(within(panel).getByText('Alumnos en el límite')).toBeInTheDocument();
         expect(await screen.findByText(/Estimación, no una medición/)).toBeInTheDocument();
         expect(screen.getByRole('link', { name: 'Ver analítica del grupo 3A' })).toHaveAttribute('href', '/analitica?grupo=1');
-        expect(screen.getByText('1 sin derecho')).toBeInTheDocument();
-        expect(screen.getByText('2 en el límite')).toBeInTheDocument();
-        expect(screen.getByText('Sin alertas')).toBeInTheDocument();
+        // La situación de riesgo sale dos veces en el DOM: en su columna (desde sm) y bajo la clave del grupo (pantallas angostas).
+        expect(screen.getAllByText('1 sin derecho')).toHaveLength(2);
+        expect(screen.getAllByText('2 en el límite')).toHaveLength(2);
+        expect(screen.getAllByText('Sin alertas')).toHaveLength(2);
         expect(screen.getByRole('button', { name: 'Exportar CSV' })).toBeEnabled();
     });
 
@@ -155,12 +159,27 @@ describe('ReporteAsistencia', () => {
         expect(screen.getByRole('tab', { name: 'Resumen' })).toHaveAttribute('aria-selected', 'true');
     });
 
-    it('la tabla por alumno resume el desglose bajo el nombre (faltas equivalentes incluidas) cuando las columnas no caben', async () => {
+    it('la tabla por alumno resume el desglose bajo el nombre (faltas equivalentes incluidas) cuando las columnas no caben y bajo la barra en xl', async () => {
         api.reporteGrupo.mockResolvedValue(reporteGrupo());
         render(<ReporteAsistencia filtrosIniciales={{ periodo: '2026-2', idGrupo: 1 }} />);
         const tabla = await screen.findByRole('table', { name: 'Asistencia acumulada por alumno' });
-        expect(within(tabla).getAllByText(/5 pres\., 0 ret\., 1 aus\./).length).toBe(2);
+        // 2 alumnos x 2 copias del desglose (bajo el nombre hasta lg y bajo la barra de la columna en xl; el CSS deja visible una).
+        expect(within(tabla).getAllByText(/5 pres\., 0 ret\., 1 aus\./).length).toBe(4);
         expect(within(tabla).getAllByText(/faltas eq\. 1/).length).toBe(2);
         expect(within(tabla).getAllByText(/8 faltas restantes/).length).toBe(2);
+    });
+
+    it('la tabla por alumno dibuja la composición como una barra con las cifras en su aria-label (bajo el nombre y en su columna)', async () => {
+        api.reporteGrupo.mockResolvedValue(reporteGrupo());
+        render(<ReporteAsistencia filtrosIniciales={{ periodo: '2026-2', idGrupo: 1 }} />);
+        const tabla = await screen.findByRole('table', { name: 'Asistencia acumulada por alumno' });
+        expect(within(tabla).getByRole('columnheader', { name: 'Composición' })).toBeInTheDocument();
+        // 2 alumnos x 2 barras (una bajo el nombre hasta lg y otra en la columna de xl; el CSS oculta la que no toca).
+        expect(within(tabla).getAllByRole('img', { name: 'Presentes 5 (83 %); Ausencias 1 (17 %)' })).toHaveLength(4);
+        // Ya no hay cinco columnas de cifras: el desglose está en la barra, en el texto bajo el nombre, en el CSV y en el papel.
+        expect(within(tabla).queryByRole('columnheader', { name: 'Justificadas' })).toBeNull();
+        // Leyenda única (decorativa) con solo los estados que existen en las filas.
+        expect(within(tabla.parentElement).getByText('Presentes')).toBeInTheDocument();
+        expect(within(tabla.parentElement).queryByText('Pendientes')).toBeNull();
     });
 });

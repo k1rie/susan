@@ -12,6 +12,7 @@
 // estable ante un reintento con la misma marca_tiempo (sobrescribe los mismos objetos).
 import { isIP } from 'node:net';
 import { ApiError } from '@/lib/api/errors';
+import { ahoraDeNegocio, relojDemoActivo } from '@/lib/local/reloj.js';
 import { exigirCupoCaptura } from './rateLimit.js';
 import { reconocer } from './recognition.js';
 import { eliminarObjetoSilencioso, prefijoRecortes } from './storage.js';
@@ -143,7 +144,10 @@ export async function ejecutarCaptura({ rpc, svc, me, params, body, form }) {
     const faissIds = Array.isArray(candidatos?.faiss_ids) ? candidatos.faiss_ids : [];
 
     // 3. Reconocimiento. Si falla (503/409...) se propaga sin haber escrito nada en la BD.
-    const marca = body.marca_tiempo ? new Date(body.marca_tiempo) : new Date();
+    // Con el reloj de demostración (solo desarrollo local) la marca es la hora de negocio simulada, no la del equipo: así cada muestra tiene
+    // una marca distinta y cae dentro de la ventana de la sesión. Fuera del modo local (sin SUSAN_LOCAL=1, o con NODE_ENV=production) está
+    // apagado aunque LOCAL_FAKE_NOW siga puesto (ver configInicial en lib/local/reloj.js): se usa la marca del cliente o la hora real.
+    const marca = relojDemoActivo() ? ahoraDeNegocio() : body.marca_tiempo ? new Date(body.marca_tiempo) : new Date();
     const reconocimiento = await reconocer({
         ...origen,
         allowedFaissIds: faissIds,

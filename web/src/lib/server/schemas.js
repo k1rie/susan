@@ -24,7 +24,9 @@ export const paramsId = z.object({ id: idEntero }).strict();
 // ---- Captura ----
 export const capturaCuerpo = z.object({
     id_camara: idEntero,
-    // Instante del fotograma en el cliente. Lo recomendable es enviarlo siempre: hace idempotente el reintento.
+    // Instante del fotograma en el cliente. OPCIONAL: la pantalla de la sesión ya no lo manda (con el reloj de demostración la hora del
+    // equipo no es la del plantel y la captura se rechazaría como MARCA_FUTURA); con el reloj de demostración activo el servidor lo
+    // ignora y estampa la hora de negocio. Solo sirve para reintentar el MISMO fotograma tras un fallo de red (idempotente por cámara + marca).
     marca_tiempo: z.iso.datetime({ offset: true }).optional(),
 }).strict();
 
@@ -44,6 +46,14 @@ export const justificanteCampos = z.object({
 
 // ---- Biometría ----
 export const plantillaCampos = z.object({ id_consent: idEntero }).strict();
+
+// Verificación por toma: con 'foto' (heredado, una sola) no hacen falta; con 'fotos' (varias) se exigen en
+// verificarFoto() porque ahora el servicio calcula cosenos de identidad y eso requiere consentimiento vigente.
+// Se dejan opcionales aquí para que el cuerpo del modo heredado siga siendo solo la foto.
+export const verificarFotosCampos = z.object({
+    id_alumno: idEntero.optional(),
+    id_consent: idEntero.optional(),
+}).strict();
 
 export const consentimientoCampos = z.object({
     id_alumno: idEntero,

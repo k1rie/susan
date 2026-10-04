@@ -49,6 +49,7 @@ export const ROLES = ['administrador', 'docente', 'alumno', 'tecnico'];
 export const MODULOS = [
     // ---- Activos: docente ----
     { id: 'panel-docente', titulo: 'Mi panel', descripcion: 'Sesiones de hoy, pendientes de revisión y alertas de asistencia de tus grupos.', icono: LayoutDashboard, categoria: 'asistencia', roles: ['docente'], estado: 'activo', href: '/docente', tono: 'azul' },
+    { id: 'pasar-lista', titulo: 'Pasar lista', descripcion: 'Abre la sesión de hoy y registra la asistencia con la cámara del aula o a mano.', icono: ScanFace, categoria: 'asistencia', roles: ['docente'], estado: 'activo', href: '/docente/pasar-lista', tono: 'azul', portada: 'degradado' },
     { id: 'revision', titulo: 'Revisión de registros', descripcion: 'Confirma o corrige los reconocimientos dudosos y los alumnos sin lectura.', icono: ClipboardCheck, categoria: 'asistencia', roles: ['docente'], estado: 'activo', href: '/docente/revision', tono: 'dorado' },
     // ---- Activos: docente y administración ----
     { id: 'reportes', titulo: 'Reportes', descripcion: 'Asistencia por periodo, grupo y alumno; exporta a CSV o PDF.', icono: FileBarChart, categoria: 'asistencia', roles: ['docente', 'administrador'], estado: 'activo', href: '/reportes', tono: 'verde' },

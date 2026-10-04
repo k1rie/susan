@@ -4,14 +4,15 @@ import clsx from 'clsx';
 import { ArrowDown, ArrowUp, ChevronRight, Minus, TrendingDown, TrendingUp } from 'lucide-react';
 import Link from 'next/link';
 import { Fragment, useId, useMemo, useState } from 'react';
+import AnilloEstados from '@/components/ui/AnilloEstados';
 import Badge from '@/components/ui/Badge';
+import BarraSegmentada from '@/components/ui/BarraSegmentada';
+import BarrasPildora from '@/components/ui/BarrasPildora';
 import Detalles from '@/components/ui/Detalles';
-import GraficaBarras from '@/components/ui/GraficaBarras';
-import GraficaDona from '@/components/ui/GraficaDona';
 import TarjetaGrafica from '@/components/ui/TarjetaGrafica';
 import { resumenTexto } from '@/lib/graficas.js';
 import {
-    CONFIG_RIESGO, distribucionRiesgo, ETIQUETA_NIVEL_RIESGO, fmtNum, fmtPct, ordenarRiesgo, resumenTextoTop, tendenciaAlumno, TOP_RIESGO, topRiesgo,
+    CONFIG_RIESGO, CONFIG_USO_LIMITE, datosUsoLimite, distribucionRiesgo, ETIQUETA_NIVEL_RIESGO, fmtNum, fmtPct, ordenarRiesgo, resumenTextoTop, tendenciaAlumno, TOP_RIESGO, topRiesgo,
 } from '../analitica.utils.js';
 import { PasoView } from '../PanelProcedimiento';
 
@@ -34,6 +35,8 @@ const COLUMNAS = [
     { key: 'cruce', header: 'Cruce (sem.)', ocultar: 'xl' },
 ];
 const ASCENDENTES = new Set(['nombre', 'cruce', 'faltasRestantes']);
+// El puntaje se escribe entero en toda la pantalla (tabla y texto alternativo): el ranking no lo muestra con decimales.
+const puntajeEntero = (v) => fmtNum(v, 0);
 
 function Tendencia({ alumno }) {
     const t = tendenciaAlumno(alumno);
@@ -47,8 +50,8 @@ function Tendencia({ alumno }) {
     );
 }
 
-// Alumnos en riesgo: dona con la distribución por nivel, ranking de los 8 de mayor puntaje y la tabla completa plegada
-// (ordenable, con factores explicables, acción sugerida y procedimiento por alumno).
+// Alumnos en riesgo: anillo con la distribución por nivel, ranking de píldoras con los 8 de mayor puntaje y la tabla completa plegada
+// (ordenable, con la barra de uso del límite de faltas, factores explicables, acción sugerida y procedimiento por alumno).
 export default function TablaRiesgo({ items = [], evaluados = null, hrefHistorial }) {
     const titulo = useId();
     const idDetalle = useId();
@@ -73,14 +76,15 @@ export default function TablaRiesgo({ items = [], evaluados = null, hrefHistoria
                         descripcion={`${dist.enRiesgo} de ${dist.total} ${dist.total === 1 ? 'alumno' : 'alumnos'} en riesgo medio o alto`}
                         resumen={`Distribución del riesgo, ${resumenTexto(dist.datos, CONFIG_RIESGO)}. ${dist.enRiesgo} en riesgo.`}
                     >
-                        <GraficaDona datos={dist.datos} config={CONFIG_RIESGO} centro={{ valor: dist.enRiesgo, etiqueta: 'en riesgo' }} alto={260} />
+                        <AnilloEstados datos={dist.datos} config={CONFIG_RIESGO} centro={{ valor: dist.enRiesgo, etiqueta: 'en riesgo' }} alto={260} />
                     </TarjetaGrafica>
                     <TarjetaGrafica
                         titulo="Mayor riesgo"
                         descripcion={items.length > TOP_RIESGO ? `Los ${TOP_RIESGO} de mayor puntaje (de ${items.length})` : 'Puntaje de 0 a 100'}
                         resumen={resumenTextoTop(items, TOP_RIESGO)}
                     >
-                        <GraficaBarras
+                        {/* En filas la altura la dan las propias filas: no hace falta calcularla por número de alumnos. */}
+                        <BarrasPildora
                             horizontal
                             apilado
                             datos={top}
@@ -88,7 +92,8 @@ export default function TablaRiesgo({ items = [], evaluados = null, hrefHistoria
                             series={[{ clave: 'alto' }, { clave: 'medio' }]}
                             config={CONFIG_RIESGO}
                             dominio={[0, 100]}
-                            alto={Math.max(180, top.length * 34 + 60)}
+                            anchoEjeY={150}
+                            formatoValor={puntajeEntero}
                             vacio={sinRiesgo}
                         />
                     </TarjetaGrafica>
@@ -117,6 +122,7 @@ export default function TablaRiesgo({ items = [], evaluados = null, hrefHistoria
                                     const expandido = abierto === clave;
                                     const idFila = `${idDetalle}-${String(clave).replace(/\s+/g, '_')}`;
                                     const href = hrefHistorial && a.idAlumno != null ? hrefHistorial(a.idAlumno) : null;
+                                    const uso = datosUsoLimite(a);
                                     return (
                                         <Fragment key={clave}>
                                             <tr className="border-t border-border align-top">
@@ -130,7 +136,11 @@ export default function TablaRiesgo({ items = [], evaluados = null, hrefHistoria
                                                     {a.superaLimite && <p className="text-xs text-ausente">Superó el límite</p>}
                                                 </td>
                                                 <td className={clsx('px-3 py-2 text-xs', OCULTAR.md)}><Tendencia alumno={a} /></td>
-                                                <td className="px-3 py-2 tabular-nums">{a.faltasEq} <span className="text-xs text-muted-foreground">({fmtPct(a.porcentajeFaltas)})</span></td>
+                                                <td className="px-3 py-2 tabular-nums">
+                                                    {a.faltasEq} <span className="whitespace-nowrap text-xs text-muted-foreground">({fmtPct(a.porcentajeFaltas)})</span>
+                                                    {/* Uso del límite: lo que ya faltó frente a lo que le queda; llena la barra al agotarlo. */}
+                                                    {uso && <BarraSegmentada className="mt-1.5 min-w-14" datos={uso.datos} config={CONFIG_USO_LIMITE} alto={6} leyenda={false} etiqueta={uso.etiqueta} />}
+                                                </td>
                                                 <td className={clsx('px-3 py-2 tabular-nums', OCULTAR.xl)}>{a.faltasRestantes ?? '-'}</td>
                                                 <td className={clsx('px-3 py-2 tabular-nums', OCULTAR.xl)}>{a.semanaCruceEstimada ?? '-'}</td>
                                                 <td className="px-3 py-2">

@@ -1,6 +1,6 @@
 import { pct, resumenTexto, sumar } from '@/lib/graficas.js';
 
-// Datos de la dona de plantillas del índice facial (conteos de api_estado_indice; nunca vectores ni imágenes, RNF-03).
+// Datos del anillo de plantillas del índice facial (conteos de api_estado_indice; nunca vectores ni imágenes, RNF-03).
 
 const num = (v) => (Number.isFinite(Number(v)) ? Number(v) : 0);
 
@@ -21,7 +21,7 @@ export function porcentajeIndexado(p = {}) {
     return pct(num(p?.indexadas), sumar(datosPlantillas(p)), 0);
 }
 
-/** Texto alternativo de la dona. */
+/** Texto alternativo del anillo. */
 export function resumenPlantillas(p = {}) {
     const datos = datosPlantillas(p);
     if (sumar(datos) <= 0) return 'No hay plantillas activas.';

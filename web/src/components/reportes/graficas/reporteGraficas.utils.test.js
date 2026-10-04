@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
-    acortar, alumnosFueraDelTop, centroAsistencia, centroDonaGrupo, distribucionAsistencia, dominioFaltas, estadoAlumnosPorGrupo, gruposConAsistencia,
-    indicadoresPeriodo, limiteFaltas, resumenSerie, resumenSituacionGrupos, serieAsistenciaGrupos, topFaltasAlumnos, umbralAsistencia,
+    acortar, alumnosFueraDelTop, centroAsistencia, centroAnilloGrupo, distribucionAsistencia, dominioFaltas, estadoAlumnosPorGrupo, gruposConAsistencia,
+    indicadoresPeriodo, limiteFaltas, MAX_ETIQUETA_ALUMNO, MAX_ETIQUETA_GRUPO, resumenSerie, resumenSituacionGrupos, serieAsistenciaGrupos, topFaltasAlumnos, umbralAsistencia,
 } from './reporteGraficas.utils.js';
 
 const alumno = (o) => ({ id_alumno: 1, matricula: 'E1', nombres: 'Ana María', apellido_paterno: 'Pérez', nombre_completo: 'Ana María Pérez Ruiz',
@@ -30,7 +30,7 @@ describe('distribucionAsistencia', () => {
             { clave: 'justificado', valor: 1 }, { clave: 'pendiente', valor: 2 },
         ]);
     });
-    it('sin alumnos o con campos nulos devuelve ceros (la dona muestra su aviso)', () => {
+    it('sin alumnos o con campos nulos devuelve ceros (el anillo muestra su aviso)', () => {
         expect(distribucionAsistencia([]).every((d) => d.valor === 0)).toBe(true);
         expect(distribucionAsistencia(undefined)).toHaveLength(5);
         expect(distribucionAsistencia([{ presentes: null, retardos: undefined }]).every((d) => d.valor === 0)).toBe(true);
@@ -46,17 +46,17 @@ describe('centroAsistencia', () => {
     });
 });
 
-describe('centroDonaGrupo', () => {
-    it('muestra la asistencia del grupo solo cuando la dona grafica al grupo completo', () => {
-        expect(centroDonaGrupo({ asistenciaPromedio: 82.35 })).toEqual({ valor: '82 %', etiqueta: 'Asistencia' });
-        expect(centroDonaGrupo({ asistenciaPromedio: null })).toBeUndefined();
+describe('centroAnilloGrupo', () => {
+    it('muestra la asistencia del grupo solo cuando el anillo grafica al grupo completo', () => {
+        expect(centroAnilloGrupo({ asistenciaPromedio: 82.35 })).toEqual({ valor: '82 %', etiqueta: 'Asistencia' });
+        expect(centroAnilloGrupo({ asistenciaPromedio: null })).toBeUndefined();
     });
-    it('con un alumno seleccionado no pone la cifra del grupo (la dona muestra el total de registros)', () => {
-        expect(centroDonaGrupo({ asistenciaPromedio: 82.35, deAlumno: true })).toBeUndefined();
+    it('con un alumno seleccionado no pone la cifra del grupo (el anillo muestra el total de registros)', () => {
+        expect(centroAnilloGrupo({ asistenciaPromedio: 82.35, deAlumno: true })).toBeUndefined();
     });
     it('sin sesiones programadas no hay centro', () => {
-        expect(centroDonaGrupo({ asistenciaPromedio: 82.35, sinSesiones: true })).toBeUndefined();
-        expect(centroDonaGrupo()).toBeUndefined();
+        expect(centroAnilloGrupo({ asistenciaPromedio: 82.35, sinSesiones: true })).toBeUndefined();
+        expect(centroAnilloGrupo()).toBeUndefined();
     });
 });
 
@@ -96,7 +96,7 @@ describe('topFaltasAlumnos', () => {
     });
     it('sin nombres usa el nombre completo acortado', () => {
         const t = topFaltasAlumnos([{ id_alumno: 1, matricula: 'E1', nombre_completo: 'Nombre Larguísimo De Prueba Completo', porcentaje_faltas: 3 }]);
-        expect(t[0].alumno.length).toBeLessThanOrEqual(18);
+        expect(t[0].alumno.length).toBeLessThanOrEqual(MAX_ETIQUETA_ALUMNO);
         expect(t[0].alumno.endsWith('…')).toBe(true);
     });
 });
@@ -120,7 +120,8 @@ describe('serieAsistenciaGrupos', () => {
         const s = serieAsistenciaGrupos(periodo);
         expect(s.map((x) => x.asistencia)).toEqual([70, 90]);
         expect(s[1].grupo).toBe('3A · Finanzas');
-        expect(s[0].grupo.length).toBeLessThanOrEqual(17);
+        expect(s[0].grupo.length).toBeLessThanOrEqual(MAX_ETIQUETA_GRUPO);
+        expect(s[0].grupo.endsWith('…')).toBe(true);
         expect(gruposConAsistencia(periodo)).toBe(2);
     });
     it('limita a N y maneja vacío', () => {

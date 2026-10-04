@@ -1,9 +1,9 @@
 import Button from '@/components/ui/Button';
 import StatusChip from '@/components/ui/StatusChip';
 import Table from '@/components/ui/Table';
-import { estadoMostrado, etiquetaScore, formatearHoraIso, motivoRegistroManual } from '../MonitorSesion/monitorSesion.utils.js';
+import { LECTURAS_REQUERIDAS, estadoMostrado, etiquetaScore, formatearHoraIso, motivoRegistroManual } from '../MonitorSesion/monitorSesion.utils.js';
 
-export const LECTURAS_REQUERIDAS = 3;
+export { LECTURAS_REQUERIDAS };
 
 // Alumnos de la sesion (P-03). Las columnas secundarias (matrícula, score, origen, hora, consentimiento) se ocultan en pantallas
 // angostas para no desbordar. `onRegistrar(alumno)` solo se ofrece a quien puede registrarse a mano.

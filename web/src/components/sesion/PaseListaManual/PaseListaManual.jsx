@@ -1,14 +1,16 @@
 'use client';
 
-import { useState } from 'react';
+import { ClipboardCheck } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 import Alert from '@/components/ui/Alert';
-import Button from '@/components/ui/Button';
 import Select from '@/components/ui/Select';
 import StatusChip from '@/components/ui/StatusChip';
 import Table from '@/components/ui/Table';
 import { useToast } from '@/components/ui/Toast';
 import { useApiMutation } from '@/hooks/data';
 import { cerrarSesion, paseListaManual } from '@/lib/api/sesiones.js';
+import AccionesPaseLista from '../AccionesPaseLista';
+import { enfocarPanel } from '../enfocarPanel.js';
 import { formatearHoraIso, sugerirEstado } from '../MonitorSesion/monitorSesion.utils.js';
 import { conteoMarcas } from './paseListaManual.utils.js';
 
@@ -20,8 +22,10 @@ const OPCIONES = [
 ];
 const ESTADOS_EDITABLES = ['presente', 'retardo', 'ausente'];
 
-// P-04: pase de lista manual (sesion sin camaras activas, RN-06). `data` = respuesta de api_sesion_monitor.
-export default function PaseListaManual({ data, onActualizar }) {
+// P-04: pase de lista manual (sesion sin camaras activas, RN-06). `data` = respuesta de api_sesion_monitor. Es el contenido principal de la
+// pantalla («Pasar lista (manual)»): con las mismas acciones que el pase con camara (una primaria, que guarda y cierra, y las secundarias).
+//   enfocar = se llego a pasar lista (?pasar-lista=1 o recien abierta): el contenedor recibe el foco al montarse
+export default function PaseListaManual({ data, onActualizar, enfocar = false }) {
     const { sesion, alumnos = [] } = data;
     const { toast } = useToast();
     const guardarMut = useApiMutation(paseListaManual);
@@ -31,6 +35,10 @@ export default function PaseListaManual({ data, onActualizar }) {
     const [marcas, setMarcas] = useState(() => Object.fromEntries(activos.filter((a) => ESTADOS_EDITABLES.includes(a.estado)).map((a) => [a.id_alumno, a.estado])));
     const ocupado = guardarMut.loading || cerrarMut.loading;
     const avance = conteoMarcas(activos, marcas);
+    const panelRef = useRef(null);
+    useEffect(() => {
+        if (enfocar) enfocarPanel(panelRef.current);
+    }, [enfocar]);
 
     const marcarRestantes = () => setMarcas((prev) => Object.fromEntries(activos.map((a) => [a.id_alumno, prev[a.id_alumno] || sugerido])));
 
@@ -70,7 +78,7 @@ export default function PaseListaManual({ data, onActualizar }) {
     ];
 
     return (
-        <div className="flex flex-col gap-4">
+        <div ref={panelRef} tabIndex={-1} className="flex flex-col gap-4 outline-none focus-visible:ring-4 focus-visible:ring-ring/30">
             <Alert tone="info" title="Sesión en modo manual">
                 El aula no tiene cámaras activas. Quien quede sin marcar será ausente al cerrar la sesión.
             </Alert>
@@ -94,17 +102,19 @@ export default function PaseListaManual({ data, onActualizar }) {
             <p className="flex flex-wrap items-center gap-1.5 text-sm text-muted-foreground">
                 Sugerido a esta hora <StatusChip kind="asistencia" value={sugerido} size="sm" />
             </p>
-            <div className="flex flex-wrap gap-2">
-                <Button variant="secondary" onClick={marcarRestantes} disabled={ocupado}>
-                    Marcar restantes según la hora
-                </Button>
-                <Button variant="secondary" onClick={() => guardar(false)} loading={guardarMut.loading && !cerrarMut.loading} disabled={ocupado}>
-                    Guardar
-                </Button>
-                <Button onClick={() => guardar(true)} loading={cerrarMut.loading} disabled={ocupado}>
-                    Guardar y cerrar sesión de clase
-                </Button>
-            </div>
+            <AccionesPaseLista
+                primaria={{
+                    etiqueta: 'Guardar y cerrar sesión de clase',
+                    onClick: () => guardar(true),
+                    loading: cerrarMut.loading,
+                    disabled: ocupado,
+                    icono: <ClipboardCheck aria-hidden="true" className="size-5" strokeWidth={1.75} />,
+                }}
+                secundarias={[
+                    { etiqueta: 'Guardar', onClick: () => guardar(false), loading: guardarMut.loading && !cerrarMut.loading, disabled: ocupado },
+                    { etiqueta: 'Marcar restantes según la hora', onClick: marcarRestantes, disabled: ocupado },
+                ]}
+            />
             <Table columns={columns} rows={activos} rowKey="id_alumno" caption="Pase de lista manual" emptyMessage="El grupo no tiene alumnos inscritos." />
         </div>
     );

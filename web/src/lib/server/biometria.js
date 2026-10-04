@@ -1,7 +1,8 @@
 // Lógica de los Route Handlers de biometría: consentimiento, plantilla facial, documentos e índice. Solo servidor.
+import { createHash } from 'node:crypto';
 import { ApiError } from '@/lib/api/errors';
 import { ttlUrlFirmada, eliminarObjetoSilencioso, rutaObjeto, subirObjeto, urlFirmada } from './storage.js';
-import { verificarFotoServicio } from './recognition.js';
+import { validarFormaConjunto, verificarFotoServicio, verificarFotosServicio } from './recognition.js';
 import { estadoIndice, reconstruirIndice, revertirIndice, sincronizarIndice } from './indice.js';
 
 /**
@@ -11,7 +12,7 @@ import { estadoIndice, reconstruirIndice, revertirIndice, sincronizarIndice } fr
 export async function reconstruirSinFallar(admin) {
     try {
         const r = await reconstruirIndice({ admin });
-        return { estado: r.estado, version: r.version, total_vectores: r.total_vectores };
+        return { estado: r.estado, version: r.version, total_vectores: r.total_vectores, muestras: r.muestras ?? [] };
     } catch (e) {
         if (e instanceof ApiError && e.code === 'RECONSTRUCCION_EN_CURSO') return { estado: 'en_curso', version: null };
         console.error('[indice] la reconstrucción tras el cambio falló; queda pendiente');
@@ -21,6 +22,9 @@ export async function reconstruirSinFallar(admin) {
 
 const comoBlob = (archivo) => new Blob([archivo.bytes], { type: archivo.contentType });
 
+/** Huella de los bytes: dos fotos con la misma huella son la misma toma subida dos veces. */
+const sha256 = (archivo) => createHash('sha256').update(archivo.bytes).digest('hex');
+
 /**
  * La calidad que devuelve el servicio trae `tamano_rostro_px`; el componente CalidadFotoResumen (docs/api/biometria.md
  * §2.1) lee `tamano_rostro`. Se entregan ambos para no romper a ninguno.
@@ -29,22 +33,34 @@ function conAlias(calidad) {
     return { ...calidad, calidad: { ...calidad.calidad, tamano_rostro: calidad.calidad.tamano_rostro_px } };
 }
 
-/** POST /api/plantilla/verificar (admin): solo calidad, no guarda nada. */
-export async function verificarFoto({ form }) {
-    return conAlias(await verificarFotoServicio(comoBlob(form.archivos.foto)));
+const conAliasCalidad = (calidad) => (calidad ? { ...calidad, tamano_rostro: calidad.tamano_rostro_px } : null);
+
+const errorValidacion = (campo, mensaje) => new ApiError({
+    code: 'VALIDACION',
+    message: 'Revisa los datos enviados.',
+    status: 422,
+    details: { campos: [{ campo, mensaje }] },
+});
+
+/**
+ * `foto` (una sola, camino heredado) XOR `fotos` (1 a 8, repetido). Devuelve { foto, fotos }: exactamente uno viene
+ * con valor. Ninguno o ambos es 422, no se adivina cuál quiso decir el cliente.
+ */
+function fotosDeLaPeticion(form) {
+    const foto = form.archivos.foto ?? null;
+    const fotos = form.archivos.fotos ?? [];
+    if (foto && fotos.length > 0) throw errorValidacion('fotos', "Envía 'foto' o 'fotos', no ambos.");
+    if (!foto && fotos.length === 0) throw errorValidacion('fotos', "Falta la foto: envía 'foto' o 'fotos'.");
+    return { foto, fotos };
 }
 
 /**
- * POST /api/alumnos/{id}/plantilla (admin).
- * consentimiento vigente -> calidad de la foto -> subir -> api_plantilla_registrar -> reconstruir el índice.
+ * El consentimiento debe ser de este alumno y estar vigente ANTES de procesar o guardar su rostro (RN-13). Lo usan
+ * el alta y la verificación por conjunto, porque esta última ya calcula embeddings y cosenos de identidad.
  */
-export async function registrarPlantilla({ rpc, admin, ip, params, body, form }) {
-    const idAlumno = params.id;
-    const foto = form.archivos.foto;
-
-    // 1. El consentimiento debe ser de este alumno y estar vigente ANTES de procesar o guardar su rostro (RN-13).
+async function exigirConsentimientoVigente(rpc, idAlumno, idConsent) {
     const consentimientos = await rpc('api_consentimientos_alumno', { idAlumno, limit: 200 });
-    const consentimiento = consentimientos?.items?.find((c) => c.id_consent === body.id_consent);
+    const consentimiento = consentimientos?.items?.find((c) => c.id_consent === idConsent);
     if (!consentimiento) {
         throw new ApiError({
             code: 'RN_13_CONSENTIMIENTO_AJENO', message: 'El consentimiento pertenece a otro alumno o no existe.', status: 409,
@@ -57,33 +73,245 @@ export async function registrarPlantilla({ rpc, admin, ip, params, body, form })
             status: 409,
         });
     }
+}
 
-    // 2. Calidad: un solo rostro y sin motivo de rechazo.
-    const calidad = conAlias(await verificarFotoServicio(comoBlob(foto)));
+/**
+ * Fotos de bytes idénticos. Devuelve `de[i]` = índice de la primera foto igual a la i-ésima (o null si es la
+ * primera ocurrencia) y la lista de índices únicos. Las copias exactas no se mandan al servicio: no aportan
+ * identidad nueva y promediarlas solo daría más peso a una toma.
+ */
+function agruparDuplicadas(archivos) {
+    const vistas = new Map();
+    const de = [];
+    const unicas = [];
+    archivos.forEach((archivo, i) => {
+        const huella = sha256(archivo);
+        if (vistas.has(huella)) {
+            de.push(vistas.get(huella));
+        } else {
+            vistas.set(huella, i);
+            de.push(null);
+            unicas.push(i);
+        }
+    });
+    return { de, unicas };
+}
+
+/**
+ * Analiza el conjunto con el servicio (solo las fotos únicas) y devuelve el resultado mapeado a las posiciones
+ * ORIGINALES del envío: las copias exactas salen como estado 'duplicada' (con `duplicada_de`) y el resto lleva el
+ * análisis del servicio. Los totales (aceptadas, suficiente, consistencia, cosenos) son los del conjunto sin copias.
+ */
+async function analizarConjunto(archivos, agrupacion) {
+    const { de, unicas } = agrupacion;
+    const conjunto = validarFormaConjunto(await verificarFotosServicio(unicas.map((i) => comoBlob(archivos[i]))), unicas.length);
+    const posicionDeUnica = new Map(unicas.map((original, k) => [original, k]));
+    const fotos = archivos.map((_, i) => {
+        if (de[i] !== null) {
+            return {
+                indice: i, estado: 'duplicada', rostros: null, un_solo_rostro: null, calidad: null,
+                motivo_rechazo: 'Es igual a otra foto del envío.', motivo_codigo: 'DUPLICADA', coseno_resto: null,
+                duplicada_de: de[i],
+            };
+        }
+        const f = conjunto.fotos[posicionDeUnica.get(i)];
+        return { ...f, indice: i, calidad: conAliasCalidad(f.calidad), duplicada_de: null };
+    });
+    return { ...conjunto, total: archivos.length, fotos };
+}
+
+/**
+ * POST /api/plantilla/verificar (admin): solo calidad, no guarda nada.
+ * - `foto`: camino heredado (una toma), no exige alumno ni consentimiento.
+ * - `fotos`: el conjunto completo (1 a 8). Exige id_alumno e id_consent y el consentimiento vigente, porque se
+ *   calculan embeddings y cosenos de identidad de una persona.
+ */
+export async function verificarFoto({ form, body = {}, rpc }) {
+    const { foto, fotos } = fotosDeLaPeticion(form);
+    if (foto) return conAlias(await verificarFotoServicio(comoBlob(foto)));
+
+    const faltan = ['id_alumno', 'id_consent'].filter((c) => body[c] === undefined);
+    if (faltan.length > 0) {
+        throw new ApiError({
+            code: 'VALIDACION',
+            message: 'Revisa los datos enviados.',
+            status: 422,
+            details: { campos: faltan.map((campo) => ({ campo, mensaje: 'Es obligatorio al verificar varias fotos.' })) },
+        });
+    }
+    await exigirConsentimientoVigente(rpc, body.id_alumno, body.id_consent);
+    return analizarConjunto(fotos, agruparDuplicadas(fotos));
+}
+
+/** Medidas de calidad que guarda la BD (lista blanca de app.calidad_foto_valida): sin el alias `tamano_rostro`. */
+function calidadParaBD(calidad) {
+    if (!calidad) return null;
+    const { brillo, nitidez, tamano_rostro_px: tamanoRostroPx, frontal } = calidad;
+    return { brillo, nitidez, tamano_rostro_px: tamanoRostroPx, frontal };
+}
+
+/** Elemento de p_fotos: las claves nulas se omiten (la RPC acepta ausentes y rechaza claves desconocidas). */
+function fotoParaRpc(ruta, foto) {
+    const elemento = { objeto_foto: ruta };
+    const calidad = calidadParaBD(foto.calidad);
+    if (calidad) elemento.calidad = calidad;
+    if (typeof foto.coseno_resto === 'number') elemento.coseno_resto = foto.coseno_resto;
+    return elemento;
+}
+
+/** Resumen escalar del build para ESTA plantilla (el arreglo completo de muestras no viaja al cliente). */
+function muestraDe(indice, idPlantilla) {
+    const m = indice?.muestras?.find((x) => x.id_plantilla === idPlantilla);
+    if (!m) return null;
+    return {
+        total: m.total,
+        usadas: m.usadas,
+        descartadas: m.descartadas,
+        coseno_min: m.coseno_min,
+        coseno_medio: m.coseno_medio,
+        degradada: m.degradada,
+    };
+}
+
+/** Quita `muestras` de la respuesta del índice: es detalle interno del build, no del contrato con la pantalla. */
+function indiceSinMuestras(indice) {
+    const salida = { ...indice };
+    delete salida.muestras;
+    return salida;
+}
+
+/** Camino heredado de UNA foto: calidad individual -> subir -> RPC con los 4 argumentos de siempre. */
+async function registrarUnaFoto({ rpc, admin, ip, idAlumno, idConsent, archivo }) {
+    // Calidad: un solo rostro y sin motivo de rechazo.
+    const calidad = conAlias(await verificarFotoServicio(comoBlob(archivo)));
     if (!calidad.un_solo_rostro || calidad.motivo_rechazo) {
         throw new ApiError({
             code: 'FOTO_RECHAZADA',
             message: calidad.motivo_rechazo ?? 'La foto no es válida para la plantilla facial.',
             status: 422,
-            details: { motivo_rechazo: calidad.motivo_rechazo, rostros: calidad.rostros, calidad: calidad.calidad },
+            details: {
+                motivo_rechazo: calidad.motivo_rechazo,
+                motivo_codigo: calidad.motivo_codigo ?? null,
+                rostros: calidad.rostros,
+                calidad: calidad.calidad,
+            },
         });
     }
 
-    // 3. Subida con ruta construida en servidor y registro; si el registro falla se borra el objeto subido.
+    // Subida con ruta construida en servidor y registro; si el registro falla se borra el objeto subido.
     const cliente = await admin();
     const ruta = rutaObjeto.registro(idAlumno);
-    await subirObjeto(ruta, foto.bytes, { contentType: 'image/jpeg', upsert: false, admin: cliente });
-    let plantilla;
+    await subirObjeto(ruta, archivo.bytes, { contentType: 'image/jpeg', upsert: false, admin: cliente });
     try {
-        plantilla = await rpc('api_plantilla_registrar', { idAlumno, idConsent: body.id_consent, objetoFoto: ruta, ip });
+        return await rpc('api_plantilla_registrar', { idAlumno, idConsent, objetoFoto: ruta, ip });
     } catch (e) {
         await eliminarObjetoSilencioso(ruta, { admin: cliente });
         throw e;
     }
+}
+
+/**
+ * Camino de varias fotos: duplicados -> análisis del conjunto (calidad + consistencia) -> rechazo estricto o
+ * subida de TODAS -> RPC con p_fotos. Las fotos rechazadas nunca se suben: lo que queda en el bucket y en
+ * plantilla_foto es exactamente lo aceptado (y no se guarda el rostro de un tercero que se coló en el lote).
+ */
+async function registrarVariasFotos({ rpc, admin, ip, idAlumno, idConsent, archivos }) {
+    const agrupacion = agruparDuplicadas(archivos);
+    const duplicadas = agrupacion.de.flatMap((de, indice) => (de === null ? [] : [{ indice, de }]));
+    if (duplicadas.length > 0) {
+        throw new ApiError({
+            code: 'FOTOS_DUPLICADAS',
+            message: 'Hay fotos repetidas: usa tomas distintas.',
+            status: 422,
+            details: { duplicadas },
+        });
+    }
+
+    const conjunto = await analizarConjunto(archivos, agrupacion);
+    if (conjunto.fotos.some((f) => f.estado !== 'aceptada') || conjunto.ambiguo) {
+        throw new ApiError({
+            code: 'FOTOS_RECHAZADAS',
+            message: 'Algunas fotos no sirven: repite las tomas marcadas.',
+            status: 422,
+            details: {
+                minimo: conjunto.minimo,
+                maximo: conjunto.maximo,
+                total: conjunto.total,
+                aceptadas: conjunto.aceptadas,
+                umbral_coseno: conjunto.umbral_coseno,
+                consistente: conjunto.consistente,
+                ambiguo: conjunto.ambiguo,
+                fotos: conjunto.fotos.map((f) => ({
+                    indice: f.indice,
+                    estado: f.estado,
+                    motivo_codigo: f.motivo_codigo,
+                    motivo_rechazo: f.motivo_rechazo,
+                    coseno_resto: f.coseno_resto,
+                })),
+            },
+        });
+    }
+    if (!conjunto.suficiente) {
+        // El mínimo lo decide el servicio (TEMPLATE_MIN_PHOTOS): esta capa solo conoce el techo.
+        throw new ApiError({
+            code: 'FOTOS_INSUFICIENTES',
+            message: `Se necesitan al menos ${conjunto.minimo} fotos.`,
+            status: 422,
+            details: { minimo: conjunto.minimo, recibidas: archivos.length },
+        });
+    }
+
+    // Subida en serie (una ruta de servidor por foto, uuid distinto). TRANSACCIONALIDAD: si falla cualquier subida
+    // o la RPC se borran TODAS las ya subidas y se relanza el error original; no quedan huérfanos.
+    const cliente = await admin();
+    const subidas = [];
+    try {
+        for (const archivo of archivos) {
+            const ruta = rutaObjeto.registro(idAlumno);
+            await subirObjeto(ruta, archivo.bytes, { contentType: 'image/jpeg', upsert: false, admin: cliente });
+            subidas.push(ruta);
+        }
+        return await rpc('api_plantilla_registrar', {
+            idAlumno,
+            idConsent,
+            objetoFoto: subidas[0],
+            fotos: subidas.map((ruta, i) => fotoParaRpc(ruta, conjunto.fotos[i])),
+            ip,
+        });
+    } catch (e) {
+        await Promise.allSettled(subidas.map((ruta) => eliminarObjetoSilencioso(ruta, { admin: cliente })));
+        throw e;
+    }
+}
+
+/**
+ * POST /api/alumnos/{id}/plantilla (admin).
+ * consentimiento vigente -> calidad (de la foto o del conjunto) -> subir -> api_plantilla_registrar -> reconstruir
+ * el índice. Una foto (`foto`, o `fotos` con un solo archivo) sigue el camino heredado; 2 o más forman la plantilla
+ * promediada (el servicio calcula el centroide al construir el índice; aquí no viaja ningún vector).
+ */
+export async function registrarPlantilla({ rpc, admin, ip, params, body, form }) {
+    const idAlumno = params.id;
+    const { foto, fotos } = fotosDeLaPeticion(form);
+    const archivos = foto ? [foto] : fotos;
+
+    // 1. El consentimiento se comprueba ANTES de procesar o guardar el rostro (RN-13).
+    await exigirConsentimientoVigente(rpc, idAlumno, body.id_consent);
+
+    // 2-3. Calidad, subida y registro.
+    const esVarias = archivos.length >= 2;
+    const plantilla = esVarias
+        ? await registrarVariasFotos({ rpc, admin, ip, idAlumno, idConsent: body.id_consent, archivos })
+        : await registrarUnaFoto({ rpc, admin, ip, idAlumno, idConsent: body.id_consent, archivo: archivos[0] });
 
     // 4. Índice: se reconstruye ya; si no se puede, la plantilla queda pendiente de indexar.
-    const indice = await reconstruirSinFallar(cliente);
-    return { ...plantilla, indice, version: indice.version };
+    const indice = await reconstruirSinFallar(await admin());
+    return {
+        ...plantilla,
+        indice: indiceSinMuestras(indice),
+        version: indice.version,
+        muestra: esVarias ? muestraDe(indice, plantilla.id_plantilla) : null,
+    };
 }
 
 /** POST /api/consentimientos (admin): PDF firmado -> bucket -> api_consentimiento_registrar. */
@@ -110,11 +338,11 @@ export async function registrarConsentimiento({ rpc, admin, ip, body, form }) {
 export async function revocarConsentimiento({ rpc, admin, ip, params }) {
     const resultado = await rpc('api_consentimiento_revocar', { idConsent: params.id, ip });
     if (!resultado?.requiere_reconstruccion) return resultado;
-    return { ...resultado, indice: await reconstruirSinFallar(await admin()) };
+    return { ...resultado, indice: indiceSinMuestras(await reconstruirSinFallar(await admin())) };
 }
 
 /**
- * GET /api/documentos/{consentimiento|plantilla}/{id} (admin): URL firmada. La RPC autoriza (rol y existencia),
+ * GET /api/documentos/{consentimiento|plantilla|plantilla_foto}/{id} (admin): URL firmada. La RPC autoriza (rol y existencia),
  * devuelve la ruta y la vigencia, y asienta la consulta en bitácora ANTES de que se firme nada (RF-19).
  */
 export function urlDeDocumento(tipo) {

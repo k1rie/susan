@@ -60,7 +60,7 @@ const nextConfig = {
     },
 
     experimental: {
-        optimizePackageImports: ['lucide-react', 'recharts'],
+        optimizePackageImports: ['lucide-react'],
     },
 
     async headers() {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { altoCapturas, contadoresCamaras, datosCapturas, haceCuanto, mensajeCambio, resumenCapturas, sinCapturar } from './camaras.utils.js';
+import { contadoresCamaras, datosCapturas, haceCuanto, mensajeCambio, resumenCapturas, sinCapturar } from './camaras.utils.js';
 
 const cam = (id, extra = {}) => ({ id_camara: id, aula_clave: `A-${id}`, posicion: 'frontal', estatus: 'activa', capturas_24h: 10, ...extra });
 
@@ -30,15 +30,17 @@ describe('camaras.utils', () => {
         expect(datosCapturas(items).omitidas).toBe(0);
         expect(datosCapturas([]).filas).toEqual([]);
     });
-    it('datosCapturas distingue cámaras con la misma aula y posición y recorta etiquetas largas', () => {
+    it('datosCapturas distingue cámaras con la misma aula y posición y deja el nombre completo (la lista lo parte en 2 líneas)', () => {
         const d = datosCapturas([cam(1, { aula_clave: 'X' }), cam(2, { aula_clave: 'X' }), cam(3, { aula_clave: 'Laboratorio de cómputo 4' })]);
         expect(d.filas.map((f) => f.camara)).toContain('X · frontal #1');
         expect(d.filas.map((f) => f.camara)).toContain('X · frontal #2');
-        expect(d.filas.find((f) => f.camara.startsWith('Laboratorio')).camara.length).toBeLessThanOrEqual(18);
+        expect(d.filas.map((f) => f.camara)).toContain('Laboratorio de cómputo 4 · frontal');
     });
-    it('alto acotado y texto alternativo', () => {
-        expect(altoCapturas(1)).toBe(160);
-        expect(altoCapturas(12)).toBe(460);
+    it('datosCapturas toma 0 cuando capturas_24h no es numérico y mantiene el orden de mayor a menor', () => {
+        const d = datosCapturas([cam(1, { capturas_24h: null }), cam(2, { capturas_24h: '7' }), cam(3, { capturas_24h: undefined })]);
+        expect(d.filas.map((f) => f.capturas)).toEqual([7, 0, 0]);
+    });
+    it('texto alternativo de la gráfica de capturas', () => {
         expect(resumenCapturas({ filas: [], omitidas: 0 })).toBe('Sin cámaras.');
         expect(resumenCapturas({ filas: [{ camara: 'A-1 · frontal', capturas: 3 }], omitidas: 2 })).toBe('A-1 · frontal: 3. Otras 2 cámaras no se muestran.');
     });

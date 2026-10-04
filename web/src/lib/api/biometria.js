@@ -62,7 +62,8 @@ export async function consentimientosAlumno(args = {}, opts = {}) {
  * @param {number} [args.limit] p_limit integer (def. 50).
  * @param {number} [args.offset] p_offset integer (def. 0).
  * @param {{ backend?: object }} [opts]
- * @returns {Promise<object>} {"id_alumno":17,"activa":{"id_plantilla":41,"id_consent":9,"fecha_registro":"...","indexada":true,"id_indice":3,"version_indice":"v003","faiss_id":1042,"en_uso":true,"consentimiento_vigente":true}|null,"archivadas":{"total":1,"items":[{"id_plantilla":33,"id_consent":4,"fecha_registro":"..."}]},"indice_en_uso":{"id_indice":3,"version":"v003"}|null}
+ * @returns {Promise<object>} {"id_alumno":17,"activa":{"id_plantilla":41,"id_consent":9,"fecha_registro":"...","indexada":true,"id_indice":3,"version_indice":"v003","faiss_id":1042,"en_uso":true,"consentimiento_vigente":true,"n_fotos":5,"coseno_min":0.512|null,"coseno_medio":0.744|null,"fotos":[{"id_foto":101,"orden":1,"principal":true,"calidad":{"brillo":120.5,"nitidez":88.2,"tamano_rostro_px":210,"frontal":true}|null,"coseno_resto":0.812|null}]}|null,"archivadas":{"total":1,"items":[{"id_plantilla":33,"id_consent":4,"fecha_registro":"...","n_fotos":1}]},"indice_en_uso":{"id_indice":3,"version":"v003"}|null}
+ * (las rutas de las fotos no salen: se piden por id_foto con documentoUrlAutorizar({ tipo: 'plantilla_foto' }))
  * @throws {ApiError} NO_AUTORIZADO, NO_ENCONTRADO (alumno)
  */
 export async function plantillaAlumno(args = {}, opts = {}) {
@@ -76,11 +77,14 @@ export async function plantillaAlumno(args = {}, opts = {}) {
  * @param {object} [args]
  * @param {number} args.idAlumno p_id_alumno integer.
  * @param {number} args.idConsent p_id_consent integer.
- * @param {string} args.objetoFoto p_objeto_foto text.
+ * @param {string} args.objetoFoto p_objeto_foto text (la foto principal).
  * @param {string} [args.ip] p_ip inet (def. NULL).
+ * @param {{ objeto_foto: string, calidad?: object | null, coseno_resto?: number | null }[]} [args.fotos] p_fotos jsonb (def. NULL):
+ *   de 3 a 8 fotos EN ORDEN DE CAPTURA (la primera es la principal y debe coincidir con objetoFoto). Sus objetos ya
+ *   llevan claves en snake_case: el envoltorio solo convierte las de primer nivel. Sin `fotos` la plantilla es de una foto.
  * @param {{ backend?: object }} [opts]
- * @returns {Promise<object>} {"id_plantilla":41,"id_alumno":17,"id_consent":9,"activa":true,"indexada":false,"plantilla_archivada":33,"fecha_registro":"2026-09-14T09:12:41-06:00","requiere_reconstruccion":true}
- * @throws {ApiError} NO_AUTORIZADO, NO_ENCONTRADO (alumno o consentimiento), ALUMNO_INACTIVO, RUTA_INVALIDA, RN_13_CONSENTIMIENTO_AJENO, RN_13_CONSENTIMIENTO_NO_VIGENTE
+ * @returns {Promise<object>} {"id_plantilla":41,"id_alumno":17,"id_consent":9,"activa":true,"indexada":false,"plantilla_archivada":33,"fecha_registro":"2026-09-14T09:12:41-06:00","requiere_reconstruccion":true,"n_fotos":5}
+ * @throws {ApiError} NO_AUTORIZADO, NO_ENCONTRADO (alumno o consentimiento), ALUMNO_INACTIVO, VALIDACION (fotos), RUTA_INVALIDA, RN_13_CONSENTIMIENTO_AJENO, RN_13_CONSENTIMIENTO_NO_VIGENTE
  */
 export async function plantillaRegistrar(args = {}, opts = {}) {
     return callRpc('api_plantilla_registrar', args, opts);
@@ -91,11 +95,11 @@ export async function plantillaRegistrar(args = {}, opts = {}) {
  * Roles: administrador
  *
  * @param {object} [args]
- * @param {string} args.tipo p_tipo text.
+ * @param {string} args.tipo p_tipo text: 'consentimiento', 'plantilla' (foto principal) o 'plantilla_foto' (idRegistro = id_foto).
  * @param {number} args.idRegistro p_id_registro integer.
  * @param {string} [args.ip] p_ip inet (def. NULL).
  * @param {{ backend?: object }} [opts]
- * @returns {Promise<object>} {"tipo":"plantilla","id_registro":41,"id_alumno":17,"objeto":"registro/17/<uuid>.jpg","vigencia_seg":300}
+ * @returns {Promise<object>} {"tipo":"plantilla","id_registro":41,"id_alumno":17,"objeto":"registro/17/<uuid>.jpg","vigencia_seg":300} (con 'plantilla_foto' añade id_plantilla y orden)
  * @throws {ApiError} NO_AUTORIZADO, VALIDACION (tipo), NO_ENCONTRADO
  */
 export async function documentoUrlAutorizar(args = {}, opts = {}) {
