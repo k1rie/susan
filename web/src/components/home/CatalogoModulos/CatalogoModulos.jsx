@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { StaggerList } from '@/components/motion';
+import StaggerList from '@/components/motion/StaggerList';
 import Pills from '@/components/ui/Pills';
 import { aplicarFiltro, filtrosDeModulos, modulosParaRol } from '@/lib/modulos.js';
 import ModuloCard from '../ModuloCard';

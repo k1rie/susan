@@ -1,8 +1,10 @@
 'use client';
 
+import clsx from 'clsx';
 import { useSyncExternalStore } from 'react';
 import { useShell } from '@/components/layout/ShellContext.jsx';
-import { BlurText, Reveal } from '@/components/motion';
+import BlurText from '@/components/motion/BlurText';
+import Reveal from '@/components/motion/Reveal';
 import { modulosActivos, modulosParaRol, modulosProximos } from '@/lib/modulos.js';
 import { rolEtiqueta } from '@/components/layout/Sidebar/navItems.js';
 import CampoComando from '../CampoComando';
@@ -43,7 +45,9 @@ export default function HomeRol({ children }) {
                 <Reveal as="p" delay={0.2} immediate className="max-w-xl text-base text-muted-foreground">
                     {texto.lema}
                 </Reveal>
-                <Reveal delay={0.3} immediate className="mt-2 w-full">
+                {/* Docente en teléfono: el buscador ya está en la barra superior y su acción principal en el botón central de la barra
+                    inferior; este campo grande empujaba «Pasar lista» (la tarjeta del panel) por debajo del pliegue. */}
+                <Reveal delay={0.3} immediate className={clsx('mt-2 w-full', rol === 'docente' && 'hidden sm:block')}>
                     <CampoComando onAbrir={abrirPaleta} />
                 </Reveal>
             </header>
