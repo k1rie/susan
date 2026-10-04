@@ -62,7 +62,7 @@ Imagen: `recognition-service/Dockerfile` (Python 3.12; `--build-arg ML=0` omite 
 | `STORAGE_BACKEND` | `supabase` con `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `BUCKET=susan-private` |
 | `ALLOW_PRIVATE_CAMERAS` | `1` solo si las cámaras IP están en la LAN del plantel (el servicio las alcanza) |
 | `INDEX_ACCEPT_MODELS` | vacía (estricto). Solo pruebas locales: modelos de índice ajenos que se aceptan al leer (`scripts/dev-modo.sh` la fija). En producción, no definirla |
-| `INDEX_BOOTSTRAP_VERSION` | opcional: versión del índice a cargar al iniciar (si no, se activa con `/v1/index/activate` o `POST /api/indice/sincronizar`) |
+| `INDEX_BOOTSTRAP_VERSION` | opcional: fija la versión del índice a cargar al iniciar. Vacía: con Supabase el servicio carga al arrancar la versión en uso (`svc_indice_en_uso`), útil con instancias que se duermen (Railway App Sleeping); si no hay, se activa con `/v1/index/activate` o `POST /api/indice/sincronizar` |
 | `TEMPLATE_MIN_PHOTOS`, `TEMPLATE_MAX_PHOTOS` | 3 y 8. Mínimo y máximo de fotos de una plantilla. El 8 es techo duro compartido con SQL y con el proxy; el servicio no arranca si no se cumple `3 <= min <= max <= 8` |
 | `TEMPLATE_OUTLIER_COSINE` | 0.35. Coseno medio mínimo de cada foto contra las demás al REGISTRAR; `0` apaga el descarte (modo calibración). Ver el protocolo debajo |
 | `TEMPLATE_LINK_COSINE` | 0.30. Segundo criterio de consistencia: las fotos conservadas deben formar UN grupo (dos fotos se enlazan si su coseno >= este valor); detecta mezclas 3+3 de dos personas que la media no ve. `0` lo apaga. El constructor usa `min(0.20, este valor)`. Bájalo (0.25) solo si rechaza fotos genuinas de personas difíciles |

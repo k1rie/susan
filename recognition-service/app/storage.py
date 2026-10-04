@@ -37,6 +37,10 @@ class Storage(ABC):
     @abstractmethod
     def delete(self, path: str) -> None: ...
 
+    def active_index_version(self) -> str | None:
+        """Version del indice en uso segun la base, para cargarla al arrancar. Sin base (modo local): None."""
+        return None
+
 
 class LocalStorage(Storage):
     """Disco: <root>/<bucket>/<objeto>. Misma disposicion que el modo local de Next."""
@@ -86,6 +90,7 @@ class SupabaseStorage(Storage):
         self.base = f'{url.rstrip("/")}/storage/v1/object'
         self.bucket = bucket
         self.client = client or httpx.Client(timeout=httpx.Timeout(60.0, connect=10.0))
+        self.rpc_base = f'{url.rstrip("/")}/rest/v1/rpc'
         self.headers = {'Authorization': f'Bearer {service_role_key}', 'apikey': service_role_key}
 
     def _url(self, path: str) -> str:
@@ -110,6 +115,16 @@ class SupabaseStorage(Storage):
         r = self.client.delete(self._url(path), headers=self.headers)
         if r.status_code not in (200, 204, 400, 404):
             raise StorageError(f'Storage DELETE fallo ({r.status_code}).')
+
+
+    def active_index_version(self) -> str | None:
+        # svc_indice_en_uso (solo service_role) devuelve {"version": ...} o null si nunca se activo un indice
+        r = self.client.post(f'{self.rpc_base}/svc_indice_en_uso', headers={**self.headers, 'Content-Type': 'application/json'},
+                             json={})
+        if r.status_code != 200:
+            raise StorageError(f'RPC svc_indice_en_uso fallo ({r.status_code}).')
+        data = r.json() if r.content.strip() else None
+        return data.get('version') if isinstance(data, dict) else None
 
 
 def create_storage(settings) -> Storage:
