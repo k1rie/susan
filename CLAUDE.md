@@ -9,10 +9,12 @@ Base funcional: la especificación del 1er avance (`docs/spec/Avance1.pdf`, text
 (`docs/NUMERICS.md`). Referencias de origen: SmartClass (flujos de grupos/asistencia/justificantes/exportación) y
 MVP-FITNESS (estructura Next.js, un folder por componente).
 
-**Estado actual: base funcional + diseño real (fases F0–F7 de `docs/DESIGN_PLAN.md`).** La identidad y las reglas de
-movimiento están en `docs/design/SISTEMA.md`; el avance y el presupuesto de rendimiento medido, en
-`docs/DESIGN_PROGRESS.md`. Toda pantalla nueva debe verse bien a 360 px, respetar "reducir movimiento" y no
-desbordar horizontalmente.
+**Estado actual: base funcional + diseño real (fases F0–F11 de `docs/DESIGN_PLAN.md`/`docs/DESIGN_PROGRESS.md`) + flujo
+"Pasar lista" con cámara + escenario de demostración.** La identidad y las reglas de movimiento están en
+`docs/design/SISTEMA.md`; el avance y el presupuesto de rendimiento medido, en `docs/DESIGN_PROGRESS.md`. Toda pantalla
+nueva debe verse bien a 360 px, respetar "reducir movimiento" y no desbordar horizontalmente. Para probar todo con datos
+de prueba: `docs/DEMO.md` (`scripts/dev-all.sh`, `scripts/seed-demo.sh --reset`); la cámara simulada y el reloj de
+demostración son solo del modo local (`docs/DEMO-CAMARA.md`, `docs/DEMO-RELOJ.md`).
 
 ## Mapa del repositorio
 
@@ -23,7 +25,8 @@ SUSAN/
 ├─ supabase/              migrations/ · local/ (stubs auth/storage para PG local) · seed/ · tests/ · config.toml
 ├─ recognition-service/   FastAPI + FAISS (Python 3.12) — embeddings 512-d, índice JSON en el bucket
 ├─ web/                   Next.js 16 (App Router, JS/JSX) + Tailwind 4 + supabase-js
-└─ scripts/               utilidades de desarrollo local (db-up, db-reset, test-sql, dev-all…)
+├─ scripts/               utilidades de desarrollo local (db-up, db-reset, test-sql, dev-all, seed-demo, measure-bundle…)
+└─ video/                 video de presentación en HyperFrames (susan-presentacion/; los renders no se versionan)
 ```
 
 ## Stack
@@ -72,14 +75,20 @@ SUSAN/
   `AppShell`; tarjetas `rounded-xl border border-border bg-card` **sin sombra**; botones y campos `rounded-md`
   (8 px); botón primario negro; filtros con `ui/Pills`; pestañas con `ui/Tabs` (subrayadas); tarjetas de módulo con
   `ui/TarjetaPortada` y listas de filas con `ui/TarjetaFila`; foco visible con `focus-visible:ring-4 ring-ring/30`.
-- **Gráficas y densidad de texto**: cada pantalla abre con cifras y gráficas (shadcn `chart` vía `ui/GraficaDona`,
-  `ui/GraficaBarras`, `ui/TarjetaGrafica` con `resumen` como texto alternativo; colores solo por token, ver
-  `lib/graficas.js`); la explicación va corta o dentro de `ui/Detalles`; tablas con solo las columnas esenciales;
-  nada de párrafos repetidos por fila. recharts se carga con `next/dynamic` (patrón `*Impl.jsx`):
-  no lo importes de forma estática en pantallas. Detalle en `docs/design/SISTEMA.md`.
+- **Gráficas y densidad de texto**: cada pantalla abre con cifras y gráficas, siempre con la familia hecha a mano de
+  `components/ui` (SVG/CSS, **sin recharts ni otra librería de gráficas**): estados -> `ui/AnilloEstados`; rankings y
+  comparaciones -> `ui/BarrasPildora`; patrón semanal -> `ui/TiraSemana`; composición en tablas ->
+  `ui/BarraSegmentada`; evolución en el tiempo -> `ui/GraficaLinea`; cifra clave -> `ui/Sparkline` (o `StatCard` con
+  `serie`) solo si hay una serie REAL, nunca inventada; `ui/MedidorLiquido` solo en la sesión en vivo y la vista del
+  alumno. Cada gráfica va en `ui/TarjetaGrafica` con `resumen` como texto alternativo; colores solo por token (ver
+  `lib/graficas.js`, `colorGrafica`); «sin dato» (`null`) no es 0. La explicación va corta o dentro de `ui/Detalles`;
+  tablas con solo las columnas esenciales; nada de párrafos repetidos por fila. Tabla de decisión, contratos y cómo
+  agregar una gráfica nueva en `docs/design/SISTEMA.md`.
 - **Movimiento**: solo con `components/motion/*` y `lib/motion` (CSS + IntersectionObserver/rAF; sin gsap ni
-  `motion`). Solo `transform`/`opacity`; una vez al entrar en vista; apagado con "reducir movimiento". No agregues
-  librerías de animación sin medir con `scripts/measure-bundle.mjs` (presupuesto: `/docente` ≤ +15 % vs. la base).
+  `motion`). Solo `transform`/`opacity` (las gráficas hechas a mano tienen excepciones documentadas en
+  `docs/design/SISTEMA.md`: `clip-path`, trazos SVG y transiciones breves al actualizar datos vivos); una vez al
+  entrar en vista; apagado con "reducir movimiento". No agregues librerías de animación sin medir con
+  `scripts/measure-bundle.mjs` (presupuesto: `/docente` ≤ +15 % vs. la base).
   `cn()` (tailwind-merge) es solo para `components/shadcn`; en el resto usa `clsx`.
 - **Módulos**: las funciones nuevas (y las futuras) se registran en `web/src/lib/modulos.js` (ver
   `docs/design/MODULOS.md`); el Home, `/modulos`, la paleta ⌘K y el riel lateral salen de ahí.

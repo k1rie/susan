@@ -17,7 +17,7 @@ Los contratos de detalle (RPC, rutas, formas JSON) viven en `docs/API.md` y `doc
    · admin de cuentas (service_role)              · busca k-NN, sube recortes
    Programador de tareas = /api/jobs/* (cron)     · construye/carga índice (JSON en el bucket)
  DATOS ───────────────────────────────────────────────────────────────────────────
-   PostgreSQL (Supabase): 19 tablas 3FN + RLS + triggers + RPC api_*/svc_*
+   PostgreSQL (Supabase): 20 tablas 3FN (19 de la spec + `plantilla_foto`) + RLS + triggers + RPC api_*/svc_*
    Supabase Storage: bucket privado `susan-private` (fotos, documentos, recortes, índice FAISS .json)
 ```
 
@@ -40,7 +40,7 @@ o el servicio de reconocimiento). La UI presenta y captura decisiones.
   solo inserción (triggers `trg_bitacora_sin_cambios`, `trg_bitacora_sin_truncate`).
 - Tablas en `public` con los nombres de la especificación en minúsculas: `alumno, docente, materia, aula, grupo,
   horario_grupo, inscripcion, sesion_clase, asistencia, justificante, consentimiento, indice_faiss, plantilla_facial,
-  camara, captura, deteccion, usuario, bitacora_auditoria, parametro_sistema`; vista `v_resumen_asistencia`
+  plantilla_foto, camara, captura, deteccion, usuario, bitacora_auditoria, parametro_sistema`; vista `v_resumen_asistencia`
   (`security_invoker = true`). Constraints con prefijos `pk_ fk_ uq_ ck_ ux_ trg_` (spec §3.4).
 - JSON de las RPC: claves `snake_case` iguales a las columnas; fechas ISO 8601 (`fecha` = `YYYY-MM-DD`, `hora_*` =
   `HH:MM:SS`, instantes con offset); enteros como número JSON. Las listas paginadas devuelven
@@ -127,6 +127,21 @@ Superficie PERMITIDA de ese objeto (nada más; así el modo local puede imitarla
   se sube como JSON con `en_uso = false`, el servicio la precarga, y **una sola transacción** asigna `id_indice`/`faiss_id`
   y mueve `en_uso` (primero FALSE en la anterior, luego TRUE en la nueva: el índice único parcial no es diferible);
   por último el servicio cambia su puntero en memoria sin interrumpir el muestreo.
+- **Plantilla de varias fotos** (extensión 7; RN-12 intacta). Una plantilla = **3 a 8 fotos** (5 guiadas) cuyos embeddings L2 se promedian en UN
+  vector (centroide, re-normalizado) con UN `faiss_id`: sigue habiendo una sola fila activa de `plantilla_facial` por alumno; las fotos viven en la
+  tabla hija `plantilla_foto` (`orden = 1` es la principal = `plantilla_facial.objeto_foto`, creada por trigger; `calidad` y `coseno_resto` son
+  escalares informativos). El promedio y el descarte de fotos ajenas (*outliers*) ocurren en el servicio de reconocimiento: el vector solo vive en
+  memoria y en el JSON del índice (RNF-03).
+  - **Registro** (`POST /api/alumnos/{id}/plantilla`): consentimiento vigente → `POST /v1/photo/check-set` verifica calidad y consistencia de TODAS las fotos
+    (una foto debe parecerse en promedio >= `TEMPLATE_OUTLIER_COSINE`, 0.35, a las demás) → si alguna no pasa, 422 `FOTOS_RECHAZADAS` sin subir nada (las fotos
+    rechazadas nunca se guardan) → se suben las fotos y `api_plantilla_registrar(..., p_fotos)` archiva la anterior e inserta la nueva en una transacción →
+    reconstrucción del índice. El camino de UNA foto (campo `foto`) se conserva como escape y para las plantillas heredadas.
+  - **Índice**: `svc_indice_plan` añade `objetos_foto` a cada entrada nueva; el constructor (`/v1/index/build`, entrada `objetos_foto`) embebe cada foto, descarta de forma
+    defensiva solo las corruptas o ajenas de verdad (umbral propio 0.25; falla únicamente si NINGUNA es utilizable) y escribe el centroide. Las filas `keep` se conservan idénticas a
+    la base (sin renormalizar), así que el costo de N fotos solo se paga al construir una plantilla nueva; la reconstrucción COMPLETA cuesta N veces más.
+  - **Compatibilidad**: las plantillas de una foto siguen funcionando sin migración manual (backfill + trigger crean su fila `orden = 1`). Orden de despliegue: SQL, servicio, web.
+  - Archivado: sigue siendo solo `activa = false`; las fotos extra no tienen bandera propia (su estado es el de la plantilla padre) y, como la foto principal, no se borran del bucket al
+    archivar (ver la brecha de retención en `docs/DECISIONS.md`). Contratos y algoritmo: `docs/api/biometria.md` §4.
 - Puntaje y modelo: el embedder es enchufable (`EMBEDDER=insightface|fake`); `fake` (determinista) permite pruebas sin
   modelos. Dimensión = parámetro `dimension_vector` (512).
 
@@ -158,14 +173,16 @@ forma JSON que devuelve, y `scripts/gen-api-catalog.mjs` genera `docs/API-RPC.md
 | `web/src/lib/api/**`, `web/src/hooks/data/**` | data-layer |
 | `web/src/lib/http/**`, `web/src/lib/server/**`, `web/src/app/api/**` (excepto `_local`) | route-handlers |
 | `web/src/app/(public)/**`, `web/src/app/(app)/layout.jsx`, `web/src/components/auth/**` | screens-auth |
-| `web/src/app/(app)/docente/page.jsx`, `components/docente/**`; `(app)/docente/sesiones/**`, `components/sesion/**` | screens-sesiones |
+| `web/src/app/(app)/docente/page.jsx`, `(app)/docente/pasar-lista/**`, `components/docente/**`; `(app)/docente/sesiones/**`, `components/sesion/**` (incluye el simulador de cámara de la demostración) | screens-sesiones |
 | `web/src/app/(app)/docente/revision/**`, `components/revision/**`, `components/alumno/RegistrarJustificanteForm`, `MisJustificantes` | screens-revision |
 | `web/src/app/(app)/reportes/**`, `(app)/alumno/**`, `components/reportes/**`, resto de `components/alumno/**` | screens-reportes |
 | `web/src/app/(app)/analitica/**`, `components/analitica/**` | screens-analitica |
-| `web/src/app/(app)/admin/alumnos/**`, `components/admin/alumnos/**` (AlumnoForm, ConsentimientoPanel, PlantillaFacialPanel) | screens-alumnos |
+| `web/src/app/(app)/admin/alumnos/**`, `components/admin/alumnos/**` (AlumnoForm, ConsentimientoPanel, PlantillaFacialPanel, CapturaGuiadaPlantilla, SubidaFotosPlantilla, GaleriaTomas, CalidadFotoResumen) | screens-alumnos |
 | `web/src/app/(app)/admin/grupos/**`, `components/admin/grupos/**` | screens-grupos |
 | `web/src/app/(app)/admin/page.jsx`, `admin/{docentes,materias,aulas,usuarios,bitacora,importar}/**`, `components/admin/catalogos/**` | screens-catalogos |
 | `web/src/app/(app)/tecnico/**`, `components/tecnico/**` | screens-tecnico |
+| `scripts/seed-demo.sh`, `scripts/demo/**`, `web/src/lib/demo/**` (datos de prueba, escenario reiniciable y fotogramas sintéticos; solo modo local), `docs/DEMO*.md` | demo |
+| `video/**` (video de presentación HyperFrames; `renders/` no se versiona) | video |
 | `docs/**` salvo lo indicado, `README.md` | docs |
 | `web/package.json`, `web/next.config.mjs`, `web/src/app/globals.css`, `web/src/config.js`, `CLAUDE.md`, `docs/ARCHITECTURE.md` | integrador (lead) |
 
@@ -179,6 +196,7 @@ forma JSON que devuelve, y `scripts/gen-api-catalog.mjs` genera `docs/API-RPC.md
 5. Análisis por métodos numéricos (`web/src/lib/numerics`) y su pantalla `/analitica` — objetivo del proyecto, fuera
    del 1er avance.
 6. Carga masiva de alumnos por CSV (herencia de SmartClass `importGroup`).
+7. Tabla `plantilla_foto` (20 tablas frente a las 19 de la spec): plantilla de 3 a 8 fotos promediadas en un solo vector (centroide en el servicio de reconocimiento), con RN-12 intacta.
 
 ## 9. Fuera de alcance (spec §1.2): entrenar el modelo, control de acceso físico, calificaciones, app móvil nativa, detección de vida (anti-spoofing). QR (de SmartClass) no se incluye: la spec no lo contempla.
 
@@ -221,7 +239,9 @@ api_matriz_grupo(p_id_grupo) -> { "fechas": ["2026-08-17", "..."],
 `POST /v1/recognize` multipart: `image` (archivo) **o** `camera_url`, `allowed_faiss_ids` (JSON array), `crop_prefix`, `max_faces` (60).
 200 → `{ index_version, elapsed_ms, image:{width,height}, faces:[{ bbox:[x1,y1,x2,y2], det_score, candidate:{faiss_id,score}|null, objeto_recorte:string|null }] }`
 (nunca el vector). Errores: 401, 409 `INDEX_NOT_LOADED`, 422 imagen inválida, 504 cámara inalcanzable.
-Además: `GET /health`, `GET /v1/index`, `POST /v1/photo/check`, `POST /v1/index/build`, `POST /v1/index/activate`.
+Además: `GET /health`, `GET /v1/index`, `POST /v1/photo/check`, `POST /v1/photo/check-set`, `POST /v1/index/build`, `POST /v1/index/activate`.
+`POST /v1/photo/check-set`: multipart con `images` repetido (1 a 8 archivos) → `{ total, aceptadas, minimo, maximo, suficiente, consistente, ambiguo, umbral_coseno, coseno_min, coseno_medio, coseno_max_par, advertencias, fotos:[{ indice, estado: aceptada|calidad|inconsistente|ilegible, rostros, un_solo_rostro, calidad, motivo_rechazo, motivo_codigo, coseno_resto }] }`
+(nunca el vector; no guarda nada). `POST /v1/index/build` acepta además entradas `{ objetos_foto: [...] }` (2 a 8 fotos, promedio en el servicio) y responde con `muestras` por plantilla multifoto. Contrato completo en `docs/api/biometria.md` §4.
 
 ## 12. Capa SQL: reglas aprendidas en la construcción (db-schema)
 

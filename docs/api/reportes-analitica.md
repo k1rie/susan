@@ -47,7 +47,7 @@ identificar patrones de ausentismo para orientar la intervención docente oportu
 | RNF-08 Trazabilidad | Bitácora `notificacion` (cambio de derecho) y `consulta` (†). |
 | RNF-10 Integridad | Solo lectura salvo `inscripcion.derecho_examen` (único campo que escribe este dominio) y bitácora. |
 | RNF-11 Usabilidad | Reporte y portal a una pantalla, filtros en la URL, sin pasos intermedios. |
-| RNF-13 360 px | Tablas con modo tarjeta bajo 640 px; gráficas con `ResponsiveContainer`; 6.3. |
+| RNF-13 360 px | Tablas con modo tarjeta bajo 640 px; gráficas de `components/ui` (SVG/CSS) que miden su ancho con `ResizeObserver` y no desbordan; 6.3. |
 | Objetivo «reducir tiempos operativos» (spec §4.1) | `api_impacto_tiempo` (estimación) + componente `ImpactoTiempo`. |
 | Objetivo «patrones de ausentismo» | `api_serie_grupo`, `api_matriz_grupo`, `api_serie_alumno`, `web/src/lib/numerics/**`, pantalla `/analitica`. |
 | P-07 Tabla 43 (marcadores 1 a 5) | Filtros, KPIs, faltas equivalentes sobre sesiones programadas, derecho a examen, exportar. |
@@ -185,50 +185,61 @@ Periodo,Grupo,Materia,Docente,Inscritos,Sesiones programadas,Sesiones cerradas,A
 - **Objetivo**: patrones y proyección del ausentismo de un grupo con métodos numéricos, mostrando el procedimiento.
 - **URL**: `/analitica?periodo=2026-2&grupo=12`.
 - **Datos**: `reporteFiltros({ periodo })` (selectores); con grupo: en paralelo `serieGrupo({ idGrupo })` y
-  `matrizGrupo({ idGrupo, limit: 200, offset })` (se repite hasta cubrir `total`); `impactoTiempo({ idGrupo })`.
+  `matrizGrupo({ idGrupo, limit: 200, offset })` (se repite hasta cubrir `total`). `/analitica` ya no pide `impactoTiempo` ni muestra la tarjeta
+  `ImpactoTiempo` (queda solo en `/reportes`).
   Con ambas respuestas el hook `useAnalitica` ejecuta `analizarGrupo({ serie: serie.items, matriz, limitePct: serie.limite_pct,
   sesionesProgramadas: serie.sesiones_programadas, opciones: { retardosPorAusencia: serie.retardos_por_ausencia } })` dentro
   de `useMemo` (cálculo síncrono, < 50 ms para 60 alumnos x 100 sesiones).
-- **Contenido** (de arriba abajo):
-  1. `AnaliticaSelector` (periodo y grupo).
-  2. `ListaAlertas` (`alertas[]`, con nivel textual «Alta / Media / Info»).
-  3. `AnaliticaTarjetas`, cuatro `StatCard`: **Ausentismo actual** (`resumen.tasaActual` en %, con variación en puntos porcentuales
-     frente a la semana previa); **Tendencia** (`tendencia.pendientePuntosPorSemana` pp/semana + «Al alza / A la baja / Estable»);
-     **Proyección a N semanas** (`proyeccion.puntos` último valor con intervalo); **Cruce del 20 %** (`cruceLimite.mensaje`:
-     «Semana 11 (estimada)», «No cruza dentro del periodo», «Ya superado» o «Datos insuficientes»).
-  4. `GraficaTasaSemanal` (recharts `ComposedChart`): tasa semanal observada (puntos), ajuste (línea), proyección (línea
-     discontinua) con banda de intervalo (`Area`), y medias móviles SMA/EMA/WMA activables con casillas (`Checkbox`).
-  5. `GraficaAcumulado`: faltas equivalentes acumuladas promedio (% de las sesiones programadas), su ajuste y línea de
-     referencia en el límite (20 %).
-  6. `GraficaPatronSemanal`: barras de tasa por día de la semana; el día crítico lleva la etiqueta «Crítico».
-  7. `TablaAlumnosRiesgo`: nivel, puntaje, faltas eq. y restantes, semana estimada de cruce, factores y acción sugerida. Cada
-     fila despliega los factores (nombre, valor, aporte) y tiene el botón «Ver procedimiento».
-  8. `ImpactoTiempo` (de `reportes`).
-  9. `PanelProcedimiento`: `Tabs` con las secciones de procedimiento (valor didáctico): **Regresión** (sumas, ecuaciones normales y
-     su eliminación gaussiana), **Suavizado** (tabla t, y, SMA, EMA, WMA), **Proyección** (candidatos con r², AIC y error LOO),
-     **Cruce: bisección**, **Cruce: Newton-Raphson** (tablas `iter, x, f(x), error`), **Cambio de nivel** (CUSUM/EWMA) y
-     **Riesgo del alumno** (se llena al pulsar «Ver procedimiento»).
-- **Estados**: carga con `Spinner`; sin grupo seleccionado -> «Elige un grupo para analizar.»; `analisis.resumen.suficiente = false`
+- **Contenido** (de arriba abajo; las gráficas son la familia hecha a mano de `components/ui`, sin recharts: ver `docs/design/SISTEMA.md`):
+  1. Encabezado con el botón «Exportar resumen CSV» (solo con el análisis listo) y `SelectorGrupo` (periodo y grupo).
+  2. `TarjetasAnalitica`, cuatro `StatCard`: **Ausentismo actual** (`resumen.tasaActual` en %, con variación en puntos porcentuales
+     frente a la semana previa); **Proyección al cierre** (último punto de `proyeccion.puntos` con su intervalo); **Cruce del límite**
+     (`cruceLimite`: «Semana 11» estimada, «No cruza», «Ya superado» o «-» sin datos); **Alumnos en riesgo** (`resumen.alumnosEnRiesgo` de
+     `alumnosEvaluados`). Solo «Ausentismo actual» y «Cruce del límite» llevan línea de tendencia (`serie`), y solo con series observadas.
+  3. `AlertasAnalitica` (`alertas[]` de más a menos grave, con nivel textual «Alta / Media / Info»; las 3 primeras a la vista y el resto
+     plegado en `Detalles`).
+  4. `GraficaSerie` (sobre `ui/GraficaLinea`, SVG propio, dentro de `ui/TarjetaGrafica`): tasa semanal observada (puntos), ajuste
+     (línea), proyección (línea discontinua) con banda de intervalo y medias móviles SMA/EMA/WMA activables con casillas (`Checkbox`).
+  5. `GraficaAcumulado` (sobre `GraficaLinea`): faltas equivalentes acumuladas promedio (% de las sesiones programadas), su ajuste y
+     línea de referencia en el límite (20 %), con la semana estimada de cruce marcada en vertical. En pantallas anchas (`lg`) va junto a la 4.
+  6. `PatronSemanal` (sobre `ui/TiraSemana`, mapa de calor): tasa por día de la semana, con la cifra en cada casilla; el día crítico se
+     marca con anillo y se nombra en texto (descripción y detalle «Ver cifras por día»), no solo en color.
+  7. `TablaRiesgo`: anillo con la distribución por nivel (`AnilloEstados`), ranking de píldoras con los 8 de mayor puntaje
+     (`BarrasPildora`) y la tabla completa plegada en `Detalles` («Ver tabla completa»): nivel, puntaje, tendencia, faltas eq. con barra de
+     uso del límite (`BarraSegmentada`), restantes y semana estimada de cruce; cada fila despliega el detalle (acción sugerida, factores con
+     nombre, aporte y explicación, enlace al historial en `/reportes` y «Ver el procedimiento del puntaje»).
+  8. `PanelProcedimiento`: una divulgación general («Ver el procedimiento paso a paso») con una `Detalles` por cada elemento de `analisis.procedimientos` que traiga pasos o traza (valor didáctico):
+     **Regresión** (sumas, ecuaciones normales y su eliminación gaussiana), **Suavizado** (tabla t, y, SMA, EMA, WMA), **Proyección**
+     (candidatos con r², AIC y error LOO), **Cruce: bisección**, **Cruce: Newton-Raphson** (tablas `iter, x, f(x), error`) y **Cambio de
+     nivel** (CUSUM/EWMA). El procedimiento de cada alumno vive en el detalle de su fila de `TablaRiesgo`.
+- **Estados**: carga con `Spinner`; sin grupo seleccionado -> «Elige un grupo para analizar.»; grupo sin sesiones cerradas ->
+  «Este grupo aún no tiene sesiones cerradas.»; `analisis.resumen.suficiente = false`
   -> alerta `DATOS_INSUFICIENTES` visible y las tarjetas/gráficas dependientes muestran «Datos insuficientes: se requieren al menos
   4 semanas con sesiones cerradas.»; el patrón semanal y la tabla de riesgo sí se muestran; `alumnosEnRiesgo` vacío ->
   «Ningún alumno en riesgo con los datos actuales.».
-- **Accesibilidad mínima**: cada gráfica lleva `role="img"` y `aria-label` con un resumen textual (p. ej. «Ausentismo semanal,
-  tendencia al alza de 0.8 puntos por semana»); los mismos datos están en el panel de procedimiento.
-- **360 px**: tarjetas en 1 columna (2 desde 480 px); gráficas con `ResponsiveContainer width="100%" height={240}`; leyenda bajo la
-  gráfica; tabla de riesgo en modo tarjeta.
+- **Accesibilidad mínima**: cada gráfica va en una `TarjetaGrafica`, un `<figure role="group">` con título y un resumen de texto `sr-only`
+  enlazado con `aria-describedby` (p. ej. «Ausentismo semanal, tendencia al alza de 0.8 puntos por semana»). `GraficaLinea` es un
+  `role="group"` enfocable con `aria-label`, navegable con ← → Home End (Esc cierra la guía), con una región `aria-live` que anuncia la
+  fila activa y una lista oculta con una frase por fila; los mismos datos están en el panel de procedimiento. `TiraSemana`, `AnilloEstados`
+  y `BarrasPildora` dibujan `aria-hidden` y traen su propio texto (cifras, leyenda o lista oculta).
+- **360 px**: tarjetas en 1 columna (2 desde 480 px y 4 desde `xl`); `GraficaLinea` con `alto={280}` y ancho medido con `ResizeObserver`;
+  `AnilloEstados`, `BarrasPildora` y `TiraSemana` se adaptan al ancho del contenedor; leyenda bajo la gráfica; la tabla de riesgo oculta
+  columnas secundarias bajo `md`/`xl` (sus valores van en el detalle de la fila) y se desplaza dentro de su propio contenedor, sin scroll
+  horizontal de página.
 
 | Componente (`web/src/components/analitica/<Nombre>/`) | Props | Responsabilidad |
 |---|---|---|
-| `Analitica` | `{ rol: string, filtrosIniciales: { periodo?: string, idGrupo?: number } }` | Contenedor; hook `useAnalitica({ idGrupo })` -> `{ estado: 'cargando'\|'error'\|'vacio'\|'listo', error, serie, matriz, analisis, recargar() }`. |
-| `AnaliticaSelector` | `{ periodos: string[], grupos: GrupoOpcion[], valor: {periodo, idGrupo}, onCambio(valor) }` | Dos `Select`. |
-| `AnaliticaTarjetas` | `{ resumen, tendencia, proyeccion, cruceLimite, limitePct }` | Las cuatro `StatCard`. |
-| `ListaAlertas` | `{ alertas: Alerta[] }` | Lista con nivel, mensaje y código; `Alert` del ui-kit. |
-| `GraficaTasaSemanal` | `{ tendencia, suavizado, proyeccion, limiteFraccion: number }` | Gráfica 4; casillas de series; datos combinados por `semana`. |
-| `GraficaAcumulado` | `{ cruceLimite, limitePct }` | Gráfica 5. |
-| `GraficaPatronSemanal` | `{ patronSemanal }` | Gráfica 6. |
-| `TablaAlumnosRiesgo` | `{ items: AlumnoRiesgo[], onVerProcedimiento(idAlumno) }` | Tabla/tarjetas con factores. |
-| `PanelProcedimiento` | `{ secciones: { id: string, titulo: string, pasos?: Paso[], traza?: object[] }[] }` | `Tabs`; cada sección se pinta con `PasoView`. |
-| `PasoView` | `{ paso: Paso }` o `{ traza: object[] }` | Pinta `titulo`, `texto`, lista de `valores`, `tabla`, `matriz` (tabla numérica con 6 decimales significativos) o la `traza` de un método iterativo (columnas = claves del primer elemento). Solo presentación. |
+| `Analitica` | `{ filtrosIniciales: { periodo?: string, idGrupo?: number } }` | Contenedor; hook `useAnalitica({ idGrupo })` -> `{ estado: 'sin_grupo'\|'cargando'\|'error'\|'vacio'\|'listo', error, serie, matriz, analisis, recargar() }`. |
+| `SelectorGrupo` | `{ periodos: string[], grupos: GrupoOpcion[], valor: {periodo, idGrupo}, onCambio(valor), deshabilitado?: boolean }` | Dos `Select`; al cambiar el periodo limpia el grupo. |
+| `TarjetasAnalitica` | `{ resumen, tendencia, proyeccion, cruceLimite, limitePct }` | Las cuatro `StatCard` (contenido 2). |
+| `AlertasAnalitica` | `{ alertas: Alerta[] }` | Alertas con nivel y mensaje (el código va en `data-codigo`); `Alert` del ui-kit; las 3 primeras a la vista y el resto en `Detalles`. |
+| `GraficaSerie` | `{ tendencia, suavizado, proyeccion, resumen, cruceLimite, limitePct }` | Contenido 4 (sobre `GraficaLinea`); casillas de series; datos combinados por `semana`. |
+| `GraficaAcumulado` | `{ cruceLimite, limitePct }` | Contenido 5 (sobre `GraficaLinea`). |
+| `PatronSemanal` | `{ patronSemanal }` | Contenido 6 (sobre `TiraSemana`). |
+| `TablaRiesgo` | `{ items: AlumnoRiesgo[], evaluados: number\|null, hrefHistorial(idAlumno): string }` | Contenido 7: distribución, ranking y tabla plegada con factores; el procedimiento por alumno va en el detalle de cada fila. |
+| `PanelProcedimiento` | `{ procedimientos: { id: string, titulo: string, pasos?: Paso[], traza?: object[] }[] }` | `Detalles` por cada procedimiento con pasos o traza; cada paso se pinta con `PasoView` y cada traza con `TablaIteraciones`. |
+| `PasoView` | `{ paso: Paso }` | Pinta `titulo`, `texto` (primera frase a la vista y el resto tras «Más»), lista de `valores`, `tabla` o `matriz` (tabla numérica con 6 decimales significativos). Solo presentación. |
+| `TablaIteraciones` | `{ traza: object[], caption?: string }` | Traza de un método iterativo (columnas = claves del primer elemento). Solo presentación. |
 
 La pantalla `/analitica` no muestra puntajes de riesgo al alumno ni los exporta (ver riesgos, 7.3).
 

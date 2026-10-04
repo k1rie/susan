@@ -590,6 +590,7 @@ public.api_detecciones_caso(
 - **Reglas**: RF-18, RF-19, RNF-04 (informa el TTL), RNF-05 (recorte nulo sin error).
 - **Contenido**: `lecturas` = detecciones cuyo candidato es una plantilla (`plantilla_facial.id_alumno`) del alumno de la asistencia y cuya captura pertenece a la sesión; incluye válidas y no válidas; orden `es_valida DESC, marca_tiempo ASC`; `p_solo_validas` filtra las válidas. `objeto_foto_registro` = `objeto_foto` de la plantilla **activa** del alumno (`NULL` si no tiene). Rutas `objeto_*` van en bruto: el handler las convierte en URL y **no las reenvía** al navegador.
 - Si la asistencia no es visible para el docente (inexistente o de grupo ajeno) → `NO_ENCONTRADO` (la RLS no permite distinguirlos; es lo deseado).
+- `objeto_foto_registro` es la **foto principal** (`orden = 1` de `plantilla_foto`) de la plantilla activa aunque esta tenga varias fotos (`docs/api/biometria.md` §4); las demás fotos de la plantilla no se exponen al docente.
 
 Retorno:
 

@@ -23,6 +23,27 @@ cada módulo activo exista en la navegación de sus roles y que cada ítem de na
 > Las entradas `pronto` actuales (Asistente SUSAN, Tutorías, Comunicados, Calificaciones, Horarios inteligentes, Acceso al campus, Notificaciones) son **hoja de ruta provisional**
 > pensada para el diseño; sus textos y roles se ajustan libremente en `modulos.js`. Ninguna tiene backend todavía.
 
+## «Pasar lista»: la acción principal del docente
+
+Se encuentra en cuatro lugares (todos salen del mismo registro/navegación, no se duplican a mano):
+
+| Dónde | Qué |
+|---|---|
+| Panel (`/docente`) | Tarjeta `PasarListaHero` ARRIBA de todo: sesión protagonista (abierta > programada abrible > siguiente programada > última cerrada) y un único botón |
+| Riel lateral | Ítem «Pasar lista» (Lucide `ScanFace`) justo bajo «Buscar», sin título de grupo (en `navItems.js` un ítem sin `grupo` queda así) |
+| Barra inferior móvil | El botón redondo central (con la etiqueta «Pasar lista» visible) |
+| Home / `/modulos` / ⌘K | Módulo `pasar-lista` de `modulos.js` (categoría Asistencia, portada en degradado) |
+
+**Botón central de la barra inferior** (`accionCentral`): se configura por rol en un solo lugar, `ACCION_CENTRAL_POR_ROL` de `Sidebar/navItems.js` (`accionCentralParaRol(rol)`),
+con la forma `{ href, label, icon }`. `AppShell` se la pasa a `BottomNav`; si el rol no tiene, el botón por omisión es «Buscar o ir a» (paleta ⌘K).
+La acción no se repite como destino lateral y se marca `aria-current` en su ruta.
+
+**Contrato de rutas** (detalle en la cabecera de `components/docente/PasarLista/PasarLista.jsx`):
+
+- `/docente/pasar-lista` elige sola: una sesión candidata (abierta o programada dentro de su horario, RN-06) → la abre y entra; varias → tarjetas; ninguna → explica por qué.
+- `/docente/pasar-lista?sesion=<id>` abre esa sesión y entra (sin consultar el panel; errores de `api_abrir_sesion` con reintento).
+- Siempre se llega a `/docente/sesiones/<id>?pasar-lista=1`: la sesión YA está abierta y la pantalla debe mostrar primero la captura/pase de lista. El parámetro solo orienta la presentación.
+
 ## Notas técnicas
 
 - Las entradas contienen componentes de icono (funciones): **no** pueden pasarse como props de servidor a cliente. Los componentes cliente (`HomeRol`, `CatalogoModulos`, `AppShell`) importan el registro ellos mismos y reciben solo el `rol` (cadena); `ModuloProximamente` es de servidor y recibe la entrada completa.
