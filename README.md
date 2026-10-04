@@ -18,7 +18,7 @@ análisis numérico del ausentismo. Estilo y estructura tomados de MVP-FITNESS (
 | Pieza | Dónde | Tecnología |
 |---|---|---|
 | Aplicación web (9 pantallas de la spec + analítica + consola técnica + catálogo de módulos) | `web/` | Next.js 16 (App Router), React 19, Tailwind 4, shadcn/ui (primitivas), JavaScript |
-| Base de datos y backend | `supabase/` | PostgreSQL 16: 19 tablas 3FN, triggers, RLS, 72 RPC `api_*` y 19 `svc_*` |
+| Base de datos y backend | `supabase/` | PostgreSQL 16: 20 tablas 3FN (19 de la spec + `plantilla_foto`), triggers, RLS, 72 RPC `api_*` y 19 `svc_*` |
 | Autenticación y almacenamiento | Supabase Auth + bucket privado `susan-private` | incluye el JSON del índice FAISS |
 | Servicio de reconocimiento | `recognition-service/` | FastAPI + `faiss-cpu`, embeddings de 512-d (InsightFace) o embedder determinista para pruebas |
 | Métodos numéricos | `web/src/lib/numerics/` | JavaScript puro con procedimiento paso a paso (`docs/NUMERICS.md`) |
@@ -45,6 +45,19 @@ abandono, ausencias en viernes y retardos).
 
 > El estado mutable local (clúster PostgreSQL, storage) vive en `~/.susan-local/SUSAN` si el proyecto está en Escritorio/Documentos
 > (iCloud desaloja y duplica archivos vivos); ver `scripts/local-dir.sh` y `docs/ARCHITECTURE.md` §13. **Recomendación: clona/ubica el proyecto fuera de carpetas sincronizadas** (p. ej. `~/Developer/SUSAN`).
+
+## Probar rápido
+
+Datos de prueba completos y reiniciables (consentimientos y plantillas faciales de los 75 alumnos, índice FAISS cargado, casos para la
+pantalla de Revisión y alumnos con avisos). Solo modo local.
+
+```bash
+scripts/dev-all.sh               # levanta todo (si ya corre, lo respeta)
+scripts/seed-demo.sh             # asegura los datos de prueba sin destruir lo hecho a mano (~15 s)
+scripts/seed-demo.sh --reset     # deja la sesión de hoy lista para repetir el pase de lista con cámara desde cero
+```
+
+Guía por rol y recorrido del pase de lista con cámara: [`docs/DEMO.md`](docs/DEMO.md); **probar con tu rostro real (InsightFace, `scripts/dev-modo.sh`)**: [`docs/DEMO.md` §9](docs/DEMO.md#9-probar-con-tu-rostro-real-insightface); cámara simulada: [`docs/DEMO-CAMARA.md`](docs/DEMO-CAMARA.md); reloj de la demostración: [`docs/DEMO-RELOJ.md`](docs/DEMO-RELOJ.md).
 
 ## Pruebas
 
@@ -77,7 +90,7 @@ SUSAN/
 │  ├─ components/ un folder por componente (ui/ · shadcn/ · motion/ · home/ · layout/ · auth/ · docente/ · sesion/ · revision/ · reportes/ · alumno/ · analitica/ · admin/ · tecnico/)
 │  ├─ lib/        api/ (envoltorios de RPC) · http/ · server/ · backend/ · local/ · numerics/ · motion/ · modulos.js (registro de módulos)
 │  └─ hooks/
-└─ scripts/       db-*.sh · test-sql.sh · dev-all.sh · dev-stop.sh · gen-api-catalog.mjs · seed-auth-users.mjs
+└─ scripts/       db-*.sh · test-sql.sh · dev-all.sh · dev-stop.sh · dev-modo.sh (embedder fake/insightface) · seed-demo.sh (+ demo/) · gen-api-catalog.mjs · seed-auth-users.mjs
 ```
 
 ## Cómo está pensado (resumen)

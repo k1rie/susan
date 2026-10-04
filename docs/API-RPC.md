@@ -64,7 +64,7 @@
 | `api_parametros_publicos` | — | `jsonb` | authenticated | DEFINER |
 | `api_pase_lista_manual` | `p_id_sesion integer, p_registros jsonb, p_marcar_restantes boolean DEFAULT false` | `jsonb` | authenticated | DEFINER |
 | `api_plantilla_alumno` | `p_id_alumno integer, p_limit integer DEFAULT 50, p_offset integer DEFAULT 0` | `jsonb` | authenticated | INVOKER |
-| `api_plantilla_registrar` | `p_id_alumno integer, p_id_consent integer, p_objeto_foto text, p_ip inet DEFAULT NULL::inet` | `jsonb` | authenticated | DEFINER |
+| `api_plantilla_registrar` | `p_id_alumno integer, p_id_consent integer, p_objeto_foto text, p_ip inet DEFAULT NULL::inet, p_fotos jsonb DEFAULT NULL::jsonb` | `jsonb` | authenticated | DEFINER |
 | `api_reanudar_sesion` | `p_id_sesion integer` | `jsonb` | authenticated | DEFINER |
 | `api_registrar_justificante` | `p_id_sesion integer, p_motivo text, p_objeto_documento text, p_id_alumno integer DEFAULT NULL::integer` | `jsonb` | authenticated | DEFINER |
 | `api_registrar_manual` | `p_id_sesion integer, p_id_alumno integer, p_estado text, p_hora timestamp with time zone DEFAULT NULL::timestamp with time zone` | `jsonb` | authenticated | DEFINER |
@@ -443,13 +443,13 @@ Lista docentes con filtro de texto y estatus (paginada).
 
 ### `api_documento_url_autorizar(p_tipo text, p_id_registro integer, p_ip inet DEFAULT NULL::inet)`
 
-Autoriza la URL firmada de un documento/foto: devuelve la ruta y la vigencia (<= 300 s) y asienta consulta en bitacora (RF-19).
+Autoriza la URL firmada de un documento/foto: devuelve la ruta y la vigencia (<= 300 s) y asienta consulta en bitacora (RF-19) antes de devolver. plantilla = foto principal de la plantilla; plantilla_foto = una foto concreta de la plantilla (p_id_registro = id_foto; la consulta se asienta sobre la plantilla con id_foto y orden). Tambien funciona para fotos de plantillas archivadas.
 
 - **Retorna:** `jsonb`
 - **Ejecuta:** authenticated · DEFINER VOLATILE
 - **Roles:** administrador
-- **Argumentos:** p_tipo (consentimiento | plantilla), p_id_registro (id_consent o id_plantilla), p_ip (opc.)
-- **Forma JSON:** {"tipo":"plantilla","id_registro":41,"id_alumno":17,"objeto":"registro/17/<uuid>.jpg","vigencia_seg":300}
+- **Argumentos:** p_tipo (consentimiento | plantilla | plantilla_foto), p_id_registro (id_consent, id_plantilla o id_foto), p_ip (opc.)
+- **Forma JSON:** {"tipo":"plantilla","id_registro":41,"id_alumno":17,"objeto":"registro/17/<uuid>.jpg","vigencia_seg":300}   |   tipo plantilla_foto: {"tipo":"plantilla_foto","id_registro":<id_foto>,"id_alumno":17,"id_plantilla":41,"orden":3,"objeto":"registro/17/<uuid>.jpg","vigencia_seg":300}
 - **Errores:** NO_AUTORIZADO, VALIDACION (tipo), NO_ENCONTRADO
 
 ### `api_generar_sesiones(p_id_grupo integer, p_desde date, p_hasta date, p_omitir_fechas date[] DEFAULT '{}'::date[])`
@@ -681,25 +681,25 @@ Pase de lista manual por lote, atomico (todo o nada), con origen manual (P-04, R
 
 ### `api_plantilla_alumno(p_id_alumno integer, p_limit integer DEFAULT 50, p_offset integer DEFAULT 0)`
 
-Plantilla facial activa de un alumno (con su version de indice) y las archivadas paginadas.
+Plantilla facial activa de un alumno (con su version de indice y sus fotos) y las archivadas paginadas. Nunca devuelve rutas objeto_foto: la foto se abre con api_documento_url_autorizar (tipo plantilla o plantilla_foto). coseno_min y coseno_medio son la consistencia entre fotos medida por el servicio al registrar (informativa; null en plantillas de una foto).
 
 - **Retorna:** `jsonb`
 - **Ejecuta:** authenticated · INVOKER STABLE
 - **Roles:** administrador
 - **Argumentos:** p_id_alumno, p_limit (def. 50, max 200; aplica a archivadas), p_offset
-- **Forma JSON:** {"id_alumno":17,"activa":{"id_plantilla":41,"id_consent":9,"fecha_registro":"...","indexada":true,"id_indice":3,"version_indice":"v003","faiss_id":1042,"en_uso":true,"consentimiento_vigente":true}|null,"archivadas":{"total":1,"items":[{"id_plantilla":33,"id_consent":4,"fecha_registro":"..."}]},"indice_en_uso":{"id_indice":3,"version":"v003"}|null}
+- **Forma JSON:** {"id_alumno":17,"activa":{"id_plantilla":41,"id_consent":9,"fecha_registro":"...","indexada":true,"id_indice":3,"version_indice":"v003","faiss_id":1042,"en_uso":true,"consentimiento_vigente":true,"n_fotos":5,"coseno_min":0.512|null,"coseno_medio":0.744|null,"fotos":[{"id_foto":101,"orden":1,"principal":true,"calidad":{"brillo":120.5,"nitidez":88.2,"tamano_rostro_px":210,"frontal":true}|null,"coseno_resto":0.812|null}]}|null,"archivadas":{"total":1,"items":[{"id_plantilla":33,"id_consent":4,"fecha_registro":"...","n_fotos":1}]},"indice_en_uso":{"id_indice":3,"version":"v003"}|null}
 - **Errores:** NO_AUTORIZADO, NO_ENCONTRADO (alumno)
 
-### `api_plantilla_registrar(p_id_alumno integer, p_id_consent integer, p_objeto_foto text, p_ip inet DEFAULT NULL::inet)`
+### `api_plantilla_registrar(p_id_alumno integer, p_id_consent integer, p_objeto_foto text, p_ip inet DEFAULT NULL::inet, p_fotos jsonb DEFAULT NULL::jsonb)`
 
-Da de alta la plantilla facial (RN-12/RN-13): archiva la activa anterior, inserta la nueva sin indexar y asienta alta_plantilla.
+Da de alta la plantilla facial (RN-12/RN-13), de una foto o de 3 a 8: archiva la activa anterior (con sus fotos, que NO se borran), inserta la nueva sin indexar y asienta alta_plantilla. Atomica: una falla no deja filas en plantilla_foto ni archiva la anterior. El promedio de los embeddings y el descarte de outliers ocurren en el servicio de reconocimiento (los vectores nunca tocan la BD, RNF-03); calidad y coseno_resto los aporta el llamador y son informativos, no verificables en SQL.
 
 - **Retorna:** `jsonb`
 - **Ejecuta:** authenticated · DEFINER VOLATILE
 - **Roles:** administrador
-- **Argumentos:** p_id_alumno, p_id_consent (vigente y del mismo alumno), p_objeto_foto (registro/{id_alumno}/{uuid}.jpg), p_ip (opc.)
-- **Forma JSON:** {"id_plantilla":41,"id_alumno":17,"id_consent":9,"activa":true,"indexada":false,"plantilla_archivada":33,"fecha_registro":"2026-09-14T09:12:41-06:00","requiere_reconstruccion":true}
-- **Errores:** NO_AUTORIZADO, NO_ENCONTRADO (alumno o consentimiento), ALUMNO_INACTIVO, RUTA_INVALIDA, RN_13_CONSENTIMIENTO_AJENO, RN_13_CONSENTIMIENTO_NO_VIGENTE
+- **Argumentos:** p_id_alumno, p_id_consent (vigente y del mismo alumno), p_objeto_foto (registro/{id_alumno}/{uuid}.jpg; con p_fotos puede ser NULL o igual a la primera), p_ip (opc.), p_fotos (opc.; arreglo JSON de 3 a 8 objetos EN ORDEN DE CAPTURA, el primero es la foto principal; por elemento: objeto_foto (obligatoria, registro/{id_alumno}/{uuid}.jpg, sin repetidas), calidad (opc., null o {brillo 0..255, nitidez 0..1000000, tamano_rostro_px entero 0..100000, frontal boolean}) y coseno_resto (opc., null o numero entre -1 y 1, se guarda con 3 decimales); cualquier otra clave es invalida; un JSON null equivale a omitirlo)
+- **Forma JSON:** {"id_plantilla":41,"id_alumno":17,"id_consent":9,"activa":true,"indexada":false,"plantilla_archivada":33,"fecha_registro":"2026-09-14T09:12:41-06:00","requiere_reconstruccion":true,"n_fotos":5}   (n_fotos = 1 sin p_fotos)
+- **Errores:** NO_AUTORIZADO, NO_ENCONTRADO (alumno o consentimiento), ALUMNO_INACTIVO, VALIDACION (p_fotos: cantidad, forma, repetidas, principal distinta de la primera), RUTA_INVALIDA, RN_13_CONSENTIMIENTO_AJENO, RN_13_CONSENTIMIENTO_NO_VIGENTE
 
 ### `api_reanudar_sesion(p_id_sesion integer)`
 
@@ -966,13 +966,13 @@ Version del indice en uso (para el arranque del servicio de reconocimiento); nul
 
 ### `svc_indice_plan(p_completa boolean DEFAULT false)`
 
-Plan de reconstruccion del indice: base (version en uso, o null), todas las plantillas activas con su faiss_id (los nuevos son max historico + posicion, nunca reutilizados), version sugerida y totales. Solo lectura.
+Plan de reconstruccion del indice: base (version en uso, o null), todas las plantillas activas con su faiss_id (los nuevos son max historico + posicion, nunca reutilizados), version sugerida y totales. Cada entry nueva trae objetos_foto (todas las fotos de la plantilla por orden, la principal primero; las plantillas de una foto traen un arreglo de 1) y las que estan en la base traen null: el servicio las conserva con keep. Solo plantillas activas; las fotos de plantillas archivadas o revocadas no entran. Solo lectura.
 
 - **Retorna:** `jsonb`
 - **Ejecuta:** service_role · DEFINER STABLE
 - **Roles:** service_role
 - **Argumentos:** p_completa (true = ignorar la base y reprocesar todas las fotos)
-- **Forma JSON:** {"dimension":512,"version_sugerida":"v004","base":{"id_indice":3,"version":"v003","objeto_indice":"indice/v003.json","total_vectores":498}|null,"motivo_sin_base":null|"sin_indice"|"dimension_cambiada"|"completa","totales":{"activas":500,"nuevas":2,"en_base":498,"obsoletas":0},"nada_que_hacer":false,"entries":[{"id_plantilla":12,"id_alumno":3,"faiss_id":1001,"id_indice":3,"en_base":true,"objeto_foto":"registro/3/<uuid>.jpg"}]}
+- **Forma JSON:** {"dimension":512,"version_sugerida":"v004","base":{"id_indice":3,"version":"v003","objeto_indice":"indice/v003.json","total_vectores":498}|null,"motivo_sin_base":null|"sin_indice"|"dimension_cambiada"|"completa","totales":{"activas":500,"nuevas":2,"en_base":498,"obsoletas":0},"nada_que_hacer":false,"entries":[{"id_plantilla":12,"id_alumno":3,"faiss_id":1001,"id_indice":3,"en_base":true,"objeto_foto":"registro/3/<uuid>.jpg","objetos_foto":null},{"id_plantilla":41,"id_alumno":17,"faiss_id":1043,"id_indice":null,"en_base":false,"objeto_foto":"registro/17/a.jpg","objetos_foto":["registro/17/a.jpg","registro/17/b.jpg","registro/17/c.jpg"]}]}
 - **Errores:** ninguno propio
 
 ### `svc_indice_registrar(p_version text, p_dimension integer, p_objeto_indice text, p_total_vectores integer)`
@@ -1157,4 +1157,4 @@ Se devuelven como `RAISE EXCEPTION ... USING ERRCODE='P0001', HINT='<CODIGO>'`. 
 | `SIN_CAMBIO` | El registro ya está en el estado indicado. | `api_corregir_asistencia` |
 | `TRANSICION_NO_PERMITIDA` | Un registro no puede volver a pendiente ni pasar a justificado por corrección; el justificado no se modifica. | `api_corregir_asistencia` |
 | `USUARIO_PROPIO` | No puedes desactivar tu cuenta ni quitarte el rol de administrador. | `api_usuario_actualizar` |
-| `VALIDACION` | Estatus de alumno no válido. | `api_alumno_cambiar_estatus`, `api_alumno_guardar`, `api_alumnos_listar`, `api_aula_guardar`, `api_bitacora_listar`, `api_camara_cambiar_estatus`, `api_camara_guardar`, `api_cola_revision`, `api_consentimiento_registrar`, `api_corregir_asistencia`, `api_docente_cambiar_estatus`, `api_docente_guardar`, `api_docentes_listar`, `api_documento_url_autorizar`, `api_generar_sesiones`, `api_grupo_guardar`, `api_horario_guardar`, `api_impacto_tiempo`, `api_importar_inscripciones`, `api_inscritos`, `api_materia_guardar`, `api_pase_lista_manual`, `api_registrar_justificante`, `api_reporte_periodo`, `api_resolver_justificante`, `api_serie_alumno`, `api_suspender_sesion`, `api_usuario_actualizar`, `api_usuarios_listar`, `svc_crear_captura`, `svc_indice_registrar`, `svc_job_cerrar_sesiones`, `svc_job_purgar_recortes_marcar`, `svc_job_recalcular`, `svc_job_resolver_pendientes`, `svc_registrar_consulta_revision`, `svc_registrar_detecciones`, `svc_usuario_crear` |
+| `VALIDACION` | Estatus de alumno no válido. | `api_alumno_cambiar_estatus`, `api_alumno_guardar`, `api_alumnos_listar`, `api_aula_guardar`, `api_bitacora_listar`, `api_camara_cambiar_estatus`, `api_camara_guardar`, `api_cola_revision`, `api_consentimiento_registrar`, `api_corregir_asistencia`, `api_docente_cambiar_estatus`, `api_docente_guardar`, `api_docentes_listar`, `api_documento_url_autorizar`, `api_generar_sesiones`, `api_grupo_guardar`, `api_horario_guardar`, `api_impacto_tiempo`, `api_importar_inscripciones`, `api_inscritos`, `api_materia_guardar`, `api_pase_lista_manual`, `api_plantilla_registrar`, `api_registrar_justificante`, `api_reporte_periodo`, `api_resolver_justificante`, `api_serie_alumno`, `api_suspender_sesion`, `api_usuario_actualizar`, `api_usuarios_listar`, `svc_crear_captura`, `svc_indice_registrar`, `svc_job_cerrar_sesiones`, `svc_job_purgar_recortes_marcar`, `svc_job_recalcular`, `svc_job_resolver_pendientes`, `svc_registrar_consulta_revision`, `svc_registrar_detecciones`, `svc_usuario_crear` |

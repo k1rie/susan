@@ -10,6 +10,7 @@ reglas de movimiento en `web/src/components/motion/README.md`; plan y avance en 
 2. **Solo tokens** de `web/src/app/globals.css` (nunca hex en componentes). Los estados de asistencia siempre llevan texto además de color.
 3. Todo se ve bien a **360 px** sin scroll horizontal y respeta **"reducir movimiento"**.
 4. Peso: `/docente` ≤ +15 % de JS gzip respecto a la base (medir con `scripts/measure-bundle.mjs`).
+5. Gráficas: solo la familia hecha a mano de `components/ui` (SVG/CSS, sin recharts ni otra librería de gráficas); ver la sección «Gráficas» más abajo.
 
 ## Identidad
 
@@ -57,29 +58,96 @@ reglas de movimiento en `web/src/components/motion/README.md`; plan y avance en 
 | `ui/Avatar` | «SL / AS» | Círculo de color sólido con iniciales blancas; el color lo elige la persona en el onboarding (`lib/perfil.js`) |
 | `home/Resaltado` | SchoolAI | Subrayado dorado que se dibuja una vez (saludo y titulares) |
 
-## Gráficas y «menos texto» (shadcn chart)
+## Gráficas y «menos texto» (familia hecha a mano)
 
-Principio (pedido del usuario, 2026-10-03): cada pantalla abre con **cifras y gráficas**; la explicación va corta o plegada. Las gráficas usan el componente `chart` de shadcn/ui
-(`components/shadcn/chart.jsx`: `ChartContainer`, `ChartTooltip(Content)`, `ChartLegend(Content)`) sobre recharts, siempre con colores por token.
+Principio (pedido del usuario, 2026-10-03): cada pantalla abre con **cifras y gráficas**; la explicación va corta o plegada.
+En F11 el usuario rechazó el aspecto de las gráficas de shadcn/recharts (F10) y aprobó **una familia propia dibujada con SVG y CSS**, sin librerías de gráficas,
+aplicada en toda la app: trazos finos y redondeados, píldoras, puntos con aro del color de la tarjeta, colores vivos `--g-*` y una entrada que se «dibuja» una sola vez.
+Todas viven en `components/ui/<Nombre>/` y se envuelven en `ui/TarjetaGrafica`.
+
+### Cuándo usar cada una
+
+| Qué quieres mostrar | Usa | Notas |
+|---|---|---|
+| **Estados** (presentes, retardos, ausencias…) con un total | `ui/AnilloEstados` | Anillo fino con el total (o un valor propio, p. ej. «82 %») al centro y leyenda con cifra y porcentaje. Sustituye a la dona |
+| **Ranking** o lista de categorías con una magnitud (alumnos con más faltas, grupos, cámaras) | `ui/BarrasPildora` con `horizontal` | Barras de píldora con la cifra al final; `limite` dibuja el umbral (p. ej. 20 % de faltas). Máx. 8 filas + «Ver todos» |
+| **Comparar** pocas categorías o periodos | `ui/BarrasPildora` (columnas) | Una o varias series, lado a lado o con `apilado`. Sustituye a las barras de recharts |
+| **Patrón semanal**: un valor por día (1–7 casillas) | `ui/TiraSemana` | Mapa de calor: la casilla se tiñe en proporción al valor y lleva anillo al alcanzar el límite |
+| **Historial de una persona sesión por sesión** (semanas × días, un cuadro por sesión coloreado por su estado; vista del alumno) | `ui/CalendarioAsistencia` | Cuadrícula tipo calendario de contribuciones; los días sin sesión quedan en gris tenue, una sesión sin registro lleva borde discontinuo y una suspendida va en gris; con más de `maxSemanas` se ven las más recientes. Solo anima `opacity`/`transform`, una vez al entrar en vista. La usa `alumno/CalendarioRacha` |
+| **Composición** dentro de una fila de tabla o en un espacio angosto | `ui/BarraSegmentada` | Una barra de segmentos proporcionales; `leyenda={false}` para caber en una celda |
+| **Evolución en el tiempo** (series, media móvil, banda, límite, marca vertical) | `ui/GraficaLinea` | Rectas, nunca suavizadas; puntero y teclado con tooltip; es la base de `analitica/GraficaSerie` y `analitica/GraficaAcumulado` |
+| **Cifra clave con su tendencia** | `ui/StatCard` con `serie` (o `ui/Sparkline` suelto) | **Solo si hay una serie real** de ≥ 2 puntos: nunca se inventan datos para que la tarjeta «tenga línea» |
+| **Nivel 0–100 %** que se está moviendo (asistencia de la sesión en vivo, porcentaje de la persona) | `ui/MedidorLiquido` | **Solo** en la sesión en vivo y en la vista del alumno; es un adorno con significado, no una gráfica de uso general. Envuelve `motion/SloshGauge` |
+
+Si ninguna sirve, primero se evalúa si basta una prop nueva; solo si no, se crea una pieza nueva (ver «Cómo agregar una gráfica nueva»).
+
+### Contrato resumido
+
+| Componente | Props (valor por defecto) |
+|---|---|
+| `AnilloEstados` | `datos` `[{ clave, valor }]` · `config` `{ clave: { label, color } }` · `centro` `{ valor, etiqueta }` (sin `valor` muestra el total; «Total» por defecto) · `alto` 240 · `vacio` · `className`. Un estado con valor 0 sale en la leyenda atenuado; un valor positivo muy pequeño se escribe «<1 %» |
+| `BarrasPildora` | `datos` (filas con la categoría `ejeX` y una propiedad por serie) · `ejeX` · `series` `[{ clave }]` · `config` · `horizontal` · `apilado` · `limite` `{ valor, etiqueta }` · `unidad` · `dominio` `[min, max]` (admite `'auto'`) · `alto` 260 (en horizontal solo fija el aviso vacío: la altura la dan las filas) · `anchoEjeY` 110 · `leyenda` (por defecto, con más de una serie) · `formatoValor` (texto corto) · `vacio` · `className`. `null` es «sin dato» y se escribe «-»; no es un 0 |
+| `BarraSegmentada` | `datos` `[{ clave, valor }]` · `config` · `alto` 12 (grosor) · `leyenda` true · `vacio` · `etiqueta` (texto alternativo propio) · `className`. Sin leyenda es `role="img"`; con leyenda la barra se oculta a los lectores porque la leyenda ya trae las cifras |
+| `TiraSemana` | `datos` `[{ etiqueta, valor }]` (`null` = sin dato: casilla neutra con «-») · `limite` (número) · `unidad` ' %' · `vacio` · `className` (va al contenedor, que mide como mucho 7 rem por casilla) |
+| `CalendarioAsistencia` | `sesiones` `[{ fecha: 'YYYY-MM-DD', estado: 'presente'\|'retardo'\|'ausente'\|'justificado'\|'pendiente'\|null, estatus?: 'suspendida' }]` (acepta también `estatus_sesion`, la forma de los `items` de `api_alumno_historial`) · `maxSemanas` 26 · `leyenda` true (cifras por estado) · `etiqueta` (texto alternativo; con `''` no se lee nada, para cuando la tarjeta ya trae el resumen) · `vacio` 'Aún no hay sesiones registradas' · `className`. La cuadrícula es `aria-hidden` |
+| `Sparkline` | `valores` (serie real; con menos de 2 puntos reales devuelve `null`) · `ancho` 120 · `alto` 36 · `color` (token) · `min`/`max` (dominio fijo) · `className` (va al `svg`). Decorativa (`aria-hidden`): la tendencia se dice también en texto |
+| `StatCard` | Las de siempre más `serie` (números reales, ≥ 2) y `serieColor` (token; por defecto sale del `tone`). Con `loading` o sin serie válida el HTML es el de antes |
+| `MedidorLiquido` | `valor` 0–100 · `tono` `presente\|retardo\|ausente\|azul\|violeta` · `etiqueta` · `descripcion` · `limite` `{ valor, etiqueta }` (marca discontinua con su texto al lado) · `ancho` 84 · `alto` 168 · `className`. Es `role="meter"`: el lector recibe siempre el valor real aunque el líquido aún suba |
+| `GraficaLinea` | `datos` (filas `{ [ejeX]: número, …valor por serie }`; un valor puede ser número, `null` = hueco o `[inferior, superior]` = banda) · `ejeX` 'x' · `series` `[{ clave, tipo: 'puntos'\|'linea'\|'banda', discontinua, grosor, color, etiqueta }]` · `limite` · `marcaX` `{ valor, etiqueta }` · `formatoX` · `formatoY` · `dominioY` `[0, 'auto']` · `alto` 280 · `leyenda` (true, false o un nodo propio) · `renderFila` · `tituloTooltip` · `descripcionActivo` (texto del `aria-live`) · `ocultarVacios` · `ariaLabel` · `vacio` · `className`. Teclado: ← → Home End y Esc |
+
+Piezas de apoyo:
 
 | Pieza | Uso |
 |---|---|
 | `ui/TarjetaGrafica` | Tarjeta (borde, sin sombra) con título, descripción corta, acciones, gráfica y pie; `resumen` = **texto alternativo obligatorio** para lectores de pantalla |
-| `ui/GraficaDona` | Distribución de estados con el total (o un %) al centro y leyenda; sin datos muestra un aviso |
-| `ui/GraficaBarras` | Barras verticales/horizontales/apiladas con línea de límite (p. ej. el 20 % de faltas) |
 | `ui/Detalles` | Plegable para tablas completas, procedimientos y explicaciones; siempre visible al imprimir |
-| `lib/graficas.js` | `CONFIG_ASISTENCIA` (los 5 estados), `pct`, `sumar`, `resumenTexto`, `formatoPct` |
+| `lib/graficas.js` | Colores y textos: `CONFIG_ASISTENCIA` (los 5 estados), `COLORES_SERIE`, `colorGrafica`, `pct`, `sumar`, `resumenTexto`, `formatoPct`, `formatoNumero`, `textoPct`, `numeroOpcional`, `valorNoNegativo`, `anchoTextoEm` |
+| `lib/graficasGeometria.js` | Funciones puras con pruebas: dominios y escalas (`dominioFinal`, `dominioConLimite`, `ticksAmigables`), trazos (`trazoSuave`, `trazoPoligonal`, `trazoBanda`), marcas del eje (`adelgazarMarcas`) y cajas (`posicionTooltip`, `cajaEtiquetaLimite`, `cajasSeSolapan`) |
 
-Carga: recharts pesa ~130 KB gzip, así que `GraficaDona`/`GraficaBarras` (y las gráficas de analítica) se cargan con `next/dynamic` (chunk aparte, alto reservado, sin SSR); las implementaciones viven en `*Impl.jsx`. Una gráfica nueva debe seguir el mismo patrón.
+### Reglas
 
-Reglas: la gráfica acompaña a la cifra, no la sustituye; ≤ 8 elementos por gráfica (top N + «Ver todos»); tablas con las columnas esenciales (el resto con `hideBelow` o en `Detalles`);
-una misma frase no se repite en cada fila; los textos necesarios (privacidad, «estimación») se acortan o pliegan, no se borran.
+1. **Color por token.** Nunca hex. Las pantallas pasan los tokens de texto de siempre (`--presente`, `--ausente`, `--chart-1`…) y `colorGrafica` los traduce a los vivos de gráfica `--g-*`
+   (`--g-presente`, `--g-retardo`, `--g-ausente`, `--g-justificado`, `--g-pendiente`, `--g-azul`, `--g-violeta`, `--g-dorado`, con su variante `.dark` en `globals.css`): así cambiar la paleta no toca las pantallas.
+2. **Texto alternativo.** Cada gráfica va en una `TarjetaGrafica` con `resumen` (usa `resumenTexto`), que se lee como texto oculto. Lo dibujado (SVG, barras) es `aria-hidden` y cada pieza trae
+   además su propio texto (leyenda, lista oculta de filas, `aria-label`, `aria-live` en `GraficaLinea`).
+3. **El color nunca es la única señal.** La cifra siempre está escrita, los estados llevan etiqueta de texto y el límite alcanzado se dice en texto (anillo + texto accesible en `TiraSemana`).
+4. **Sin dato no es cero.** `null`/vacío se escribe «-» (y «sin datos» para lectores); un día sin sesiones no es un día con 0 % de ausentismo. Los negativos se dibujan como 0.
+5. **El límite se explica.** En columnas la leyenda lleva su entrada (una etiqueta sobre la línea chocaría con la cifra de la barra cercana, justo la que importa); en filas la etiqueta va sobre la primera fila;
+   un límite fuera de un dominio fijo no se dibuja pegado al borde: se avisa en la leyenda con «(fuera de escala)». En `GraficaLinea` el dominio Y siempre incluye el límite y su etiqueta es un chip en un margen reservado (o va a la leyenda si no cabe, una sola vez).
+6. **Animación: una vez, al entrar en vista, y apagada con «reducir movimiento».** Cada pieza usa `useEnVista` y `usePrefersReducedMotion` de `lib/motion`; con «reducir movimiento» no hay observador ni transiciones y se ve el estado final.
+   Con datos vivos (la sesión sondea cada 5 s) **no se reinicia la entrada**: las barras, arcos y segmentos se mueven con transiciones de ~0,5 s y un estado que aparece o desaparece se desvanece.
+7. **Sin librerías de gráficas ni de animación.** Ni recharts ni Chart.js ni d3 para dibujar; todo es SVG/CSS a mano. No se carga nada con `next/dynamic` por ser gráfica: no hay librería que diferir y se importan de forma estática.
+8. **Hidratación limpia.** Sin `Math.random`, `Date.now` ni `typeof window` en el render; el contenedor con `ref` existe **siempre**, también sin datos (si no, una gráfica que pasa de «sin datos» a «con datos» se quedaría invisible porque el observador nunca vería el nodo).
+9. **360 px.** Sin desborde horizontal: el anillo pone la leyenda en una columna, las columnas reducen o abrevian las cifras según el ancho medido, `TiraSemana` achica cifra y nombre con container queries.
+10. **Densidad.** La gráfica acompaña a la cifra, no la sustituye; ≤ 8 elementos por gráfica (top N + «Ver todos»); tablas con las columnas esenciales (el resto con `hideBelow` o en `Detalles`);
+    una misma frase no se repite en cada fila; los textos necesarios (privacidad, «estimación») se acortan o pliegan, no se borran.
+11. **Línea de datos exacta.** `GraficaLinea` une los datos con rectas (no se suaviza nada); la curva suave es solo de `Sparkline`, que es decorativa.
+
+### Cómo agregar una gráfica nueva
+
+1. Revisa la tabla de arriba: casi siempre basta una prop o un `tono` nuevo. Si no, crea `components/ui/<Nombre>/` con `Nombre.jsx`, `nombre.utils.js` (la geometría y las reglas, puras), `Nombre.test.jsx` e `index.js`.
+2. Dibuja con SVG/CSS y tokens; si necesitas geometría reutilizable, agrégala a `lib/graficasGeometria.js` con su prueba. Reutiliza `lib/graficas.js` (`colorGrafica`, `formatoNumero`, `numeroOpcional`…) y `lib/motion` (`useEnVista`, `usePrefersReducedMotion`, `EASE`).
+3. Cumple las reglas de arriba: contenedor con `ref` siempre, `null` ≠ 0, dibujo `aria-hidden` + texto, entrada una vez, sin transiciones con «reducir movimiento», sin `Math.random`/`Date.now`/`typeof window` en el render.
+4. Envuélvela en `TarjetaGrafica` con `resumen` y un texto corto; lo largo va en `Detalles`.
+5. Pruebas con `// @vitest-environment jsdom`: jsdom no trae `IntersectionObserver`, `ResizeObserver` ni `matchMedia`, así que se simulan con `vi.stubGlobal` (sin `IntersectionObserver`, `useEnVista` cae a «visible»). Cubre datos vacíos, `null`, datos que cambian y «reducir movimiento».
+6. Revisa a 360 px, en claro y en oscuro, con datos largos y con pocos; luego mide el bundle (`scripts/measure-bundle.mjs`) y documenta la pieza aquí.
+
+### Retiradas en F11
+
+`ui/GraficaDona` y `ui/GraficaBarras` (sustituidas por `AnilloEstados` y `BarrasPildora`, con la misma API de props), las implementaciones `GraficaSerieImpl` y `GraficaAcumuladoImpl` de Analítica (ahora sobre `GraficaLinea`),
+`components/shadcn/chart.jsx`, el hook `useDatosEstables`, el patrón `next/dynamic` + `*Impl.jsx` y la dependencia `recharts`. Su historia está en [`DESIGN_PROGRESS.md`](../DESIGN_PROGRESS.md) (F10) y la decisión en [`DECISIONS.md`](../DECISIONS.md) §5.
 
 ## Movimiento
 
-Patrones de ReactBits reescritos en CSS/rAF (sin gsap ni `motion`): `Reveal`, `BlurText`, `CountUp`, `StaggerList` (y `SpotlightCard`, disponible, ya sin uso en el Home).
+Patrones de ReactBits reescritos en CSS/rAF (sin gsap ni `motion`): `Reveal`, `BlurText`, `CountUp`, `StaggerList` (y `SpotlightCard`, disponible, ya sin uso en el Home) y, adaptado de React Bits,
+`SloshGauge` (tanque con líquido físico; solo lo usa `ui/MedidorLiquido`).
 Solo `transform`/`opacity`, una vez al entrar en vista, apagado con "reducir movimiento" y visible siempre al imprimir (`[data-anim]`).
-Dash es sobrio: el movimiento se limita al saludo, la entrada escalonada de tarjetas, los contadores y el panel de producto del login.
+Al imprimir o exportar a PDF las entradas por scroll no se disparan: los elementos `[data-anim]` se fuerzan visibles por CSS (`@media print`) y las gráficas y el resto del movimiento se revelan por `beforeprint` en `useEnVista` (con `flushSync`, para que el estado final esté pintado antes de que el navegador maquete el papel).
+Dash es sobrio: el movimiento se limita al saludo, la entrada escalonada de tarjetas, los contadores, las gráficas y el panel de producto del login.
+
+**Excepciones documentadas (las gráficas hechas a mano, F11):** además de `transform`/`opacity` animan `clip-path` (revelado de barras y segmentos), `stroke-dasharray`/`stroke-dashoffset` (arcos del anillo y líneas
+de `GraficaLinea`) y, solo cuando cambian datos vivos, transiciones de ~0,5 s de posición y tamaño (`left`/`width`, `bottom`/`height`, `flex-grow`) en elementos diminutos dentro de un contenedor de tamaño fijo, de modo que no
+mueven el resto de la página. `SloshGauge` anima el `clip-path` de su líquido mientras la física no está en reposo. La regla de fondo sigue: una vez al entrar en vista, sin reiniciar con datos nuevos, y apagado con «reducir movimiento».
 
 ## Pantallas de acceso y onboarding
 
