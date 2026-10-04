@@ -1,17 +1,13 @@
-'use client';
-
-import { memo } from 'react';
-import GraficaBarras from '@/components/ui/GraficaBarras';
+import BarrasPildora from '@/components/ui/BarrasPildora';
 import TarjetaGrafica from '@/components/ui/TarjetaGrafica';
-import { CONFIG_FALTAS, datosGraficaAlertas, mismaGrafica, resumenAlertas } from './graficaAlertas.utils.js';
+import { CONFIG_FALTAS, datosGraficaAlertas, resumenAlertas } from './graficaAlertas.utils.js';
 
 // «Faltas vs límite»: los alumnos en alerta frente a la línea del límite (RN-11). Solo se pinta cuando hay alertas.
-// Memoizada por lo que dibuja: un refetch del panel trae arreglos nuevos y no debe reanimar las barras si nada cambió.
-function GraficaAlertas({ alertas = [] }) {
+// Un refetch del panel trae arreglos nuevos, pero BarrasPildora no reinicia su entrada al cambiar los datos: las barras
+// que cambian se mueven con una transición corta y las demás se quedan quietas.
+export default function GraficaAlertas({ alertas = [] }) {
     const { datos, limite, dominio, graficables } = datosGraficaAlertas(alertas);
     if (datos.length === 0) return null;
-    // Alto proporcional al número de barras para que cada nombre quepa sin amontonarse.
-    const alto = Math.max(160, 56 + datos.length * 34);
     return (
         <TarjetaGrafica
             titulo="Faltas vs límite"
@@ -19,7 +15,8 @@ function GraficaAlertas({ alertas = [] }) {
             resumen={resumenAlertas(datos, limite)}
             pie={graficables > datos.length ? `Se muestran los ${datos.length} con más faltas.` : undefined}
         >
-            <GraficaBarras
+            {/* En horizontal el alto lo dan las filas: no se pasa `alto`. */}
+            <BarrasPildora
                 horizontal
                 datos={datos}
                 ejeX="alumno"
@@ -28,10 +25,8 @@ function GraficaAlertas({ alertas = [] }) {
                 unidad=" %"
                 dominio={dominio}
                 limite={limite ? { valor: limite, etiqueta: `Límite ${limite} %` } : undefined}
-                alto={alto}
+                anchoEjeY={150}
             />
         </TarjetaGrafica>
     );
 }
-
-export default memo(GraficaAlertas, (previo, nuevo) => mismaGrafica(previo.alertas, nuevo.alertas));

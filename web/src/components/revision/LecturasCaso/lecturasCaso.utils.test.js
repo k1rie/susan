@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { datosScores, lecturasNumeradas, progresoValidas, recortePurgado, resumenScores, resumenValidas, textoCamara, textoScore } from './lecturasCaso.utils.js';
+import { contarConScore, datosScores, lecturasNumeradas, MAX_BARRAS_SCORE, progresoValidas, recortePurgado, resumenScores, resumenValidas, textoCamara, textoScore } from './lecturasCaso.utils.js';
 
 const L = (min, score, es_valida) => ({ marca_tiempo: `2026-09-14T13:0${min}:00Z`, score_similitud: score, es_valida });
 
@@ -45,6 +45,20 @@ describe('lecturasCaso.utils', () => {
         const d = datosScores(muchas, 3);
         expect(d).toHaveLength(3);
         expect(d[2].valida).toBe(75);
+    });
+    it('el tope por defecto son 12 columnas (las que caben a 360 px con el número completo) y conserva las más recientes', () => {
+        expect(MAX_BARRAS_SCORE).toBe(12);
+        // L() arma la hora con un solo dígito de minuto: aquí se fija la hora completa para ordenar 20 lecturas.
+        const veinte = Array.from({ length: 20 }, (_, i) => ({ ...L(0, 0.5, true), marca_tiempo: `2026-09-14T13:${String(i).padStart(2, '0')}:00Z` }));
+        const d = datosScores(veinte);
+        expect(d).toHaveLength(12);
+        expect(d[0].lectura).toBe('9');
+        expect(d[11].lectura).toBe('20');
+    });
+    it('cuenta solo las lecturas con score, que son las graficables', () => {
+        expect(contarConScore([L(1, 0.9, true), L(2, null, true), L(3, 'x', false), L(4, 0, false)])).toBe(2);
+        expect(contarConScore([])).toBe(0);
+        expect(contarConScore(undefined)).toBe(0);
     });
     it('sin lecturas devuelve vacío y el resumen lo dice', () => {
         expect(datosScores([])).toEqual([]);

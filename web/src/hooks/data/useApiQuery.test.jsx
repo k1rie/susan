@@ -3,6 +3,7 @@ import { StrictMode } from 'react';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ApiError } from '@/lib/api/errors.js';
+import { EVENTO_RELOJ_CAMBIO } from './eventos.js';
 import { useApiQuery } from './useApiQuery.js';
 
 const diferido = () => {
@@ -103,5 +104,59 @@ describe('useApiQuery', () => {
         unmount();
         await act(async () => { await vi.advanceTimersByTimeAsync(5000); });
         expect(fn).toHaveBeenCalledTimes(3);
+    });
+});
+
+describe('useApiQuery y el reloj de demostración', () => {
+    const emitir = () => act(async () => { window.dispatchEvent(new CustomEvent(EVENTO_RELOJ_CAMBIO)); });
+
+    it('el evento global vuelve a pedir los datos (sin pasar por loading) y muestra lo nuevo', async () => {
+        const fn = vi.fn().mockResolvedValueOnce('07:12').mockResolvedValueOnce('07:42');
+        const { result } = renderHook(() => useApiQuery(fn, { idSesion: 19 }));
+        await waitFor(() => expect(result.current.data).toBe('07:12'));
+        await emitir();
+        await waitFor(() => expect(result.current.data).toBe('07:42'));
+        expect(fn).toHaveBeenCalledTimes(2);
+        expect(fn).toHaveBeenLastCalledWith({ idSesion: 19 });
+        expect(result.current.loading).toBe(false);
+    });
+
+    it('cada consulta montada se refresca una sola vez por evento', async () => {
+        const a = vi.fn().mockResolvedValue('a');
+        const b = vi.fn().mockResolvedValue('b');
+        const { result } = renderHook(() => ({ a: useApiQuery(a, {}), b: useApiQuery(b, {}) }));
+        await waitFor(() => expect(result.current.b.data).toBe('b'));
+        await emitir();
+        await waitFor(() => expect(a).toHaveBeenCalledTimes(2));
+        expect(b).toHaveBeenCalledTimes(2);
+    });
+
+    it('una consulta con enabled=false no pide nada por el evento', async () => {
+        const fn = vi.fn().mockResolvedValue(1);
+        renderHook(() => useApiQuery(fn, {}, { enabled: false }));
+        await emitir();
+        expect(fn).not.toHaveBeenCalled();
+    });
+
+    it('al desmontar deja de escuchar', async () => {
+        const fn = vi.fn().mockResolvedValue(1);
+        const { result, unmount } = renderHook(() => useApiQuery(fn, {}));
+        await waitFor(() => expect(result.current.data).toBe(1));
+        unmount();
+        await emitir();
+        expect(fn).toHaveBeenCalledTimes(1);
+    });
+
+    it('con sondeo, el refetch forzado no duplica los temporizadores', async () => {
+        vi.useFakeTimers();
+        const fn = vi.fn().mockResolvedValue('v');
+        renderHook(() => useApiQuery(fn, {}, { refetchInterval: 1000 }));
+        await act(async () => { await vi.advanceTimersByTimeAsync(0); });
+        expect(fn).toHaveBeenCalledTimes(1);
+        await emitir(); // pedido forzado con un temporizador ya pendiente
+        expect(fn).toHaveBeenCalledTimes(2);
+        await act(async () => { await vi.advanceTimersByTimeAsync(3000); });
+        // un solo ciclo de sondeo: 3 ticks en 3 s (con temporizadores duplicados serian 6)
+        expect(fn).toHaveBeenCalledTimes(5);
     });
 });

@@ -7,12 +7,28 @@ import { fechaCorta } from '../reporte.utils.js';
 const COLUMNAS = [
     { key: 'fecha', header: 'Fecha', primary: true, render: (d) => fechaCorta(d.fecha) },
     { key: 'hora_inicio', header: 'Hora', hideBelow: 'sm', render: (d) => String(d.hora_inicio || '').slice(0, 5) },
-    { key: 'estado', header: 'Estado', render: (d) => (d.estado ? <StatusChip kind="asistencia" value={d.estado} size="sm" /> : 'Sin registro') },
+    {
+        key: 'estado', header: 'Estado',
+        render: (d) => (
+            <span className="flex flex-col items-start gap-1">
+                {d.estado ? <StatusChip kind="asistencia" value={d.estado} size="sm" /> : 'Sin registro'}
+                {/* Solo en pantallas angostas: ui/Table no encoge sus columnas y con tres a 360 px se desplazaría en horizontal; desde sm
+                    el justificante tiene su propia columna. El rótulo evita que «Aprobado» se lea como un estado de la asistencia. */}
+                {d.justificante_estatus && (
+                    <span className="flex flex-col items-start gap-0.5 sm:hidden">
+                        <span className="text-xs text-muted-foreground">Justificante</span>
+                        <StatusChip kind="justificante" value={d.justificante_estatus} size="sm" />
+                    </span>
+                )}
+            </span>
+        ),
+    },
     { key: 'origen', header: 'Origen', hideBelow: 'sm', render: (d) => (d.origen ? <StatusChip kind="origen" value={d.origen} size="sm" /> : '—') },
-    { key: 'justificante', header: 'Justificante', render: (d) => (d.justificante_estatus ? <StatusChip kind="justificante" value={d.justificante_estatus} size="sm" /> : '—') },
+    { key: 'justificante', header: 'Justificante', hideBelow: 'sm', render: (d) => (d.justificante_estatus ? <StatusChip kind="justificante" value={d.justificante_estatus} size="sm" /> : '—') },
 ];
 
-// Historial de sesiones del alumno seleccionado (modo alumno). Hora y origen se ocultan en pantallas angostas.
+// Historial de sesiones del alumno seleccionado (modo alumno). Hora, origen y justificante se ocultan en pantallas angostas
+// (el justificante pasa bajo el estado).
 export default function DetalleAlumno({ detalle }) {
     const filas = detalle || [];
     return (

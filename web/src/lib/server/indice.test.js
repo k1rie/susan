@@ -10,7 +10,7 @@ vi.mock('./recognition.js', () => ({
 
 import { ApiError } from '@/lib/api/errors';
 import { activarIndice, construirIndice, infoIndice, manifiestoIndice } from './recognition.js';
-import { estadoIndice, reconstruirIndice, revertirIndice, sincronizarIndice } from './indice.js';
+import { entradasDeBuild, estadoIndice, reconstruirIndice, revertirIndice, sincronizarIndice } from './indice.js';
 import { crearBackend, errorDeNegocio } from './testing.js';
 
 const PLAN = {
@@ -50,6 +50,56 @@ beforeEach(() => {
     manifiestoIndice.mockResolvedValue({ version: 'v003', ntotal: 1, dimension: 512, refs: [{ id_plantilla: 12, faiss_id: 1001 }] });
     infoIndice.mockResolvedValue({ version: 'v004', ntotal: 2, dimension: 512, model: 'fake', loaded_at: 't' });
     vi.spyOn(console, 'error').mockImplementation(() => {});
+});
+
+describe('entradasDeBuild', () => {
+    const plan = (entries) => ({ entries });
+
+    it('en_base da keep; objetos_foto de más de una ruta da objetos_foto; una foto o sin la clave da objeto_foto como hoy', () => {
+        const entradas = entradasDeBuild(plan([
+            { id_plantilla: 1, faiss_id: 10, en_base: true, objeto_foto: 'registro/1/a.jpg', objetos_foto: null },
+            { id_plantilla: 2, faiss_id: 11, en_base: false, objeto_foto: 'registro/2/a.jpg', objetos_foto: ['registro/2/a.jpg', 'registro/2/b.jpg', 'registro/2/c.jpg'] },
+            { id_plantilla: 3, faiss_id: 12, en_base: false, objeto_foto: 'registro/3/a.jpg', objetos_foto: ['registro/3/a.jpg'] },
+            { id_plantilla: 4, faiss_id: 13, en_base: false, objeto_foto: 'registro/4/a.jpg' },
+            { id_plantilla: 5, faiss_id: 14, en_base: false, objeto_foto: 'registro/5/a.jpg', objetos_foto: null },
+        ]));
+        expect(entradas).toEqual([
+            { id_plantilla: 1, faiss_id: 10, keep: true },
+            { id_plantilla: 2, faiss_id: 11, objetos_foto: ['registro/2/a.jpg', 'registro/2/b.jpg', 'registro/2/c.jpg'] },
+            { id_plantilla: 3, faiss_id: 12, objeto_foto: 'registro/3/a.jpg' },
+            { id_plantilla: 4, faiss_id: 13, objeto_foto: 'registro/4/a.jpg' },
+            { id_plantilla: 5, faiss_id: 14, objeto_foto: 'registro/5/a.jpg' },
+        ]);
+        // Una entrada nunca mezcla formas (el servicio rechaza mezclar keep / objeto_foto / objetos_foto con 422).
+        for (const e of entradas) expect(['keep', 'objeto_foto', 'objetos_foto'].filter((k) => k in e)).toHaveLength(1);
+    });
+
+    it('reconstruirIndice manda la forma multifoto al servicio y propaga las muestras', async () => {
+        const muestras = [{ id_plantilla: 41, total: 3, usadas: 3, descartadas: [], coseno_min: 0.5, coseno_medio: 0.7, degradada: false }];
+        construirIndice.mockResolvedValue({ ...BUILD_OK, muestras });
+        const plan = {
+            ...PLAN,
+            entries: [
+                PLAN.entries[0],
+                { ...PLAN.entries[1], objetos_foto: ['registro/17/b.jpg', 'registro/17/c.jpg', 'registro/17/d.jpg'] },
+            ],
+        };
+        const r = await reconstruirIndice({ admin: admin({ svc_indice_plan: () => plan }) });
+        expect(construirIndice.mock.calls[0][0].entries[1]).toEqual({
+            id_plantilla: 41, faiss_id: 1043, objetos_foto: ['registro/17/b.jpg', 'registro/17/c.jpg', 'registro/17/d.jpg'],
+        });
+        expect(r.muestras).toEqual(muestras);
+    });
+
+    it('SIN_MUESTRAS_UTILIZABLES: el build con errores es INDICE_CONSTRUCCION_FALLIDA con el código en details.errores', async () => {
+        construirIndice.mockResolvedValue({
+            ...BUILD_OK, objeto_indice: null, mapeo: [],
+            errores: [{ id_plantilla: 41, motivo: 'Ninguna de las 3 fotos es utilizable.', codigo: 'SIN_MUESTRAS_UTILIZABLES' }],
+        });
+        const e = await reconstruirIndice({ admin: admin() }).catch((x) => x);
+        expect(e).toMatchObject({ code: 'INDICE_CONSTRUCCION_FALLIDA', status: 422 });
+        expect(e.details.errores).toEqual([{ id_plantilla: 41, motivo: 'Ninguna de las 3 fotos es utilizable.', codigo: 'SIN_MUESTRAS_UTILIZABLES' }]);
+    });
 });
 
 describe('reconstruirIndice', () => {

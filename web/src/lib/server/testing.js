@@ -58,7 +58,14 @@ export const BYTES_PDF = new TextEncoder().encode('%PDF-1.7\n%fake\n');
 
 export const archivo = (bytes, tipo, nombre = 'a') => new File([bytes], nombre, { type: tipo });
 
-/** Request JSON o multipart (si `form` es un objeto { campo: string | File }). */
+/**
+ * n JPEG con la misma firma y UN byte distinto: BYTES_JPEG idéntico repetido dispararía FOTOS_DUPLICADAS (sha256
+ * de los bytes), así que las pruebas de varias fotos necesitan contenidos únicos que sigan pasando la firma binaria.
+ * @returns {Uint8Array[]}
+ */
+export const fotosDistintas = (n) => Array.from({ length: n }, (_, i) => new Uint8Array([...BYTES_JPEG, i + 1]));
+
+/** Request JSON o multipart (si `form` es un objeto { campo: string | File | Array }; un arreglo repite el campo). */
 export function pedir(url, { method = 'POST', json, form, headers = {} } = {}) {
     const init = { method, headers: { ...headers } };
     if (json !== undefined) {
@@ -66,7 +73,9 @@ export function pedir(url, { method = 'POST', json, form, headers = {} } = {}) {
         init.body = JSON.stringify(json);
     } else if (form) {
         const fd = new FormData();
-        for (const [k, v] of Object.entries(form)) fd.append(k, v);
+        for (const [k, v] of Object.entries(form)) {
+            for (const item of Array.isArray(v) ? v : [v]) fd.append(k, item);
+        }
         init.body = fd;
     }
     return new Request(`http://localhost${url}`, init);

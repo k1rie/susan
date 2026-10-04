@@ -19,8 +19,9 @@ describe('utilidades de la paleta', () => {
     });
     it('construye navegación, módulos próximos y cuenta, con descripción tomada del módulo activo', () => {
         const c = comandosDocente();
-        expect(c.filter((x) => x.grupo === 'Ir a').map((x) => x.href)).toEqual(['/docente', '/docente/revision', '/reportes', '/analitica', '/modulos']);
+        expect(c.filter((x) => x.grupo === 'Ir a').map((x) => x.href)).toEqual(['/docente', '/docente/pasar-lista', '/docente/revision', '/reportes', '/analitica', '/modulos']);
         expect(c.find((x) => x.href === '/analitica').descripcion).toMatch(/proyección/i);
+        expect(c.find((x) => x.href === '/docente/pasar-lista')).toMatchObject({ titulo: 'Pasar lista', descripcion: expect.stringMatching(/cámara/i) });
         expect(c.filter((x) => x.pronto).every((x) => x.href.startsWith('/modulos/'))).toBe(true);
         expect(c.at(-1)).toMatchObject({ accion: 'salir' });
     });
@@ -57,8 +58,16 @@ describe('PaletaComandos', () => {
         await user.keyboard('{ArrowDown}');
         expect(screen.getAllByRole('option')[1]).toHaveAttribute('aria-selected', 'true');
         await user.keyboard('{Enter}');
-        expect(push).toHaveBeenCalledWith('/docente/revision');
+        // la segunda opción del docente es «Pasar lista» (justo después del Panel)
+        expect(push).toHaveBeenCalledWith('/docente/pasar-lista');
         expect(onClose).toHaveBeenCalled();
+    });
+
+    it('buscar «pasar lista» (o «lista») encuentra la acción en primer lugar', async () => {
+        const user = userEvent.setup();
+        render(<PaletaComandos open onClose={() => {}} comandos={comandosDocente()} />);
+        await user.type(screen.getByRole('combobox'), 'pasar lista');
+        expect(screen.getAllByRole('option')[0]).toHaveTextContent('Pasar lista');
     });
 
     it('escribir filtra, muestra el mensaje sin resultados y Esc cierra', async () => {

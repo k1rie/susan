@@ -112,6 +112,7 @@ export default function Analitica({ filtrosIniciales = {} }) {
                 <>
                     <TarjetasAnalitica
                         resumen={analisis.resumen}
+                        tendencia={analisis.tendencia}
                         proyeccion={analisis.proyeccion}
                         cruceLimite={analisis.cruceLimite}
                         limitePct={limitePct}

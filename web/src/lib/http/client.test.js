@@ -7,7 +7,7 @@ import {
 import {
     crearUsuario, detallesCaso, documentoJustificante, enviarCaptura, estadoIndice, obtenerDeteccionesCaso,
     probarCamara, reconstruirIndice, registrarConsentimiento, registrarPlantilla, restablecerUsuario,
-    revertirIndice, sincronizarIndice, solicitarUrlDocumento, subirDocumentoJustificante, verificarFoto,
+    revertirIndice, sincronizarIndice, solicitarUrlDocumento, subirDocumentoJustificante, verificarFoto, verificarFotos,
 } from './index.js';
 
 const respuesta = (cuerpo, status = 200) => new Response(cuerpo === null ? null : JSON.stringify(cuerpo), { status, headers: { 'content-type': 'application/json' } });
@@ -115,6 +115,42 @@ describe('clientes tipados', () => {
         expect(f.mock.calls[3][1].body.has('id_alumno')).toBe(false);
         await documentoJustificante(15);
         expect(f.mock.calls[4][0]).toBe('/api/justificantes/15/documento');
+    });
+
+    it('biometría con varias fotos: repite el campo "fotos" en el orden dado y manda alumno y consentimiento', async () => {
+        const f = simular(respuesta({ ok: 1 }));
+        const blobs = [new Blob(['a']), new Blob(['b']), new Blob(['c'])];
+        await verificarFotos(blobs, { idAlumno: 17, idConsent: 9 });
+        const [url, init] = f.mock.calls[0];
+        expect(url).toBe('/api/plantilla/verificar');
+        expect(init.method).toBe('POST');
+        expect(init.headers['Content-Type']).toBeUndefined(); // multipart: el boundary lo pone el navegador
+        expect(init.body.getAll('fotos')).toHaveLength(3);
+        expect(init.body.getAll('fotos').map((x) => x.name)).toEqual(['foto-1.jpg', 'foto-2.jpg', 'foto-3.jpg']);
+        expect(init.body.get('id_alumno')).toBe('17');
+        expect(init.body.get('id_consent')).toBe('9');
+        expect(init.body.get('foto')).toBeNull();
+
+        await registrarPlantilla({ idAlumno: 17, idConsent: 9, fotos: blobs });
+        expect(f.mock.calls[1][0]).toBe('/api/alumnos/17/plantilla');
+        expect(f.mock.calls[1][1].body.getAll('fotos')).toHaveLength(3);
+        expect(f.mock.calls[1][1].body.get('foto')).toBeNull();
+        expect(f.mock.calls[1][1].body.get('id_consent')).toBe('9');
+
+        await registrarPlantilla({ idAlumno: 17, idConsent: 9, foto: blobs[0] });
+        expect(f.mock.calls[2][1].body.get('foto')).toBeInstanceOf(Blob);
+        expect(f.mock.calls[2][1].body.getAll('fotos')).toEqual([]);
+
+        await solicitarUrlDocumento({ tipo: 'plantilla_foto', idRegistro: 101 });
+        expect(f.mock.calls[3][0]).toBe('/api/documentos/plantilla_foto/101');
+    });
+
+    it('un FOTOS_RECHAZADAS del servidor llega como ApiError con sus details por foto', async () => {
+        simular(respuesta({ error: { code: 'FOTOS_RECHAZADAS', message: 'Algunas fotos no sirven.', details: { fotos: [{ indice: 4, estado: 'inconsistente' }] } } }, 422));
+        const e = await registrarPlantilla({ idAlumno: 17, idConsent: 9, fotos: [new Blob(['a']), new Blob(['b'])] }).catch((x) => x);
+        expect(e).toBeInstanceOf(ApiError);
+        expect(e).toMatchObject({ code: 'FOTOS_RECHAZADAS', status: 422 });
+        expect(e.details.fotos[0].indice).toBe(4);
     });
 
     it('biometría: consentimiento, plantilla, verificar, documentos e índice', async () => {

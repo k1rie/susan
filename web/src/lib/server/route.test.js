@@ -6,7 +6,7 @@ vi.mock('@/lib/backend', () => ({ getServerBackend: vi.fn(), getAdminBackend: vi
 import { getAdminBackend, getServerBackend } from '@/lib/backend';
 import { ApiError } from '@/lib/api/errors';
 import { creado, handle, json } from './route.js';
-import { BYTES_JPEG, YO, archivo, conParams, crearBackend, errorDeNegocio, pedir } from './testing.js';
+import { BYTES_JPEG, BYTES_PNG, YO, archivo, conParams, crearBackend, errorDeNegocio, fotosDistintas, pedir } from './testing.js';
 
 let usuario;
 let admin;
@@ -207,6 +207,101 @@ describe('handle: multipart', () => {
         expect(cuerpos[0]).toEqual([{ id_camara: 3 }, null]);
         expect(cuerpos[1][0]).toEqual({ id_camara: 4 });
         expect(cuerpos[1][1].tipo).toBe('jpg');
+    });
+});
+
+describe('handle: varios archivos con el mismo nombre', () => {
+    const jpg = (bytes, nombre = 'f.jpg') => archivo(bytes, 'image/jpeg', nombre);
+    const spec = (extra = {}) => ({ campo: 'fotos', maxBytes: 10_000, tipos: ['jpg'], multiple: true, ...extra });
+
+    it('los archivos repetidos llegan en orden de llegada (no se pisan) con su tipo y tamaño', async () => {
+        let ctx;
+        const POST = handle({ archivos: [spec()] }, (c) => { ctx = c; return { ok: true }; });
+        const bytes = fotosDistintas(3);
+        const r = await POST(pedir('/api/x', { form: { fotos: bytes.map((b) => jpg(b)) } }));
+        expect(r.status).toBe(200);
+        expect(ctx.form.archivos.fotos).toHaveLength(3);
+        expect(ctx.form.archivos.fotos.map((f) => f.size)).toEqual(bytes.map((b) => b.length));
+        expect(ctx.form.archivos.fotos.map((f) => [...f.bytes.subarray(-1)][0])).toEqual([1, 2, 3]);
+        expect(ctx.form.archivos.fotos[0]).toMatchObject({ tipo: 'jpg', ext: 'jpg' });
+    });
+
+    it('una sola foto en un campo múltiple sigue siendo un arreglo; sin archivos y no requerido, []', async () => {
+        const vistos = [];
+        const POST = handle({ archivos: [spec({ requerido: false })] }, (c) => { vistos.push(c.form.archivos.fotos); });
+        await POST(pedir('/api/x', { form: { fotos: jpg(BYTES_JPEG) } }));
+        await POST(pedir('/api/x', { form: { otro: 'x' } }));
+        await POST(pedir('/api/x', { form: {} }));
+        expect(vistos[0]).toHaveLength(1);
+        expect(vistos[1]).toEqual([]);
+        expect(vistos[2]).toEqual([]);
+    });
+
+    it('un campo múltiple obligatorio sin archivos da 422 con el campo', async () => {
+        const r = await leer(await handle({ archivos: [spec()] }, vi.fn())(pedir('/api/x', { form: { otro: 'x' } })));
+        expect(r.status).toBe(422);
+        expect(r.cuerpo.error.details.campos[0].campo).toBe('fotos');
+    });
+
+    it('más de maxArchivos: 422 DEMASIADOS_ARCHIVOS con maximo y recibidos, sin leer los archivos', async () => {
+        const fn = vi.fn();
+        const POST = handle({ archivos: [spec({ maxArchivos: 2 })] }, fn);
+        const r = await leer(await POST(pedir('/api/x', { form: { fotos: fotosDistintas(3).map((b) => jpg(b)) } })));
+        expect(r.status).toBe(422);
+        expect(r.cuerpo.error).toMatchObject({ code: 'DEMASIADOS_ARCHIVOS', details: { campo: 'fotos', maximo: 2, recibidos: 3 } });
+        expect(fn).not.toHaveBeenCalled();
+    });
+
+    it('la suma de bytes del campo sobre maxBytesTotal da 413 aunque cada archivo quepa', async () => {
+        const grande = (n) => { const b = new Uint8Array(n); b.set(BYTES_JPEG); return jpg(b); };
+        const POST = handle({ archivos: [spec({ maxBytesTotal: 5_000 })], maxMultipartBytes: 100_000 }, vi.fn());
+        const r = await leer(await POST(pedir('/api/x', { form: { fotos: [grande(3_000), grande(3_000)] } })));
+        expect(r.status).toBe(413);
+        expect(r.cuerpo.error).toMatchObject({ code: 'ARCHIVO_DEMASIADO_GRANDE', details: { campo: 'fotos' } });
+    });
+
+    it('un error de un archivo lleva campo e indice para marcar la foto exacta', async () => {
+        const POST = handle({ archivos: [spec()] }, vi.fn());
+        const falso = jpg(new TextEncoder().encode('no es jpeg'));
+        const r = await leer(await POST(pedir('/api/x', { form: { fotos: [jpg(BYTES_JPEG), falso] } })));
+        expect(r.status).toBe(422);
+        expect(r.cuerpo.error).toMatchObject({ code: 'ARCHIVO_INVALIDO', details: { campo: 'fotos', indice: 1 } });
+
+        const png = await leer(await POST(pedir('/api/x', { form: { fotos: [archivo(BYTES_PNG, 'image/png'), jpg(BYTES_JPEG)] } })));
+        expect(png.status).toBe(415);
+        expect(png.cuerpo.error.details).toMatchObject({ campo: 'fotos', indice: 0 });
+
+        const grande = new Uint8Array(20_000);
+        grande.set(BYTES_JPEG);
+        const pesado = await leer(await POST(pedir('/api/x', { form: { fotos: [jpg(BYTES_JPEG), jpg(BYTES_JPEG), jpg(grande)] } })));
+        expect(pesado.status).toBe(413);
+        expect(pesado.cuerpo.error.details).toMatchObject({ campo: 'fotos', indice: 2 });
+    });
+
+    it('un campo simple repetido es 422 (no gana el último en silencio)', async () => {
+        const POST = handle({ archivos: [{ campo: 'foto', maxBytes: 10_000, tipos: ['jpg'] }] }, vi.fn());
+        const r = await leer(await POST(pedir('/api/x', { form: { foto: [jpg(BYTES_JPEG), jpg(BYTES_JPEG)] } })));
+        expect(r.status).toBe(422);
+        expect(r.cuerpo.error.details.campos[0]).toMatchObject({ campo: 'foto', mensaje: 'Solo se admite un archivo en este campo.' });
+    });
+
+    it('foto (simple) y fotos (múltiple) pueden llegar juntas: cada campo recibe lo suyo', async () => {
+        let ctx;
+        const POST = handle({
+            archivos: [{ campo: 'foto', maxBytes: 10_000, tipos: ['jpg'], requerido: false }, spec({ requerido: false })],
+        }, (c) => { ctx = c; });
+        await POST(pedir('/api/x', { form: { foto: jpg(BYTES_JPEG), fotos: fotosDistintas(2).map((b) => jpg(b)) } }));
+        expect(ctx.form.archivos.foto.tipo).toBe('jpg');
+        expect(ctx.form.archivos.fotos).toHaveLength(2);
+    });
+
+    it('maxMultipartBytes fija el tope del cuerpo: más allá, 413 limpio en lugar de un formData truncado', async () => {
+        const POST = handle({ archivos: [spec({ maxBytes: 1_000_000 })], maxMultipartBytes: 5_000 }, vi.fn());
+        const grande = new Uint8Array(20_000);
+        grande.set(BYTES_JPEG);
+        const r = await leer(await POST(pedir('/api/x', { form: { fotos: [jpg(grande)] } })));
+        expect(r.status).toBe(413);
+        expect(r.cuerpo.error.code).toBe('ARCHIVO_DEMASIADO_GRANDE');
     });
 });
 

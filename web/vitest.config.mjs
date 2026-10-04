@@ -6,11 +6,9 @@ import path from 'node:path';
 export default defineConfig({
     oxc: { jsx: { runtime: 'automatic' } },
     resolve: {
-        alias: [
-            // next/dynamic -> shim síncrono para pruebas (ver src/test/nextDynamic.jsx)
-            { find: /^next\/dynamic$/, replacement: path.resolve(import.meta.dirname, 'src/test/nextDynamic.jsx') },
-            { find: '@', replacement: path.resolve(import.meta.dirname, 'src') },
-        ],
+        alias: {
+            '@': path.resolve(import.meta.dirname, 'src'),
+        },
     },
     test: {
         environment: 'node',

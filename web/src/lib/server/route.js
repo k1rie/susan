@@ -133,6 +133,63 @@ function parsear(esquema, datos) {
 }
 
 // ---------------------------------------------------------------------------------------------------------
+// Archivos del multipart
+// ---------------------------------------------------------------------------------------------------------
+
+const errorDeCampo = (campo, mensaje) => validacionDeZod(new z.ZodError([{ code: 'custom', path: [campo], message: mensaje }]));
+
+/** Relanza un error de archivo agregando `campo` e `indice` a sus details para que la pantalla marque la foto exacta. */
+function conIndice(e, campo, indice) {
+    if (!(e instanceof ApiError)) return e;
+    const base = e.details && typeof e.details === 'object' && !Array.isArray(e.details) ? e.details : {};
+    return new ApiError({ code: e.code, message: e.message, status: e.status, details: { ...base, campo, indice } });
+}
+
+/**
+ * Valida y lee los archivos de UN campo del multipart según su spec. Devuelve el archivo (o null) para campos
+ * simples y un arreglo (posiblemente vacío) para los `multiple`. Los topes de cantidad y de bytes totales se
+ * comprueban con lo DECLARADO antes de leer nada y otra vez con lo realmente recibido.
+ */
+async function leerCampoArchivos(spec, recibidos) {
+    const { campo, maxBytes, tipos, multiple = false, maxArchivos, maxBytesTotal } = spec;
+    if (recibidos.length === 0) {
+        if (spec.requerido === false) return multiple ? [] : null;
+        throw errorDeCampo(campo, 'El archivo es obligatorio.');
+    }
+    if (!multiple) {
+        if (recibidos.length > 1) throw errorDeCampo(campo, 'Solo se admite un archivo en este campo.');
+        return leerArchivoValidado(recibidos[0], { permitidos: tipos, maxBytes });
+    }
+    if (maxArchivos !== undefined && recibidos.length > maxArchivos) {
+        throw new ApiError({
+            code: 'DEMASIADOS_ARCHIVOS',
+            message: `Se admiten como máximo ${maxArchivos} archivos en este campo.`,
+            status: 422,
+            details: { campo, maximo: maxArchivos, recibidos: recibidos.length },
+        });
+    }
+    const excedeTotal = () => new ApiError({
+        code: 'ARCHIVO_DEMASIADO_GRANDE',
+        message: 'Los archivos juntos superan el tamaño permitido.',
+        status: 413,
+        details: { campo },
+    });
+    if (maxBytesTotal !== undefined && recibidos.reduce((s, a) => s + (a.size ?? 0), 0) > maxBytesTotal) throw excedeTotal();
+    const salida = [];
+    let total = 0;
+    for (const [indice, archivo] of recibidos.entries()) {
+        try {
+            salida.push(await leerArchivoValidado(archivo, { permitidos: tipos, maxBytes }));
+        } catch (e) {
+            throw conIndice(e, campo, indice);
+        }
+        total += salida[indice].size;
+    }
+    if (maxBytesTotal !== undefined && total > maxBytesTotal) throw excedeTotal();
+    return salida;
+}
+
+// ---------------------------------------------------------------------------------------------------------
 // handle
 // ---------------------------------------------------------------------------------------------------------
 
@@ -144,8 +201,14 @@ function parsear(esquema, datos) {
  * @property {import('zod').ZodType} [query]    parámetros de URL
  * @property {import('zod').ZodType} [params]   segmentos dinámicos
  * @property {import('zod').ZodType} [fields]   campos de texto de un multipart/form-data
- * @property {{ campo: string, maxBytes: number, tipos: string[], requerido?: boolean }[]} [archivos]
+ * @property {{ campo: string, maxBytes: number, tipos: string[], requerido?: boolean, multiple?: boolean,
+ *   maxArchivos?: number, maxBytesTotal?: number }[]} [archivos]
+ *   `multiple`: el campo puede repetirse (form.archivos[campo] = arreglo en orden de llegada, [] si no llegó nada
+ *   y requerido:false). Sin `multiple`, repetir el campo es un 422. `maxArchivos` y `maxBytesTotal` solo aplican
+ *   a los campos múltiples.
  * @property {number} [maxBodyBytes]  tope del cuerpo JSON (def. 256 KiB)
+ * @property {number} [maxMultipartBytes]  tope del cuerpo multipart completo (def. suma de maxBytes + margen). Las
+ *   rutas con varias fotos lo fijan bajo el tope de 10 MB del proxy de Next, que trunca en silencio lo que lo pase.
  *
  * Con `input` y `fields` a la vez el endpoint acepta JSON o multipart según Content-Type; en ambos casos
  * `ctx.body` trae los campos ya validados.
@@ -160,7 +223,8 @@ export function handle(opciones, fn) {
     const { auth = 'usuario', roles, input, query, params, fields, archivos = [] } = opciones ?? {};
     const aceptaJson = Boolean(input);
     const aceptaMultipart = Boolean(fields) || archivos.length > 0;
-    const maxMultipart = archivos.reduce((s, a) => s + a.maxBytes, 0) + MARGEN_MULTIPART;
+    const maxMultipart = opciones?.maxMultipartBytes
+        ?? archivos.reduce((s, a) => s + a.maxBytes, 0) + MARGEN_MULTIPART;
     const maxJson = opciones?.maxBodyBytes ?? MAX_JSON_BYTES;
 
     return async function manejador(request, routeContext) {
@@ -194,27 +258,15 @@ export function handle(opciones, fn) {
                             throw new ApiError({ code: 'PETICION_INVALIDA', message: 'El formulario enviado no se pudo leer.', status: 400 });
                         }
                         const texto = {};
-                        const subidos = {};
+                        const subidos = {}; // campo -> [archivos]: un mismo nombre puede repetirse (varias fotos)
                         for (const [clave, valor] of datos.entries()) {
                             if (typeof valor === 'string') texto[clave] = valor;
-                            else subidos[clave] = valor;
+                            else (subidos[clave] ??= []).push(valor);
                         }
                         body = fields ? parsear(fields, texto) : {};
                         form.campos = body;
                         for (const spec of archivos) {
-                            const archivo = subidos[spec.campo];
-                            if (!archivo) {
-                                if (spec.requerido === false) {
-                                    form.archivos[spec.campo] = null;
-                                    continue;
-                                }
-                                throw validacionDeZod(new z.ZodError([{
-                                    code: 'custom', path: [spec.campo], message: 'El archivo es obligatorio.',
-                                }]));
-                            }
-                            form.archivos[spec.campo] = await leerArchivoValidado(archivo, {
-                                permitidos: spec.tipos, maxBytes: spec.maxBytes,
-                            });
+                            form.archivos[spec.campo] = await leerCampoArchivos(spec, subidos[spec.campo] ?? []);
                         }
                     } else if (esJson && aceptaJson) {
                         const crudo = await leerCuerpoLimitado(request, maxJson, false);
@@ -231,9 +283,9 @@ export function handle(opciones, fn) {
                         throw new ApiError({ code: 'TIPO_NO_SOPORTADO', message: 'Tipo de contenido no soportado.', status: 415 });
                     }
                     // JSON y multipart a la vez: los archivos opcionales ausentes quedan en null para uniformidad.
-                    for (const spec of archivos) if (!(spec.campo in form.archivos)) form.archivos[spec.campo] = null;
+                    for (const spec of archivos) if (!(spec.campo in form.archivos)) form.archivos[spec.campo] = spec.multiple ? [] : null;
                 } else {
-                    for (const spec of archivos) form.archivos[spec.campo] = null;
+                    for (const spec of archivos) form.archivos[spec.campo] = spec.multiple ? [] : null;
                 }
             }
 

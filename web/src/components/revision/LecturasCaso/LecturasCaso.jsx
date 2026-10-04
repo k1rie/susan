@@ -2,13 +2,13 @@
 
 import clsx from 'clsx';
 import Alert from '@/components/ui/Alert';
+import BarrasPildora from '@/components/ui/BarrasPildora';
 import Button from '@/components/ui/Button';
-import GraficaBarras from '@/components/ui/GraficaBarras';
 import Spinner from '@/components/ui/Spinner';
 import TarjetaGrafica from '@/components/ui/TarjetaGrafica';
 import RecorteFirmado from '../RecorteFirmado';
 import { formatearHora } from '../PlazoRestante/plazoRestante.utils.js';
-import { CONFIG_SCORES, datosScores, lecturasNumeradas, progresoValidas, recortePurgado, resumenScores, resumenValidas, textoCamara, textoScore } from './lecturasCaso.utils.js';
+import { CONFIG_SCORES, contarConScore, datosScores, lecturasNumeradas, progresoValidas, recortePurgado, resumenScores, resumenValidas, textoCamara, textoScore } from './lecturasCaso.utils.js';
 import { useLecturasCaso } from './useLecturasCaso.js';
 
 // Evidencia del caso: avance de lecturas válidas, gráfica de scores, foto de registro y una tarjeta compacta por lectura.
@@ -39,6 +39,7 @@ export default function LecturasCaso({ idAsistencia, minimoValidas }) {
     const ordenadas = lecturasNumeradas(lecturas);
     const avance = progresoValidas(lecturas, minimoValidas);
     const scores = datosScores(lecturas);
+    const conScore = contarConScore(lecturas);
     return (
         <div className="flex flex-col gap-3">
             <div className="flex flex-wrap items-center justify-between gap-2">
@@ -64,8 +65,13 @@ export default function LecturasCaso({ idAsistencia, minimoValidas }) {
             </div>
 
             {scores.length >= 2 && (
-                <TarjetaGrafica titulo="Score por lectura" descripcion="Similitud con la foto de registro, por número de lectura" resumen={resumenScores(scores)}>
-                    <GraficaBarras datos={scores} ejeX="lectura" series={[{ clave: 'valida' }, { clave: 'no_valida' }]} config={CONFIG_SCORES} apilado unidad=" %" dominio={[0, 100]} alto={170} leyenda />
+                <TarjetaGrafica
+                    titulo="Score por lectura"
+                    descripcion="Similitud con la foto de registro (%), por número de lectura"
+                    resumen={resumenScores(scores)}
+                    pie={conScore > scores.length ? `Se muestran las ${scores.length} más recientes de ${conScore}.` : undefined}
+                >
+                    <BarrasPildora datos={scores} ejeX="lectura" series={[{ clave: 'valida' }, { clave: 'no_valida' }]} config={CONFIG_SCORES} apilado unidad=" %" dominio={[0, 100]} alto={170} leyenda />
                 </TarjetaGrafica>
             )}
 
@@ -89,8 +95,10 @@ export default function LecturasCaso({ idAsistencia, minimoValidas }) {
                                 <p className="truncate font-medium">
                                     Lectura {l.numero} · {formatearHora(l.marca_tiempo)}
                                 </p>
-                                <p className="truncate text-muted-foreground">
-                                    {textoCamara(l.camara_posicion)} · Score {textoScore(l.score_similitud)}
+                                {/* Sin truncate: a 360 px el score es el dato que importa y se cortaba («Score 0.4…»); si no cabe, baja de línea
+                                    y «Score 0.420» viaja junto. */}
+                                <p className="text-muted-foreground">
+                                    {textoCamara(l.camara_posicion)} · <span className="whitespace-nowrap">Score {textoScore(l.score_similitud)}</span>
                                 </p>
                                 <p className="truncate">
                                     <span className={l.es_valida ? 'text-presente' : 'text-ausente'}>{l.es_valida ? 'Válida' : 'No válida'}</span>

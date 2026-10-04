@@ -1,5 +1,6 @@
 'use client';
 
+import { CalendarCheck, CalendarDays, UserMinus, Users } from 'lucide-react';
 import { useState } from 'react';
 import PageHeader from '@/components/layout/PageHeader';
 import Card from '@/components/ui/Card';
@@ -13,6 +14,7 @@ import GenerarSesiones from '../GenerarSesiones';
 import GrupoForm from '../GrupoForm';
 import HorarioEditor from '../HorarioEditor';
 import InscripcionesTabla from '../InscripcionesTabla';
+import { APOYO_BAJAS, apoyoSesiones, tarjetaCerradas, tarjetaInscritos } from './grupoDetalle.utils.js';
 
 const TABS = [
     { id: 'datos', label: 'Datos' },
@@ -37,10 +39,10 @@ export default function GrupoDetalle({ idGrupo }) {
                         subtitle={`Periodo ${g.periodo} · ${g.docente_nombre} · Aula ${g.aula_clave}`}
                     />
                     <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                        <StatCard label="Inscritos activos" value={g.inscritos?.activos ?? 0} hint={`Capacidad ${g.inscritos?.capacidad_aula ?? '-'}`} />
-                        <StatCard label="Bajas" value={g.inscritos?.baja ?? 0} />
-                        <StatCard label="Sesiones" value={g.sesiones?.total ?? 0} hint={`${g.sesiones?.programadas ?? 0} programadas`} />
-                        <StatCard label="Cerradas" value={g.sesiones?.cerradas ?? 0} />
+                        <StatCard icon={Users} label="Inscritos activos" {...tarjetaInscritos(g.inscritos)} />
+                        <StatCard icon={UserMinus} label="Bajas" value={g.inscritos?.baja ?? 0} hint={APOYO_BAJAS} />
+                        <StatCard icon={CalendarDays} label="Sesiones" value={g.sesiones?.total ?? 0} hint={apoyoSesiones(g.sesiones)} />
+                        <StatCard icon={CalendarCheck} label="Cerradas" {...tarjetaCerradas(g.sesiones)} />
                     </div>
                     <Tabs tabs={TABS} value={tab} onChange={setTab} idPrefix="grupo" />
                     <div role="tabpanel" id={`grupo-panel-${tab}`} aria-labelledby={`grupo-${tab}`}>

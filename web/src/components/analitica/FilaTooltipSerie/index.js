@@ -1,1 +1,1 @@
-export { default, formatterSerie } from './FilaTooltipSerie.jsx';
+export { default, renderFilaSerie } from './FilaTooltipSerie.jsx';

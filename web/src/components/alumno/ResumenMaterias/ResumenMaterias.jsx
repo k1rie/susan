@@ -1,18 +1,14 @@
+import clsx from 'clsx';
 import Alert from '@/components/ui/Alert';
+import BarraSegmentada from '@/components/ui/BarraSegmentada';
 import Detalles from '@/components/ui/Detalles';
+import { CONFIG_ASISTENCIA } from '@/lib/graficas.js';
 import BarraFaltas from '../BarraFaltas';
-import { avisoMateria } from '../alumno.utils.js';
+import { avisoMateria, composicionRegistros } from '../alumno.utils.js';
 
-// Cifra pequeña con su etiqueta debajo (3 por tarjeta; el resto va en el desglose).
-function Cifra({ valor, etiqueta }) {
-    return (
-        <div className="flex flex-col-reverse rounded-lg bg-muted/60 px-3 py-2">
-            <dt className="mt-1 text-xs text-muted-foreground">{etiqueta}</dt>
-            <dd className="text-lg font-semibold leading-none tabular-nums">{valor}</dd>
-        </div>
-    );
-}
-
+// Tarjeta de materia: solo lo que decide el derecho a examen (faltas usadas, barra frente al límite y el aviso) y el botón que elige la
+// materia. Las cifras por estado ya no van en cajas propias aquí: la materia elegida las muestra en casillas (StatCard, alumno/CifrasMateria)
+// junto a su calendario, y el desglose de abajo trae todas las materias.
 function Tarjeta({ item, seleccionada, onSeleccionar }) {
     const aviso = avisoMateria(item);
     const sinSesiones = !item.sesiones_programadas;
@@ -44,11 +40,6 @@ function Tarjeta({ item, seleccionada, onSeleccionar }) {
                     <BarraFaltas className="mt-2" porcentaje={item.porcentaje_faltas} limitePct={item.limite_pct} superaLimite={item.supera_limite} enLimite={item.en_limite} />
                 </>
             )}
-            <dl className="mt-3 grid grid-cols-3 gap-2">
-                <Cifra valor={item.presentes} etiqueta="Presentes" />
-                <Cifra valor={item.retardos} etiqueta="Retardos" />
-                <Cifra valor={item.ausencias} etiqueta="Ausencias" />
-            </dl>
             {aviso && <Alert tone={aviso.tone} className="mt-3">{aviso.texto}</Alert>}
         </li>
     );
@@ -56,7 +47,9 @@ function Tarjeta({ item, seleccionada, onSeleccionar }) {
 
 const celda = 'px-3 py-2';
 
-// Desglose completo de todas las materias en una tabla plegada (una por materia sería un muro de números).
+// Desglose completo de todas las materias en una tabla plegada (una por materia sería un muro de números). La barra segmentada de cada
+// fila resume de un vistazo la mezcla de registros resueltos; va en la última columna para no empujar las cifras exactas fuera de la
+// vista en un teléfono (la tabla se desplaza dentro de su caja, no la página).
 function Desglose({ items }) {
     return (
         <Detalles titulo="Desglose por materia" resumen={`${items.length} materia${items.length === 1 ? '' : 's'}`}>
@@ -72,6 +65,7 @@ function Desglose({ items }) {
                             <th scope="col" className={`${celda} text-right font-medium`}>Pendientes</th>
                             <th scope="col" className={`${celda} text-right font-medium`}>Faltas eq.</th>
                             <th scope="col" className={`${celda} text-right font-medium`}>Te quedan</th>
+                            <th scope="col" className={`${celda} font-medium`}>Distribución</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -87,6 +81,9 @@ function Desglose({ items }) {
                                 <td className={`${celda} text-right`}>{it.pendientes}</td>
                                 <td className={`${celda} text-right`}>{it.faltas_equivalentes} / {it.faltas_maximas_permitidas}</td>
                                 <td className={`${celda} text-right`}>{it.sesiones_programadas ? Math.max(0, it.faltas_restantes_antes_limite ?? 0) : '-'}</td>
+                                <td className={`${celda} min-w-32`}>
+                                    <BarraSegmentada datos={composicionRegistros(it)} config={CONFIG_ASISTENCIA} alto={8} leyenda={false} vacio="Sin registros" />
+                                </td>
                             </tr>
                         ))}
                     </tbody>
@@ -97,11 +94,13 @@ function Desglose({ items }) {
     );
 }
 
-// Resumen por materia: tarjetas compactas (faltas usadas, barra y 3 cifras) y el desglose completo plegado.
+// Resumen por materia: tarjetas compactas (faltas usadas, barra y aviso) y el desglose completo plegado.
 export default function ResumenMaterias({ items = [], idGrupoSeleccionado, onSeleccionar }) {
     return (
         <div className="flex flex-col gap-3">
-            <ul className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+            {/* Con una sola materia la tarjeta ocupa toda la columna (el portal ya la pone junto a las gráficas): dos columnas la dejarían a media
+                columna y más angosta que el desglose de abajo. */}
+            <ul className={clsx('grid grid-cols-1 gap-3', items.length > 1 && 'lg:grid-cols-2')}>
                 {items.map((it) => (
                     <Tarjeta key={it.id_grupo} item={it} seleccionada={it.id_grupo === idGrupoSeleccionado} onSeleccionar={onSeleccionar} />
                 ))}

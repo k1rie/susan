@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -32,13 +32,50 @@ describe('IndiceFacialPanel', () => {
     });
 
     it('grafica las plantillas y pliega las versiones sin quitarlas del DOM', async () => {
-        const { container } = render(<IndiceFacialPanel />);
+        render(<IndiceFacialPanel />);
         expect(await screen.findByRole('group', { name: 'Plantillas' })).toHaveAccessibleDescription(/Indexadas: 498.*Pendientes: 2/);
-        expect(container.querySelector('[data-slot="chart"]')).toBeInTheDocument();
         expect(screen.getByText('Requiere reconstrucción')).toBeInTheDocument();
         const boton = screen.getByRole('button', { name: /Versiones del índice.*1 versión/ });
         expect(boton).toHaveAttribute('aria-expanded', 'false');
         expect(screen.getByRole('table', { hidden: true })).toBeInTheDocument();
+    });
+
+    it('el anillo de plantillas lleva el % indexado al centro y las cifras en la leyenda (pocas pendientes no dicen 0 %)', async () => {
+        render(<IndiceFacialPanel />);
+        const tarjeta = await screen.findByRole('group', { name: 'Plantillas' });
+        expect(within(tarjeta).getByText('100 %', { selector: 'span.font-semibold' })).toBeInTheDocument();
+        expect(within(tarjeta).getByText('Indexadas', { selector: 'span.text-xs' })).toBeInTheDocument();
+        // Fila de leyenda = [punto de color, nombre, cifra, porcentaje].
+        const leyenda = within(tarjeta).getAllByRole('listitem').map((li) => [...li.children].slice(1).map((c) => c.textContent));
+        expect(leyenda).toEqual([['Indexadas', '498', '100 %'], ['Pendientes', '2', '<1 %']]);
+        expect(within(tarjeta).getByText('500 activas')).toBeInTheDocument();
+    });
+
+    it('avisa de las plantillas obsoletas en el índice y lo dice también en el texto alternativo', async () => {
+        estado.mockResolvedValue({
+            en_uso: null,
+            plantillas: { activas: 10, indexadas: 6, pendientes: 4, obsoletas_en_indice: 3 },
+            requiere_reconstruccion: true, pendientes_detalle: [], versiones: { total: 0, items: [] },
+            servicio: { disponible: true }, sincronizado: true,
+        });
+        render(<IndiceFacialPanel />);
+        const tarjeta = await screen.findByRole('group', { name: 'Plantillas' });
+        expect(within(tarjeta).getByText('10 activas · 3 obsoletas en el índice')).toBeInTheDocument();
+        expect(tarjeta).toHaveAccessibleDescription(/Obsoletas en el índice: 3\./);
+        expect(within(tarjeta).getByText('60 %', { selector: 'span.font-semibold' })).toBeInTheDocument();
+    });
+
+    it('sin plantillas activas el anillo avisa en lugar de dibujar un 0 %', async () => {
+        estado.mockResolvedValue({
+            en_uso: null,
+            plantillas: { activas: 0, indexadas: 0, pendientes: 0 },
+            requiere_reconstruccion: false, pendientes_detalle: [], versiones: { total: 0, items: [] },
+            servicio: { disponible: true }, sincronizado: true,
+        });
+        render(<IndiceFacialPanel />);
+        const tarjeta = await screen.findByRole('group', { name: 'Plantillas' });
+        expect(within(tarjeta).getByText('No hay plantillas activas', { selector: 'p.flex' })).toBeInTheDocument();
+        expect(tarjeta.querySelector('svg')).toBeNull();
     });
 
     it('los Detalles plegados dicen la unidad ("1 versión", "2 plantillas"), no un número suelto', async () => {

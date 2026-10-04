@@ -36,7 +36,16 @@ const VALOR_CRUCE = {
     insuficiente: () => SIN_DATO,
 };
 
-/** Datos para la franja de indicadores (textos ya formateados y cortos). */
+/** Cifra con `d` decimales y su unidad aparte ('%') para la tarjeta; sin dato, guion y sin unidad (la unidad no acompaña a un guion). */
+function cifraConUnidad(n, d = 1, unidad = '%') {
+    const hay = typeof n === 'number' && Number.isFinite(n);
+    return { valor: fmtNum(n, d), unidad: hay ? unidad : undefined };
+}
+
+/**
+ * Datos para la franja de indicadores (textos ya formateados y cortos). Los porcentajes salen en `valor` (la cifra) y `unidad` ('%')
+ * por separado: la tarjeta pinta la unidad más chica, con el mismo redondeo de siempre (fmtPct = fmtNum + ' %').
+ */
 export function datosTarjetas({ resumen, proyeccion, cruceLimite, limitePct = 20 }) {
     const suficiente = Boolean(resumen?.suficiente);
     const ultimo = proyeccion?.disponible && proyeccion.puntos?.length ? proyeccion.puntos[proyeccion.puntos.length - 1] : null;
@@ -45,12 +54,12 @@ export function datosTarjetas({ resumen, proyeccion, cruceLimite, limitePct = 20
     const superan = resumen?.alumnosSuperanLimite ?? 0;
     return {
         actual: {
-            valor: fmtPct(resumen?.tasaActual),
+            ...cifraConUnidad(resumen?.tasaActual),
             nota: resumen?.variacionPP == null ? 'Sin semana previa' : `${fmtSigno(resumen.variacionPP)} pp vs. semana previa`,
             tono: resumen?.tasaActual != null && resumen.tasaActual > limitePct ? 'danger' : 'neutral',
         },
         proyeccion: {
-            valor: ultimo ? fmtPct(ultimo.valor * 100) : SIN_DATO,
+            ...cifraConUnidad(ultimo ? ultimo.valor * 100 : null),
             nota: ultimo ? `Semana ${ultimo.semana} (${fmtPct(ultimo.inferior * 100, 0)} a ${fmtPct(ultimo.superior * 100, 0)})` : suficiente ? 'Sin proyección' : 'Faltan semanas',
             tono: 'neutral',
         },
@@ -175,25 +184,35 @@ export function datosPatron(patronSemanal) {
     }));
 }
 
-/**
- * Filas del patrón para barras apiladas: el día crítico va en su propia serie (otro color y otra etiqueta en la leyenda),
- * así la señal nunca depende solo del color. `tasa` en %; los días sin sesiones quedan nulos.
- */
-export function datosPatronBarras(patronSemanal) {
-    return datosPatron(patronSemanal).map((d) => ({ dia: d.dia, normal: d.critico ? null : d.tasa, critico: d.critico ? d.tasa : null }));
+/** Nombre del día en 3 letras para la casilla ("Miércoles" -> "Mié"): el nombre completo no cabe en 5 casillas a 360 px. */
+export function abreviarDia(nombre) {
+    const t = String(nombre ?? '').trim();
+    if (!t) return SIN_DATO;
+    return t.length > 3 ? t.slice(0, 3) : t;
 }
 
-export const CONFIG_PATRON = {
-    normal: { label: 'Ausentismo', color: 'var(--chart-1)' },
-    critico: { label: 'Día crítico', color: 'var(--ausente)' },
-};
+/** Casillas del mapa de calor del patrón (una por día con sesiones): `valor` = tasa en %, o null si el día no tiene dato (no es un 0). */
+export function datosTiraPatron(patronSemanal) {
+    return datosPatron(patronSemanal).map((d) => ({ etiqueta: abreviarDia(d.dia), valor: d.tasa }));
+}
+
+/** Posición (0, 1...) del día crítico entre las casillas de `datosTiraPatron`, o -1 si no hay un día claramente crítico. */
+export function indiceDiaCritico(patronSemanal) {
+    return datosPatron(patronSemanal).findIndex((d) => d.critico);
+}
 
 /** Texto alternativo del patrón semanal con las cifras de cada día. */
 export function resumenTextoPatron(patronSemanal) {
     const dias = datosPatron(patronSemanal);
     if (dias.length === 0) return 'Patrón por día de la semana: sin sesiones cerradas.';
-    const lista = dias.map((d) => `${d.dia} ${d.tasa == null ? 'sin datos' : fmtPct(d.tasa)} (${d.ausentes} de ${d.sesiones} sesiones${d.critico ? ', día crítico' : ''})`).join('; ');
+    const lista = dias.map((d) => `${d.dia} ${d.tasa == null ? 'sin datos' : fmtPct(d.tasa)} (${textoSesiones(d)}${d.critico ? ', día crítico' : ''})`).join('; ');
     return `Ausentismo por día de la semana: ${lista}.`;
+}
+
+/** "6 ausencias en 3 sesiones": las ausencias son de alumnos sumadas en todas las sesiones de ese día, no una fracción de las sesiones. */
+export function textoSesiones(d) {
+    const ausencias = `${d.ausentes} ${d.ausentes === 1 ? 'ausencia' : 'ausencias'}`;
+    return `${ausencias} en ${d.sesiones} ${d.sesiones === 1 ? 'sesión' : 'sesiones'}`;
 }
 
 // ---- Configuración de colores de las gráficas (solo tokens de globals.css) ----
@@ -215,6 +234,84 @@ export const CONFIG_ACUMULADO = {
     proyeccion: CONFIG_SERIE.proyeccion,
     banda: CONFIG_SERIE.banda,
 };
+
+// `forma` de la configuración -> cómo la dibuja GraficaLinea (tipo de serie y trazo). La misma forma sale en la leyenda y el tooltip.
+const TRAZO_DE_FORMA = {
+    punto: { tipo: 'puntos' },
+    linea: { tipo: 'linea' },
+    discontinua: { tipo: 'linea', discontinua: true },
+    banda: { tipo: 'banda' },
+};
+
+/** Serie de GraficaLinea a partir de una entrada de CONFIG_SERIE / CONFIG_ACUMULADO (etiqueta, token de color y forma). */
+export function serieDeConfig(clave, config, extra = {}) {
+    const c = config[clave];
+    return { clave, etiqueta: c.label, color: c.color, ...(TRAZO_DE_FORMA[c.forma] ?? TRAZO_DE_FORMA.linea), ...extra };
+}
+
+export const MEDIAS_MOVILES = ['sma', 'ema', 'wma'];
+
+/** Series de la gráfica semanal; las medias móviles solo entran si su interruptor (`ver`) está activo. */
+export function seriesSemanal(ver = {}) {
+    return [
+        ...['observada', 'ajuste', 'proyeccion', 'banda'].map((k) => serieDeConfig(k, CONFIG_SERIE)),
+        ...MEDIAS_MOVILES.filter((k) => ver[k]).map((k) => serieDeConfig(k, CONFIG_SERIE, { grosor: 1.75 })),
+    ];
+}
+
+/** Series de la gráfica de acumulado. */
+export function seriesAcumulado() {
+    return ['acumulado', 'ajuste', 'proyeccion', 'banda'].map((k) => serieDeConfig(k, CONFIG_ACUMULADO));
+}
+
+/** Marca del eje Y en %: entera si lo es ("10 %"), con un decimal si no ("2.5 %"). */
+export function fmtEjePct(v) {
+    return fmtPct(v, Number.isInteger(v) ? 0 : 1);
+}
+
+/** Texto de un valor de serie en el tooltip: "12.5 %", "8.0 % a 12.3 %" para la banda (intervalo) o guion si falta. */
+export function textoValorSerie(valor) {
+    if (Array.isArray(valor)) return `${fmtPct(valor[0])} a ${fmtPct(valor[1])}`;
+    return valor == null ? SIN_DATO : fmtPct(valor);
+}
+
+const esFinito = (v) => typeof v === 'number' && Number.isFinite(v);
+
+/**
+ * Series REALES (en %) para la línea de tendencia de las tarjetas; una tarjeta sin serie honesta no lleva línea.
+ *  - actual: la tasa semanal observada (las semanas sin clase quedan fuera: no se inventa un valor).
+ *  - cruce: el promedio acumulado de faltas por alumno, observado; sin análisis suficiente la tarjeta dice "Faltan semanas", así que
+ *    tampoco lleva línea.
+ * La proyección no tiene serie observada (es una estimación) y los alumnos en riesgo no tienen historial: ahí no hay línea.
+ */
+export function seriesTarjetas({ tendencia, cruceLimite } = {}) {
+    const actual = (tendencia?.tasas ?? []).filter(esFinito).map((t) => Number((t * 100).toFixed(3)));
+    const cruce = cruceLimite && cruceLimite.estado !== 'insuficiente' ? (cruceLimite.acumulado?.valores ?? []).filter(esFinito) : [];
+    return { actual, cruce };
+}
+
+// ---- Uso del límite de faltas por alumno (barra de la tabla de riesgo) ----
+export const CONFIG_USO_LIMITE = {
+    faltas: { label: 'Faltas', color: 'var(--ausente)' },
+    restantes: { label: 'Restantes', color: 'var(--pendiente)' },
+};
+
+/**
+ * Segmentos de la barra "faltas / restantes": juntos suman las faltas permitidas, así que la barra se llena al agotar el límite. Con
+ * el límite superado queda toda en rojo. Sin faltas permitidas ni faltas no hay nada que mostrar (null).
+ * @returns {{ datos: {clave: string, valor: number}[], etiqueta: string } | null}
+ */
+export function datosUsoLimite(alumno) {
+    const faltas = alumno?.faltasEq;
+    const maximas = alumno?.faltasMaximas;
+    if (!esFinito(faltas) || !esFinito(maximas) || faltas < 0 || maximas < 0) return null;
+    const restantes = Math.max(0, maximas - faltas);
+    if (faltas + restantes <= 0) return null;
+    return {
+        datos: [{ clave: 'faltas', valor: faltas }, { clave: 'restantes', valor: restantes }],
+        etiqueta: faltas > maximas ? `Superó el límite: ${faltas} faltas de ${maximas} permitidas` : `${faltas} de ${maximas} faltas permitidas`,
+    };
+}
 
 // ---- Riesgo: distribución y ranking ----
 export const CONFIG_RIESGO = {
@@ -245,8 +342,8 @@ export function distribucionRiesgo(items = [], evaluados = null) {
 }
 
 /**
- * Nombre acotado para el eje de las barras (los completos viven en la tabla): si no cabe, la primera palabra entera y las
- * demás como iniciales ("González C. M."); si aun así no cabe, se corta con puntos suspensivos.
+ * Nombre acotado para el ranking de barras (los completos viven en la tabla y en el texto alternativo): si no cabe, la primera
+ * palabra entera y las demás como iniciales ("González C. M."); si aun así no cabe, se corta con puntos suspensivos.
  */
 export function nombreCorto(nombre, max = 16) {
     const t = String(nombre ?? '').trim().replace(/\s+/g, ' ');
@@ -260,12 +357,13 @@ export function nombreCorto(nombre, max = 16) {
 
 export const TOP_RIESGO = 8;
 
-// Ancho máximo (en caracteres) de la etiqueta del eje: el eje Y de GraficaBarras mide 110 px.
-const MAX_ETIQUETA = 16;
+// Ancho máximo (en caracteres) del nombre en el ranking: BarrasPildora lo reparte en 2 líneas (columna de ~150 px, ~120 px a 360 px),
+// así que cabe un nombre y un apellido enteros sin las iniciales de antes.
+const MAX_ETIQUETA = 28;
 
 /**
  * Los `n` alumnos de mayor puntaje para barras horizontales apiladas por nivel (cada nivel su serie y su color).
- * Las etiquetas del eje son únicas y nunca pasan de MAX_ETIQUETA caracteres: si dos nombres cortos chocan se recortan y
+ * Las etiquetas son únicas y nunca pasan de MAX_ETIQUETA caracteres: si dos nombres cortos chocan se recortan y
  * llevan los últimos 4 de la matrícula ("González C. #3456"); como último recurso, un número de orden.
  */
 export function topRiesgo(items = [], n = TOP_RIESGO) {

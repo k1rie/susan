@@ -144,16 +144,48 @@ const esquemaReconocer = z.object({
     image: z.object({ width: z.number(), height: z.number() }),
     faces: z.array(esquemaRostro),
 });
+const esquemaMedidasCalidad = z.object({
+    brillo: z.number(),
+    nitidez: z.number(),
+    tamano_rostro_px: z.number(),
+    frontal: z.boolean(),
+});
+// `motivo_rechazo` es la frase del servicio (puede cambiar); `motivo_codigo` es el identificador estable que usa
+// la pantalla para decidir el texto. Un servicio anterior a esta mejora no lo manda: queda en null.
+const motivoCodigo = z.string().nullable().optional().transform((v) => v ?? null);
 const esquemaCalidadFoto = z.object({
     rostros: z.number().int(),
     un_solo_rostro: z.boolean(),
-    calidad: z.object({
-        brillo: z.number(),
-        nitidez: z.number(),
-        tamano_rostro_px: z.number(),
-        frontal: z.boolean(),
-    }),
+    calidad: esquemaMedidasCalidad,
     motivo_rechazo: z.string().nullable(),
+    motivo_codigo: motivoCodigo,
+});
+const numeroONulo = z.number().nullable().optional().transform((v) => v ?? null);
+// /v1/photo/check-set: estado por foto y consistencia entre fotos. NUNCA trae vectores (RNF-03; sinVectores lo asegura).
+export const ESTADOS_FOTO_CONJUNTO = ['aceptada', 'calidad', 'inconsistente', 'ilegible'];
+const esquemaConjunto = z.object({
+    total: z.number().int(),
+    aceptadas: z.number().int(),
+    minimo: z.number().int(),
+    maximo: z.number().int(),
+    suficiente: z.boolean(),
+    consistente: z.boolean().nullable().optional().transform((v) => v ?? null),
+    ambiguo: z.boolean().optional().transform((v) => v ?? false),
+    umbral_coseno: z.number(),
+    coseno_min: numeroONulo,
+    coseno_medio: numeroONulo,
+    coseno_max_par: numeroONulo,
+    advertencias: z.array(z.string()).optional().transform((v) => v ?? []),
+    fotos: z.array(z.object({
+        indice: z.number().int(),
+        estado: z.enum(ESTADOS_FOTO_CONJUNTO),
+        rostros: z.number().int().nullable().optional().transform((v) => v ?? null),
+        un_solo_rostro: z.boolean().nullable().optional().transform((v) => v ?? null),
+        calidad: esquemaMedidasCalidad.nullable().optional().transform((v) => v ?? null),
+        motivo_rechazo: z.string().nullable().optional().transform((v) => v ?? null),
+        motivo_codigo: motivoCodigo,
+        coseno_resto: numeroONulo,
+    })),
 });
 const esquemaBuild = z.object({
     version: z.string(),
@@ -161,7 +193,25 @@ const esquemaBuild = z.object({
     dimension: z.number().int(),
     ntotal: z.number().int(),
     mapeo: z.array(z.object({ id_plantilla: z.number().int(), faiss_id: z.number().int() })),
-    errores: z.array(z.object({ id_plantilla: z.number().int(), motivo: z.string() })),
+    errores: z.array(z.object({
+        id_plantilla: z.number().int(),
+        motivo: z.string(),
+        codigo: z.string().optional(), // p. ej. SIN_MUESTRAS_UTILIZABLES
+    })),
+    // Resumen escalar por plantilla de varias fotos (cuántas se usaron, cuáles se descartaron y su coseno). Sin vectores.
+    muestras: z.array(z.object({
+        id_plantilla: z.number().int(),
+        total: z.number().int(),
+        usadas: z.number().int(),
+        descartadas: z.array(z.object({
+            indice: z.number().int(),
+            motivo: z.string(),
+            coseno_resto: numeroONulo,
+        })),
+        coseno_min: numeroONulo,
+        coseno_medio: numeroONulo,
+        degradada: z.boolean(),
+    })).optional().transform((v) => v ?? []),
 });
 const esquemaInfoIndice = z.object({
     version: z.string().nullable(),
@@ -235,7 +285,39 @@ export async function verificarFotoServicio(imagen) {
     return leerJson(r, esquemaCalidadFoto);
 }
 
-/** POST /v1/index/build. `entries`: [{ id_plantilla, faiss_id, keep: true } | { id_plantilla, faiss_id, objeto_foto }]. */
+/**
+ * La respuesta de /check-set debe cubrir EXACTAMENTE las n fotos enviadas y en orden: la pantalla y el alta aplican
+ * cada resultado por posición, así que un servicio que omita, repita o desordene fotos no puede pasar inadvertido
+ * (se descartaría la foto equivocada o se subiría una sin verificar).
+ * @throws {ApiError} 502 SERVICIO_RECONOCIMIENTO_ERROR
+ */
+export function validarFormaConjunto(conjunto, n) {
+    const ok = Array.isArray(conjunto?.fotos)
+        && conjunto.fotos.length === n
+        && conjunto.fotos.every((f, i) => f?.indice === i);
+    if (!ok) {
+        throw error('SERVICIO_RECONOCIMIENTO_ERROR', 'El servicio de reconocimiento devolvió una respuesta inesperada.', 502);
+    }
+    return conjunto;
+}
+
+/**
+ * POST /v1/photo/check-set: calidad de cada toma y consistencia de identidad entre ellas (1 a 8 fotos).
+ * No guarda nada ni devuelve vectores. Hasta 8 fotos de ~300 KB: 30 s de margen, un reintento ante 502/503.
+ * @param {Blob[]} imagenes
+ */
+export async function verificarFotosServicio(imagenes) {
+    if (!Array.isArray(imagenes) || imagenes.length === 0) throw error('VALIDACION', 'Falta la imagen.', 422);
+    const form = new FormData();
+    imagenes.forEach((imagen, i) => form.append('images', bytesDeImagen(imagen)[0], `foto-${i + 1}.jpg`));
+    const r = await recognitionFetch('/v1/photo/check-set', { method: 'POST', body: form, timeoutMs: 30_000, reintentos: 1 });
+    return validarFormaConjunto(await leerJson(r, esquemaConjunto), imagenes.length);
+}
+
+/**
+ * POST /v1/index/build. `entries`: [{ id_plantilla, faiss_id, keep: true } | { id_plantilla, faiss_id, objeto_foto }
+ * | { id_plantilla, faiss_id, objetos_foto: [2 a 8 rutas] }] (la tercera forma promedia las fotos en un centroide).
+ */
 export async function construirIndice({ version, baseVersion = null, entries }) {
     const r = await recognitionFetch('/v1/index/build', {
         method: 'POST',
@@ -273,6 +355,7 @@ export async function manifiestoIndice(version) {
 export const recognition = {
     recognize: reconocer,
     photoCheck: verificarFotoServicio,
+    photoCheckSet: verificarFotosServicio,
     indexBuild: construirIndice,
     indexActivate: activarIndice,
     indexInfo: infoIndice,

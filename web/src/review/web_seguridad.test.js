@@ -133,7 +133,7 @@ describe.skipIf(!vivo)('servidor real :3000 (modo local)', () => {
     it('HALLAZGO: el login local no limita intentos y filtra existencia de la cuenta por tiempo', async () => {
         const medir = async (correo) => {
             const t = [];
-            for (let i = 0; i < 5; i += 1) {
+            for (let i = 0; i < 7; i += 1) {
                 const t0 = performance.now();
                 const r = await fetch(`${B}/api/_local/auth/login`, {
                     method: 'POST', headers: O, body: JSON.stringify({ email: correo, password: 'mala-clave-123' }),
@@ -141,7 +141,8 @@ describe.skipIf(!vivo)('servidor real :3000 (modo local)', () => {
                 expect(r.status).toBe(400); // jamas 429
                 t.push(performance.now() - t0);
             }
-            return t.sort((a, b) => a - b)[2];
+            // El minimo descarta el ruido por carga de CPU (la suite corre en paralelo); la mediana flaqueaba con la maquina ocupada.
+            return Math.min(...t);
         };
         const existe = await medir('admin@susan.local');
         const noExiste = await medir('nadie-xyz@susan.local');

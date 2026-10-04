@@ -14,6 +14,7 @@ const RUTAS = {
     'consentimientos/[id]/revocar': ['POST'],
     'documentos/consentimiento/[id]': ['GET'],
     'documentos/plantilla/[id]': ['GET'],
+    'documentos/plantilla_foto/[id]': ['GET'],
     'indice': ['GET'],
     'indice/reconstruir': ['POST'],
     'indice/revertir': ['POST'],

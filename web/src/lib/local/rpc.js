@@ -5,6 +5,7 @@
 // el patron, y ademas que existan en pg_proc (lista blanca consultada a la propia base).
 import pg from 'pg';
 import { obtenerPool } from './pool.js';
+import { valorRelojSql } from './reloj.js';
 import { esUuid } from './session.js';
 
 const RE_NOMBRE = /^(api|svc)_[a-z0-9_]+$/;
@@ -151,8 +152,9 @@ export async function ejecutarRpc(nombre, args, contexto = {}) {
         await cliente.query(`SET LOCAL ROLE ${rol}`);
         await cliente.query(`SET LOCAL statement_timeout = '${TIMEOUT_SENTENCIA}'`);
         await cliente.query("SELECT set_config('request.jwt.claims', $1, true)", [JSON.stringify(claims)]);
-        // Reloj de demostracion (solo surte efecto si la BD tiene app.allow_fake_clock = 'on').
-        const falso = process.env.LOCAL_FAKE_NOW;
+        // Reloj de demostracion (solo surte efecto si la BD tiene app.allow_fake_clock = 'on'). Se lee en CADA RPC
+        // (reloj.js, con cache por mtime) para poder moverlo en caliente desde /api/_local/reloj sin reiniciar Next.
+        const falso = valorRelojSql();
         if (falso) await cliente.query("SELECT set_config('app.fake_now', $1, true)", [falso]);
 
         const res = await cliente.query({

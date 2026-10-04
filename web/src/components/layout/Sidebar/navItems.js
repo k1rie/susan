@@ -7,6 +7,7 @@ import {
     GraduationCap,
     LayoutDashboard,
     Presentation,
+    ScanFace,
     ScrollText,
     UserCheck,
     UserCog,
@@ -16,7 +17,9 @@ import {
 
 // Definición única de la navegación por rol (plataforma.md 2.5). Las sesiones no tienen ítem propio.
 // El primer ítem de cada rol es su «Inicio» (va arriba, junto a Buscar); el resto se agrupa bajo `grupo` (título de sección del
-// riel, como «Chats»/«Stacks» en Dropbox Dash). Iconos: SIEMPRE de Lucide.
+// riel, como «Chats»/«Stacks» en Dropbox Dash). Un ítem SIN `grupo` queda justo debajo de «Buscar», sin título de sección: se
+// reserva para la acción principal del rol («Pasar lista» del docente), que no debe esconderse dentro de un grupo.
+// Iconos: SIEMPRE de Lucide.
 export const NAV_POR_ROL = {
     administrador: [
         { href: '/admin', label: 'Inicio', icon: LayoutDashboard },
@@ -33,12 +36,20 @@ export const NAV_POR_ROL = {
     ],
     docente: [
         { href: '/docente', label: 'Panel', icon: LayoutDashboard },
+        { href: '/docente/pasar-lista', label: 'Pasar lista', icon: ScanFace },
         { href: '/docente/revision', label: 'Revisión', icon: ClipboardCheck, grupo: 'Asistencia' },
         { href: '/reportes', label: 'Reportes', icon: FileBarChart, grupo: 'Asistencia' },
         { href: '/analitica', label: 'Analítica', icon: ChartLine, grupo: 'Análisis' },
     ],
     alumno: [{ href: '/alumno', label: 'Mi asistencia', icon: UserCheck }],
     tecnico: [{ href: '/tecnico', label: 'Consola técnica', icon: Wrench }],
+};
+
+// Acción del botón redondo central de la barra inferior móvil, por rol (un solo lugar). Forma: { href, label, icon }. Los roles que
+// no aparecen aquí conservan el botón por omisión de BottomNav: «Buscar o ir a» (abre la paleta de comandos). El docente pasa lista
+// a diario, así que su botón más grande y central lo lleva a /docente/pasar-lista; el buscador sigue en la barra superior.
+export const ACCION_CENTRAL_POR_ROL = {
+    docente: { href: '/docente/pasar-lista', label: 'Pasar lista', icon: ScanFace },
 };
 
 export const ROL_ETIQUETA = {
@@ -50,6 +61,11 @@ export const ROL_ETIQUETA = {
 
 export function navParaRol(rol) {
     return NAV_POR_ROL[rol] ?? [];
+}
+
+/** Acción central de la barra inferior para el rol, o null si usa la búsqueda por omisión. */
+export function accionCentralParaRol(rol) {
+    return ACCION_CENTRAL_POR_ROL[rol] ?? null;
 }
 
 export function rolEtiqueta(rol) {

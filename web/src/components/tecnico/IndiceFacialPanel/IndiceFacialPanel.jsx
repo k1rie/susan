@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Alert from '@/components/ui/Alert';
+import AnilloEstados from '@/components/ui/AnilloEstados';
 import Badge from '@/components/ui/Badge';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
@@ -9,7 +10,6 @@ import Checkbox from '@/components/ui/Checkbox';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import DataState from '@/components/ui/DataState';
 import Detalles from '@/components/ui/Detalles';
-import GraficaDona from '@/components/ui/GraficaDona';
 import Spinner from '@/components/ui/Spinner';
 import TarjetaGrafica from '@/components/ui/TarjetaGrafica';
 import { CONFIG_PLANTILLAS, datosPlantillas, fechaHora, porcentajeIndexado, resumenPlantillas, textoPlantillas, textoVersiones } from './indiceFacial.utils.js';
@@ -96,11 +96,11 @@ export default function IndiceFacialPanel({ soloLectura = false }) {
                                     descripcion={`${p.activas ?? 0} activas${(p.obsoletas_en_indice ?? 0) > 0 ? ` · ${p.obsoletas_en_indice} obsoletas en el índice` : ''}`}
                                     resumen={resumenPlantillas(p)}
                                 >
-                                    <GraficaDona
+                                    <AnilloEstados
                                         datos={datosPlantillas(p)}
                                         config={CONFIG_PLANTILLAS}
                                         centro={{ valor: `${porcentajeIndexado(p)} %`, etiqueta: 'Indexadas' }}
-                                        alto={210}
+                                        alto={240}
                                         vacio="No hay plantillas activas"
                                     />
                                 </TarjetaGrafica>

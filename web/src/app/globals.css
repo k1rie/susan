@@ -43,7 +43,7 @@
   --ring: #0061fe;
   --radius: 0.625rem;
 
-  /* Gráficas (recharts) */
+  /* Gráficas: color base de cada serie; colorGrafica (lib/graficas.js) lo traduce al tono vivo --g-* */
   --chart-1: #0061fe;
   --chart-2: #a8842c;
   --chart-3: #1f7a47;
@@ -81,6 +81,18 @@
   --pendiente-bg: #eeebe6;
   --justificado: #1f5fa8;
   --justificado-bg: #e1edfa;
+
+  /* Colores de GRÁFICAS: más vivos y suaves que los de texto (--presente, --ausente…), que son oscuros para leerse como texto.
+     Todos ≥ 3:1 contra el blanco (WCAG 1.4.11; el dorado se oscureció a #a8842c, el mismo tono de --chart-2, porque #c9a13a daba 2,43:1);
+     nunca son el único canal (siempre hay etiqueta y cifra al lado). */
+  --g-presente: #27a06a;
+  --g-retardo: #c98100;
+  --g-ausente: #de4d44;
+  --g-justificado: #4a86f0;
+  --g-pendiente: #8f8a82;
+  --g-azul: #4a86f0;
+  --g-violeta: #8b6fe0;
+  --g-dorado: #a8842c;
 
   /* Portadas pastel de las tarjetas (fondo y trazo del icono por tono) */
   --tono-azul: #e6eefc;
@@ -144,6 +156,14 @@
   --pendiente-bg: rgba(148, 163, 184, 0.16);
   --justificado: #82b8f2;
   --justificado-bg: rgba(106, 169, 236, 0.18);
+  --g-presente: #4cc38a;
+  --g-retardo: #e0a63a;
+  --g-ausente: #f0746c;
+  --g-justificado: #6aa3ff;
+  --g-pendiente: #a39d96;
+  --g-azul: #6aa3ff;
+  --g-violeta: #a58df0;
+  --g-dorado: #d9b65c;
   --tono-azul: #1b2a45;
   --tono-azul-fg: #8db4ff;
   --tono-dorado: #3a3118;
@@ -410,7 +430,8 @@
   .no-print {
     display: none !important;
   }
-  /* Nada animado puede quedar oculto al imprimir/exportar a PDF (las entradas por scroll no se disparan al imprimir). */
+  /* Nada animado puede quedar oculto al imprimir/exportar a PDF (las entradas por scroll no se disparan al imprimir). Esta regla solo
+     alcanza a [data-anim]; las gráficas guardan su estado cerrado en estilo inline y las revela useEnVista por `beforeprint`. */
   [data-anim],
   [data-anim] * {
     opacity: 1 !important;

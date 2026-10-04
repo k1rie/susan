@@ -21,25 +21,52 @@ export function revocarConsentimiento({ idConsent }, { signal } = {}) {
 }
 
 /**
- * URL firmada (<= 300 s) de un documento o foto. tipo: 'consentimiento' (idRegistro = id_consent) o
- * 'plantilla' (idRegistro = id_plantilla). Cada consulta queda en bitácora (RF-19).
+ * URL firmada (<= 300 s) de un documento o foto. tipo: 'consentimiento' (idRegistro = id_consent),
+ * 'plantilla' (idRegistro = id_plantilla; la foto principal) o 'plantilla_foto' (idRegistro = id_foto; una foto
+ * concreta de la plantilla). Cada consulta queda en bitácora (RF-19).
  * @returns {Promise<{ tipo: string, id_registro: number, url: string, expira_en: string, vigencia_seg: number }>}
  */
 export function solicitarUrlDocumento({ tipo, idRegistro }, { signal } = {}) {
     return getJSON(`/api/documentos/${encodeURIComponent(tipo)}/${encodeURIComponent(idRegistro)}`, { signal });
 }
 
-/** POST /api/plantilla/verificar -> { rostros, un_solo_rostro, calidad, motivo_rechazo }. */
+/** POST /api/plantilla/verificar -> { rostros, un_solo_rostro, calidad, motivo_rechazo, motivo_codigo }. Una sola foto (heredado). */
 export function verificarFoto(blob, { signal } = {}) {
     const form = new FormData();
     form.append('foto', blob, 'foto.jpg');
     return postForm('/api/plantilla/verificar', form, { signal });
 }
 
-/** POST /api/alumnos/{id}/plantilla -> plantilla registrada + `indice` ({ estado, version }). */
-export function registrarPlantilla({ idAlumno, idConsent, foto }, { signal } = {}) {
+/**
+ * POST /api/plantilla/verificar con varias tomas. Se mandan TODAS las que se sostienen (1 a 8) en cada llamada:
+ * el servidor no guarda sesiones de captura y la consistencia entre fotos solo se puede medir con el conjunto.
+ * Exige id_alumno e id_consent (el consentimiento debe estar vigente). No guarda nada.
+ * @param {Blob[]} blobs en el orden de envío (la primera es la foto principal)
+ * @returns {Promise<{ total: number, aceptadas: number, minimo: number, maximo: number, suficiente: boolean,
+ *   consistente: boolean | null, ambiguo: boolean, umbral_coseno: number, coseno_min: number | null,
+ *   coseno_medio: number | null, coseno_max_par: number | null, advertencias: string[],
+ *   fotos: { indice: number, estado: 'aceptada' | 'calidad' | 'inconsistente' | 'ilegible' | 'duplicada',
+ *     rostros: number | null, un_solo_rostro: boolean | null, calidad: object | null, motivo_rechazo: string | null,
+ *     motivo_codigo: string | null, coseno_resto: number | null, duplicada_de: number | null }[] }>}
+ */
+export function verificarFotos(blobs, { idAlumno, idConsent, signal } = {}) {
     const form = new FormData();
-    form.append('foto', foto, 'foto.jpg');
+    blobs.forEach((blob, i) => form.append('fotos', blob, `foto-${i + 1}.jpg`));
+    form.append('id_alumno', String(idAlumno));
+    form.append('id_consent', String(idConsent));
+    return postForm('/api/plantilla/verificar', form, { signal });
+}
+
+/**
+ * POST /api/alumnos/{id}/plantilla -> plantilla registrada + `indice` ({ estado, version }) + `muestra`.
+ * Con `fotos` (arreglo de 2 a 8 Blob) se registra la plantilla promediada (3 o más: el mínimo lo decide el
+ * servicio de reconocimiento); con `foto` se usa el camino heredado de una sola foto.
+ * @returns {Promise<{ id_plantilla: number, n_fotos: number, indice: object, version: string | null, muestra: object | null }>}
+ */
+export function registrarPlantilla({ idAlumno, idConsent, foto, fotos }, { signal } = {}) {
+    const form = new FormData();
+    if (Array.isArray(fotos)) fotos.forEach((blob, i) => form.append('fotos', blob, `foto-${i + 1}.jpg`));
+    else form.append('foto', foto, 'foto.jpg');
     form.append('id_consent', String(idConsent));
     return postForm(`/api/alumnos/${encodeURIComponent(idAlumno)}/plantilla`, form, { signal });
 }

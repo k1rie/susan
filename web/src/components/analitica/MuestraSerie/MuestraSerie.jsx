@@ -1,11 +1,12 @@
 import clsx from 'clsx';
 
-// Muestra de una serie en la leyenda y el tooltip de las gráficas. Ajuste, proyección e intervalo comparten el azul de la
-// gráfica, así que la forma (línea, discontinua, banda, punto) es lo que las distingue: la señal no depende solo del color.
+// Muestra de una serie en el tooltip de las gráficas de línea. Ajuste, proyección e intervalo comparten el azul de la gráfica, así que
+// la forma (línea, discontinua, banda, punto) es lo que las distingue: la señal no depende solo del color. Mismas medidas que las
+// muestras de la leyenda de GraficaLinea, para que leyenda y tooltip se vean como una sola cosa.
 const FORMAS = {
-    punto: 'size-2 rounded-full',
+    punto: 'size-2.5 rounded-full',
     linea: 'h-0.5 w-4 rounded-full',
-    banda: 'h-2.5 w-4 rounded-[2px] opacity-30',
+    banda: 'h-2.5 w-4 rounded-[3px] opacity-30',
 };
 
 export default function MuestraSerie({ forma = 'punto', color, className }) {

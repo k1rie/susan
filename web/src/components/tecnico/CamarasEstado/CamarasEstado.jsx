@@ -1,15 +1,16 @@
 'use client';
 
+import { Camera, ImageOff, VideoOff } from 'lucide-react';
 import { useState } from 'react';
 import { camarasEstado, camaraCambiarEstatus } from '@/lib/api/biometria.js';
 import { useApiQuery, useApiMutation } from '@/hooks/data';
 import Alert from '@/components/ui/Alert';
+import BarrasPildora from '@/components/ui/BarrasPildora';
 import Card from '@/components/ui/Card';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import DataState from '@/components/ui/DataState';
 import Detalles from '@/components/ui/Detalles';
 import EmptyState from '@/components/ui/EmptyState';
-import GraficaBarras from '@/components/ui/GraficaBarras';
 import Select from '@/components/ui/Select';
 import StatCard from '@/components/ui/StatCard';
 import StatusChip from '@/components/ui/StatusChip';
@@ -18,7 +19,6 @@ import { useToast } from '@/components/ui/Toast';
 import {
     CONFIG_CAPTURAS,
     ESTATUS_CAMARA,
-    altoCapturas,
     contadoresCamaras,
     datosCapturas,
     haceCuanto,
@@ -70,24 +70,25 @@ export default function CamarasEstado({ soloLectura = false }) {
                     const capturas = datosCapturas(d.items);
                     return (
                         <>
-                            {/* A 360 px tres columnas dejaban ~70 px útiles y las etiquetas se partían: dos arriba y la tercera a todo el ancho. */}
+                            {/* A 360 px tres columnas dejaban ~70 px útiles y las etiquetas se partían: dos arriba y la tercera a todo el ancho.
+                                Activas se lee frente al total («5 / 6»); sin ninguna activa deja de pintarse en verde. Las tres llevan apoyo para que las cifras
+                                queden a la misma altura en la fila. */}
                             <section aria-label="Resumen de cámaras" className="grid grid-cols-2 gap-2 sm:gap-3 min-[520px]:grid-cols-3">
-                                <StatCard animated label="Activas" value={n.activas} tone="success" />
-                                <StatCard animated label="Inactivas" value={n.inactivas} hint="Con mantenimiento" />
-                                <StatCard animated label="Sin capturas" value={n.sinCapturas} tone={n.sinCapturas > 0 ? 'warning' : 'neutral'} hint="Activas, 24 h" className="col-span-2 min-[520px]:col-span-1" />
+                                <StatCard animated icon={Camera} label="Activas" value={n.activas} unit={`/ ${n.total}`} tone={n.activas > 0 ? 'success' : 'neutral'} hint="En operación" />
+                                <StatCard animated icon={VideoOff} label="Inactivas" value={n.inactivas} hint="Con mantenimiento" />
+                                <StatCard animated icon={ImageOff} label="Sin capturas" value={n.sinCapturas} tone={n.sinCapturas > 0 ? 'warning' : 'neutral'} hint="Activas, 24 h" className="col-span-2 min-[520px]:col-span-1" />
                             </section>
                             <TarjetaGrafica
                                 titulo="Capturas en 24 h por cámara"
                                 resumen={resumenCapturas(capturas)}
                                 pie={capturas.omitidas > 0 ? `Se muestran las ${capturas.filas.length} con más capturas; todas están abajo.` : undefined}
                             >
-                                <GraficaBarras
+                                <BarrasPildora
                                     horizontal
                                     datos={capturas.filas}
                                     ejeX="camara"
                                     series={[{ clave: 'capturas' }]}
                                     config={CONFIG_CAPTURAS}
-                                    alto={altoCapturas(capturas.filas.length)}
                                 />
                             </TarjetaGrafica>
                             <ul className="grid gap-3 md:grid-cols-2">
