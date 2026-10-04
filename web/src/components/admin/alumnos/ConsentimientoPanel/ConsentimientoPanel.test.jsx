@@ -1,15 +1,16 @@
 // @vitest-environment jsdom
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
+import { ToastProvider } from '@/components/ui/Toast';
 import { ApiError } from '@/lib/api/errors.js';
 import ConsentimientoPanel from './ConsentimientoPanel.jsx';
 import { resumenConsentimiento, validarConsentimiento } from './consentimiento.utils.js';
 
-const mocks = vi.hoisted(() => ({ consentimientosAlumno: vi.fn() }));
+const mocks = vi.hoisted(() => ({ consentimientosAlumno: vi.fn(), revocarConsentimiento: vi.fn() }));
 vi.mock('@/lib/api/biometria.js', () => ({ consentimientosAlumno: mocks.consentimientosAlumno }));
 vi.mock('@/lib/http/biometria.js', () => ({
     registrarConsentimiento: vi.fn(),
-    revocarConsentimiento: vi.fn(),
+    revocarConsentimiento: mocks.revocarConsentimiento,
     solicitarUrlDocumento: vi.fn(),
 }));
 
@@ -70,5 +71,32 @@ describe('ConsentimientoPanel', () => {
         });
         render(<ConsentimientoPanel idAlumno={1} />);
         expect(await screen.findByText('Reintentar')).toBeInTheDocument();
+    });
+
+    describe('revocar', () => {
+        const revocar = async (respuesta) => {
+            mocks.consentimientosAlumno.mockResolvedValue({ vigente: true, consentimiento_vigente: { id_consent: 1, vigencia_hasta: '2027-08-01', dias_restantes: 100 }, total: 1, items: [item()] });
+            mocks.revocarConsentimiento.mockResolvedValue(respuesta);
+            render(
+                <ToastProvider>
+                    <ConsentimientoPanel idAlumno={1} />
+                </ToastProvider>,
+            );
+            fireEvent.click(await screen.findByRole('button', { name: 'Revocar' }));
+            const dialogo = await screen.findByRole('dialog');
+            fireEvent.click(within(dialogo).getByRole('button', { name: 'Revocar' }));
+        };
+
+        it('con el índice reconstruido avisa que la plantilla se archivó', async () => {
+            await revocar({ requiere_reconstruccion: true, indice: { estado: 'activada', version: 'v005' } });
+            expect(await screen.findByText('La plantilla ligada se archivó.')).toBeInTheDocument();
+            expect(screen.queryByText(/conserva el vector/)).not.toBeInTheDocument();
+        });
+
+        it('con el índice pendiente avisa que el vector sigue en el índice hasta reconstruirlo', async () => {
+            await revocar({ requiere_reconstruccion: true, indice: { estado: 'pendiente', version: null, error: { code: 'INDICE_CONSTRUCCION_FALLIDA' } } });
+            expect(await screen.findByText('El índice facial conserva el vector hasta que se reconstruya; pide a un técnico que lo reconstruya.')).toBeInTheDocument();
+            expect(screen.queryByText('La plantilla ligada se archivó.')).not.toBeInTheDocument();
+        });
     });
 });

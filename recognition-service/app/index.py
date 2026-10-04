@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import base64
 import json
+import logging
 import threading
 import time
 from dataclasses import dataclass
@@ -16,6 +17,8 @@ from app.errors import ApiError, index_not_loaded
 from app.storage import ObjectNotFound, Storage
 
 FORMAT = 'susan-faiss-json/1'
+
+log = logging.getLogger('susan.recognition')
 
 
 class IndexFormatError(ValueError):
@@ -138,10 +141,13 @@ def cosine_to_score(cos: float) -> float:
 class IndexManager:
     """Carga/activa versiones. El lock serializa build/activate; las lecturas usan el puntero sin bloquear."""
 
-    def __init__(self, storage: Storage, dimension: int, model_name: str):
+    def __init__(self, storage: Storage, dimension: int, model_name: str, accept_models: tuple[str, ...] = ()):
         self.storage = storage
         self.dimension = dimension
         self.model_name = model_name
+        # Modelos ajenos que se toleran al LEER un indice (INDEX_ACCEPT_MODELS). Un `build` siempre escribe con
+        # `model_name`, asi que una reconstruccion sobre una base ajena deja el indice nuevo con el modelo propio.
+        self.accept_models = tuple(accept_models)
         self.lock = threading.RLock()
         self._current: LoadedIndex | None = None  # asignacion de referencia = atomica en CPython
         self._preloaded: dict[str, LoadedIndex] = {}
@@ -168,9 +174,12 @@ class IndexManager:
             raise ApiError(422, 'INDEX_INVALID', str(e)) from None
         if payload.version != version:
             raise ApiError(422, 'INDEX_INVALID', 'La version del contenido no coincide con el nombre del objeto.')
-        if payload.model != self.model_name:
+        if payload.model != self.model_name and payload.model not in self.accept_models:
             raise ApiError(422, 'INDEX_INVALID',
                            f'El indice fue construido con el modelo {payload.model!r}, no con {self.model_name!r}.')
+        if payload.model != self.model_name:
+            log.warning('Indice %s construido con el modelo %r y leido con %r (INDEX_ACCEPT_MODELS): sus vectores '
+                        'no son comparables con los de este embedder.', version, payload.model, self.model_name)
         return payload
 
     def activate(self, version: str, preload_only: bool = False) -> dict:

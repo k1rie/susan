@@ -28,6 +28,10 @@ SELECT public.api_plantilla_registrar(t.id_alumno('A002'), t.id_consent('A002'),
 SELECT public.api_plantilla_registrar(t.id_alumno('A003'), t.id_consent('A003'), t.ruta('registro', 'A003', 1, 'jpg'));
 SELECT t.as_service();
 SELECT t.eq((public.svc_indice_plan() #>> '{totales,nuevas}')::int, 2, 'plan: 2 nuevas');
+SELECT t.ok((SELECT bool_and(CASE WHEN (e ->> 'en_base')::boolean THEN e -> 'objetos_foto' = 'null'::jsonb
+                                  ELSE jsonb_array_length(e -> 'objetos_foto') = 1 AND e -> 'objetos_foto' ->> 0 = e ->> 'objeto_foto' END)
+               FROM jsonb_array_elements(public.svc_indice_plan() -> 'entries') e),
+    'plan: objetos_foto es null en las plantillas en base y [objeto_foto] en las nuevas de una foto');
 SELECT t.ok(NOT (public.svc_indice_plan() ->> 'nada_que_hacer')::boolean, 'plan: hay nuevas => hay trabajo');
 SELECT t.eq((SELECT string_agg((e ->> 'faiss_id') || ':' || (e ->> 'en_base'), ',' ORDER BY (e ->> 'id_plantilla')::int) FROM jsonb_array_elements(public.svc_indice_plan() -> 'entries') e),
     '0:true,1:true,2:false,3:false', 'plan: faiss_id nuevos = max + posicion');

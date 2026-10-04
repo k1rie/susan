@@ -62,14 +62,26 @@ export default function ConsentimientoPanel({ idAlumno, version = 0, onCambio })
     };
 
     const revocar = async () => {
+        let respuesta;
         try {
-            await revocarConsentimiento({ idConsent: resumen.idConsent });
+            respuesta = await revocarConsentimiento({ idConsent: resumen.idConsent });
         } catch (err) {
             toast({ tone: 'danger', title: 'No se pudo revocar', message: err.message });
             throw err;
         }
         setConfirmando(false);
-        toast({ tone: 'success', title: 'Consentimiento revocado', message: 'La plantilla ligada se archivó.' });
+        // La revocación solo es efectiva cuando el índice se reconstruye: si quedó pendiente, el vector sigue
+        // en el índice y hay que avisarlo en lugar de dar el trámite por cerrado.
+        if (respuesta?.indice?.estado === 'pendiente') {
+            toast({
+                tone: 'warning',
+                title: 'Consentimiento revocado',
+                message: 'El índice facial conserva el vector hasta que se reconstruya; pide a un técnico que lo reconstruya.',
+                durationMs: 10000,
+            });
+        } else {
+            toast({ tone: 'success', title: 'Consentimiento revocado', message: 'La plantilla ligada se archivó.' });
+        }
         await alCambiar();
     };
 

@@ -329,3 +329,43 @@ def test_latencia_busqueda_20000_vectores():
     fuera = next(i for i in range(n) if i not in set(allowed))
     (r,) = idx.search(v[fuera][None, :], allowed)
     assert r[0] != fuera
+
+
+# ---------- modelos de indice ajenos (INDEX_ACCEPT_MODELS) ----------
+def test_indice_de_otro_modelo_se_rechaza_por_omision(client, storage):
+    build(client, storage, 'v1', {1: (10, 11)})
+    # Mismo contenido, pero etiquetado con otro modelo: el modo estricto lo rechaza al activar y como base de un build.
+    ajeno = parse_index(storage.get('indice/v1.json'), DIM)
+    ajeno.version, ajeno.model = 'v9', 'buffalo_s'
+    storage.put('indice/v9.json', dump_index(ajeno))
+    r = client.post('/v1/index/activate', json={'version': 'v9'})
+    assert r.status_code == 422 and r.json()['code'] == 'INDEX_INVALID'
+    r = client.post('/v1/index/build', json={'version': 'v10', 'base_version': 'v9',
+                                             'entries': [{'id_plantilla': 1, 'faiss_id': 10, 'keep': True}]})
+    assert r.status_code == 422 and r.json()['code'] == 'INDEX_INVALID'
+
+
+def test_indice_ajeno_aceptado_se_conserva_y_se_reetiqueta(settings, storage):
+    # Demo bajo insightface: el indice 'buffalo_s' (vectores de otro modelo) se acepta como base y se conserva;
+    # el indice nuevo queda con el modelo propio ('fake-hash' aqui) y el vector ajeno no coincide con rostros propios.
+    cfg = Settings(**{**settings.__dict__, 'index_accept_models': ('buffalo_s',)})
+    with TestClient(create_app(cfg, storage=storage, embedder=FakeEmbedder(DIM)), headers={'X-API-Key': KEY}) as c:
+        build(c, storage, 'v1', {1: (10, 11)})
+        ajeno = parse_index(storage.get('indice/v1.json'), DIM)
+        ajeno.version, ajeno.model = 'v2', 'buffalo_s'
+        storage.put('indice/v2.json', dump_index(ajeno))
+        assert activate(c, 'v2')['model'] == 'buffalo_s'
+        b = build(c, storage, 'v3', {2: (20, 22)}, base='v2', keep=[(1, 10)])
+        assert b['ntotal'] == 2 and b['errores'] == []
+        p = parse_index(storage.get('indice/v3.json'), DIM)
+        assert p.model == 'fake-hash'
+        assert np.array_equal(p.vectors[0], ajeno.vectors[0])  # el vector ajeno se conserva byte a byte
+        activate(c, 'v3')
+        assert recognize(c, face_image(22), [10, 20]).json()['faces'][0]['candidate']['faiss_id'] == 20
+
+
+def test_accept_models_desde_el_entorno(monkeypatch):
+    monkeypatch.setenv('INDEX_ACCEPT_MODELS', ' fake-hash , buffalo_s ,')
+    assert Settings.from_env().index_accept_models == ('fake-hash', 'buffalo_s')
+    monkeypatch.delenv('INDEX_ACCEPT_MODELS')
+    assert Settings.from_env().index_accept_models == ()
