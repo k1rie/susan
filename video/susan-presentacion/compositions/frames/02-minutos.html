@@ -1,0 +1,478 @@
+<template>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+<style>
+/* Cuadro 02 · Minutos (v2). Los ids y clases empiezan con un digito, por eso en CSS se escapan como \30 2 */
+@font-face{font-family:"Hanken Grotesk";font-weight:400 700;font-style:normal;font-display:block;src:url("assets/fonts/HankenGrotesk-var.woff2") format("woff2");}
+@font-face{font-family:"Geist Mono";font-weight:400 700;font-style:normal;font-display:block;src:url("assets/fonts/GeistMono-var.woff2") format("woff2");}
+
+#root{position:absolute;inset:0;width:1920px;height:1080px;overflow:hidden;
+    --ink:#1e1919;--mfg:#6f6a65;--lt:#9a948d;--line:#e7e2dc;--blue:#0061fe;--warn:#9a6408;--g-warn:#c98100;
+    font-family:'Hanken Grotesk',system-ui,sans-serif;color:var(--ink);font-feature-settings:'tnum' 1;-webkit-font-smoothing:antialiased}
+#root *{box-sizing:border-box}
+
+/* fondo crema a pantalla completa (capa clip propia, fuera de la camara) */
+#\30 2-minutos-bg{position:absolute;inset:0;background:#f7f5f2}
+
+/* camara: UN solo wrapper (scale/x/y/rotation los pone GSAP con los helpers cam*) */
+#\30 2-minutos-world{position:absolute;inset:0;transform-origin:50% 50%;will-change:transform}
+
+/* brillo calido detras del anillo (florece a 2.15 s y se expande en el slam) */
+#\30 2-minutos-glow{position:absolute;left:40px;top:120px;width:880px;height:880px;border-radius:50%;pointer-events:none;
+    background:radial-gradient(closest-side,rgba(255,200,154,.70) 0%,rgba(255,200,154,.34) 46%,rgba(255,200,154,0) 100%)}
+
+/* cabecera */
+#\30 2-minutos-eyebrow{position:absolute;left:200px;top:108px;height:68px;display:flex;align-items:center;gap:14px;padding:0 34px 0 22px;
+    border-radius:999px;background:rgba(0,97,254,.08);color:var(--blue);font-size:26px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}
+#\30 2-minutos-eyebrow svg{width:40px;height:40px;flex:none}
+
+/* conectores anillo -> chips */
+#\30 2-minutos-links{position:absolute;left:0;top:0;width:1920px;height:1080px;overflow:visible;pointer-events:none}
+.\30 2-minutos-ln{fill:none;stroke:#9a948d;stroke-opacity:.55;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+
+/* chips multiplicadores */
+.\30 2-minutos-chip{position:absolute;left:1040px;width:680px;height:220px;display:flex;align-items:center;gap:36px;padding:0 48px;
+    background:#fff;border:2px solid var(--line);border-radius:28px;transform-origin:0% 50%}
+#\30 2-minutos-chip1{top:280px}
+#\30 2-minutos-chip2{top:620px}
+.\30 2-minutos-chip-t{display:flex;align-items:baseline;gap:18px;font-size:84px;line-height:1;letter-spacing:-.03em;white-space:nowrap}
+.\30 2-minutos-chip-x{color:var(--blue);font-weight:600}
+.\30 2-minutos-chip-n{font-weight:700}
+.\30 2-minutos-chip-w{font-weight:500}
+
+/* anillo */
+#\30 2-minutos-ringwrap{position:absolute;left:200px;top:280px;width:560px;height:560px;transform-origin:50% 50%}
+#\30 2-minutos-halo{position:absolute;inset:-2px;border-radius:50%;border:4px solid #0061fe;opacity:0;transform-origin:50% 50%}
+/* segundo anillo ambar: remate decorativo (sin informacion nueva) que mantiene la accion hasta el corte */
+#\30 2-minutos-halo2{position:absolute;inset:-2px;border-radius:50%;border:3px solid #c98100;opacity:0;transform-origin:50% 50%}
+#\30 2-minutos-face{position:absolute;left:0;top:0;width:560px;height:560px;overflow:visible}
+.\30 2-minutos-disc{fill:#fff}
+/* la pista llega con trazo grueso y tono medio: bajo el fundido de entrada el anillo se lee sobre el crema (antes #e7e2dc a 6 px casi desaparecia) */
+.\30 2-minutos-track{fill:none;stroke:#d3cbc1;stroke-width:9}
+.\30 2-minutos-arc{fill:none;stroke:#0061fe;stroke-width:6;stroke-linecap:round}
+.\30 2-minutos-arc2{fill:none;stroke:#c98100;stroke-width:6;stroke-linecap:round}
+#\30 2-minutos-knobrot,#\30 2-minutos-knobrot2{position:absolute;inset:0;transform-origin:50% 50%;opacity:0}
+#\30 2-minutos-knob,#\30 2-minutos-knob2{position:absolute;left:269px;top:-8px;width:22px;height:22px;border-radius:50%;background:#fff;border:6px solid #0061fe}
+#\30 2-minutos-knob2{border-color:#c98100}
+
+/* interior del anillo */
+/* la columna (cifra + etiqueta) baja 56 px para dejar sitio al tile del timer, que ya no vive en ella sino cabalgando el borde superior del anillo */
+#\30 2-minutos-core{position:absolute;inset:0;padding-top:56px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0}
+/* HEROE: tile de 200 px (#fbefd2) con el timer de 144 px (cuerpo visible ~120 x 96 px: circulo de 96 px); el relleno duotono (#f6dca0) es distinto al del tile para que
+   se vea el cuerpo. Cabalga el borde superior del anillo (centro a 30 px de su borde) en vez de apilarse sobre la cifra: asi no choca con
+   '10 min' / '2 h 30'. El borde crema de 8 px lo separa de la pista y del arco que pasan por detras. */
+#\30 2-minutos-icon{position:absolute;left:180px;top:-70px;width:200px;height:200px;border-radius:50%;display:grid;place-items:center;background:#fbefd2;color:#9a6408;border:8px solid #f7f5f2;z-index:2}
+#\30 2-minutos-icon svg{width:144px;height:144px;display:block;overflow:visible}
+/* left:-8px compensa el aire a la izquierda del "1" para que la cifra se lea centrada;
+   overflow:hidden recorta la holgura de ascendente/descendente de la fuente a la caja de linea (la tinta de las cifras queda dentro) */
+#\30 2-minutos-numrow{position:relative;left:-8px;display:flex;align-items:baseline;justify-content:center;width:520px;height:192px;line-height:1;overflow:hidden;transform-origin:50% 55%}
+.\30 2-minutos-n{display:inline-block;min-width:2ch;font-size:192px;font-weight:700;line-height:1;letter-spacing:-.035em;font-variant-numeric:tabular-nums;text-align:center}
+#\30 2-minutos-hh{min-width:1ch}
+.\30 2-minutos-u{display:inline-block;font-size:56px;font-weight:500;line-height:1;letter-spacing:0;color:var(--mfg)}
+/* "min" cuelga a la derecha sin restar centrado al numero (ancho fijo + margen derecho negativo) */
+#\30 2-minutos-mu{width:100px;margin-left:14px;margin-right:-114px;text-align:left}
+#\30 2-minutos-hu{margin:0 22px}
+#\30 2-minutos-labels{position:relative;top:0;width:100%;height:40px}
+#\30 2-minutos-lab1,#\30 2-minutos-lab2{position:absolute;left:0;right:0;top:0;padding-left:.12em;text-align:center;font-size:32px;line-height:40px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;white-space:nowrap}
+#\30 2-minutos-lab1{color:var(--mfg)}
+#\30 2-minutos-lab2{color:var(--warn)}
+
+/* ecuacion de apoyo bajo el anillo */
+/* la formula sube de 32 a 36 px y de tono: antes el '150 min' era gris claro (#9a948d) sobre blanco y se perdia; ahora arranca en #4d4843 y se enciende a tinta */
+#\30 2-minutos-eqwrap{position:absolute;left:200px;top:872px;width:560px;display:flex;justify-content:center}
+#\30 2-minutos-eq{display:inline-block;height:76px;line-height:72px;padding:0 34px;border-radius:999px;background:#fff;border:2px solid #cfc7bd;
+    font-family:'Geist Mono',ui-monospace,monospace;font-size:36px;font-weight:500;letter-spacing:-.02em;color:#4d4843;white-space:nowrap}
+#\30 2-minutos-eq i{font-style:normal;color:var(--blue)}
+#\30 2-minutos-eq b{margin-left:.5ch;font-weight:700;color:#4d4843}
+</style>
+
+<div id="root" data-composition-id="02-minutos" data-start="0" data-duration="5.58" data-width="1920" data-height="1080">
+
+    <div id="02-minutos-bg" class="clip" data-start="0" data-duration="5.58" data-track-index="0"></div>
+
+    <div id="02-minutos-world" data-camera>
+
+        <div id="02-minutos-glow"></div>
+
+        <div id="02-minutos-eyebrow">
+            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" data-lucide="clipboard-list" aria-hidden="true"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></svg>
+            <span>Pase de lista manual</span>
+        </div>
+
+        <svg id="02-minutos-links" viewBox="0 0 1920 1080" aria-hidden="true">
+            <path id="02-minutos-ln-s" class="02-minutos-ln" d="M 780 560 H 900"/>
+            <path id="02-minutos-ln-1" class="02-minutos-ln" d="M 900 560 V 414 Q 900 390 924 390 H 1046"/>
+            <path id="02-minutos-ln-2" class="02-minutos-ln" d="M 900 560 V 706 Q 900 730 924 730 H 1046"/>
+        </svg>
+
+        <div id="02-minutos-chip1" class="02-minutos-chip">
+            <span class="ic-tile" style="display:inline-grid;place-items:center;width:88px;height:88px;border-radius:24px;background:#e6eefc;color:#0061fe;flex:none"><svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" data-lucide="users" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><path d="M16 3.128a4 4 0 0 1 0 7.744"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><circle cx="9" cy="7" r="4"/></svg></span>
+            <div class="02-minutos-chip-t"><span class="02-minutos-chip-x">×</span><span class="02-minutos-chip-n">3</span><span class="02-minutos-chip-w">grupos</span></div>
+        </div>
+
+        <div id="02-minutos-chip2" class="02-minutos-chip">
+            <span class="ic-tile" style="display:inline-grid;place-items:center;width:88px;height:88px;border-radius:24px;background:#e6eefc;color:#0061fe;flex:none"><svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" data-lucide="calendar-days" aria-hidden="true"><path d="M8 2v3"/><path d="M16 2v3"/><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M8 13h.01"/><path d="M12 13h.01"/><path d="M16 13h.01"/><path d="M8 17h.01"/><path d="M12 17h.01"/><path d="M16 17h.01"/></svg></span>
+            <div class="02-minutos-chip-t"><span class="02-minutos-chip-x">×</span><span class="02-minutos-chip-n">5</span><span class="02-minutos-chip-w">días</span></div>
+        </div>
+
+        <div id="02-minutos-ringwrap">
+            <div id="02-minutos-halo"></div>
+            <div id="02-minutos-halo2"></div>
+            <svg id="02-minutos-face" viewBox="0 0 560 560" aria-hidden="true">
+                <circle class="02-minutos-disc" cx="280" cy="280" r="274"/>
+                <circle class="02-minutos-track" cx="280" cy="280" r="277"/>
+                <circle id="02-minutos-arc" class="02-minutos-arc" cx="280" cy="280" r="277" transform="rotate(-90 280 280)"/>
+                <circle id="02-minutos-arc2" class="02-minutos-arc2" cx="280" cy="280" r="277" transform="rotate(-90 280 280)"/>
+            </svg>
+            <div id="02-minutos-knobrot"><span id="02-minutos-knob"></span></div>
+            <div id="02-minutos-knobrot2"><span id="02-minutos-knob2"></span></div>
+            <div id="02-minutos-core">
+                <div id="02-minutos-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 24 24" fill="#f6dca0" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" data-lucide="timer" aria-hidden="true"><circle cx="12" cy="14" r="8" pathLength="100"/><line x1="10" x2="14" y1="2" y2="2" pathLength="100"/><line x1="12" x2="15" y1="14" y2="11" pathLength="100"/></svg>
+                </div>
+                <div id="02-minutos-numrow">
+                    <span id="02-minutos-hh" class="02-minutos-n" style="display:none">0</span>
+                    <span id="02-minutos-hu" class="02-minutos-u" style="display:none">h</span>
+                    <span id="02-minutos-mm" class="02-minutos-n">0</span>
+                    <span id="02-minutos-mu" class="02-minutos-u">min</span>
+                </div>
+                <div id="02-minutos-labels">
+                    <span id="02-minutos-lab1">por clase</span>
+                    <span id="02-minutos-lab2">a la semana</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="02-minutos-eqwrap">
+            <div id="02-minutos-eq">10 <i>×</i> 3 <i>×</i> 5 =<b id="02-minutos-eqb">150 min</b></div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+(function () {
+    var g = function (n) { return document.getElementById('02-minutos-' + n); };
+    var tl = gsap.timeline({ paused: true });
+    window.__timelines = window.__timelines || {};
+    window.__timelines['02-minutos'] = tl;
+
+    /* ============================================================================================================
+       BLOQUE CANONICO v2 (sonido + camara). Se PEGA TAL CUAL dentro del <script> de cada cuadro, justo despues de crear `tl`
+       (var tl = gsap.timeline({ paused: true }); window.__timelines[ID_DEL_CUADRO] = tl;). No lo edites en el cuadro: edita este archivo.
+       Es idempotente: pegarlo en varios cuadros (mismo window) redefine las mismas funciones.
+
+       POR QUE EXISTE (contrato de sincronia v2, audit/sonido/REPORT.md 7): el instante de un sonido NO se escribe a mano. Se declara
+       como ETIQUETA del timeline con la MISMA variable de tiempo que el tween que acompana, y los scripts lo derivan:
+           extract-events.mjs --cues  ->  v2/sfx-cues.json (tiempos absolutos)  ->  mount-sfx.mjs (data-start = t - ancla del archivo)
+       Uso tipico:
+           var T = 1.05 + k * 0.3;                                                    // un solo numero para tween y sonido
+           tl.fromTo(bx[k], { opacity: 0, scale: 0.82 }, { opacity: 1, scale: 1, duration: 0.45, ease: 'back.out(1.7)', data: 'hero' }, T);
+           sfx(tl, T, 'ping-note' + (k + 1), 0.5);                                    // nombre del CATALOG.json; vol opcional
+       Convenciones:
+         - t es el instante del evento visual: inicio del tween de entrada (primer fotograma visible); para 'whoosh/swipe' el punto de
+           maxima velocidad; para sonidos con anclaje 'fin' (riser, zoom-in) el instante en que ocurre el impacto/llegada (ver CATALOG.json).
+         - `data: 'hero'` en un tween (entrada de un elemento principal, cambio de estado, contador, empuje de camara, trazo) le exige sonido:
+           verify-sfx.mjs avisa de los hero sin etiqueta sfx a +-33 ms de su inicio. Las funciones cam* lo ponen solas.
+         - Nunca llames a addLabel con nombres repetidos (GSAP sobrescribe): sfx() agrega un contador unico.
+       ============================================================================================================ */
+    window.SFXN = window.SFXN || 0;   // contador unico de etiquetas (compartido por todos los cuadros de la pagina)
+    window.KEYN = window.KEYN || 0;   // rotacion de teclas (continua entre frases)
+
+    /* sfx(tl, t, nombre, vol) -> etiqueta 'sfx:<nombre>@<vol>#<n>' en el instante t. vol omitido = volDefecto del catalogo. */
+    function sfx(tl, t, nombre, vol) {
+        tl.addLabel('sfx:' + nombre + '@' + (vol == null ? '' : vol) + '#' + (window.SFXN++), t);
+        return t;
+    }
+
+    /* sfxType(tl, t0, tiempos, opciones) -> tiempos absolutos de las teclas que suenan.
+       tiempos[i] = segundo (relativo a t0) en que se pinta el caracter i del texto (sale del mismo reloj que pinta el texto).
+       opciones: texto ('Hola mundo': para detectar inicios de palabra; los espacios no suenan), vol (0.35), maxPorSeg (14),
+                 enter (true | segundo absoluto: agrega key-enter; true = 0.14 s tras la ultima tecla), borrados ([segundos absolutos]: key-back).
+       Decima a <= 14 teclas/s: siempre suena la primera y la ultima; el acento (vol completo) va en inicios de palabra, las demas a 0.78.
+       Rota key-1..8 sin repetir seguidas; una etiqueta por tecla (mount-sfx las hornea en un solo wav por frase, al milisegundo). */
+    function sfxType(tl, t0, tiempos, op) {
+        op = op || {};
+        var txt = op.texto || '', vol = op.vol == null ? 0.35 : op.vol, gap = 1 / (op.maxPorSeg || 14), k = [], i, c, p;
+        var ult = -1;
+        for (i = 0; i < tiempos.length; i++) if (!txt || txt.charAt(i) !== ' ') ult = i;
+        for (i = 0; i < tiempos.length; i++) {
+            if (txt && txt.charAt(i) === ' ') continue;
+            c = { t: t0 + tiempos[i], ini: !!txt && (i === 0 || txt.charAt(i - 1) === ' '), ult: i === ult };
+            p = k[k.length - 1];
+            if (!p || c.t - p.t >= gap) k.push(c);
+            else if (k.length > 1 && (c.ult || (c.ini && !p.ini))) k[k.length - 1] = c;   // la ultima y las iniciales desplazan a una tecla normal
+            else if (c.ult) k.push(c);                                                       // solo hay una tecla antes: ambas suenan
+        }
+        var out = [];
+        k.forEach(function (q, j) {
+            var acento = j === 0 || q.ini || j === k.length - 1;
+            sfx(tl, q.t, 'key-' + ((window.KEYN++ * 5) % 8 + 1), +(vol * (acento ? 1 : 0.78)).toFixed(3));
+            out.push(q.t);
+        });
+        if (op.enter && k.length) sfx(tl, op.enter === true ? k[k.length - 1].t + 0.14 : op.enter, 'key-enter', +(vol * 1.1).toFixed(3));
+        (op.borrados || []).forEach(function (tb) { sfx(tl, tb, 'key-back', vol); });
+        return out;
+    }
+
+    /* sfxCount(tl, t0, t1, desde, hasta, opciones) -> tiempos absolutos de los 'tick'. Un tick por cambio de entero (el contador muestra
+       Math.round(valor)), <= 12/s, 4 alturas crecientes (tick-1..4 segun el avance), el ultimo con acento (tick-4 a vol x1.5).
+       opciones: ease ('power1.out': la MISMA ease del tween del contador; debe ser monotona), paso (1: valor entre ticks), vol (0.4), maxPorSeg (12). */
+    function sfxCount(tl, t0, t1, desde, hasta, op) {
+        op = op || {};
+        var ease = gsap.parseEase(op.ease || 'power1.out'), paso = op.paso || 1, vol = op.vol == null ? 0.4 : op.vol, gap = 1 / (op.maxPorSeg || 12);
+        var span = Math.abs(hasta - desde), n = Math.floor(span / paso + 1e-9), ts = [], s, lo, hi, m, it;
+        for (s = 1; s <= n; s++) {                       // instante en que el valor cruza (s - 0.5) pasos: se invierte la ease por biseccion
+            lo = 0; hi = 1;
+            for (it = 0; it < 32; it++) { m = (lo + hi) / 2; if (ease(m) * span < (s - 0.5) * paso) lo = m; else hi = m; }
+            ts.push(t0 + hi * (t1 - t0));
+        }
+        var k = [];
+        ts.forEach(function (t, j) {
+            var p = k[k.length - 1];
+            if (p === undefined || t - p >= gap) k.push(t);
+            else if (j === ts.length - 1 && k.length > 1) k[k.length - 1] = t;           // el ultimo siempre suena
+            else if (j === ts.length - 1) k.push(t);
+        });
+        k.forEach(function (t, j) {
+            var ultimo = j === k.length - 1;
+            sfx(tl, t, 'tick-' + (ultimo ? 4 : Math.min(3, Math.floor(4 * j / k.length)) + 1), +Math.min(1, vol * (ultimo ? 1.5 : 1)).toFixed(3));
+        });
+        return k;
+    }
+
+    /* readMark(tl, t, 'frase') -> etiqueta 'read:frase' en el instante en que una frase clave queda COMPLETA y legible. El director/verificador
+       exige que el corte a otro cuadro llegue >= 0.9 s despues (tiempo de lectura). */
+    function readMark(tl, t, frase) {
+        tl.addLabel('read:' + frase + '#' + (window.SFXN++), t);   // no se lee tl.labels: el compilador de render ejecuta el script con un timeline proxy sin esa propiedad
+        return t;
+    }
+
+    /* ---- CAMARA con GSAP puro (seek-safe). Cada helper hace un fromTo con los valores de partida que recuerda en el elemento (el estado
+       se encadena en el orden de las llamadas) e `immediateRender: false` SIEMPRE: sin eso el segundo fromTo sobre el mismo objetivo
+       aplica su `from` en el fotograma 0 y pisa al primero (bug del cuadro 6: entraba a 1.6 y saltaba a 1.0). Devuelven el fin del tween.
+       `el`: elemento o selector. Opciones comunes: dur, ease, foco [cx, cy] (punto de 1920x1080 que queda en el centro), x, y (px, pisan a foco),
+       W, H (tamano de escena, 1920x1080), sfx (nombre del catalogo o false), vol. Todos los tweens llevan data: 'hero'. ---- */
+    function camInit(el, escala, x, y) {
+        var e = typeof el === 'string' ? document.querySelector(el) : el;
+        e.__cam = { s: escala == null ? 1 : escala, x: x || 0, y: y || 0, r: 0 };
+        gsap.set(e, { transformOrigin: '50% 50%', scale: e.__cam.s, x: e.__cam.x, y: e.__cam.y, rotation: 0 });
+    }
+    function camTo(tl, el, t, a, o, dur0, ease0, sfx0) {
+        o = o || {};
+        var e = typeof el === 'string' ? document.querySelector(el) : el;
+        if (!e.__cam) camInit(e, 1, 0, 0);
+        var c = e.__cam, dur = o.dur == null ? dur0 : o.dur, W = o.W || 1920, H = o.H || 1080;
+        var s = a.s == null ? c.s : a.s, x = a.x == null ? c.x : a.x, y = a.y == null ? c.y : a.y, r = a.r == null ? c.r : a.r;
+        if (o.foco) { x = (W / 2 - o.foco[0]) * s; y = (H / 2 - o.foco[1]) * s; }
+        if (o.x != null) x = o.x;
+        if (o.y != null) y = o.y;
+        tl.fromTo(e, { scale: c.s, x: c.x, y: c.y, rotation: c.r },
+            { scale: s, x: x, y: y, rotation: r, duration: dur, ease: o.ease || ease0, immediateRender: false, data: 'hero' }, t);
+        e.__cam = { s: s, x: x, y: y, r: r };
+        var snd = o.sfx === undefined ? sfx0 : o.sfx;
+        if (snd) sfx(tl, t, snd, o.vol);
+        return t + dur;
+    }
+    /* camSnap: salto de zoom en ~0.18 s con ataque (snap-zoom). Suena 'snap' por defecto (sfx: false lo apaga). */
+    function camSnap(tl, el, t, escala, o) { return camTo(tl, el, t, { s: escala }, o, 0.18, 'power4.out', 'snap'); }
+    /* camPush: empuje lento (acercar). Sonido opcional: sfx(tl, fin, 'zoom-in') (anclaje 'fin': t = fin del tween). */
+    function camPush(tl, el, t, escala, o) { return camTo(tl, el, t, { s: escala }, o, 1.1, 'power2.inOut', null); }
+    /* camPull: alejar (escala por defecto 1) en ~0.7 s. */
+    function camPull(tl, el, t, escala, o) { return camTo(tl, el, t, { s: escala == null ? 1 : escala }, o, 0.7, 'power3.inOut', null); }
+    /* camPan: desplazamiento RELATIVO (dx, dy en px) respecto a la posicion actual, ~0.6 s. */
+    function camPan(tl, el, t, dx, dy, o) {
+        var e = typeof el === 'string' ? document.querySelector(el) : el;
+        var c = e.__cam || { x: 0, y: 0 };
+        return camTo(tl, el, t, { x: c.x + (dx || 0), y: c.y + (dy || 0) }, o, 0.6, 'power3.inOut', null);
+    }
+    /* camTilt: inclinacion (rotacion en grados, absoluta) ~0.5 s; camTilt(tl, el, t, 0) la endereza. */
+    function camTilt(tl, el, t, grados, o) { return camTo(tl, el, t, { r: grados }, o, 0.5, 'power2.inOut', null); }
+    /* ============================ fin del bloque canonico v2 ============================ */
+
+    var world = g('world');
+    // Entrada: continúa el zoom de "cada clase" del cuadro 01 (corte seco en su punto más rápido). Arranca a 1.3x sobre el cronómetro
+    // (en la misma zona de la pantalla que el texto del 01), desenfocado, y se aleja hasta 1x.
+    camInit(world, 1.3, (960 - 480) * 1.3, (540 - 560) * 1.3);
+    camTo(tl, world, 0, { s: 1 }, { foco: [960, 540], dur: 0.45, ease: 'power3.out', sfx: false });
+    tl.fromTo(world, { filter: 'blur(10px)' }, { filter: 'blur(0px)', duration: 0.28, ease: 'power2.out' }, 0);
+
+    var arc = g('arc'), arc2 = g('arc2'), knobrot = g('knobrot'), knobrot2 = g('knobrot2');
+    var ringwrap = g('ringwrap'), halo = g('halo'), halo2 = g('halo2');
+    var numrow = g('numrow');
+    var hh = g('hh'), hu = g('hu'), mm = g('mm'), mu = g('mu');
+    var lab1 = g('lab1'), lab2 = g('lab2');
+    var chip1 = g('chip1'), chip2 = g('chip2'), links = g('links');
+    var eye = g('eyebrow'), eq = g('eq'), eqb = g('eqb'), glow = g('glow');
+    var timerHand = g('icon').querySelector('line[x1="12"][x2="15"]');   // la manecilla del timer (de 12,14 hacia 15,11)
+
+    // Todo fromTo lleva immediateRender:false y el estado de partida se fija con gsap.set: asi ningun tween
+    // pisa al anterior en el fotograma 0 (bug del cuadro 6 de la v1).
+    function ft(el, de, a, t) {
+        a.immediateRender = false;
+        tl.fromTo(el, de, a, t);
+    }
+
+    /* ---------- preparacion de estados (lo que ya se ve en el fotograma 0: anillo, disco, pista, timer y la cifra "0") ---------- */
+    var LEN = 2 * Math.PI * 277;
+    arc.style.strokeDasharray = String(LEN);  arc.style.strokeDashoffset = String(LEN);
+    arc2.style.strokeDasharray = String(LEN); arc2.style.strokeDashoffset = String(LEN);
+
+    function plen(el, fb) {
+        try { var l = el.getTotalLength(); return l > 1 ? l : fb; } catch (e) { return fb; }
+    }
+    var segs = [
+        { el: g('ln-s'), len: plen(g('ln-s'), 120) },
+        { el: g('ln-1'), len: plen(g('ln-1'), 303) },
+        { el: g('ln-2'), len: plen(g('ln-2'), 303) }
+    ];
+    segs.forEach(function (s) {
+        s.el.style.strokeDasharray = String(s.len);
+        s.el.style.strokeDashoffset = String(s.len);
+        gsap.set(s.el, { opacity: 0 });
+    });
+
+    // La cifra se pinta desde un valor en minutos: bajo 60, "NN min"; desde 60, "H h MM".
+    var state = { value: 0 };
+    function render(v) {
+        var t = Math.round(v);
+        if (t < 60) {
+            hh.style.display = 'none'; hu.style.display = 'none'; mu.style.display = '';
+            mm.textContent = String(t);
+        } else {
+            hh.style.display = ''; hu.style.display = ''; mu.style.display = 'none';
+            hh.textContent = String(Math.floor(t / 60));
+            mm.textContent = (t % 60 < 10 ? '0' : '') + String(t % 60);
+        }
+    }
+    function upd() { render(state.value); }
+    render(0);
+
+    gsap.set(arc, { opacity: 0 });
+    gsap.set(eye, { opacity: 0, y: 16 });
+    gsap.set(numrow, { scale: 0.55 });
+    gsap.set(lab1, { opacity: 0, y: 12 });
+    gsap.set(lab2, { opacity: 0, y: 16 });
+    gsap.set(mu, { opacity: 0, y: 18 });
+    gsap.set([chip1, chip2], { opacity: 0, x: 120, scale: 0.7 });
+    gsap.set(eq, { opacity: 0, y: 16 });
+    gsap.set(glow, { opacity: 0.55, scale: 0.8 });   // el brillo calido ya enmarca el anillo en el fotograma 0: contraste bajo el fundido de entrada
+    gsap.set([halo, halo2], { opacity: 0 });
+
+    /* ---------- 0.00-0.30 solape de entrada: el heroe llega completo y NADA se anima ni suena ---------- */
+
+    /* ---------- 0.30-0.70: eyebrow, cuenta 0 -> 10, arco azul, timer ---------- */
+    var T_IN = 0.30;
+    ft(eye, { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.30, ease: 'power3.out' }, T_IN);
+
+    // cuenta, arco, perilla y cifra comparten tiempo y ease (power2.out): un solo golpe
+    ft(state, { value: 0 }, { value: 10, duration: 0.40, ease: 'power2.out', onUpdate: upd, data: 'hero' }, T_IN);
+    sfxCount(tl, T_IN, 0.70, 0, 10, { ease: 'power2.out', vol: 0.40 });
+    ft(arc, { opacity: 0 }, { opacity: 1, duration: 0.03, ease: 'none' }, T_IN);
+    ft(arc, { strokeDashoffset: LEN }, { strokeDashoffset: LEN * (1 - 0.62), duration: 0.40, ease: 'power2.out', data: 'hero' }, T_IN);
+    ft(knobrot, { rotation: 0 }, { rotation: 0.62 * 360, duration: 0.40, ease: 'power2.out' }, T_IN);
+    ft(knobrot, { opacity: 0 }, { opacity: 1, duration: 0.05, ease: 'none' }, T_IN);
+    ft(numrow, { scale: 0.55 }, { scale: 1, duration: 0.40, ease: 'power2.out', data: 'hero' }, T_IN);
+
+    // el timer llega ya colocado y completo (la manecilla va DESPUES del circulo en el svg: el relleno duotono la tapaba) (tile + cuerpo en el fotograma 0, antes se dibujaba el 60 % restante sobre el texto saliente);
+    // en 0.30 su manecilla da una vuelta completa (gira sobre su eje 12,14) al ritmo de la cuenta 0 -> 10; suena 'draw' con el tween
+    ft(timerHand, { rotation: 0, svgOrigin: '12 14' }, { rotation: 360, svgOrigin: '12 14', duration: 0.40, ease: 'power2.out', data: 'hero' }, T_IN);
+    sfx(tl, T_IN, 'draw', 0.35);
+
+    // etiqueta "por clase"
+    ft(lab1, { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.30, ease: 'power3.out' }, 0.55);
+
+    // Cues 'asent': la entrada es en dos tweens (aparicion 0.10 s + asentamiento 0.10 s despues). El sonido iba al inicio del asentamiento y
+    // sonaba 67-117 ms DESPUES del primer fotograma visible; se adelanta 0.07 s (a aparicion + 0.03 s) sin tocar los tweens visuales.
+    // La etiqueta sigue a <= 33 ms del inicio del tween de APARICION, que ya existe en ese instante.
+    var AVANCE_ASENT = 0.07;
+
+    // "min" salta: aparicion (70 % del recorrido en 0.10 s) y asentamiento back.out desde 0.80 s
+    var T_MU = 0.80;
+    ft(mu, { opacity: 0, y: 18 }, { opacity: 1, y: 5.4, duration: 0.10, ease: 'none' }, T_MU - 0.10);
+    ft(mu, { y: 5.4 }, { y: 0, duration: 0.25, ease: 'back.out(1.5)' }, T_MU);
+    sfx(tl, T_MU - AVANCE_ASENT, 'pop-2', 0.40);
+
+    /* ---------- 0.80-1.40: dolly lateral hacia la pila de chips (va y vuelve) ---------- */
+    camTo(tl, world, 0.80, { s: 1 }, { foco: [1130, 540], dur: 0.60, ease: 'power2.inOut', sfx: false });
+    sfx(tl, 1.10, 'whoosh-m', 0.22);
+
+    /* ---------- 0.90-2.30: conectores, chips y ecuacion ---------- */
+    function draw(seg, at, dur, ease) {
+        ft(seg.el, { opacity: 0 }, { opacity: 1, duration: 0.03, ease: 'none' }, at);
+        ft(seg.el, { strokeDashoffset: seg.len }, { strokeDashoffset: 0, duration: dur, ease: ease, data: 'hero' }, at);
+    }
+    draw(segs[0], 0.90, 0.15, 'none');
+    sfx(tl, 0.90, 'draw', 0.30);
+    draw(segs[1], 1.05, 0.25, 'power2.out');
+    draw(segs[2], 1.45, 0.25, 'power2.out');
+
+    // chip: aparicion (x +120 -> +36, fundido, 0.10 s) y asentamiento (escala 0.7 -> 1, x -> 0) 0.10 s despues
+    function chipIn(chip, at, nombre, vol) {
+        var T = at + 0.10;   // inicio del asentamiento
+        ft(chip, { opacity: 0, x: 120 }, { opacity: 1, x: 36, duration: 0.10, ease: 'none' }, at);
+        ft(chip, { scale: 0.7, x: 36 }, { scale: 1, x: 0, duration: 0.35, ease: 'power3.out', data: 'hero' }, T);
+        sfx(tl, T - AVANCE_ASENT, nombre, vol);
+        // el anillo late y deja un eco azul
+        ft(ringwrap, { scale: 1 }, { scale: 1.022, duration: 0.14, ease: 'power2.out' }, at + 0.10);
+        ft(ringwrap, { scale: 1.022 }, { scale: 1, duration: 0.40, ease: 'power2.inOut' }, at + 0.24);
+        ft(halo, { opacity: 0.38, scale: 1 }, { opacity: 0, scale: 1.08, duration: 0.60, ease: 'power2.out' }, at + 0.10);
+    }
+    chipIn(chip1, 1.15, 'pop-4', 0.40);
+    chipIn(chip2, 1.55, 'pop-1', 0.42);
+
+    // ecuacion bajo el anillo: aparicion 1.95 y asentamiento 2.05
+    var T_EQ = 2.05;
+    ft(eq, { opacity: 0, y: 16 }, { opacity: 1, y: 4.8, duration: 0.10, ease: 'none' }, T_EQ - 0.10);
+    ft(eq, { y: 4.8, scale: 0.94 }, { y: 0, scale: 1, duration: 0.30, ease: 'back.out(1.5)', data: 'hero' }, T_EQ);
+    sfx(tl, T_EQ - AVANCE_ASENT, 'pop-3', 0.40);
+
+    /* ---------- 2.15-3.20: regreso al anillo, brillo, arco ambar y cuenta a 150 ---------- */
+    // las tarjetas ceden solo hasta 0.82 (antes 0.4: quedaban desvaidas y cortadas); la ecuacion y las tarjetas se leen hasta el corte
+    ft([chip1, chip2], { opacity: 1 }, { opacity: 0.82, duration: 0.50, ease: 'power2.out' }, 2.15);
+    ft(links, { opacity: 1 }, { opacity: 0.7, duration: 0.50, ease: 'power2.out' }, 2.15);
+    ft(glow, { opacity: 0.55, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.50, ease: 'power2.out' }, 2.15);
+
+    camTo(tl, world, 2.15, { s: 1 }, { foco: [960, 540], dur: 0.35, ease: 'power2.inOut', sfx: false });
+    sfx(tl, 2.33, 'whoosh-m', 0.18);
+
+    // el arco ambar da la vuelta completa acelerando hacia el slam; el riser de 1 s arranca a 2.20 y termina en el golpe de 3.20
+    ft(arc2, { opacity: 0 }, { opacity: 1, duration: 0.03, ease: 'none' }, 2.25);
+    ft(arc2, { strokeDashoffset: LEN }, { strokeDashoffset: 0, duration: 0.95, ease: 'power2.in', data: 'hero' }, 2.25);
+    ft(knobrot2, { opacity: 0, rotation: 0 }, { opacity: 1, rotation: 360, duration: 0.95, ease: 'power2.in' }, 2.25);
+    ft(knobrot, { opacity: 1 }, { opacity: 0, duration: 0.12, ease: 'power2.out' }, 2.25);
+    tl.set(halo, { borderColor: '#c98100' }, 2.36);
+    sfx(tl, 3.20, 'riser-1s', 0.50);
+
+    // 10 -> 150 min (2 h 30) en 0.20 s con ticks acelerados; termina 0.12 s antes del slam
+    ft(state, { value: 10 }, { value: 150, duration: 0.20, ease: 'power2.in', onUpdate: upd, data: 'hero' }, 2.88);
+    sfxCount(tl, 2.88, 3.08, 10, 150, { ease: 'power2.in', vol: 0.16 });
+
+    /* ---------- 3.20-4.15: SLAM, snap-zoom, etiqueta, ecuacion ---------- */
+    var HIT = 3.20;
+    ft(numrow, { scale: 1 }, { scale: 1.16, duration: 0.12, ease: 'power2.out', data: 'hero' }, HIT);
+    ft(numrow, { scale: 1.16 }, { scale: 1, duration: 0.40, ease: 'power2.out' }, HIT + 0.12);
+    sfx(tl, HIT, 'impact-hit', 0.72);
+
+    // Foco (920,560) en vez de (480,560): a 1.1 el contenido (anillo x 200-760 + tarjetas hasta x 1720) queda en pantalla x 168-1840, completo
+    // y con >= 80 px de margen; con (480,560) las tarjetas salian por el borde derecho (cortadas a 6.7 s de la v2.0).
+    camTo(tl, world, HIT, { s: 1.1 }, { foco: [920, 560], dur: 0.16, ease: 'power4.out', sfx: false });
+
+    // la etiqueta cede: "por clase" sale y "a la semana" entra (completa a 3.45 s)
+    ft(lab1, { opacity: 1, y: 0 }, { opacity: 0, y: -14, duration: 0.12, ease: 'power2.in' }, HIT);
+    ft(lab2, { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.21, ease: 'power3.out' }, HIT + 0.04);
+    readMark(tl, 3.45, '2 h 30 a la semana');
+
+    // halo ambar y brillo se expanden hasta el corte (el halo sigue en movimiento en el ultimo fotograma)
+    ft(halo, { opacity: 0.6, scale: 1 }, { opacity: 0.12, scale: 1.14, duration: 0.95, ease: 'power1.out' }, HIT);
+    ft(glow, { scale: 1 }, { scale: 1.1, duration: 0.95, ease: 'power1.out' }, HIT);
+
+    // remate: un segundo anillo ambar sale del disco mientras la ecuacion se enciende
+    ft(halo2, { opacity: 0.55, scale: 1 }, { opacity: 0, scale: 1.22, duration: 0.60, ease: 'power1.out' }, 3.55);
+
+    // la ecuacion se enciende: "= 150 min" de gris a tinta
+    ft(eqb, { color: '#4d4843' }, { color: '#1e1919', duration: 0.20, ease: 'power2.out' }, 3.55);
+    /* duracion exacta del plan (5.58 s): el cuadro se alargo para que la voz termine antes del corte */
+    tl.set({}, {}, 5.58);
+  })();
+</script>
+</template>

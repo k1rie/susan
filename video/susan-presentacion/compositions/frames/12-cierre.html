@@ -1,0 +1,667 @@
+<template>
+    <style>
+        /* Fuentes reales del proyecto, rutas relativas a la raiz. */
+        @font-face {
+            font-family: "Hanken Grotesk";
+            font-style: normal;
+            font-weight: 400 700;
+            font-display: block;
+            src: url("assets/fonts/HankenGrotesk-var.woff2") format("woff2");
+        }
+
+        @font-face {
+            font-family: "EB Garamond";
+            font-style: italic;
+            font-weight: 400;
+            font-display: block;
+            src: url("assets/fonts/EBGaramond-Italic.woff2") format("woff2");
+        }
+
+        /* La raiz se estiliza por id y NO pinta el fondo: eso es del clip de abajo. */
+        #root {
+            --ink: #1e1919;
+            --blue: #0061fe;
+            --canvas: #f7f5f2;
+            --line: #e7e2dc;
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 1920px;
+            height: 1080px;
+            overflow: hidden;
+            font-family: "Hanken Grotesk", system-ui, sans-serif;
+            color: var(--ink);
+            -webkit-font-smoothing: antialiased;
+            text-rendering: geometricPrecision;
+        }
+
+        /* Fondo crema a pantalla completa en su propio clip. */
+        [id="12-cierre-bg"] {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 1920px;
+            height: 1080px;
+            background: var(--canvas);
+        }
+
+        /* Mundo: unico elemento que mueve la camara (escala/x/y/rotacion). El fondo crema queda fuera para no escalarse. */
+        [id="12-cierre-world"] {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 1920px;
+            height: 1080px;
+        }
+
+        /* ---------- Escena 1: la linea ---------- */
+        [id="12-cierre-line"] {
+            position: absolute;
+            left: 0;
+            top: 236px;
+            width: 1920px;
+            z-index: 4;
+            text-align: center;
+        }
+
+        [class~="12-cierre-l1"] {
+            display: block;
+            height: 214px;
+            font-size: 190px;
+            font-weight: 700;
+            line-height: 214px;
+            letter-spacing: -0.03em;
+            white-space: nowrap;
+            color: var(--ink);
+            transform-origin: 50% 62%;
+        }
+
+        /* La serif italica mide menos a igual cuerpo: se sube a 224 px para igualar el tamano visual. */
+        [class~="12-cierre-l2"] {
+            display: block;
+            height: 236px;
+            font-family: "EB Garamond", Georgia, serif;
+            font-style: italic;
+            font-weight: 400;
+            font-size: 224px;
+            line-height: 236px;
+            letter-spacing: -0.01em;
+            white-space: nowrap;
+            color: var(--blue);
+            opacity: 0;
+            transform-origin: 50% 80%;
+        }
+
+        [id="12-cierre-seg"] {
+            position: relative;
+            display: inline-block;
+        }
+
+        /* Marcador suave (15 % de azul) bajo el cuerpo de las letras, como cierre de la linea. */
+        [id="12-cierre-bar"] {
+            position: absolute;
+            left: -12px;
+            right: -18px;
+            top: 146px;
+            bottom: 40px;
+            border-radius: 18px;
+            background: var(--blue);
+            opacity: 0.15;
+            transform-origin: left bottom;
+            z-index: 0;
+        }
+
+        [id="12-cierre-segtxt"] {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ---------- Escena 2: el cierre institucional ---------- */
+        [id="12-cierre-mesh"] {
+            opacity: 0;
+            position: absolute;
+            left: -160px;
+            top: 470px;
+            width: 2240px;
+            height: 830px;
+            z-index: 1;
+            transform-origin: 50% 100%;
+        }
+
+        /* El degradado vive en una capa interior para que su latido (impacto de marca) no choque con la floracion. */
+        [id="12-cierre-meshin"] {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            transform-origin: 50% 100%;
+            background:
+                radial-gradient(ellipse 720px 560px at 14% 640px, rgba(143, 182, 255, 0.95) 0%, rgba(143, 182, 255, 0.55) 45%, rgba(143, 182, 255, 0) 100%),
+                radial-gradient(ellipse 720px 580px at 38% 690px, rgba(183, 156, 245, 0.92) 0%, rgba(183, 156, 245, 0.52) 45%, rgba(183, 156, 245, 0) 100%),
+                radial-gradient(ellipse 720px 560px at 62% 670px, rgba(245, 163, 199, 0.9) 0%, rgba(245, 163, 199, 0.5) 45%, rgba(245, 163, 199, 0) 100%),
+                radial-gradient(ellipse 720px 540px at 86% 620px, rgba(255, 200, 154, 0.95) 0%, rgba(255, 200, 154, 0.55) 45%, rgba(255, 200, 154, 0) 100%);
+        }
+
+        /* Grano fino (ruido en grises) solo donde hay malla; se desvanece hacia arriba con la malla. */
+        [id="12-cierre-grain"] {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.2;
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+            -webkit-mask-image: linear-gradient(to top, #000 0%, rgba(0, 0, 0, 0.7) 40%, rgba(0, 0, 0, 0) 80%);
+            mask-image: linear-gradient(to top, #000 0%, rgba(0, 0, 0, 0.7) 40%, rgba(0, 0, 0, 0) 80%);
+        }
+
+        [id="12-cierre-lockup"] {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 1920px;
+            height: 1080px;
+            z-index: 3;
+        }
+
+        /* Wordmark: 260 px, peso 700, centrado en x=960 (el -4 px compensa el tracking negativo final). */
+        [id="12-cierre-mark"] {
+            position: absolute;
+            left: 1px;
+            top: 410px;  /* centrado en y = 540 (medido en el render: sin la fila de escudos quedaba ~150 px arriba) */
+            width: 1920px;
+            height: 260px;
+            display: flex;
+            justify-content: center;
+            font-size: 260px;
+            font-weight: 700;
+            line-height: 260px;
+            letter-spacing: -0.035em;
+            color: var(--ink);
+            transform-origin: 50% 50%;
+        }
+
+        [class~="12-cierre-ch"] {
+            display: block;
+            height: 260px;
+            line-height: 260px;
+            opacity: 0;
+        }
+
+        /* Brillo que barre SUSAN: copia exacta del wordmark (sin kerning, como las letras sueltas) cuyo texto solo se pinta
+           con la banda de luz; fuera de la banda es transparente, asi que solo se ve durante el barrido. */
+        [id="12-cierre-shinewrap"] {
+            position: absolute;
+            left: 1px;
+            top: 410px;  /* misma caja que el wordmark centrado (#12-cierre-mark) */
+            width: 1920px;
+            height: 260px;
+            display: flex;
+            justify-content: center;
+            z-index: 4;
+            pointer-events: none;
+        }
+
+        [id="12-cierre-shine"] {
+            display: block;
+            font-size: 260px;
+            font-weight: 700;
+            line-height: 260px;
+            letter-spacing: -0.035em;
+            font-kerning: none;
+            color: transparent;
+            -webkit-text-fill-color: transparent;
+            background-image: linear-gradient(100deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0) 42%, rgba(255, 255, 255, 0.92) 50%, rgba(255, 255, 255, 0) 58%, rgba(255, 255, 255, 0) 100%);
+            background-size: 300% 100%;
+            background-position: 100% 0%;
+            -webkit-background-clip: text;
+            background-clip: text;
+        }
+
+        /* Fila institucional: baldosa - pildora - baldosa, con ranuras simetricas para que la pildora quede en x=960. */
+        [id="12-cierre-row"] {
+            position: absolute;
+            left: 0;
+            top: 584px;
+            width: 1920px;
+            height: 148px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 40px;
+        }
+
+        [class~="12-cierre-slot"] {
+            position: relative;
+            width: 164px;
+            height: 148px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Los dos escudos viven en la MISMA baldosa blanca (mismo tamano, borde y radio, sin sombra): el UNACH oliva y el FCA negro
+           dejan de leerse como marcas ajenas porque ambos descansan sobre el mismo fondo de contraste maximo en vez de sobre el degradado.
+           Los logos no se tocan (assets/brand/*.png); solo se ajustan a una caja comun de 112 px para igualar su peso optico. */
+        /* en el cierre solo aparece el nombre: sin escudos ni pastilla UNACH · FCA (pedido de la persona dueña) */
+        [id="12-cierre-row"] { display: none; }
+
+        [class~="12-cierre-tile"] {
+            position: relative;
+            width: 148px;
+            height: 148px;
+            box-sizing: border-box;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 28px;
+            overflow: hidden;
+            background: #ffffff;
+            border: 2px solid var(--line);
+            opacity: 0;
+        }
+
+        [class~="12-cierre-esc"] {
+            position: relative;
+            display: block;
+            z-index: 1;
+        }
+
+        /* Brillo suave que recorre cada baldosa: banda violeta pastel DETRAS del escudo (un blanco sobre fondo blanco no se veria). */
+        [class~="12-cierre-glint"] {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 80px;
+            height: 148px;
+            opacity: 0;
+            z-index: 0;
+            background: linear-gradient(100deg, rgba(183, 156, 245, 0) 0%, rgba(183, 156, 245, 0.55) 50%, rgba(183, 156, 245, 0) 100%);
+        }
+
+        [id="12-cierre-pill"] {
+            opacity: 0;
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            height: 96px;
+            padding: 0 58px;
+            border-radius: 999px;
+            overflow: hidden;
+            font-size: 34px;
+            font-weight: 600;
+            letter-spacing: 0.06em;
+            white-space: nowrap;
+            color: var(--ink);
+            background: linear-gradient(120deg, #cfe0ff 0%, #e4d8ff 45%, #ffd9e8 100%);
+            border: 2px solid rgba(255, 255, 255, 0.92);
+        }
+
+        [id="12-cierre-pilltxt"] {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Destello que cruza la pildora (3.80 s). */
+        [id="12-cierre-gloss"] {
+            position: absolute;
+            left: 0;
+            top: -20px;
+            width: 130px;
+            height: 140px;
+            z-index: 0;
+            background: linear-gradient(100deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.8) 50%, rgba(255, 255, 255, 0) 100%);
+        }
+    </style>
+
+    <div id="root" data-composition-id="12-cierre" data-start="0" data-duration="5" data-width="1920" data-height="1080">
+        <div class="clip" id="12-cierre-bg" data-start="0" data-duration="5" data-track-index="0"></div>
+
+        <div id="12-cierre-world" data-camera>
+            <div id="12-cierre-mesh"><div id="12-cierre-meshin"><div id="12-cierre-grain"></div></div></div>
+
+            <div id="12-cierre-line">
+                <div class="12-cierre-l1" id="12-cierre-l1">Pasa lista en</div>
+                <div class="12-cierre-l2" id="12-cierre-l2"><span id="12-cierre-seg"><span id="12-cierre-bar"></span><span id="12-cierre-segtxt">segundos.</span></span></div>
+            </div>
+
+            <div id="12-cierre-lockup">
+                <div id="12-cierre-mark"><span class="12-cierre-ch" id="12-cierre-c0">S</span><span class="12-cierre-ch" id="12-cierre-c1">U</span><span class="12-cierre-ch" id="12-cierre-c2">S</span><span class="12-cierre-ch" id="12-cierre-c3">A</span><span class="12-cierre-ch" id="12-cierre-c4">N</span></div>
+                <div id="12-cierre-shinewrap"><span id="12-cierre-shine">SUSAN</span></div>
+                <div id="12-cierre-row">
+                    <div class="12-cierre-slot"><div class="12-cierre-tile" id="12-cierre-unach"><span class="12-cierre-glint" id="12-cierre-glint0"></span><img class="12-cierre-esc" src="assets/brand/unach-escudo.png" width="124" height="112" alt=""></div></div>
+                    <div id="12-cierre-pill"><span id="12-cierre-gloss"></span><span id="12-cierre-pilltxt">UNACH · FCA C-I</span></div>
+                    <div class="12-cierre-slot"><div class="12-cierre-tile" id="12-cierre-fca"><span class="12-cierre-glint" id="12-cierre-glint1"></span><img class="12-cierre-esc" src="assets/brand/fca-escudo.png" width="108" height="112" alt=""></div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <script>
+        (function () {
+            function el(id) { return document.getElementById(id); }
+
+            var world = el('12-cierre-world');
+            var line = el('12-cierre-line');
+            var l1 = el('12-cierre-l1');
+            var l2 = el('12-cierre-l2');
+            var bar = el('12-cierre-bar');
+            var mesh = el('12-cierre-mesh');
+            var meshin = el('12-cierre-meshin');
+            var mark = el('12-cierre-mark');
+            var shine = el('12-cierre-shine');
+            var letras = [0, 1, 2, 3, 4].map(function (i) { return el('12-cierre-c' + i); });
+            var unach = el('12-cierre-unach');
+            var fca = el('12-cierre-fca');
+            var pill = el('12-cierre-pill');
+            var gloss = el('12-cierre-gloss');
+            var glints = [el('12-cierre-glint0'), el('12-cierre-glint1')];
+
+            var tl = gsap.timeline({ paused: true });
+            window.__timelines = window.__timelines || {};
+            window.__timelines['12-cierre'] = tl;
+
+            /* ============================================================================================================
+               BLOQUE CANONICO v2 (sonido + camara). Se PEGA TAL CUAL dentro del <script> de cada cuadro, justo despues de crear `tl`
+               (var tl = gsap.timeline({ paused: true }); window.__timelines[ID_DEL_CUADRO] = tl;). No lo edites en el cuadro: edita este archivo.
+               Es idempotente: pegarlo en varios cuadros (mismo window) redefine las mismas funciones.
+
+               POR QUE EXISTE (contrato de sincronia v2, audit/sonido/REPORT.md 7): el instante de un sonido NO se escribe a mano. Se declara
+               como ETIQUETA del timeline con la MISMA variable de tiempo que el tween que acompana, y los scripts lo derivan:
+                   extract-events.mjs --cues  ->  v2/sfx-cues.json (tiempos absolutos)  ->  mount-sfx.mjs (data-start = t - ancla del archivo)
+               Uso tipico:
+                   var T = 1.05 + k * 0.3;                                                    // un solo numero para tween y sonido
+                   tl.fromTo(bx[k], { opacity: 0, scale: 0.82 }, { opacity: 1, scale: 1, duration: 0.45, ease: 'back.out(1.7)', data: 'hero' }, T);
+                   sfx(tl, T, 'ping-note' + (k + 1), 0.5);                                    // nombre del CATALOG.json; vol opcional
+               Convenciones:
+                 - t es el instante del evento visual: inicio del tween de entrada (primer fotograma visible); para 'whoosh/swipe' el punto de
+                   maxima velocidad; para sonidos con anclaje 'fin' (riser, zoom-in) el instante en que ocurre el impacto/llegada (ver CATALOG.json).
+                 - `data: 'hero'` en un tween (entrada de un elemento principal, cambio de estado, contador, empuje de camara, trazo) le exige sonido:
+                   verify-sfx.mjs avisa de los hero sin etiqueta sfx a +-33 ms de su inicio. Las funciones cam* lo ponen solas.
+                 - Nunca llames a addLabel con nombres repetidos (GSAP sobrescribe): sfx() agrega un contador unico.
+               ============================================================================================================ */
+            window.SFXN = window.SFXN || 0;   // contador unico de etiquetas (compartido por todos los cuadros de la pagina)
+            window.KEYN = window.KEYN || 0;   // rotacion de teclas (continua entre frases)
+
+            /* sfx(tl, t, nombre, vol) -> etiqueta 'sfx:<nombre>@<vol>#<n>' en el instante t. vol omitido = volDefecto del catalogo. */
+            function sfx(tl, t, nombre, vol) {
+                tl.addLabel('sfx:' + nombre + '@' + (vol == null ? '' : vol) + '#' + (window.SFXN++), t);
+                return t;
+            }
+
+            /* sfxType(tl, t0, tiempos, opciones) -> tiempos absolutos de las teclas que suenan.
+               tiempos[i] = segundo (relativo a t0) en que se pinta el caracter i del texto (sale del mismo reloj que pinta el texto).
+               opciones: texto ('Hola mundo': para detectar inicios de palabra; los espacios no suenan), vol (0.35), maxPorSeg (14),
+                         enter (true | segundo absoluto: agrega key-enter; true = 0.14 s tras la ultima tecla), borrados ([segundos absolutos]: key-back).
+               Decima a <= 14 teclas/s: siempre suena la primera y la ultima; el acento (vol completo) va en inicios de palabra, las demas a 0.78.
+               Rota key-1..8 sin repetir seguidas; una etiqueta por tecla (mount-sfx las hornea en un solo wav por frase, al milisegundo). */
+            function sfxType(tl, t0, tiempos, op) {
+                op = op || {};
+                var txt = op.texto || '', vol = op.vol == null ? 0.35 : op.vol, gap = 1 / (op.maxPorSeg || 14), k = [], i, c, p;
+                var ult = -1;
+                for (i = 0; i < tiempos.length; i++) if (!txt || txt.charAt(i) !== ' ') ult = i;
+                for (i = 0; i < tiempos.length; i++) {
+                    if (txt && txt.charAt(i) === ' ') continue;
+                    c = { t: t0 + tiempos[i], ini: !!txt && (i === 0 || txt.charAt(i - 1) === ' '), ult: i === ult };
+                    p = k[k.length - 1];
+                    if (!p || c.t - p.t >= gap) k.push(c);
+                    else if (k.length > 1 && (c.ult || (c.ini && !p.ini))) k[k.length - 1] = c;   // la ultima y las iniciales desplazan a una tecla normal
+                    else if (c.ult) k.push(c);                                                       // solo hay una tecla antes: ambas suenan
+                }
+                var out = [];
+                k.forEach(function (q, j) {
+                    var acento = j === 0 || q.ini || j === k.length - 1;
+                    sfx(tl, q.t, 'key-' + ((window.KEYN++ * 5) % 8 + 1), +(vol * (acento ? 1 : 0.78)).toFixed(3));
+                    out.push(q.t);
+                });
+                if (op.enter && k.length) sfx(tl, op.enter === true ? k[k.length - 1].t + 0.14 : op.enter, 'key-enter', +(vol * 1.1).toFixed(3));
+                (op.borrados || []).forEach(function (tb) { sfx(tl, tb, 'key-back', vol); });
+                return out;
+            }
+
+            /* sfxCount(tl, t0, t1, desde, hasta, opciones) -> tiempos absolutos de los 'tick'. Un tick por cambio de entero (el contador muestra
+               Math.round(valor)), <= 12/s, 4 alturas crecientes (tick-1..4 segun el avance), el ultimo con acento (tick-4 a vol x1.5).
+               opciones: ease ('power1.out': la MISMA ease del tween del contador; debe ser monotona), paso (1: valor entre ticks), vol (0.4), maxPorSeg (12). */
+            function sfxCount(tl, t0, t1, desde, hasta, op) {
+                op = op || {};
+                var ease = gsap.parseEase(op.ease || 'power1.out'), paso = op.paso || 1, vol = op.vol == null ? 0.4 : op.vol, gap = 1 / (op.maxPorSeg || 12);
+                var span = Math.abs(hasta - desde), n = Math.floor(span / paso + 1e-9), ts = [], s, lo, hi, m, it;
+                for (s = 1; s <= n; s++) {                       // instante en que el valor cruza (s - 0.5) pasos: se invierte la ease por biseccion
+                    lo = 0; hi = 1;
+                    for (it = 0; it < 32; it++) { m = (lo + hi) / 2; if (ease(m) * span < (s - 0.5) * paso) lo = m; else hi = m; }
+                    ts.push(t0 + hi * (t1 - t0));
+                }
+                var k = [];
+                ts.forEach(function (t, j) {
+                    var p = k[k.length - 1];
+                    if (p === undefined || t - p >= gap) k.push(t);
+                    else if (j === ts.length - 1 && k.length > 1) k[k.length - 1] = t;           // el ultimo siempre suena
+                    else if (j === ts.length - 1) k.push(t);
+                });
+                k.forEach(function (t, j) {
+                    var ultimo = j === k.length - 1;
+                    sfx(tl, t, 'tick-' + (ultimo ? 4 : Math.min(3, Math.floor(4 * j / k.length)) + 1), +Math.min(1, vol * (ultimo ? 1.5 : 1)).toFixed(3));
+                });
+                return k;
+            }
+
+            /* readMark(tl, t, 'frase') -> etiqueta 'read:frase' en el instante en que una frase clave queda COMPLETA y legible. El director/verificador
+               exige que el corte a otro cuadro llegue >= 0.9 s despues (tiempo de lectura). */
+            function readMark(tl, t, frase) {
+                tl.addLabel('read:' + frase + '#' + (window.SFXN++), t);   // no se lee tl.labels: el compilador de render ejecuta el script con un timeline proxy sin esa propiedad
+                return t;
+            }
+
+            /* ---- CAMARA con GSAP puro (seek-safe). Cada helper hace un fromTo con los valores de partida que recuerda en el elemento (el estado
+               se encadena en el orden de las llamadas) e `immediateRender: false` SIEMPRE: sin eso el segundo fromTo sobre el mismo objetivo
+               aplica su `from` en el fotograma 0 y pisa al primero (bug del cuadro 6: entraba a 1.6 y saltaba a 1.0). Devuelven el fin del tween.
+               `el`: elemento o selector. Opciones comunes: dur, ease, foco [cx, cy] (punto de 1920x1080 que queda en el centro), x, y (px, pisan a foco),
+               W, H (tamano de escena, 1920x1080), sfx (nombre del catalogo o false), vol. Todos los tweens llevan data: 'hero'. ---- */
+            function camInit(el, escala, x, y) {
+                var e = typeof el === 'string' ? document.querySelector(el) : el;
+                e.__cam = { s: escala == null ? 1 : escala, x: x || 0, y: y || 0, r: 0 };
+                gsap.set(e, { transformOrigin: '50% 50%', scale: e.__cam.s, x: e.__cam.x, y: e.__cam.y, rotation: 0 });
+            }
+            function camTo(tl, el, t, a, o, dur0, ease0, sfx0) {
+                o = o || {};
+                var e = typeof el === 'string' ? document.querySelector(el) : el;
+                if (!e.__cam) camInit(e, 1, 0, 0);
+                var c = e.__cam, dur = o.dur == null ? dur0 : o.dur, W = o.W || 1920, H = o.H || 1080;
+                var s = a.s == null ? c.s : a.s, x = a.x == null ? c.x : a.x, y = a.y == null ? c.y : a.y, r = a.r == null ? c.r : a.r;
+                if (o.foco) { x = (W / 2 - o.foco[0]) * s; y = (H / 2 - o.foco[1]) * s; }
+                if (o.x != null) x = o.x;
+                if (o.y != null) y = o.y;
+                tl.fromTo(e, { scale: c.s, x: c.x, y: c.y, rotation: c.r },
+                    { scale: s, x: x, y: y, rotation: r, duration: dur, ease: o.ease || ease0, immediateRender: false, data: 'hero' }, t);
+                e.__cam = { s: s, x: x, y: y, r: r };
+                var snd = o.sfx === undefined ? sfx0 : o.sfx;
+                if (snd) sfx(tl, t, snd, o.vol);
+                return t + dur;
+            }
+            /* camSnap: salto de zoom en ~0.18 s con ataque (snap-zoom). Suena 'snap' por defecto (sfx: false lo apaga). */
+            function camSnap(tl, el, t, escala, o) { return camTo(tl, el, t, { s: escala }, o, 0.18, 'power4.out', 'snap'); }
+            /* camPush: empuje lento (acercar). Sonido opcional: sfx(tl, fin, 'zoom-in') (anclaje 'fin': t = fin del tween). */
+            function camPush(tl, el, t, escala, o) { return camTo(tl, el, t, { s: escala }, o, 1.1, 'power2.inOut', null); }
+            /* camPull: alejar (escala por defecto 1) en ~0.7 s. */
+            function camPull(tl, el, t, escala, o) { return camTo(tl, el, t, { s: escala == null ? 1 : escala }, o, 0.7, 'power3.inOut', null); }
+            /* camPan: desplazamiento RELATIVO (dx, dy en px) respecto a la posicion actual, ~0.6 s. */
+            function camPan(tl, el, t, dx, dy, o) {
+                var e = typeof el === 'string' ? document.querySelector(el) : el;
+                var c = e.__cam || { x: 0, y: 0 };
+                return camTo(tl, el, t, { x: c.x + (dx || 0), y: c.y + (dy || 0) }, o, 0.6, 'power3.inOut', null);
+            }
+            /* camTilt: inclinacion (rotacion en grados, absoluta) ~0.5 s; camTilt(tl, el, t, 0) la endereza. */
+            function camTilt(tl, el, t, grados, o) { return camTo(tl, el, t, { r: grados }, o, 0.5, 'power2.inOut', null); }
+            /* ============================ fin del bloque canonico v2 ============================ */
+
+
+            // El mundo es lo unico que mueve la camara. Foco siempre al centro del lienzo: x = y = 0.
+            var FOCO = [960, 540];
+
+            // ---------- 0.00-0.45 Llegada: corte seco desde 11, que acaba en empuje (1.20). Aqui continua la velocidad
+            // y la camara se retira a 1.00. "Pasa lista en" ya esta opaca en el fotograma 0 (heroe), sin entrada propia.
+            camInit(world, 1.22, 0, 0);
+            camTo(tl, world, 0, { s: 1 }, { dur: 0.45, ease: 'power4.out', foco: FOCO, sfx: false });
+
+            // ---------- 0.15-0.50 Slam de "segundos." en DOS tweens: aparicion (0.15) y asentamiento (0.25, con el stamp).
+            // 1.5 -> 1.15 es el 70 % del recorrido; el resto lo hace el resorte expo.out.
+            tl.fromTo(l2,
+                { opacity: 0, scale: 1.5 },
+                { opacity: 1, scale: 1.15, duration: 0.10, ease: 'power2.out' },
+                0.15);
+            // El sonido de un asentamiento se adelanta 0.07 s: la aparicion (primer fotograma visible) ocurre 0.10 s antes y el sonido
+            // llegaba 67-117 ms tarde; a inicio de aparicion + 0.03 s la etiqueta sigue a <= 33 ms del tween de aparicion.
+            var AVANCE_ASENT = 0.07;
+            var TS = 0.25;
+            tl.fromTo(l2,
+                { scale: 1.15 },
+                { scale: 1, duration: 0.20, ease: 'expo.out', immediateRender: false, data: 'hero' },
+                TS);
+            sfx(tl, TS - AVANCE_ASENT, 'stamp', 0.40);
+            // Marcador azul (15 %) que subraya la palabra: se dibuja con el asentamiento y cierra la frase a 0.50.
+            tl.fromTo(bar,
+                { scaleX: 0 },
+                { scaleX: 1, duration: 0.25, ease: 'power3.out' },
+                TS);
+            readMark(tl, 0.5, 'Pasa lista en segundos.');
+
+            // ---------- 0.45-1.40 Empuje hacia el corte: la camara sigue a 1.00 -> 1.07 (power2.in, velocidad maxima en el blur-and-lift,
+            // igual que 11 empuja hacia este corte). Rompe la pausa de ~1 s sobre una frase ya leida y deja el texto limpio.
+            // La ease "in" arranca casi quieta: el evento visible de esos primeros 0.35 s es el marcador de abajo.
+            camTo(tl, world, 0.45, { s: 1.07 }, { dur: 0.95, ease: 'power2.in', foco: FOCO, sfx: false });
+
+            // ---------- 0.80-1.02 El marcador se vuelve resaltador: crece hacia arriba hasta cubrir media palabra (x2.2) y se
+            // oscurece (15 % -> 34 %). Es un cambio grande y permanente (no un "respiro" de 25 %), asi el tap suena sobre algo que se ve.
+            // Va detras del texto (z-index 0): no se superpone ni tapa la frase, que sigue limpia hasta el blur-and-lift.
+            var TR = 0.80;
+            tl.to(bar, { opacity: 0.34, scaleY: 2.2, duration: 0.22, ease: 'power3.out', data: 'hero' }, TR);
+            sfx(tl, TR, 'tap', 0.16);
+
+            // ---------- 1.20-1.40 Blur-and-lift: la linea se limpia y desaparece en corte duro a 1.40.
+            // El whoosh cae a 1.39: velocidad maxima al final de la curva power3.in.
+            tl.fromTo(line,
+                { scale: 1, filter: 'blur(0px)', opacity: 1 },
+                { scale: 1.18, filter: 'blur(10px)', opacity: 0.15, duration: 0.20, ease: 'power3.in', immediateRender: false },
+                1.20);
+            sfx(tl, 1.39, 'whoosh-s', 0.40);
+            tl.set(line, { opacity: 0 }, 1.40);
+
+            // ---------- 1.30-2.20 La malla pastel con grano florece desde el borde inferior.
+            var TM = 1.30;
+            tl.fromTo(mesh,
+                { opacity: 0 },
+                { opacity: 0.92, duration: 0.90, ease: 'power2.out', data: 'hero' },
+                TM);
+            sfx(tl, TM, 'soft-in', 0.30);
+            tl.fromTo(mesh,
+                { y: 170, scale: 0.92 },
+                { y: 0, scale: 1, duration: 0.80, ease: 'power2.out' },
+                TM);
+
+            // ---------- 1.40 Camara pull-back 2: entra a 1.12 (la linea ya se fue) y se retira a 1.06 mientras se arma el wordmark.
+            world.__cam = { s: 1.12, x: 0, y: 0, r: 0 };
+            camTo(tl, world, 1.40, { s: 1.06 }, { dur: 0.50, ease: 'power3.out', foco: FOCO, sfx: false });
+
+            // ---------- 1.40-2.10 SUSAN: cada letra en DOS tweens (aparicion y asentamiento 0.10 s despues, con su pop).
+            // Motivo de marca 1 -> 4 (como en 04); la N no suena: termina de asentarse a 2.10, justo en el impacto.
+            var POPS = ['pop-1', 'pop-2', 'pop-3', 'pop-4', null];
+            letras.forEach(function (letra, i) {
+                var T = +(1.40 + i * 0.10).toFixed(2);
+                tl.fromTo(letra,
+                    { opacity: 0, y: 120, filter: 'blur(14px)' },
+                    { opacity: 1, y: 36, filter: 'blur(4.2px)', duration: 0.10, ease: 'power2.out' },
+                    T);
+                var TA = +(T + 0.10).toFixed(2);
+                tl.fromTo(letra,
+                    { y: 36, filter: 'blur(4.2px)' },
+                    { y: 0, filter: 'blur(0px)', duration: 0.20, ease: 'power3.out', immediateRender: false, data: 'hero' },
+                    TA);
+                if (POPS[i]) sfx(tl, TA - AVANCE_ASENT, POPS[i], 0.36);
+            });
+
+            // ---------- 2.10-2.40 Impacto de marca: el wordmark pulsa 1 -> 1.03 -> 1 y el degradado late; el riser (que
+            // empieza a 1.50 bajo los pops) termina aqui. La camara hace su recoil (alejar) sobre el mismo golpe.
+            var TI = 2.10;
+            tl.fromTo(mark,
+                { scale: 1 },
+                { scale: 1.03, duration: 0.10, ease: 'power2.out', data: 'hero' },
+                TI);
+            sfx(tl, TI, 'riser-s', 0.40);
+            sfx(tl, TI, 'impact-lite', 0.50);
+            tl.fromTo(mark,
+                { scale: 1.03 },
+                { scale: 1, duration: 0.30, ease: 'power2.inOut', immediateRender: false },
+                TI + 0.10);
+            tl.fromTo(meshin,
+                { scale: 1 },
+                { scale: 1.05, duration: 0.10, ease: 'power2.out' },
+                TI);
+            tl.fromTo(meshin,
+                { scale: 1.05 },
+                { scale: 1, duration: 0.30, ease: 'power2.inOut', immediateRender: false },
+                TI + 0.10);
+            camTo(tl, world, TI, { s: 1.01 }, { dur: 0.12, ease: 'power4.out', foco: FOCO, sfx: false });
+            camTo(tl, world, 2.22, { s: 1.06 }, { dur: 0.28, ease: 'power2.inOut', foco: FOCO, sfx: false });
+
+            // ---------- 2.25-3.00 Escudo UNACH, pastilla y escudo FCA entran uno tras otro (aparicion + asentamiento, pops 3 1 4).
+            function entrar(obj, T, pop, desde) {
+                tl.fromTo(obj,
+                    { opacity: 0, scale: desde },
+                    { opacity: 1, scale: desde + (1 - desde) * 0.7, duration: 0.10, ease: 'power2.out' },
+                    T);
+                var TA = +(T + 0.10).toFixed(2);
+                tl.fromTo(obj,
+                    { scale: desde + (1 - desde) * 0.7 },
+                    { scale: 1, duration: 0.25, ease: 'back.out(1.5)', immediateRender: false, data: 'hero' },
+                    TA);
+                sfx(tl, TA - AVANCE_ASENT, pop, 0.36);
+            }
+
+            // ---------- 2.95-3.35 Camara pull-back 3: revela los dos escudos y la pastilla (sin whoosh).
+            camTo(tl, world, 2.95, { s: 1 }, { dur: 0.40, ease: 'power3.out', foco: FOCO, sfx: false });
+
+            // ---------- 3.10-3.55 Barrido de brillo por las letras de SUSAN + campana final.
+            var TB = 3.10;
+            // Con background-size 300 % la banda de luz (42-58 % del gradiente) queda pegada al borde izquierdo de la S en 87 % y sale por
+            // el derecho de la N en 13 %: sin recorrido muerto fuera del texto, y con ease "out" el brillo ya cubre la primera letra
+            // a +30 ms del cue (antes: 100 % -> 0 % con inOut, el brillo entraba 183 ms tarde).
+            tl.fromTo(shine,
+                { backgroundPosition: '87% 0%' },
+                { backgroundPosition: '13% 0%', duration: 0.45, ease: 'power1.out', data: 'hero' },
+                TB);
+            // Un solo sonido por barrido: 'sheen' (barrido de luz) sustituye al par sparkle-short + chime-trim.
+            sfx(tl, TB, 'sheen', 0.50);
+            readMark(tl, 3.35, 'SUSAN');
+
+
+
+            // ---------- 3.40-5.00 Retencion del lockup con movimiento sutil: la camara avanza 1.00 -> 1.04 (sine.inOut, pico ~3.9 %/s,
+            // sobre 3 %/s en todo 3.8-4.6) para que la cola no sea una imagen fija; el lockup sigue completo y centrado.
+            camTo(tl, world, 3.40, { s: 1.04 }, { dur: 1.60, ease: 'sine.inOut', foco: FOCO, sfx: false });
+
+            // Deriva ambiental del degradado durante la retencion (decorativa, sin informacion nueva, no es camara).
+            tl.fromTo(meshin,
+                { x: 0 },
+                { x: -240, duration: 1.55, ease: 'none' },
+                3.40);
+
+            // ---------- 4.40-4.95 Respiracion ambiental del degradado (+8 % de opacidad). SIN sonido: el soft-in que tenia a 4.40 sonaba sobre un
+            // cambio de 0.4-0.9 de diferencia media (imperceptible junto a la camara); ya no es un evento hero, es ambiente.
+            var TZ = 4.40;
+            tl.fromTo(mesh,
+                { opacity: 0.92 },
+                { opacity: 1, duration: 0.55, ease: 'power1.inOut', immediateRender: false },
+                TZ);
+            tl.fromTo(meshin,
+                { scale: 1 },
+                { scale: 1.07, duration: 0.55, ease: 'power1.inOut', immediateRender: false },
+                TZ);
+
+            // Fija la duracion exacta del cuadro (5.00 s) sin animar nada.
+            tl.set({}, {}, 5);
+        })();
+    </script>
+</template>

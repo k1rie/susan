@@ -1,0 +1,100 @@
+{
+ "01": {
+  "lang": "spa",
+  "prob": 0.942,
+  "texto_stt": "Pasar lista te roba cada clase",
+  "faltan": []
+ },
+ "02": {
+  "lang": "spa",
+  "prob": 0.986,
+  "texto_stt": "Diez minutos por clase",
+  "faltan": []
+ },
+ "03": {
+  "lang": "spa",
+  "prob": 0.663,
+  "texto_stt": "Son dos horas y media nomás a la semana",
+  "faltan": []
+ },
+ "04": {
+  "lang": "spa",
+  "prob": 0.977,
+  "texto_stt": "Y las faltas se notan tarde",
+  "faltan": []
+ },
+ "05": {
+  "lang": "ita",
+  "prob": 0.308,
+  "texto_stt": "Presentamos Susan",
+  "faltan": []
+ },
+ "06": {
+  "lang": "spa",
+  "prob": 0.934,
+  "texto_stt": "Asistencia académica medida y a tiempo",
+  "faltan": []
+ },
+ "07": {
+  "lang": "spa",
+  "prob": 0.793,
+  "texto_stt": "La cámara reconoce al grupo",
+  "faltan": []
+ },
+ "08": {
+  "lang": "spa",
+  "prob": 0.838,
+  "texto_stt": "Y pasa lista en segundos",
+  "faltan": []
+ },
+ "09": {
+  "lang": "spa",
+  "prob": 0.901,
+  "texto_stt": "Todo en vivo sin escribir nada",
+  "faltan": []
+ },
+ "10": {
+  "lang": "spa",
+  "prob": 0.893,
+  "texto_stt": "Tú decides los casos dudosos",
+  "faltan": []
+ },
+ "11": {
+  "lang": "spa",
+  "prob": 0.521,
+  "texto_stt": "Reportes listos para entregar",
+  "faltan": []
+ },
+ "12": {
+  "lang": "spa",
+  "prob": 0.93,
+  "texto_stt": "Detecta el patrón antes de que sea tarde",
+  "faltan": []
+ },
+ "13": {
+  "lang": "spa",
+  "prob": 0.711,
+  "texto_stt": "Cada alumno ve su propia asistencia",
+  "faltan": []
+ },
+ "14": {
+  "lang": "spa",
+  "prob": 0.987,
+  "texto_stt": "Tus datos bajo control",
+  "faltan": []
+ },
+ "15": {
+  "lang": "spa",
+  "prob": 0.871,
+  "texto_stt": "Pasa lista en segundos",
+  "faltan": []
+ },
+ "16": {
+  "lang": "eng",
+  "prob": 0.125,
+  "texto_stt": "Susana",
+  "faltan": [
+   "susan"
+  ]
+ }
+}

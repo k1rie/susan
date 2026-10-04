@@ -1,0 +1,495 @@
+<template>
+<style>
+@font-face{font-family:"Hanken Grotesk";font-weight:100 900;font-style:normal;font-display:block;src:url("assets/fonts/HankenGrotesk-var.woff2") format("woff2");}
+@font-face{font-family:"Geist Mono";font-weight:100 900;font-style:normal;font-display:block;src:url("assets/fonts/GeistMono-var.woff2") format("woff2");}
+
+/* Tokens de SUSAN (kit del frame.md); el cuadro se estiliza por #root, nunca por clase */
+#root{position:absolute;left:0;top:0;width:1920px;height:1080px;overflow:hidden;
+ --ink:#1e1919;--canvas:#f7f5f2;--card:#fff;--muted:#f0ede8;--mfg:#6f6a65;--lt:#9a948d;--line:#e7e2dc;--blue:#0061fe;
+ --ok:#1f7a47;--ok-bg:#e3f4ea;--warn:#9a6408;--warn-txt:#8a5a06;--warn-bg:#fbefd2;--bad:#b3261e;--bad-bg:#fbe4e1;
+ --g-ok:#27a06a;--g-warn:#c98100;--g-bad:#de4d44;
+ font-family:'Hanken Grotesk',system-ui,sans-serif;color:var(--ink);font-feature-settings:'tnum' 1}
+#root *{box-sizing:border-box}
+
+/* Fondo: lienzo crema a pantalla completa (capa clip propia) */
+.\30 6-vivo-bg{position:absolute;left:0;top:0;width:1920px;height:1080px;
+ background:radial-gradient(1200px 760px at 50% 52%,#faf9f6 0%,#f7f5f2 55%,#f2efea 100%)}
+
+/* Mundo = la camara virtual (un solo wrapper con scale/x/y) */
+.\30 6-vivo-world{position:absolute;left:0;top:0;width:1920px;height:1080px;transform-origin:50% 50%}   /* sin will-change: con el la capa se rasteriza a escala 1 y el texto a camara 1.53 sale borroso (no iguala a 05) */
+
+/* Ventana de la app: tarjeta blanca de 1500x820, sin sombra */
+.\30 6-vivo-win{position:absolute;left:210px;top:130px;width:1500px;height:820px;background:var(--card);
+ border:2px solid var(--line);border-radius:36px;overflow:hidden}
+.\30 6-vivo-head{position:absolute;left:0;top:0;width:1496px;height:108px;padding:0 44px;display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid var(--line)}
+.\30 6-vivo-head-l{display:flex;align-items:center;gap:22px}
+.\30 6-vivo-title{font-size:38px;font-weight:600;letter-spacing:-.02em;line-height:1.15;white-space:nowrap}
+.\30 6-vivo-sub{font-size:24px;font-weight:500;color:var(--mfg);line-height:1.3;margin-top:2px;white-space:nowrap}
+.\30 6-vivo-head-r{display:flex;align-items:center;gap:20px}
+.\30 6-vivo-av{display:block;border-radius:50%;border:2px solid var(--line);flex:none;object-fit:cover}
+
+/* Estado de asistencia: texto + color, nunca solo color */
+.\30 6-vivo-st{display:inline-flex;align-items:center;gap:10px;padding:8px 22px;border-radius:999px;font-size:24px;font-weight:600;white-space:nowrap}
+.\30 6-vivo-st::before{content:'';width:12px;height:12px;border-radius:50%;background:currentColor;flex:none}
+.\30 6-vivo-st.\30 6-vivo-ok{background:var(--ok-bg);color:var(--ok)}
+.\30 6-vivo-st.\30 6-vivo-warn{background:var(--warn-bg);color:var(--warn-txt)}
+.\30 6-vivo-st.\30 6-vivo-sm{padding:6px 18px;font-size:22px}
+.\30 6-vivo-st.\30 6-vivo-sm::before{width:10px;height:10px}
+.\30 6-vivo-live{position:relative;display:inline-flex;align-items:center;gap:12px;height:48px;padding:0 22px 0 20px;border-radius:999px;
+ background:rgba(0,97,254,.08);color:var(--blue);font-size:24px;font-weight:600;white-space:nowrap}
+.\30 6-vivo-live-dot{position:relative;display:block;width:14px;height:14px;border-radius:50%;background:var(--blue)}
+.\30 6-vivo-live-ring{position:absolute;left:20px;top:17px;width:14px;height:14px;border-radius:50%;border:3px solid rgba(0,97,254,0)}
+
+.\30 6-vivo-body{position:absolute;left:0;top:108px;width:1496px;height:708px}
+
+/* Tarjetas de cifra: tile de 72 px a la izquierda, etiqueta y cifra a la derecha */
+.\30 6-vivo-stat{position:absolute;top:24px;height:170px;width:334px;background:var(--card);border:2px solid var(--line);border-radius:28px;
+ padding:0 24px;display:flex;align-items:center;gap:20px}
+.\30 6-vivo-stat-t{display:flex;flex-direction:column;gap:2px}
+.\30 6-vivo-stat-l{font-size:26px;font-weight:500;color:var(--mfg);line-height:1.2;white-space:nowrap}
+.\30 6-vivo-stat-v{height:88px;font-size:88px;font-weight:600;letter-spacing:-.03em;line-height:1;white-space:nowrap}
+.\30 6-vivo-num{display:inline}
+
+/* Tarjetas inferiores */
+.\30 6-vivo-panel{position:absolute;top:216px;height:468px;background:var(--card);border:2px solid var(--line);border-radius:28px}
+.\30 6-vivo-ph{position:absolute;left:28px;top:20px;height:64px;display:flex;align-items:center;gap:16px;font-size:32px;font-weight:600;letter-spacing:-.01em;white-space:nowrap}
+
+/* Anillo de estados (300 px natural; trazo 18.3 px) */
+.\30 6-vivo-ring{position:absolute;left:40px;top:118px;width:300px;height:300px;z-index:2}   /* z 2: por encima del velo de entrada */
+.\30 6-vivo-ring-svg{position:absolute;left:0;top:0;width:300px;height:300px;overflow:visible}
+.\30 6-vivo-ring-svg circle{fill:none;stroke-width:18.3;stroke-linecap:round}
+.\30 6-vivo-ring-c{position:absolute;left:0;top:0;width:300px;height:300px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+/* Cifra y "/ 24" con EXACTAMENTE lo que entrega 05 al corte (match cut al pixel): alli 72 px / peso 700 / tracking -0.04em y 26 px / peso 600 a
+   camara 2.0; aqui la camara arranca en 1.5333, asi que los px naturales son los de 05 x 2 / 1.5333 (1.30435): 93.913 y 33.913 px. */
+.\30 6-vivo-ring-n{display:block;font-size:93.913px;font-weight:700;letter-spacing:-.04em;line-height:1;font-variant-numeric:tabular-nums;transform-origin:50% 55%;position:relative;top:0.65px}   /* top: baja 1 px de pantalla: el baseline de la cifra se redondea distinto a 72 px que a 93.9 px */
+.\30 6-vivo-ring-d{font-size:33.913px;font-weight:600;color:var(--mfg);margin-top:2.609px;line-height:39.13px;white-space:nowrap}
+
+/* Velo de entrada del match cut: lienzo crema plano (el MISMO #f7f5f2 de 05) por encima de la ventana y por debajo del anillo. En el
+   fotograma 0 el unico contenido es el anillo sobre crema, igual que el ultimo de 05; despues se disuelve mientras la camara se retira. */
+.\30 6-vivo-veil{position:absolute;left:-1200px;top:-1200px;width:4320px;height:3480px;background:#f7f5f2;z-index:1;pointer-events:none}
+
+/* Tanque de liquido: relleno con scaleY y borde ondulado */
+.\30 6-vivo-tank{position:absolute;left:384px;top:118px;width:150px;height:300px;border:3px solid var(--line);border-radius:56px;background:var(--muted);overflow:hidden}
+.\30 6-vivo-liq{position:absolute;left:0;bottom:0;width:144px;height:294px;transform-origin:50% 100%;background:linear-gradient(180deg,#27a06a 0%,#1f8c5b 100%)}
+.\30 6-vivo-wave{position:absolute;left:0;top:294px;width:144px;height:20px;overflow:hidden}
+.\30 6-vivo-wave svg{position:absolute;left:0;top:0;width:432px;height:20px}
+.\30 6-vivo-tick{position:absolute;right:0;width:22px;height:3px;border-radius:3px 0 0 3px;background:rgba(30,25,25,.14)}
+.\30 6-vivo-glint{position:absolute;left:0;top:-30px;width:56px;height:360px;
+ background:linear-gradient(90deg,rgba(255,255,255,0) 0%,rgba(255,255,255,.55) 50%,rgba(255,255,255,0) 100%)}
+
+/* Lectura "Presentes ahora 88 %" */
+.\30 6-vivo-reading{position:absolute;left:574px;top:152px;width:280px;height:230px}
+.\30 6-vivo-r-label{position:absolute;left:0;top:0;font-size:32px;font-weight:500;color:var(--mfg);line-height:1.2;white-space:nowrap}
+.\30 6-vivo-r-val{position:absolute;left:0;top:70px;height:130px;display:flex;align-items:baseline;white-space:nowrap}
+.\30 6-vivo-r-n{display:inline-block;font-size:128px;font-weight:600;letter-spacing:-.03em;line-height:1;transform-origin:0% 70%}
+.\30 6-vivo-r-p{display:inline-block;font-size:64px;font-weight:500;color:var(--mfg);margin-left:10px;line-height:1}
+
+/* Lista de actividad en vivo */
+.\30 6-vivo-lw{position:absolute;left:0;top:96px;width:500px;height:332px;overflow:hidden}
+.\30 6-vivo-lst{position:absolute;left:0;top:0;width:500px;height:0}
+.\30 6-vivo-row{position:absolute;left:20px;width:460px;height:100px;background:var(--card);border:2px solid var(--line);border-radius:22px;
+ display:flex;align-items:center;gap:14px;padding:0 18px}
+.\30 6-vivo-row-t{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.\30 6-vivo-row-n{font-size:26px;font-weight:600;letter-spacing:-.01em;line-height:1.2;white-space:nowrap}
+.\30 6-vivo-row-h{font-family:'Geist Mono',ui-monospace,monospace;font-size:21px;font-weight:500;color:var(--mfg);line-height:1.2}
+</style>
+
+<div id="root" data-composition-id="06-vivo" data-start="0" data-duration="3.8" data-width="1920" data-height="1080">
+  <div class="clip 06-vivo-bg" data-start="0" data-duration="3.8" data-track-index="0"></div>
+
+  <div class="06-vivo-world" id="06-vivo-world" data-camera data-layout-allow-overflow>
+    <div class="06-vivo-win" id="06-vivo-win" data-layout-allow-overflow>
+      <div class="06-vivo-head">
+        <div class="06-vivo-head-l">
+          <span id="06-vivo-tile-book" class="06-vivo-tile" style="display:inline-grid;place-items:center;width:72px;height:72px;border-radius:20px;background:#1e1919;color:#ffffff;flex:none"><svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" data-lucide="book-open" id="06-vivo-ic-book" aria-hidden="true"><path d="M12 5v16"/><path d="M20.001 19A2 2 0 0022 17V5a2 2 0 00-1.999-2L16 3.002A5 5 0 0012 5a5 5 0 00-4-2H4a2 2 0 00-2 2v12a2 2 0 001.999 2H8a5 5 0 014 2 5 5 0 014-2z"/></svg></span>
+          <div>
+            <div class="06-vivo-title">Administración Financiera (3A)</div>
+            <div class="06-vivo-sub">Patricia Ortega · Lun 10:00</div>
+          </div>
+        </div>
+        <div class="06-vivo-head-r">
+          <div class="06-vivo-live" id="06-vivo-live"><span class="06-vivo-live-dot" id="06-vivo-live-dot"></span><span class="06-vivo-live-ring" id="06-vivo-live-ring"></span><span>En vivo</span></div>
+          <div class="06-vivo-st 06-vivo-ok" id="06-vivo-chip">Sesión en curso</div>
+          <img class="06-vivo-av" src="assets/avatars/avatar-16-po.svg" width="64" height="64" alt="" style="background:#f0d9f0">
+        </div>
+      </div>
+
+      <div class="06-vivo-body">
+        <div class="06-vivo-stat" id="06-vivo-stat-1" style="left:44px"><span id="06-vivo-tile-users" class="06-vivo-tile" style="display:inline-grid;place-items:center;width:72px;height:72px;border-radius:20px;background:#e6eefc;color:#0061fe;flex:none"><svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" data-lucide="users" id="06-vivo-ic-users" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><path d="M16 3.128a4 4 0 0 1 0 7.744"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><circle cx="9" cy="7" r="4"/></svg></span><div class="06-vivo-stat-t"><div class="06-vivo-stat-l">Inscritos</div><div class="06-vivo-stat-v"><span class="06-vivo-num" id="06-vivo-n-ins">24</span></div></div></div>
+        <div class="06-vivo-stat" id="06-vivo-stat-2" style="left:402px"><span id="06-vivo-tile-check" class="06-vivo-tile" style="display:inline-grid;place-items:center;width:72px;height:72px;border-radius:20px;background:#e3f4ea;color:#1f7a47;flex:none"><svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" data-lucide="circle-check" id="06-vivo-ic-check" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m16 9-5.5 5.5L8 12"/></svg></span><div class="06-vivo-stat-t"><div class="06-vivo-stat-l">Presentes</div><div class="06-vivo-stat-v"><span class="06-vivo-num" id="06-vivo-n-pre">24</span></div></div></div>
+        <div class="06-vivo-stat" id="06-vivo-stat-3" style="left:760px"><span id="06-vivo-tile-clock" class="06-vivo-tile" style="display:inline-grid;place-items:center;width:72px;height:72px;border-radius:20px;background:#fbefd2;color:#9a6408;flex:none"><svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" data-lucide="clock" id="06-vivo-ic-clock" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></span><div class="06-vivo-stat-t"><div class="06-vivo-stat-l">Retardos</div><div class="06-vivo-stat-v"><span class="06-vivo-num" id="06-vivo-n-ret">0</span></div></div></div>
+        <div class="06-vivo-stat" id="06-vivo-stat-4" style="left:1118px"><span id="06-vivo-tile-userx" class="06-vivo-tile" style="display:inline-grid;place-items:center;width:72px;height:72px;border-radius:20px;background:#fbe4e1;color:#b3261e;flex:none"><svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" data-lucide="user-x" id="06-vivo-ic-userx" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="17" x2="22" y1="8" y2="13"/><line x1="22" x2="17" y1="8" y2="13"/></svg></span><div class="06-vivo-stat-t"><div class="06-vivo-stat-l">Sin registro</div><div class="06-vivo-stat-v"><span class="06-vivo-num" id="06-vivo-n-sin">0</span></div></div></div>
+
+        <div class="06-vivo-panel" id="06-vivo-panel" style="left:44px;width:880px">
+          <div class="06-vivo-ph"><span id="06-vivo-tile-act" class="06-vivo-tile" style="display:inline-grid;place-items:center;width:64px;height:64px;border-radius:18px;background:#f0ede8;color:#6f6a65;flex:none"><svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" data-lucide="activity" id="06-vivo-ic-act" aria-hidden="true"><path d="M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2"/></svg></span><span>Asistencia del grupo</span></div>
+
+          <div class="06-vivo-ring" id="06-vivo-ring">
+            <svg class="06-vivo-ring-svg" viewBox="0 0 300 300" aria-hidden="true">
+              <circle id="06-vivo-disc" cx="150" cy="150" r="140.85" style="fill:#fff;stroke:none"/>
+              <circle id="06-vivo-track" cx="150" cy="150" r="140.85" stroke="#f0ede8" transform="rotate(-90 150 150)"/>
+              <circle id="06-vivo-halo" cx="150" cy="150" r="140.85" stroke="#27a06a" style="stroke-width:44px;opacity:0" transform="rotate(-90 150 150)"/>
+              <circle id="06-vivo-arc-ok" cx="150" cy="150" r="140.85" stroke="#27a06a" transform="rotate(-90 150 150)"/>
+              <circle id="06-vivo-arc-warn" cx="150" cy="150" r="140.85" stroke="#c98100" style="opacity:0" transform="rotate(-90 150 150)"/>
+              <circle id="06-vivo-arc-bad" cx="150" cy="150" r="140.85" stroke="#de4d44" style="opacity:0" transform="rotate(-90 150 150)"/>
+            </svg>
+            <div class="06-vivo-ring-c">
+              <span class="06-vivo-ring-n" id="06-vivo-ring-n">24</span>
+              <span class="06-vivo-ring-d">/ 24</span>
+            </div>
+          </div>
+
+          <div class="06-vivo-tank" id="06-vivo-tank">
+            <div class="06-vivo-liq" id="06-vivo-liq"></div>
+            <div class="06-vivo-wave" id="06-vivo-wave" data-layout-allow-overflow>
+              <svg id="06-vivo-wave-b" viewBox="0 0 432 20" aria-hidden="true"><path id="06-vivo-wave-b-p" fill="#27a06a" fill-opacity=".38" d=""/></svg>
+              <svg id="06-vivo-wave-f" viewBox="0 0 432 20" aria-hidden="true"><path id="06-vivo-wave-f-p" fill="#27a06a" d=""/></svg>
+            </div>
+            <div class="06-vivo-tick" style="top:72px"></div>
+            <div class="06-vivo-tick" style="top:144px"></div>
+            <div class="06-vivo-tick" style="top:216px"></div>
+            <div class="06-vivo-glint" id="06-vivo-glint"></div>
+          </div>
+
+          <div class="06-vivo-reading" id="06-vivo-reading">
+            <div class="06-vivo-r-label" id="06-vivo-r-label">Presentes ahora</div>
+            <div class="06-vivo-r-val"><span class="06-vivo-r-n" id="06-vivo-r-n">0</span><span class="06-vivo-r-p" id="06-vivo-r-p">%</span></div>
+          </div>
+        </div>
+
+        <div class="06-vivo-panel" id="06-vivo-panel2" style="left:948px;width:504px">
+          <div class="06-vivo-ph"><span>Últimos registros</span></div>
+          <div class="06-vivo-lw">
+            <div class="06-vivo-lst" id="06-vivo-lst">
+              <div class="06-vivo-row" id="06-vivo-reg-3" style="top:0px;opacity:0"><img class="06-vivo-av" src="assets/avatars/avatar-05-cv.svg" width="56" height="56" alt="" style="background:#ffe0c4"><div class="06-vivo-row-t"><div class="06-vivo-row-n">Camila Vega</div><div class="06-vivo-row-h">10:11</div></div><span class="06-vivo-st 06-vivo-sm 06-vivo-warn" id="06-vivo-chip-3">Retardo</span></div>
+              <div class="06-vivo-row" id="06-vivo-reg-2" style="top:112px;opacity:0"><img class="06-vivo-av" src="assets/avatars/avatar-13-vn.svg" width="56" height="56" alt="" style="background:#ffe0c4"><div class="06-vivo-row-t"><div class="06-vivo-row-n">Valeria Núñez</div><div class="06-vivo-row-h">10:02</div></div><span class="06-vivo-st 06-vivo-sm 06-vivo-ok" id="06-vivo-chip-2">Presente</span></div>
+              <div class="06-vivo-row" id="06-vivo-reg-1" style="top:224px;opacity:0"><img class="06-vivo-av" src="assets/avatars/avatar-11-xt.svg" width="56" height="56" alt="" style="background:#e4d8ff"><div class="06-vivo-row-t"><div class="06-vivo-row-n">Ximena Torres</div><div class="06-vivo-row-h">10:01</div></div><span class="06-vivo-st 06-vivo-sm 06-vivo-ok" id="06-vivo-chip-1">Presente</span></div>
+              <div class="06-vivo-row" id="06-vivo-reg-4" style="top:-112px;opacity:0"><img class="06-vivo-av" src="assets/avatars/avatar-17-lb.svg" width="56" height="56" alt="" style="background:#cfe0ff"><div class="06-vivo-row-t"><div class="06-vivo-row-n">Luis Barrios</div><div class="06-vivo-row-h">10:12</div></div><span class="06-vivo-st 06-vivo-sm 06-vivo-ok" id="06-vivo-chip-4">Presente</span></div>
+              <div class="06-vivo-row" id="06-vivo-reg-5" style="top:-224px;opacity:0"><img class="06-vivo-av" src="assets/avatars/avatar-18-sg.svg" width="56" height="56" alt="" style="background:#ffd9e8"><div class="06-vivo-row-t"><div class="06-vivo-row-n">Sofía Gómez</div><div class="06-vivo-row-h">10:13</div></div><span class="06-vivo-st 06-vivo-sm 06-vivo-ok" id="06-vivo-chip-5">Presente</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="06-vivo-veil" id="06-vivo-veil" data-layout-ignore></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+<script>
+(function () {
+    var FID = '06-vivo';
+    var $ = function (n) { return document.getElementById(FID + '-' + n); };
+
+    var tl = gsap.timeline({ paused: true });
+    window.__timelines['06-vivo'] = tl;
+
+    /* ============================================================================================================
+       BLOQUE CANONICO v2 (sonido + camara). Se PEGA TAL CUAL dentro del <script> de cada cuadro, justo despues de crear `tl`
+       (var tl = gsap.timeline({ paused: true }); window.__timelines[ID_DEL_CUADRO] = tl;). No lo edites en el cuadro: edita este archivo.
+       Es idempotente: pegarlo en varios cuadros (mismo window) redefine las mismas funciones.
+
+       POR QUE EXISTE (contrato de sincronia v2, audit/sonido/REPORT.md 7): el instante de un sonido NO se escribe a mano. Se declara
+       como ETIQUETA del timeline con la MISMA variable de tiempo que el tween que acompana, y los scripts lo derivan:
+           extract-events.mjs --cues  ->  v2/sfx-cues.json (tiempos absolutos)  ->  mount-sfx.mjs (data-start = t - ancla del archivo)
+       Uso tipico:
+           var T = 1.05 + k * 0.3;                                                    // un solo numero para tween y sonido
+           tl.fromTo(bx[k], { opacity: 0, scale: 0.82 }, { opacity: 1, scale: 1, duration: 0.45, ease: 'back.out(1.7)', data: 'hero' }, T);
+           sfx(tl, T, 'ping-note' + (k + 1), 0.5);                                    // nombre del CATALOG.json; vol opcional
+       Convenciones:
+         - t es el instante del evento visual: inicio del tween de entrada (primer fotograma visible); para 'whoosh/swipe' el punto de
+           maxima velocidad; para sonidos con anclaje 'fin' (riser, zoom-in) el instante en que ocurre el impacto/llegada (ver CATALOG.json).
+         - `data: 'hero'` en un tween (entrada de un elemento principal, cambio de estado, contador, empuje de camara, trazo) le exige sonido:
+           verify-sfx.mjs avisa de los hero sin etiqueta sfx a +-33 ms de su inicio. Las funciones cam* lo ponen solas.
+         - Nunca llames a addLabel con nombres repetidos (GSAP sobrescribe): sfx() agrega un contador unico.
+       ============================================================================================================ */
+    window.SFXN = window.SFXN || 0;   // contador unico de etiquetas (compartido por todos los cuadros de la pagina)
+    window.KEYN = window.KEYN || 0;   // rotacion de teclas (continua entre frases)
+
+    /* sfx(tl, t, nombre, vol) -> etiqueta 'sfx:<nombre>@<vol>#<n>' en el instante t. vol omitido = volDefecto del catalogo. */
+    function sfx(tl, t, nombre, vol) {
+        tl.addLabel('sfx:' + nombre + '@' + (vol == null ? '' : vol) + '#' + (window.SFXN++), t);
+        return t;
+    }
+
+    /* sfxType(tl, t0, tiempos, opciones) -> tiempos absolutos de las teclas que suenan.
+       tiempos[i] = segundo (relativo a t0) en que se pinta el caracter i del texto (sale del mismo reloj que pinta el texto).
+       opciones: texto ('Hola mundo': para detectar inicios de palabra; los espacios no suenan), vol (0.35), maxPorSeg (14),
+                 enter (true | segundo absoluto: agrega key-enter; true = 0.14 s tras la ultima tecla), borrados ([segundos absolutos]: key-back).
+       Decima a <= 14 teclas/s: siempre suena la primera y la ultima; el acento (vol completo) va en inicios de palabra, las demas a 0.78.
+       Rota key-1..8 sin repetir seguidas; una etiqueta por tecla (mount-sfx las hornea en un solo wav por frase, al milisegundo). */
+    function sfxType(tl, t0, tiempos, op) {
+        op = op || {};
+        var txt = op.texto || '', vol = op.vol == null ? 0.35 : op.vol, gap = 1 / (op.maxPorSeg || 14), k = [], i, c, p;
+        var ult = -1;
+        for (i = 0; i < tiempos.length; i++) if (!txt || txt.charAt(i) !== ' ') ult = i;
+        for (i = 0; i < tiempos.length; i++) {
+            if (txt && txt.charAt(i) === ' ') continue;
+            c = { t: t0 + tiempos[i], ini: !!txt && (i === 0 || txt.charAt(i - 1) === ' '), ult: i === ult };
+            p = k[k.length - 1];
+            if (!p || c.t - p.t >= gap) k.push(c);
+            else if (k.length > 1 && (c.ult || (c.ini && !p.ini))) k[k.length - 1] = c;   // la ultima y las iniciales desplazan a una tecla normal
+            else if (c.ult) k.push(c);                                                       // solo hay una tecla antes: ambas suenan
+        }
+        var out = [];
+        k.forEach(function (q, j) {
+            var acento = j === 0 || q.ini || j === k.length - 1;
+            sfx(tl, q.t, 'key-' + ((window.KEYN++ * 5) % 8 + 1), +(vol * (acento ? 1 : 0.78)).toFixed(3));
+            out.push(q.t);
+        });
+        if (op.enter && k.length) sfx(tl, op.enter === true ? k[k.length - 1].t + 0.14 : op.enter, 'key-enter', +(vol * 1.1).toFixed(3));
+        (op.borrados || []).forEach(function (tb) { sfx(tl, tb, 'key-back', vol); });
+        return out;
+    }
+
+    /* sfxCount(tl, t0, t1, desde, hasta, opciones) -> tiempos absolutos de los 'tick'. Un tick por cambio de entero (el contador muestra
+       Math.round(valor)), <= 12/s, 4 alturas crecientes (tick-1..4 segun el avance), el ultimo con acento (tick-4 a vol x1.5).
+       opciones: ease ('power1.out': la MISMA ease del tween del contador; debe ser monotona), paso (1: valor entre ticks), vol (0.4), maxPorSeg (12). */
+    function sfxCount(tl, t0, t1, desde, hasta, op) {
+        op = op || {};
+        var ease = gsap.parseEase(op.ease || 'power1.out'), paso = op.paso || 1, vol = op.vol == null ? 0.4 : op.vol, gap = 1 / (op.maxPorSeg || 12);
+        var span = Math.abs(hasta - desde), n = Math.floor(span / paso + 1e-9), ts = [], s, lo, hi, m, it;
+        for (s = 1; s <= n; s++) {                       // instante en que el valor cruza (s - 0.5) pasos: se invierte la ease por biseccion
+            lo = 0; hi = 1;
+            for (it = 0; it < 32; it++) { m = (lo + hi) / 2; if (ease(m) * span < (s - 0.5) * paso) lo = m; else hi = m; }
+            ts.push(t0 + hi * (t1 - t0));
+        }
+        var k = [];
+        ts.forEach(function (t, j) {
+            var p = k[k.length - 1];
+            if (p === undefined || t - p >= gap) k.push(t);
+            else if (j === ts.length - 1 && k.length > 1) k[k.length - 1] = t;           // el ultimo siempre suena
+            else if (j === ts.length - 1) k.push(t);
+        });
+        k.forEach(function (t, j) {
+            var ultimo = j === k.length - 1;
+            sfx(tl, t, 'tick-' + (ultimo ? 4 : Math.min(3, Math.floor(4 * j / k.length)) + 1), +Math.min(1, vol * (ultimo ? 1.5 : 1)).toFixed(3));
+        });
+        return k;
+    }
+
+    /* readMark(tl, t, 'frase') -> etiqueta 'read:frase' en el instante en que una frase clave queda COMPLETA y legible. El director/verificador
+       exige que el corte a otro cuadro llegue >= 0.9 s despues (tiempo de lectura). */
+    function readMark(tl, t, frase) {
+        tl.addLabel('read:' + frase + '#' + (window.SFXN++), t);   // no se lee tl.labels: el compilador de render ejecuta el script con un timeline proxy sin esa propiedad
+        return t;
+    }
+
+    /* ---- CAMARA con GSAP puro (seek-safe). Cada helper hace un fromTo con los valores de partida que recuerda en el elemento (el estado
+       se encadena en el orden de las llamadas) e `immediateRender: false` SIEMPRE: sin eso el segundo fromTo sobre el mismo objetivo
+       aplica su `from` en el fotograma 0 y pisa al primero (bug del cuadro 6: entraba a 1.6 y saltaba a 1.0). Devuelven el fin del tween.
+       `el`: elemento o selector. Opciones comunes: dur, ease, foco [cx, cy] (punto de 1920x1080 que queda en el centro), x, y (px, pisan a foco),
+       W, H (tamano de escena, 1920x1080), sfx (nombre del catalogo o false), vol. Todos los tweens llevan data: 'hero'. ---- */
+    function camInit(el, escala, x, y) {
+        var e = typeof el === 'string' ? document.querySelector(el) : el;
+        e.__cam = { s: escala == null ? 1 : escala, x: x || 0, y: y || 0, r: 0 };
+        gsap.set(e, { transformOrigin: '50% 50%', scale: e.__cam.s, x: e.__cam.x, y: e.__cam.y, rotation: 0 });
+    }
+    function camTo(tl, el, t, a, o, dur0, ease0, sfx0) {
+        o = o || {};
+        var e = typeof el === 'string' ? document.querySelector(el) : el;
+        if (!e.__cam) camInit(e, 1, 0, 0);
+        var c = e.__cam, dur = o.dur == null ? dur0 : o.dur, W = o.W || 1920, H = o.H || 1080;
+        var s = a.s == null ? c.s : a.s, x = a.x == null ? c.x : a.x, y = a.y == null ? c.y : a.y, r = a.r == null ? c.r : a.r;
+        if (o.foco) { x = (W / 2 - o.foco[0]) * s; y = (H / 2 - o.foco[1]) * s; }
+        if (o.x != null) x = o.x;
+        if (o.y != null) y = o.y;
+        tl.fromTo(e, { scale: c.s, x: c.x, y: c.y, rotation: c.r },
+            { scale: s, x: x, y: y, rotation: r, duration: dur, ease: o.ease || ease0, immediateRender: false, data: 'hero' }, t);
+        e.__cam = { s: s, x: x, y: y, r: r };
+        var snd = o.sfx === undefined ? sfx0 : o.sfx;
+        if (snd) sfx(tl, t, snd, o.vol);
+        return t + dur;
+    }
+    /* camSnap: salto de zoom en ~0.18 s con ataque (snap-zoom). Suena 'snap' por defecto (sfx: false lo apaga). */
+    function camSnap(tl, el, t, escala, o) { return camTo(tl, el, t, { s: escala }, o, 0.18, 'power4.out', 'snap'); }
+    /* camPush: empuje lento (acercar). Sonido opcional: sfx(tl, fin, 'zoom-in') (anclaje 'fin': t = fin del tween). */
+    function camPush(tl, el, t, escala, o) { return camTo(tl, el, t, { s: escala }, o, 1.1, 'power2.inOut', null); }
+    /* camPull: alejar (escala por defecto 1) en ~0.7 s. */
+    function camPull(tl, el, t, escala, o) { return camTo(tl, el, t, { s: escala == null ? 1 : escala }, o, 0.7, 'power3.inOut', null); }
+    /* camPan: desplazamiento RELATIVO (dx, dy en px) respecto a la posicion actual, ~0.6 s. */
+    function camPan(tl, el, t, dx, dy, o) {
+        var e = typeof el === 'string' ? document.querySelector(el) : el;
+        var c = e.__cam || { x: 0, y: 0 };
+        return camTo(tl, el, t, { x: c.x + (dx || 0), y: c.y + (dy || 0) }, o, 0.6, 'power3.inOut', null);
+    }
+    /* camTilt: inclinacion (rotacion en grados, absoluta) ~0.5 s; camTilt(tl, el, t, 0) la endereza. */
+    function camTilt(tl, el, t, grados, o) { return camTo(tl, el, t, { r: grados }, o, 0.5, 'power2.inOut', null); }
+    /* ============================ fin del bloque canonico v2 ============================ */
+
+    // ---------- Geometria ----------
+    // Centro del anillo en el mundo (coordenadas del lienzo): ventana (210,130) + borde 2 + cuerpo (0,108) + panel (44,216) + borde 2
+    // + anillo (40,118) + radio 150. Es el punto que el handoff del match cut deja en (960,540) a 460 px de diametro.
+    var RX = 448, RY = 726;
+    var ESC0 = 460 / 300;                       // 1.5333: 300 px naturales x 1.5333 = 460 px en pantalla
+
+    // Anillo de estados: segmentos con extremos redondos; en px de circunferencia (R = 140.85)
+    var R = 140.85, SW = 18.3, C = 2 * Math.PI * R;
+    var GEO_GAP = 14 + SW;                      // hueco visible de 14 px + los dos remates redondos
+    var LTOT = C - 3 * GEO_GAP;
+    var L_OK = LTOT * 21 / 24, L_WARN = LTOT * 2 / 24, L_BAD = LTOT * 1 / 24;
+    var S_OK = GEO_GAP / 2, S_WARN = S_OK + L_OK + GEO_GAP, S_BAD = S_WARN + L_WARN + GEO_GAP;
+    var f2 = function (x) { return x.toFixed(2); };
+
+    var arcOk = $('arc-ok'), arcWarn = $('arc-warn'), arcBad = $('arc-bad');
+    // Estado inicial = ultimo fotograma de 05: anillo completo en verde
+    arcOk.style.strokeDasharray = f2(C) + ' 0';
+    arcOk.style.strokeDashoffset = '0';
+    arcWarn.style.strokeDasharray = '0.01 ' + f2(C);
+    arcWarn.style.strokeDashoffset = f2(-S_WARN);
+    arcBad.style.strokeDasharray = '0.01 ' + f2(C);
+    arcBad.style.strokeDashoffset = f2(-S_BAD);
+    $('halo').style.strokeDasharray = f2(C) + ' 0';
+
+    // Ola del tanque (dos capas desfasadas, deriva lineal)
+    var TANK_H = 294, FILL = 0.88, WAVE_H = 20;
+    function wavePath(width, base, amp, period, phase, h) {
+        var d = 'M0 ' + h;
+        for (var x = 0; x <= width; x += 6) d += ' L' + x + ' ' + (base + amp * Math.sin(2 * Math.PI * (x + phase) / period)).toFixed(2);
+        return d + ' L' + width + ' ' + h + ' Z';
+    }
+    $('wave-f-p').setAttribute('d', wavePath(432, 12, 3.6, 72, 0, WAVE_H));
+    $('wave-b-p').setAttribute('d', wavePath(432, 8, 3.6, 72, 36, WAVE_H));
+
+    // fromTo: el primero sobre cada objetivo/propiedad usa el render inmediato (estado de partida); los demas, immediateRender:false
+    function ft(el, from, to, t, primero) {
+        if (!primero) to.immediateRender = false;
+        tl.fromTo(el, from, to, t);
+    }
+
+    var world = $('world');
+    var stats = [$('stat-1'), $('stat-2'), $('stat-3'), $('stat-4')];
+    var ringN = $('ring-n'), nPre = $('n-pre'), nRet = $('n-ret'), nSin = $('n-sin');
+
+    // =========================================================================
+    // CAMARA: pull-back de revelado desde el handoff (anillo a 460 px en el centro)
+    // =========================================================================
+    camInit(world, ESC0, (960 - RX) * ESC0, (540 - RY) * ESC0);
+    // El pull-back arranca UN fotograma despues (0.0333 s) y termina en el mismo instante (0.50 s): power4.out ya recorre ~12 % en el
+    // primer fotograma, y como el corte cae a medio fotograma el primer fotograma de 06 saltaba 61 px respecto al anillo de 05. Asi el
+    // fotograma 0 conserva exactamente el anillo del handoff (460 px en el centro) y el siguiente ya se retira a velocidad maxima.
+    camTo(tl, world, 0.0333, { s: 1 }, { dur: 0.4667, ease: 'power4.out', foco: [960, 540], sfx: false }, 0.4667, 'power4.out');
+
+    // Velo de entrada: opaco en el fotograma 0 (anillo sobre crema = ultimo fotograma de 05) y se disuelve con el arranque del pull-back
+    ft($('veil'), { opacity: 1 }, { opacity: 0, duration: 0.267, ease: 'power2.out' }, 0.0333, true);
+
+    // =========================================================================
+    // 0.10 - 0.60  El anillo lleno se parte en 21 verde + 2 ambar + 1 rojo; las cifras bajan/suben
+    // =========================================================================
+    var T0 = 0.10;
+    ft(arcOk, { strokeDasharray: f2(C) + ' 0', strokeDashoffset: 0 },
+        { strokeDasharray: f2(L_OK) + ' ' + f2(C), strokeDashoffset: f2(-S_OK), duration: 0.5, ease: 'power3.out', data: 'hero' }, T0, true);
+    sfx(tl, T0, 'zoom-out', 0.28);
+    ft(arcWarn, { strokeDasharray: '0.01 ' + f2(C), opacity: 0 }, { strokeDasharray: f2(L_WARN) + ' ' + f2(C), opacity: 1, duration: 0.3, ease: 'power2.out' }, 0.25, true);
+    ft(arcBad, { strokeDasharray: '0.01 ' + f2(C), opacity: 0 }, { strokeDasharray: f2(L_BAD) + ' ' + f2(C), opacity: 1, duration: 0.2, ease: 'power2.out' }, 0.40, true);
+
+    // Cuenta descendente 24 -> 21. NO se usan tl.set de innerText: al rebobinar GSAP restaura el valor inicial que leyo del DOM (0) y el
+    // fotograma 0 del match cut mostraba "0 / 24". Un fromTo con el 24 explicito es seguro al buscar en cualquier orden. El tween lineal
+    // cruza 23.5 / 22.5 / 21.5 en 0.19 / 0.29 / 0.39 s, asi que los fotogramas 0.20 / 0.30 / 0.40 muestran 23 / 22 / 21 sin empates de redondeo.
+    tl.fromTo([ringN, nPre], { innerText: 24 }, { innerText: 21, duration: 0.30, ease: 'none', snap: { innerText: 1 } }, 0.14);
+    // Cada paso late (la cifra arranca a escala 1: el match cut exige 144 px exactos en el fotograma 0) y lleva su tick descendente
+    [[0.20, 'tick-4'], [0.30, 'tick-3'], [0.40, 'tick-2']].forEach(function (p) {
+        ft(ringN, { scale: 1 }, { scale: 1.12, duration: 0.04, ease: 'power2.out', data: 'hero' }, p[0], p[0] === 0.20);
+        ft(ringN, { scale: 1.12 }, { scale: 1, duration: 0.08, ease: 'power2.out' }, p[0] + 0.04);
+        sfx(tl, p[0], p[1], 0.32);
+    });
+    // Retardos 0 -> 2 y Sin registro 0 -> 1 (mudos); sus tiles laten al cambiar
+    tl.fromTo(nRet, { innerText: 0 }, { innerText: 2, duration: 0.2, ease: 'none', snap: { innerText: 1 } }, 0.25);
+    tl.fromTo(nSin, { innerText: 0 }, { innerText: 1, duration: 0.2, ease: 'none', snap: { innerText: 1 } }, 0.40);
+    ft($('tile-check'), { scale: 1 }, { scale: 1.1, duration: 0.1, ease: 'power2.out' }, 0.10, true);
+    ft($('tile-check'), { scale: 1.1 }, { scale: 1, duration: 0.25, ease: 'power2.inOut' }, 0.20);
+    ft($('tile-clock'), { scale: 1 }, { scale: 1.1, duration: 0.1, ease: 'power2.out' }, 0.25, true);
+    ft($('tile-clock'), { scale: 1.1 }, { scale: 1, duration: 0.25, ease: 'power2.inOut' }, 0.35);
+    ft($('tile-userx'), { scale: 1 }, { scale: 1.1, duration: 0.1, ease: 'power2.out' }, 0.40, true);
+    ft($('tile-userx'), { scale: 1.1 }, { scale: 1, duration: 0.25, ease: 'power2.inOut' }, 0.50);
+
+    // =========================================================================
+    // 0.50 - 2.30  Registros en vivo: aparicion (0.10 s, ~70 % del recorrido) y asentamiento 0.10 s despues
+    // Los tres primeros registros se adelantaron 0.20 s (0.70 / 0.90 / 1.10 -> 0.50 / 0.70 / 0.90): la auditoria v2.1 midio una calma de ~0.8 s
+    // tras el match cut (el anillo ya partido, la lista casi vacia, el tanque vacio y la camara quieta). Asi cada 0.2 s entra algo nuevo.
+    // =========================================================================
+    // El sonido de un asentamiento se adelanta 0.07 s: la aparicion (primer fotograma visible) ocurre 0.10 s antes y el pop llegaba
+    // 67-117 ms tarde; a inicio de aparicion + 0.03 s la etiqueta sigue a <= 33 ms del tween de aparicion.
+    var AVANCE_ASENT = 0.07;
+    function registro(k, Ta, vol, nombre) {
+        var row = $('reg-' + k), chip = $('chip-' + k);
+        ft(row, { opacity: 0, x: 60 }, { opacity: 1, x: 18, duration: 0.10, ease: 'none' }, Ta, true);
+        ft(row, { x: 18 }, { x: 0, duration: 0.2, ease: 'back.out(1.6)', data: 'hero' }, Ta + 0.10);
+        sfx(tl, Ta + 0.10 - AVANCE_ASENT, nombre, vol);
+        ft(chip, { scale: 0.8 }, { scale: 1, duration: 0.25, ease: 'back.out(2)' }, Ta + 0.10);
+    }
+    registro(1, 0.50, 0.40, 'pop-3');
+    registro(2, 0.70, 0.40, 'pop-1');
+    registro(3, 0.90, 0.40, 'pop-4');
+    registro(4, 1.75, 0.38, 'pop-2');
+    registro(5, 2.10, 0.36, 'pop-4');
+    // La lista baja un puesto cuando entra un registro nuevo arriba
+    ft($('lst'), { y: 0 }, { y: 112, duration: 0.2, ease: 'power2.out' }, 1.75, true);
+    ft($('lst'), { y: 112 }, { y: 224, duration: 0.2, ease: 'power2.out' }, 2.10);
+
+    // =========================================================================
+    // 0.70 - 1.10  Deriva diagonal de camara con la entrada de la actividad (arranca con el registro 2). Sustituye al tilt (rotacion): la
+    // inclinacion de la camara se veia forzada y sin sentido; ahora un desplazamiento corto x/y con +4 % de escala (~10 %/s de escala, ~84 px/s)
+    // =========================================================================
+    camTo(tl, world, 0.70, { s: 1.04, x: -34, y: -20 }, { dur: 0.4, ease: 'power2.inOut', sfx: false });
+
+    // =========================================================================
+    // 1.15 - 2.40  El tanque sube a 88 % y la cifra cuenta (scale 0.62 -> 1). Arranca 0.25 s antes (antes 1.40) para que el llenado empalme con
+    // la deriva y los registros; el aterrizaje del 88 % sigue en 2.40 (golpe lateral, sheen y snap), solo que el llenado dura 1.25 s en vez de 1.0.
+    // =========================================================================
+    var TF = 1.15, TE = 2.40;
+    ft($('liq'), { scaleY: 0 }, { scaleY: FILL, duration: TE - TF, ease: 'power2.out', data: 'hero' }, TF, true);
+    sfx(tl, TF, 'fill', 0.40);
+    var waveEnd = TANK_H * (1 - FILL) + 2 - WAVE_H - TANK_H;
+    ft($('wave'), { y: 0 }, { y: waveEnd, duration: TE - TF, ease: 'power2.out' }, TF, true);
+    // la ola deriva hasta el final del cuadro (3.6 s), como antes (1.4 + 2.2)
+    ft($('wave-f'), { x: 0 }, { x: -144, duration: 3.6 - TF, ease: 'none' }, TF, true);
+    ft($('wave-b'), { x: -144 }, { x: 0, duration: 3.6 - TF, ease: 'none' }, TF, true);
+    ft($('r-n'), { opacity: 0, scale: 0.62 }, { opacity: 1, scale: 1, duration: TE - TF, ease: 'power2.out' }, TF, true);
+    ft($('r-p'), { opacity: 0 }, { opacity: 1, duration: 0.1, ease: 'none' }, TF, true);
+    // Cuenta 0 -> 88 en UN tween (mismo ease que sfxCount: los ticks caen en cada cambio de entero)
+    var rN = $('r-n');
+    tl.fromTo(rN, { innerText: 0 }, { innerText: 88, duration: TE - TF, ease: 'power2.out', snap: { innerText: 1 } }, TF);
+    sfxCount(tl, TF, TE, 0, 88, { ease: 'power2.out', vol: 0.22 });
+    // "Presentes ahora" y el anillo laten con el registro 5 (sin sonido propio)
+    ft($('ring'), { scale: 1 }, { scale: 1.05, duration: 0.12, ease: 'power2.out' }, 2.10, true);
+    ft($('ring'), { scale: 1.05 }, { scale: 1, duration: 0.2, ease: 'power2.inOut' }, 2.22);
+
+    // =========================================================================
+    // 2.40 - 2.70  Aterriza el 88 %: golpe lateral, brillo del anillo, tarjetas al 45 %
+    // =========================================================================
+    camTo(tl, world, 2.40, { s: 1 }, { dur: 0.25, ease: 'power3.out', foco: [1040, 540], sfx: 'snap', vol: 0.40 }, 0.25, 'power3.out');
+    ft($('halo'), { opacity: 0 }, { opacity: 0.32, duration: 0.15, ease: 'power2.out', data: 'hero' }, 2.40, true);
+    var GL = 2.40;
+    sfx(tl, GL, 'sheen', 0.30);                                                                     // barrido de luz del glint (misma T que su tween)
+    ft($('halo'), { opacity: 0.32 }, { opacity: 0, duration: 0.4, ease: 'power1.out' }, 2.55);
+    // La franja (56 px) arranca justo fuera del tanque (x -56: su borde derecho toca el borde izquierdo, alfa 0, asi que NO se ve en reposo
+    // durante los 2.40 s previos) y con ease 'out' entra ya al primer fotograma: antes (x -120, inOut) tardaba ~0.22 s en asomar y el sheen
+    // sonaba sobre un tanque aun sin brillo. Termina en x 150 (borde derecho del tanque = 144) para no gastar su cola fuera del recorte.
+    ft($('glint'), { x: -56 }, { x: 150, duration: 0.44, ease: 'power2.out' }, GL, true);
+    stats.forEach(function (card) {
+        ft(card, { opacity: 1 }, { opacity: 0.45, duration: 0.3, ease: 'power2.out' }, 2.40, true);
+        ft(card, { opacity: 0.45 }, { opacity: 1, duration: 0.3, ease: 'power2.out' }, 3.05);
+    });
+
+    // 2.45 - 2.75  "Presentes ahora" se funde junto a la cifra: lectura completa a 2.75
+    ft($('r-label'), { opacity: 0, y: 14 }, { opacity: 1, y: 4, duration: 0.10, ease: 'none' }, 2.45, true);
+    ft($('r-label'), { y: 4 }, { y: 0, duration: 0.2, ease: 'power3.out', data: 'hero' }, 2.55);
+    sfx(tl, 2.55 - AVANCE_ASENT, 'pop-1', 0.34);
+    ft(rN, { scale: 1 }, { scale: 1.07, duration: 0.12, ease: 'power2.out' }, 2.55);
+    ft(rN, { scale: 1.07 }, { scale: 1, duration: 0.2, ease: 'power2.inOut' }, 2.67);
+    ft($('live-ring'), { scale: 1, borderColor: 'rgba(0,97,254,0)' }, { scale: 2.9, borderColor: 'rgba(0,97,254,0.55)', duration: 0.1, ease: 'power2.out' }, 2.45, true);
+    ft($('live-ring'), { scale: 2.9, borderColor: 'rgba(0,97,254,0.55)' }, { scale: 3.6, borderColor: 'rgba(0,97,254,0)', duration: 0.3, ease: 'power1.out' }, 2.55);
+    ft($('live-dot'), { scale: 1 }, { scale: 1.3, duration: 0.12, ease: 'power2.out' }, 2.45, true);
+    ft($('live-dot'), { scale: 1.3 }, { scale: 1, duration: 0.25, ease: 'power2.inOut' }, 2.57);
+    readMark(tl, 2.75, 'Presentes ahora 88 %');
+
+    // =========================================================================
+    // 3.05 - 3.35  Cola de lectura: la camara regresa al centro; sin informacion nueva
+    // =========================================================================
+    camTo(tl, world, 3.05, { s: 1 }, { dur: 0.3, ease: 'power2.out', foco: [960, 540], sfx: false }, 0.3, 'power2.out');
+
+    // Fija la duracion exacta del cuadro (ancla sin efecto visual)
+    tl.set({}, {}, 3.8);
+})();
+</script>
+</template>

@@ -1,0 +1,590 @@
+{
+  "version": 2,
+  "total_s": 47.32,
+  "resumen": "EJEMPLO / PRUEBA: plan de la v2 con los 12 cuadros de la v1, una transicion de cada tipo del vocabulario y un verbo de camara distinto en cuadros contiguos. Sirve para probar scripts/build-index.mjs y como modelo de formato; el director lo reemplaza por v2/plan.json con el ritmo y la camara reales.",
+  "reglas": [
+    "Cada cuadro tiene algo visible nuevo al menos cada 0.5 s y ningun tramo de energia < 0.30 dura 1 s o mas (frame-check.mjs).",
+    "Cada cuadro declara al menos un movimiento de camara perceptible (>= 3 %/s) y no repite el verbo del cuadro contiguo.",
+    "Las frases clave quedan completas con >= 0.5 s de lectura antes del final util (duracion - solape de salida).",
+    "Ningun tipo de transicion distinto de cut se repite dos veces seguidas y hay como maximo dos cortes secos seguidos.",
+    "Los iconos son Lucide verificados (scripts/lucide.mjs) de 28 px o mas; los avatares salen solo de assets/avatars.",
+    "Cada efecto de sonido se ancla con una etiqueta sfx:<nombre>@<vol>#<n> a <= 33.3 ms del inicio de un tween."
+  ],
+  "frames": [
+    {
+      "id": "01-hook",
+      "title": "Gancho: pase de lista lento",
+      "duration": 4.4,
+      "camera": {
+        "verb": "push-fast",
+        "summary": "Empuje rapido 6 % hacia la linea que se teclea (0.4-1.0 s) y snap de 8 % sobre el cursor en 3.6 s"
+      },
+      "icons": [
+        {
+          "name": "timer",
+          "uso": "junto a la cifra de minutos",
+          "tile": "neutro",
+          "tam": 64
+        }
+      ],
+      "avatars": [
+        "avatar-01-xr.svg"
+      ],
+      "handoff_in": null,
+      "handoff_out": null,
+      "read_marks": [
+        {
+          "frase": "Pasar lista nunca debia costar la clase",
+          "t": 3.1,
+          "min_lectura": 0.5
+        }
+      ],
+      "spec": "EJEMPLO DE FORMATO (cuadro 01-hook). 0.00 s: entra el fondo y el titular; 0.30 s: primer elemento con pop (sfx pop #1); 0.60-1.40 s: movimiento principal (Empuje rapido 6 % hacia la linea que se teclea (0.4-1.0 s) y snap de 8 % sobre el cursor en 3.6 s); 1.40 s: segundo evento visible; 2.20 s: tercer evento; cada 0.5 s como maximo ocurre algo visible. Estado final de lectura: la frase clave queda completa antes de 3.10 s y se sostiene 0.5 s como minimo antes de la transicion de salida."
+    },
+    {
+      "id": "02-minutos",
+      "title": "Los minutos que se pierden",
+      "duration": 4.2,
+      "camera": {
+        "verb": "pull-back",
+        "summary": "Arranca a x1.18 y se retira a x1.0 en 0.5 s (power3.out) al caer el contador; luego pan lateral de 5 % entre tarjetas"
+      },
+      "icons": [
+        {
+          "name": "clock",
+          "uso": "tarjeta de cronometro",
+          "tile": "dorado",
+          "tam": 56
+        }
+      ],
+      "avatars": [
+        "avatar-02-mg.svg",
+        "avatar-03-vs.svg"
+      ],
+      "handoff_in": null,
+      "handoff_out": null,
+      "read_marks": [
+        {
+          "frase": "24 alumnos, 8 minutos",
+          "t": 2.9,
+          "min_lectura": 0.5
+        }
+      ],
+      "spec": "EJEMPLO DE FORMATO (cuadro 02-minutos). 0.00 s: entra el fondo y el titular; 0.30 s: primer elemento con pop (sfx pop #1); 0.60-1.40 s: movimiento principal (Arranca a x1.18 y se retira a x1.0 en 0.5 s (power3.out) al caer el contador; luego pan lateral de 5 % entre tarjetas); 1.40 s: segundo evento visible; 2.20 s: tercer evento; cada 0.5 s como maximo ocurre algo visible. Estado final de lectura: la frase clave queda completa antes de 2.90 s y se sostiene 0.5 s como minimo antes de la transicion de salida."
+    },
+    {
+      "id": "03-tarde",
+      "title": "Los retardos pasan inadvertidos",
+      "duration": 3.6,
+      "camera": {
+        "verb": "snap",
+        "summary": "Snap de 9 % en 0.2 s sobre la fila del alumno tarde (1.0 s) y retorno suave en 0.6 s"
+      },
+      "icons": [
+        {
+          "name": "alarm-clock",
+          "uso": "badge de retardo",
+          "tile": "rosa",
+          "tam": 48
+        }
+      ],
+      "avatars": [
+        "avatar-04-dh.svg"
+      ],
+      "handoff_in": null,
+      "handoff_out": null,
+      "read_marks": [
+        {
+          "frase": "Llegar tarde tambien cuenta",
+          "t": 2.4,
+          "min_lectura": 0.5
+        }
+      ],
+      "spec": "EJEMPLO DE FORMATO (cuadro 03-tarde). 0.00 s: entra el fondo y el titular; 0.30 s: primer elemento con pop (sfx pop #1); 0.60-1.40 s: movimiento principal (Snap de 9 % en 0.2 s sobre la fila del alumno tarde (1.0 s) y retorno suave en 0.6 s); 1.40 s: segundo evento visible; 2.20 s: tercer evento; cada 0.5 s como maximo ocurre algo visible. Estado final de lectura: la frase clave queda completa antes de 2.40 s y se sostiene 0.5 s como minimo antes de la transicion de salida."
+    },
+    {
+      "id": "04-intro",
+      "title": "Presentamos SUSAN",
+      "duration": 4.2,
+      "camera": {
+        "verb": "dolly",
+        "summary": "Dolly in de 14 % en 1.4 s (power2.inOut) con el logo y luego dolly out de 6 % al aparecer el subtitulo"
+      },
+      "icons": [
+        {
+          "name": "sparkles",
+          "uso": "junto al logo",
+          "tile": "dorado",
+          "tam": 72
+        }
+      ],
+      "avatars": [],
+      "handoff_in": null,
+      "handoff_out": null,
+      "read_marks": [
+        {
+          "frase": "SUSAN registra la asistencia por ti",
+          "t": 3.2,
+          "min_lectura": 0.5
+        }
+      ],
+      "spec": "EJEMPLO DE FORMATO (cuadro 04-intro). 0.00 s: entra el fondo y el titular; 0.30 s: primer elemento con pop (sfx pop #1); 0.60-1.40 s: movimiento principal (Dolly in de 14 % en 1.4 s (power2.inOut) con el logo y luego dolly out de 6 % al aparecer el subtitulo); 1.40 s: segundo evento visible; 2.20 s: tercer evento; cada 0.5 s como maximo ocurre algo visible. Estado final de lectura: la frase clave queda completa antes de 3.20 s y se sostiene 0.5 s como minimo antes de la transicion de salida."
+    },
+    {
+      "id": "05-camara",
+      "title": "La camara pasa lista",
+      "duration": 5.2,
+      "camera": {
+        "verb": "pan",
+        "summary": "Pan horizontal de 12 % en 1.6 s siguiendo los recuadros de deteccion y tilt final de 4 % hacia el contador"
+      },
+      "icons": [
+        {
+          "name": "camera",
+          "uso": "encabezado del visor",
+          "tile": "azul",
+          "tam": 64
+        },
+        {
+          "name": "scan-face",
+          "uso": "recuadro de deteccion",
+          "tile": "verde",
+          "tam": 56
+        }
+      ],
+      "avatars": [
+        "avatar-05-cv.svg",
+        "avatar-06-et.svg",
+        "avatar-07-rm.svg",
+        "avatar-08-sc.svg"
+      ],
+      "handoff_in": null,
+      "handoff_out": null,
+      "read_marks": [
+        {
+          "frase": "24 de 24 en segundos",
+          "t": 4.0,
+          "min_lectura": 0.6
+        }
+      ],
+      "spec": "EJEMPLO DE FORMATO (cuadro 05-camara). 0.00 s: entra el fondo y el titular; 0.30 s: primer elemento con pop (sfx pop #1); 0.60-1.40 s: movimiento principal (Pan horizontal de 12 % en 1.6 s siguiendo los recuadros de deteccion y tilt final de 4 % hacia el contador); 1.40 s: segundo evento visible; 2.20 s: tercer evento; cada 0.5 s como maximo ocurre algo visible. Estado final de lectura: la frase clave queda completa antes de 4.00 s y se sostiene 0.6 s como minimo antes de la transicion de salida."
+    },
+    {
+      "id": "06-vivo",
+      "title": "Sesion en vivo",
+      "duration": 4.8,
+      "camera": {
+        "verb": "tilt",
+        "summary": "Tilt hacia abajo de 7 % en 0.9 s (power3.inOut) al llenarse el medidor y push-in de 18 % en 3.2-4.1 s sobre el anillo"
+      },
+      "icons": [
+        {
+          "name": "activity",
+          "uso": "titulo del panel",
+          "tile": "azul",
+          "tam": 48
+        }
+      ],
+      "avatars": [
+        "avatar-09-ag.svg"
+      ],
+      "handoff_in": null,
+      "handoff_out": null,
+      "read_marks": [
+        {
+          "frase": "88 % presentes ahora",
+          "t": 3.6,
+          "min_lectura": 0.5
+        }
+      ],
+      "spec": "EJEMPLO DE FORMATO (cuadro 06-vivo). 0.00 s: entra el fondo y el titular; 0.30 s: primer elemento con pop (sfx pop #1); 0.60-1.40 s: movimiento principal (Tilt hacia abajo de 7 % en 0.9 s (power3.inOut) al llenarse el medidor y push-in de 18 % en 3.2-4.1 s sobre el anillo); 1.40 s: segundo evento visible; 2.20 s: tercer evento; cada 0.5 s como maximo ocurre algo visible. Estado final de lectura: la frase clave queda completa antes de 3.60 s y se sostiene 0.5 s como minimo antes de la transicion de salida."
+    },
+    {
+      "id": "07-revision",
+      "title": "Revision del docente",
+      "duration": 4.0,
+      "camera": {
+        "verb": "orbit",
+        "summary": "Rotacion de 2.5 grados con escala 1.08 durante 1.6 s alrededor del boton Confirmar"
+      },
+      "icons": [
+        {
+          "name": "check-check",
+          "uso": "boton de confirmar",
+          "tile": "verde",
+          "tam": 56
+        }
+      ],
+      "avatars": [
+        "avatar-10-hm.svg",
+        "avatar-11-xt.svg"
+      ],
+      "handoff_in": null,
+      "handoff_out": null,
+      "read_marks": [
+        {
+          "frase": "Tu confirmas, el sistema lo guarda",
+          "t": 2.8,
+          "min_lectura": 0.5
+        }
+      ],
+      "spec": "EJEMPLO DE FORMATO (cuadro 07-revision). 0.00 s: entra el fondo y el titular; 0.30 s: primer elemento con pop (sfx pop #1); 0.60-1.40 s: movimiento principal (Rotacion de 2.5 grados con escala 1.08 durante 1.6 s alrededor del boton Confirmar); 1.40 s: segundo evento visible; 2.20 s: tercer evento; cada 0.5 s como maximo ocurre algo visible. Estado final de lectura: la frase clave queda completa antes de 2.80 s y se sostiene 0.5 s como minimo antes de la transicion de salida."
+    },
+    {
+      "id": "08-reportes",
+      "title": "Reportes y justificantes",
+      "duration": 3.8,
+      "camera": {
+        "verb": "whip",
+        "summary": "Barrida de 14 % en 0.25 s entre las dos tarjetas de reporte (1.5 s) y retorno en 0.5 s"
+      },
+      "icons": [
+        {
+          "name": "file-text",
+          "uso": "tarjeta de reporte",
+          "tile": "violeta",
+          "tam": 56
+        }
+      ],
+      "avatars": [],
+      "handoff_in": null,
+      "handoff_out": null,
+      "read_marks": [
+        {
+          "frase": "Exporta en un clic",
+          "t": 2.7,
+          "min_lectura": 0.5
+        }
+      ],
+      "spec": "EJEMPLO DE FORMATO (cuadro 08-reportes). 0.00 s: entra el fondo y el titular; 0.30 s: primer elemento con pop (sfx pop #1); 0.60-1.40 s: movimiento principal (Barrida de 14 % en 0.25 s entre las dos tarjetas de reporte (1.5 s) y retorno en 0.5 s); 1.40 s: segundo evento visible; 2.20 s: tercer evento; cada 0.5 s como maximo ocurre algo visible. Estado final de lectura: la frase clave queda completa antes de 2.70 s y se sostiene 0.5 s como minimo antes de la transicion de salida."
+    },
+    {
+      "id": "09-analitica",
+      "title": "Analitica del ausentismo",
+      "duration": 5.0,
+      "camera": {
+        "verb": "push-fast",
+        "summary": "Push-in de 10 % en 0.7 s sobre la tendencia (1.2 s), pan a la derecha de 8 % en 2.6 s hacia el semaforo"
+      },
+      "icons": [
+        {
+          "name": "chart-line",
+          "uso": "grafica de tendencia",
+          "tile": "azul",
+          "tam": 64
+        },
+        {
+          "name": "triangle-alert",
+          "uso": "semaforo de riesgo",
+          "tile": "dorado",
+          "tam": 56
+        }
+      ],
+      "avatars": [
+        "avatar-12-mh.svg",
+        "avatar-13-vn.svg"
+      ],
+      "handoff_in": null,
+      "handoff_out": null,
+      "read_marks": [
+        {
+          "frase": "9 alumnos en riesgo",
+          "t": 3.9,
+          "min_lectura": 0.6
+        }
+      ],
+      "spec": "EJEMPLO DE FORMATO (cuadro 09-analitica). 0.00 s: entra el fondo y el titular; 0.30 s: primer elemento con pop (sfx pop #1); 0.60-1.40 s: movimiento principal (Push-in de 10 % en 0.7 s sobre la tendencia (1.2 s), pan a la derecha de 8 % en 2.6 s hacia el semaforo); 1.40 s: segundo evento visible; 2.20 s: tercer evento; cada 0.5 s como maximo ocurre algo visible. Estado final de lectura: la frase clave queda completa antes de 3.90 s y se sostiene 0.6 s como minimo antes de la transicion de salida."
+    },
+    {
+      "id": "10-alumno",
+      "title": "Vista del alumno",
+      "duration": 4.2,
+      "camera": {
+        "verb": "pull-back",
+        "summary": "Pull-back de 12 % en 0.6 s al aparecer la tarjeta y deriva de handoff hacia el anillo central"
+      },
+      "icons": [
+        {
+          "name": "user-round",
+          "uso": "encabezado",
+          "tile": "neutro",
+          "tam": 56
+        }
+      ],
+      "avatars": [
+        "avatar-14-dr.svg",
+        "avatar-15-cr.svg"
+      ],
+      "handoff_in": null,
+      "handoff_out": {
+        "elemento": "anillo de avance",
+        "x": 960,
+        "y": 540,
+        "escala": 1.0,
+        "nota": "El anillo queda centrado a escala 1 en el ultimo fotograma"
+      },
+      "read_marks": [
+        {
+          "frase": "Cada alumno ve su propio avance",
+          "t": 3.0,
+          "min_lectura": 0.5
+        }
+      ],
+      "spec": "EJEMPLO DE FORMATO (cuadro 10-alumno). 0.00 s: entra el fondo y el titular; 0.30 s: primer elemento con pop (sfx pop #1); 0.60-1.40 s: movimiento principal (Pull-back de 12 % en 0.6 s al aparecer la tarjeta y deriva de handoff hacia el anillo central); 1.40 s: segundo evento visible; 2.20 s: tercer evento; cada 0.5 s como maximo ocurre algo visible. Estado final de lectura: la frase clave queda completa antes de 3.00 s y se sostiene 0.5 s como minimo antes de la transicion de salida."
+    },
+    {
+      "id": "11-confianza",
+      "title": "Privacidad y confianza",
+      "duration": 3.4,
+      "camera": {
+        "verb": "dolly",
+        "summary": "Dolly in de 9 % en 0.8 s sobre el candado y snap de 7 % al sellar la tarjeta"
+      },
+      "icons": [
+        {
+          "name": "shield-check",
+          "uso": "candado central",
+          "tile": "verde",
+          "tam": 72
+        }
+      ],
+      "avatars": [],
+      "handoff_in": {
+        "elemento": "anillo de avance",
+        "x": 960,
+        "y": 540,
+        "escala": 1.0,
+        "nota": "La tarjeta de confianza arranca con el mismo anillo centrado a escala 1"
+      },
+      "handoff_out": null,
+      "read_marks": [
+        {
+          "frase": "Los datos faciales no salen del servicio",
+          "t": 2.2,
+          "min_lectura": 0.5
+        }
+      ],
+      "spec": "EJEMPLO DE FORMATO (cuadro 11-confianza). 0.00 s: entra el fondo y el titular; 0.30 s: primer elemento con pop (sfx pop #1); 0.60-1.40 s: movimiento principal (Dolly in de 9 % en 0.8 s sobre el candado y snap de 7 % al sellar la tarjeta); 1.40 s: segundo evento visible; 2.20 s: tercer evento; cada 0.5 s como maximo ocurre algo visible. Estado final de lectura: la frase clave queda completa antes de 2.20 s y se sostiene 0.5 s como minimo antes de la transicion de salida."
+    },
+    {
+      "id": "12-cierre",
+      "title": "Cierre",
+      "duration": 4.2,
+      "camera": {
+        "verb": "snap",
+        "summary": "Snap de 10 % hacia el logo en 0.2 s al caer el titular y retirada lenta de 3 % hasta el final"
+      },
+      "icons": [
+        {
+          "name": "graduation-cap",
+          "uso": "junto al titular",
+          "tile": "dorado",
+          "tam": 64
+        }
+      ],
+      "avatars": [],
+      "handoff_in": null,
+      "handoff_out": null,
+      "read_marks": [
+        {
+          "frase": "SUSAN. Asistencia que se entiende",
+          "t": 2.8,
+          "min_lectura": 0.6
+        }
+      ],
+      "spec": "EJEMPLO DE FORMATO (cuadro 12-cierre). 0.00 s: entra el fondo y el titular; 0.30 s: primer elemento con pop (sfx pop #1); 0.60-1.40 s: movimiento principal (Snap de 10 % hacia el logo en 0.2 s al caer el titular y retirada lenta de 3 % hasta el final); 1.40 s: segundo evento visible; 2.20 s: tercer evento; cada 0.5 s como maximo ocurre algo visible. Estado final de lectura: la frase clave queda completa antes de 2.80 s y se sostiene 0.6 s como minimo antes de la transicion de salida."
+    }
+  ],
+  "transitions": [
+    {
+      "from": "01-hook",
+      "to": "02-minutos",
+      "type": "push",
+      "dir": "left",
+      "dur": 0.5,
+      "ease": "power3.inOut",
+      "dist": 0.6,
+      "fade": true,
+      "origin": null,
+      "sfx": {
+        "name": "whoosh-m",
+        "vol": 0.5,
+        "peak": 0.5
+      },
+      "note": "Empuje a la izquierda; el saliente recorre el 60 % y se atenua"
+    },
+    {
+      "from": "02-minutos",
+      "to": "03-tarde",
+      "type": "zoom",
+      "dir": "in",
+      "dur": 0.5,
+      "ease": "power3.in",
+      "dist": null,
+      "fade": null,
+      "origin": null,
+      "sfx": {
+        "name": "zoom-in",
+        "vol": 0.5,
+        "peak": 0.7
+      },
+      "note": "El saliente crece hacia el espectador"
+    },
+    {
+      "from": "03-tarde",
+      "to": "04-intro",
+      "type": "cut",
+      "dir": null,
+      "dur": 0,
+      "ease": "power3.inOut",
+      "dist": null,
+      "fade": null,
+      "origin": null,
+      "sfx": {
+        "name": "snap",
+        "vol": 0.5,
+        "peak": 0
+      },
+      "note": "Corte seco sobre el golpe"
+    },
+    {
+      "from": "04-intro",
+      "to": "05-camara",
+      "type": "whip",
+      "dir": "right",
+      "dur": 0.28,
+      "ease": "expo.inOut",
+      "dist": null,
+      "fade": null,
+      "origin": null,
+      "sfx": {
+        "name": "swipe",
+        "vol": 0.5,
+        "peak": 0.5
+      },
+      "note": "Barrida brusca a la derecha"
+    },
+    {
+      "from": "05-camara",
+      "to": "06-vivo",
+      "type": "over",
+      "dir": null,
+      "dur": 0.3,
+      "ease": "power2.out",
+      "dist": null,
+      "fade": null,
+      "origin": null,
+      "sfx": {
+        "name": "soft-in",
+        "vol": 0.4,
+        "peak": 0.3
+      },
+      "note": "El entrante aparece sobre el saliente"
+    },
+    {
+      "from": "06-vivo",
+      "to": "07-revision",
+      "type": "iris",
+      "dir": null,
+      "dur": 0.6,
+      "ease": "power2.inOut",
+      "dist": null,
+      "fade": null,
+      "origin": [
+        0.5,
+        0.45
+      ],
+      "sfx": {
+        "name": "whoosh-s",
+        "vol": 0.5,
+        "peak": 0.5
+      },
+      "note": "Iris desde el anillo"
+    },
+    {
+      "from": "07-revision",
+      "to": "08-reportes",
+      "type": "flash",
+      "dir": null,
+      "dur": 0.1,
+      "ease": "power3.inOut",
+      "dist": null,
+      "fade": null,
+      "origin": null,
+      "sfx": {
+        "name": "flash",
+        "vol": 0.4,
+        "peak": 0
+      },
+      "note": "Destello crema sobre el impacto"
+    },
+    {
+      "from": "08-reportes",
+      "to": "09-analitica",
+      "type": "squeeze",
+      "dir": null,
+      "dur": 0.4,
+      "ease": "power3.inOut",
+      "dist": null,
+      "fade": null,
+      "origin": null,
+      "sfx": {
+        "name": "whoosh-s",
+        "vol": 0.45,
+        "peak": 0.5
+      },
+      "note": "Compresion a la izquierda"
+    },
+    {
+      "from": "09-analitica",
+      "to": "10-alumno",
+      "type": "wipe",
+      "dir": "left",
+      "dur": 0.5,
+      "ease": "power3.inOut",
+      "dist": null,
+      "fade": null,
+      "origin": null,
+      "sfx": {
+        "name": "whoosh-m",
+        "vol": 0.5,
+        "peak": 0.5
+      },
+      "note": "Barrida con borde de acento"
+    },
+    {
+      "from": "10-alumno",
+      "to": "11-confianza",
+      "type": "match",
+      "dir": null,
+      "dur": 0,
+      "ease": "power3.inOut",
+      "dist": null,
+      "fade": null,
+      "origin": null,
+      "sfx": {
+        "name": "tick",
+        "vol": 0.4,
+        "peak": 0
+      },
+      "note": "El anillo de avance conserva posicion y escala entre el alumno y la tarjeta de confianza"
+    },
+    {
+      "from": "11-confianza",
+      "to": "12-cierre",
+      "type": "zoom",
+      "dir": "out",
+      "dur": 0.5,
+      "ease": "power2.in",
+      "dist": null,
+      "fade": null,
+      "origin": null,
+      "sfx": {
+        "name": "zoom-out",
+        "vol": 0.5,
+        "peak": 0.5
+      },
+      "note": "El saliente se aleja sobre el cierre"
+    }
+  ]
+}

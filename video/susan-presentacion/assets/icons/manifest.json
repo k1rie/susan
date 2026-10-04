@@ -1,0 +1,283 @@
+{
+  "lucide": "1.50.0",
+  "fuente": "lucide-react",
+  "hashes": "sha256 (16 hex) de la geometria canonica: tag + d/cx/cy/r/rx/ry/x/y/x1/x2/y1/y2/width/height/points. Ignora class, id, pathLength, fill, stroke.",
+  "iconos": [
+    {
+      "nombre": "activity",
+      "archivo": "activity.svg",
+      "version": "1.50.0",
+      "hash": "49e279e66513ebc0"
+    },
+    {
+      "nombre": "badge-check",
+      "archivo": "badge-check.svg",
+      "version": "1.50.0",
+      "hash": "6b2e77bbdc24be6f"
+    },
+    {
+      "nombre": "ban",
+      "archivo": "ban.svg",
+      "version": "1.50.0",
+      "hash": "6fc80cdae62805dc"
+    },
+    {
+      "nombre": "bell-ring",
+      "archivo": "bell-ring.svg",
+      "version": "1.50.0",
+      "hash": "92f2b1ce3867f1b4"
+    },
+    {
+      "nombre": "bell",
+      "archivo": "bell.svg",
+      "version": "1.50.0",
+      "hash": "3c60f68d16c587e4"
+    },
+    {
+      "nombre": "book-open",
+      "archivo": "book-open.svg",
+      "version": "1.50.0",
+      "hash": "4eb7c29cdd965d7c"
+    },
+    {
+      "nombre": "calendar-check",
+      "archivo": "calendar-check.svg",
+      "version": "1.50.0",
+      "hash": "8bc2add623b6f948"
+    },
+    {
+      "nombre": "calendar-days",
+      "archivo": "calendar-days.svg",
+      "version": "1.50.0",
+      "hash": "453ff38fcec42181"
+    },
+    {
+      "nombre": "camera",
+      "archivo": "camera.svg",
+      "version": "1.50.0",
+      "hash": "41ef7a635014cc9f"
+    },
+    {
+      "nombre": "chart-line",
+      "archivo": "chart-line.svg",
+      "version": "1.50.0",
+      "hash": "ee0494b9c1cd719f"
+    },
+    {
+      "nombre": "check",
+      "archivo": "check.svg",
+      "version": "1.50.0",
+      "hash": "e6648fdccd04f386"
+    },
+    {
+      "nombre": "chevron-down",
+      "archivo": "chevron-down.svg",
+      "version": "1.50.0",
+      "hash": "21e5339aa3c82b11"
+    },
+    {
+      "nombre": "circle-check",
+      "archivo": "circle-check.svg",
+      "version": "1.50.0",
+      "hash": "3cb432ad16370f92"
+    },
+    {
+      "nombre": "clipboard-list",
+      "archivo": "clipboard-list.svg",
+      "version": "1.50.0",
+      "hash": "b9eba6f1113e7857"
+    },
+    {
+      "nombre": "clock",
+      "archivo": "clock.svg",
+      "version": "1.50.0",
+      "hash": "fbe8ed02b06a80e8"
+    },
+    {
+      "nombre": "download",
+      "archivo": "download.svg",
+      "version": "1.50.0",
+      "hash": "c283becd8ec149ad"
+    },
+    {
+      "nombre": "file-spreadsheet",
+      "archivo": "file-spreadsheet.svg",
+      "version": "1.50.0",
+      "hash": "b578f159414b54bd"
+    },
+    {
+      "nombre": "fingerprint-pattern",
+      "archivo": "fingerprint-pattern.svg",
+      "version": "1.50.0",
+      "hash": "de98240467a357dd"
+    },
+    {
+      "nombre": "flame",
+      "archivo": "flame.svg",
+      "version": "1.50.0",
+      "hash": "b3dd62906a6e92bf"
+    },
+    {
+      "nombre": "graduation-cap",
+      "archivo": "graduation-cap.svg",
+      "version": "1.50.0",
+      "hash": "d3905f611d571673"
+    },
+    {
+      "nombre": "hourglass",
+      "archivo": "hourglass.svg",
+      "version": "1.50.0",
+      "hash": "540c487885d471b9"
+    },
+    {
+      "nombre": "house",
+      "archivo": "house.svg",
+      "version": "1.50.0",
+      "hash": "ef2f666fe40e7c05"
+    },
+    {
+      "nombre": "image-off",
+      "archivo": "image-off.svg",
+      "version": "1.50.0",
+      "hash": "73b16043a47349f2"
+    },
+    {
+      "nombre": "layers",
+      "archivo": "layers.svg",
+      "version": "1.50.0",
+      "hash": "ba69babcc9e29046"
+    },
+    {
+      "nombre": "lock-keyhole",
+      "archivo": "lock-keyhole.svg",
+      "version": "1.50.0",
+      "hash": "6e4e7a0c73d66f94"
+    },
+    {
+      "nombre": "lock",
+      "archivo": "lock.svg",
+      "version": "1.50.0",
+      "hash": "1074deb124b44052"
+    },
+    {
+      "nombre": "mouse-pointer-2",
+      "archivo": "mouse-pointer-2.svg",
+      "version": "1.50.0",
+      "hash": "8741520d6901d679"
+    },
+    {
+      "nombre": "qr-code",
+      "archivo": "qr-code.svg",
+      "version": "1.50.0",
+      "hash": "60d3260f07d5cccc"
+    },
+    {
+      "nombre": "scan-face",
+      "archivo": "scan-face.svg",
+      "version": "1.50.0",
+      "hash": "4de1ce684e78173e"
+    },
+    {
+      "nombre": "scroll-text",
+      "archivo": "scroll-text.svg",
+      "version": "1.50.0",
+      "hash": "982ef246662c2d67"
+    },
+    {
+      "nombre": "shield-check",
+      "archivo": "shield-check.svg",
+      "version": "1.50.0",
+      "hash": "0b599c38dd9c4f87"
+    },
+    {
+      "nombre": "shield-lock",
+      "archivo": "shield-lock.svg",
+      "version": "1.50.0",
+      "hash": "89d00b301e196f51"
+    },
+    {
+      "nombre": "shield",
+      "archivo": "shield.svg",
+      "version": "1.50.0",
+      "hash": "3f2b0f2d27e335b5"
+    },
+    {
+      "nombre": "sparkle",
+      "archivo": "sparkle.svg",
+      "version": "1.50.0",
+      "hash": "789bfcba41ae6466"
+    },
+    {
+      "nombre": "sparkles",
+      "archivo": "sparkles.svg",
+      "version": "1.50.0",
+      "hash": "d87939c45da82c4a"
+    },
+    {
+      "nombre": "timer",
+      "archivo": "timer.svg",
+      "version": "1.50.0",
+      "hash": "6980341c9a5ecb44"
+    },
+    {
+      "nombre": "trending-up",
+      "archivo": "trending-up.svg",
+      "version": "1.50.0",
+      "hash": "e5747f06acc56797"
+    },
+    {
+      "nombre": "triangle-alert",
+      "archivo": "triangle-alert.svg",
+      "version": "1.50.0",
+      "hash": "d587750335906b44"
+    },
+    {
+      "nombre": "user-check",
+      "archivo": "user-check.svg",
+      "version": "1.50.0",
+      "hash": "e8d50ff9ab4f431e"
+    },
+    {
+      "nombre": "user-round-x",
+      "archivo": "user-round-x.svg",
+      "version": "1.50.0",
+      "hash": "81bd4e6e23508886"
+    },
+    {
+      "nombre": "user-round",
+      "archivo": "user-round.svg",
+      "version": "1.50.0",
+      "hash": "34d5e57f243528bf"
+    },
+    {
+      "nombre": "user-x",
+      "archivo": "user-x.svg",
+      "version": "1.50.0",
+      "hash": "7b4edf1cdc75c231"
+    },
+    {
+      "nombre": "users-round",
+      "archivo": "users-round.svg",
+      "version": "1.50.0",
+      "hash": "76c67be6b4cf0cda"
+    },
+    {
+      "nombre": "users",
+      "archivo": "users.svg",
+      "version": "1.50.0",
+      "hash": "b014d3a36bd518b4"
+    },
+    {
+      "nombre": "video",
+      "archivo": "video.svg",
+      "version": "1.50.0",
+      "hash": "9d4b96c6e583711b"
+    },
+    {
+      "nombre": "x",
+      "archivo": "x.svg",
+      "version": "1.50.0",
+      "hash": "5867fdbf0ece3328"
+    }
+  ]
+}

@@ -1,0 +1,506 @@
+<template>
+  <style>
+    /* Tipografia: solo archivos que existen en assets/fonts/ (rutas relativas a la raiz del proyecto) */
+    @font-face{font-family:"Hanken Grotesk";font-weight:400 700;font-style:normal;font-display:block;src:url("assets/fonts/HankenGrotesk-var.woff2") format("woff2");}
+    @font-face{font-family:"Geist Mono";font-weight:400 700;font-style:normal;font-display:block;src:url("assets/fonts/GeistMono-var.woff2") format("woff2");}
+
+    /* Las clases e ids llevan el prefijo "09-analitica-" (empieza con digito), por eso se escriben con selectores de atributo */
+    #root{position:absolute;left:0;top:0;width:1920px;height:1080px;overflow:hidden;
+      --ink:#1e1919;--card:#fff;--muted:#f0ede8;--mfg:#6f6a65;--lt:#9a948d;--line:#e7e2dc;--blue:#0061fe;
+      --warn:#9a6408;--warn-bg:#fbefd2;--bad:#b3261e;--bad-bg:#fbe4e1;--g-bad:#de4d44;
+      font-family:'Hanken Grotesk',system-ui,sans-serif;color:var(--ink);font-feature-settings:'tnum' 1}
+
+    [id="09-analitica-bg"]{position:absolute;left:0;top:0;width:1920px;height:1080px;background:#f7f5f2}
+
+    /* Camara: un solo mundo (gráfica + columna) con scale/x/y; nunca width/height */
+    [id="09-analitica-world"]{position:absolute;left:0;top:0;width:1920px;height:1080px}
+    [id="09-analitica-chart"]{position:absolute;left:0;top:0;width:1920px;height:1080px}
+
+    /* Tarjeta de la grafica: 1140x820 en (90,80), borde fino, sin sombra */
+    [id="09-analitica-card"]{position:absolute;left:90px;top:80px;width:1140px;height:820px;box-sizing:border-box;
+      background:var(--card);border:2px solid var(--line);border-radius:28px}
+    [id="09-analitica-hd"]{position:absolute;left:132px;top:112px}
+    [class~="09-analitica-ttl"]{font-size:36px;font-weight:600;letter-spacing:-.02em;line-height:1.15}
+    [class~="09-analitica-sub"]{margin-top:4px;font-size:26px;font-weight:500;color:var(--mfg);line-height:1.2}
+    [id="09-analitica-lg"]{position:absolute;right:752px;top:122px;display:flex;align-items:center;gap:28px;font-size:24px;font-weight:500;color:var(--mfg);white-space:nowrap}
+    [class~="09-analitica-li"]{display:inline-flex;align-items:center;gap:10px}
+    [class~="09-analitica-ld"]{width:16px;height:16px;border-radius:50%;background:var(--blue)}
+    [class~="09-analitica-lp"]{width:34px;height:4px;background:repeating-linear-gradient(90deg,var(--blue) 0,var(--blue) 10px,transparent 10px,transparent 16px)}
+    [class~="09-analitica-lr"]{width:34px;height:18px;border-radius:6px;background:rgba(0,97,254,.18)}
+
+    /* Capa de lineas a escala de escena (1920x1080) para usar las coordenadas de la hoja tal cual */
+    [id="09-analitica-svg"]{position:absolute;left:0;top:0;width:1920px;height:1080px;overflow:visible}
+
+    /* Rotulos de ejes */
+    [class~="09-analitica-yl"]{position:absolute;left:96px;width:62px;height:32px;line-height:32px;text-align:right;
+      font-family:'Geist Mono',ui-monospace,monospace;font-size:24px;font-weight:400;color:var(--mfg)}
+    [class~="09-analitica-xl"]{position:absolute;top:818px;width:76px;height:32px;line-height:32px;text-align:center;
+      font-family:'Geist Mono',ui-monospace,monospace;font-size:24px;font-weight:400;color:var(--mfg)}
+
+    /* Puntos observados: nucleo azul con anillo blanco (38 px); el contenedor escala desde su centro */
+    [class~="09-analitica-pt"]{position:absolute;width:38px;height:38px}
+    [class~="09-analitica-pt"] > i{position:absolute;inset:0;box-sizing:border-box;border-radius:50%;background:var(--blue);border:7px solid #fff}
+    [class~="09-analitica-vl"]{position:absolute;width:100px;text-align:center;font-size:28px;font-weight:700;letter-spacing:-.01em;color:var(--ink);white-space:nowrap}
+    /* Puntos proyectados: circulos huecos sobre la linea discontinua */
+    [class~="09-analitica-hp"]{position:absolute;width:32px;height:32px;box-sizing:border-box;border-radius:50%;background:#fff;border:4px solid var(--blue)}
+
+    /* Pastilla del limite (siempre presente) */
+    [id="09-analitica-chl"]{position:absolute;left:182px;top:378px;height:48px;padding:0 22px;box-sizing:border-box;display:inline-flex;align-items:center;
+      border-radius:999px;background:var(--bad-bg);color:var(--bad);font-size:26px;font-weight:700;white-space:nowrap}
+
+    /* Pastilla de alerta + tallo hacia el cruce; escala desde el pie del tallo (el marcador) */
+    [id="09-analitica-chx"]{position:absolute;left:778px;top:262px;width:420px;height:124px;transform-origin:312px 124px}
+    [id="09-analitica-chx"] > b{position:absolute;right:0;top:0;height:62px;padding:0 28px 0 18px;box-sizing:border-box;display:inline-flex;align-items:center;gap:12px;
+      border-radius:999px;background:var(--bad-bg);color:var(--bad);font-size:27px;font-weight:700;white-space:nowrap}
+    [id="09-analitica-chx"] > b svg{width:36px;height:36px;flex:none}
+    [id="09-analitica-chx"] > i{position:absolute;left:311px;top:62px;width:3px;height:56px;background:repeating-linear-gradient(180deg,rgba(222,77,68,.75) 0,rgba(222,77,68,.75) 8px,transparent 8px,transparent 14px)}
+
+    /* Marcador del cruce en S11 (1090, 415.4): brillo suave, tres anillos que laten y nucleo rojo con anillo blanco */
+    [id="09-analitica-glow"]{position:absolute;left:980px;top:305px;width:220px;height:220px;border-radius:50%;opacity:0;
+      background:radial-gradient(circle,rgba(222,77,68,.5) 0%,rgba(222,77,68,.22) 36%,rgba(222,77,68,0) 70%)}
+    [class~="09-analitica-ring"]{position:absolute;left:1066px;top:392px;width:48px;height:48px;box-sizing:border-box;border-radius:50%;border:4px solid rgba(222,77,68,.8);opacity:0}
+    [id="09-analitica-core"]{position:absolute;left:1071px;top:396px;width:38px;height:38px;box-sizing:border-box;border-radius:50%;background:var(--g-bad);border:7px solid #fff;opacity:0}
+
+    /* Columna derecha */
+    [id="09-analitica-pill"]{position:absolute;left:1290px;top:90px;height:68px;padding:0 30px 0 20px;box-sizing:border-box;display:inline-flex;align-items:center;gap:14px;
+      border-radius:999px;background:rgba(0,97,254,.09);color:var(--blue);font-size:28px;font-weight:600;white-space:nowrap}
+    [id="09-analitica-pill"] svg{width:36px;height:36px;flex:none}
+
+    /* Titular: 8 palabras que entran en cascada; las de acento van en azul con un marcador que las barre */
+    [id="09-analitica-hl"]{position:absolute;left:1290px;top:186px;width:580px;font-size:72px;font-weight:600;line-height:1.07;letter-spacing:-.03em;color:var(--ink);white-space:nowrap}
+    [class~="09-analitica-wd"]{position:relative;display:inline-block;margin-right:.24em;isolation:isolate}
+    [class~="09-analitica-bl"]{color:var(--blue)}
+    [class~="09-analitica-mk"]{position:absolute;left:-.1em;right:-.1em;top:.1em;bottom:.02em;border-radius:.14em;background:rgba(0,97,254,.15);z-index:-1;transform-origin:0 50%}
+
+    /* Tarjetas de cifra (kit de SUSAN): tile 72 con icono 40, etiqueta y cifra */
+    [class~="09-analitica-sc"]{position:absolute;left:1290px;width:560px;height:188px;box-sizing:border-box;background:var(--card);border:2px solid var(--line);border-radius:28px;
+      padding:0 32px;display:flex;align-items:center;gap:26px}
+    [class~="09-analitica-sx"]{display:flex;flex-direction:column;gap:6px;min-width:0}
+    [class~="09-analitica-sl"]{color:var(--mfg);font-size:28px;font-weight:500;line-height:1.2;white-space:nowrap}
+    [class~="09-analitica-sv"]{display:flex;align-items:baseline;font-size:88px;font-weight:600;letter-spacing:-.03em;line-height:1;white-space:nowrap}
+    [class~="09-analitica-sv"] small{display:inline-block;margin-left:12px;font-size:36px;font-weight:500;color:var(--mfg);letter-spacing:0}
+    [class~="09-analitica-vn"]{display:inline-block;transform-origin:0 70%;font-variant-numeric:tabular-nums}
+  </style>
+
+  <div id="root" data-composition-id="09-analitica" data-start="0" data-duration="5.69" data-width="1920" data-height="1080">
+    <div id="09-analitica-bg" class="clip" data-start="0" data-duration="5.69" data-track-index="0"></div>
+
+    <div id="09-analitica-world" data-camera>
+
+      <!-- ===== Columna izquierda: la grafica de dispersion (hecha a mano, data-chart) ===== -->
+      <div id="09-analitica-chart" data-chart="dispersion-ausentismo">
+        <div id="09-analitica-card"></div>
+
+        <div id="09-analitica-hd">
+          <div class="09-analitica-ttl">Ausentismo semanal</div>
+          <div class="09-analitica-sub">Grupo 3A</div>
+        </div>
+        <div id="09-analitica-lg">
+          <span class="09-analitica-li"><i class="09-analitica-ld"></i>Observado</span>
+          <span class="09-analitica-li"><i class="09-analitica-lp"></i>Proyección</span>
+          <span class="09-analitica-li"><i class="09-analitica-lr"></i>Rango</span>
+        </div>
+
+        <svg id="09-analitica-svg" data-chart="lineas" viewBox="0 0 1920 1080" width="1920" height="1080" aria-hidden="true">
+          <defs>
+            <linearGradient id="09-analitica-bandg" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0" stop-color="#0061fe" stop-opacity=".10"/>
+              <stop offset="1" stop-color="#0061fe" stop-opacity=".26"/>
+            </linearGradient>
+            <mask id="09-analitica-mk-prj" maskUnits="userSpaceOnUse" x="0" y="0" width="1920" height="1080">
+              <path id="09-analitica-mp" d="M820 485.8 L1180 391.9" fill="none" stroke="#fff" stroke-width="30"/>
+            </mask>
+            <mask id="09-analitica-mk-band" maskUnits="userSpaceOnUse" x="0" y="0" width="1920" height="1080">
+              <path id="09-analitica-mb" d="M820 485.8 L1180 391.9" fill="none" stroke="#fff" stroke-width="260"/>
+            </mask>
+          </defs>
+
+          <g stroke="#e7e2dc" stroke-width="2">
+              <line x1="168" y1="800" x2="1212" y2="800" stroke="#d9d3cb"/>
+              <line x1="168" y1="616.7" x2="1212" y2="616.7" />
+              <line x1="168" y1="250" x2="1212" y2="250" />
+          </g>
+          <polygon id="09-analitica-band" points="820.0,485.8 865.0,459.9 910.0,442.3 955.0,426.1 1000.0,410.6 1045.0,395.5 1090.0,380.7 1135.0,366.2 1180.0,351.9 1180.0,431.9 1135.0,441.1 1090.0,450.0 1045.0,458.7 1000.0,467.1 955.0,475.1 910.0,482.3 865.0,488.2 820.0,485.8" fill="url(#09-analitica-bandg)" mask="url(#09-analitica-mk-band)"/>
+          <line x1="168" y1="433.3" x2="1212" y2="433.3" stroke="#de4d44" stroke-width="3" stroke-dasharray="14 12"/>
+          <path id="09-analitica-prj" d="M820 485.8 L1180 391.9" fill="none" stroke="#0061fe" stroke-width="4" stroke-dasharray="18 12" mask="url(#09-analitica-mk-prj)"/>
+          <path id="09-analitica-fit" d="M190 650 L820 485.8" fill="none" stroke="#0061fe" stroke-width="4" stroke-linecap="round"/>
+        </svg>
+
+        <!-- ejes -->
+        <div class="09-analitica-yl" style="top:784.0px">0%</div>
+        <div class="09-analitica-yl" style="top:600.7px">10%</div>
+        <div class="09-analitica-yl" style="top:417.3px">20%</div>
+        <div class="09-analitica-yl" style="top:234.0px">30%</div>
+        <div class="09-analitica-xl" style="left:152px">S1</div>
+        <div class="09-analitica-xl" style="left:242px">S2</div>
+        <div class="09-analitica-xl" style="left:332px">S3</div>
+        <div class="09-analitica-xl" style="left:422px">S4</div>
+        <div class="09-analitica-xl" style="left:512px">S5</div>
+        <div class="09-analitica-xl" style="left:602px">S6</div>
+        <div class="09-analitica-xl" style="left:692px">S7</div>
+        <div class="09-analitica-xl" style="left:782px">S8</div>
+        <div class="09-analitica-xl" style="left:872px">S9</div>
+        <div class="09-analitica-xl" style="left:962px">S10</div>
+        <div id="09-analitica-xl-11" class="09-analitica-xl" style="left:1052px">S11</div>
+        <div class="09-analitica-xl" style="left:1142px">S12</div>
+
+        <!-- limite 20 % -->
+        <div id="09-analitica-chl">Límite&nbsp;20&nbsp;%</div>
+
+        <!-- puntos observados S1 a S8 -->
+          <div id="09-analitica-pt-1" class="09-analitica-pt" style="left:171.0px;top:634.3px"><i></i><span class="09-analitica-vl" style="left:-31px;top:48px">8&nbsp;%</span></div>
+          <div id="09-analitica-pt-2" class="09-analitica-pt" style="left:261.0px;top:606.8px"><i></i></div>
+          <div id="09-analitica-pt-3" class="09-analitica-pt" style="left:351.0px;top:588.5px"><i></i></div>
+          <div id="09-analitica-pt-4" class="09-analitica-pt" style="left:441.0px;top:570.2px"><i></i></div>
+          <div id="09-analitica-pt-5" class="09-analitica-pt" style="left:531.0px;top:542.7px"><i></i></div>
+          <div id="09-analitica-pt-6" class="09-analitica-pt" style="left:621.0px;top:524.3px"><i></i></div>
+          <div id="09-analitica-pt-7" class="09-analitica-pt" style="left:711.0px;top:496.8px"><i></i></div>
+          <div id="09-analitica-pt-8" class="09-analitica-pt" style="left:801.0px;top:469.3px"><i></i><span class="09-analitica-vl" style="left:-31px;top:48px">17&nbsp;%</span></div>
+
+        <!-- puntos proyectados S9, S10 y el extremo S12 (22.3 %) -->
+          <div id="09-analitica-hp-9" class="09-analitica-hp" style="left:894px;top:446.3px"></div>
+          <div id="09-analitica-hp-10" class="09-analitica-hp" style="left:984px;top:422.8px"></div>
+          <div id="09-analitica-hp-12" class="09-analitica-hp" style="left:1164px;top:375.9px"></div>
+
+        <!-- marcador del cruce en S11 -->
+        <div id="09-analitica-glow"></div>
+        <div id="09-analitica-ring-1" class="09-analitica-ring"></div>
+        <div id="09-analitica-ring-2" class="09-analitica-ring"></div>
+        <div id="09-analitica-ring-3" class="09-analitica-ring"></div>
+        <div id="09-analitica-core"></div>
+
+        <div id="09-analitica-chx"><b><svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="triangle-alert" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg><span>Cruza el límite en S11</span></b><i></i></div>
+      </div>
+
+      <!-- ===== Columna derecha: etiqueta, titular en cascada y dos tarjetas de cifra ===== -->
+      <div id="09-analitica-pill"><svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="chart-line" aria-hidden="true"><path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="m19 9-5 5-4-4-3 3"/></svg><span>Análisis numérico</span></div>
+
+      <div id="09-analitica-hl">
+        <span id="09-analitica-w-1" class="09-analitica-wd">Detecta</span><span id="09-analitica-w-2" class="09-analitica-wd">el</span><span id="09-analitica-w-3" class="09-analitica-wd">patrón</span><br>
+        <span id="09-analitica-w-4" class="09-analitica-wd 09-analitica-bl"><i class="09-analitica-mk"></i>antes</span><span id="09-analitica-w-5" class="09-analitica-wd 09-analitica-bl"><i class="09-analitica-mk"></i>de</span><span id="09-analitica-w-6" class="09-analitica-wd 09-analitica-bl"><i class="09-analitica-mk"></i>que</span><br>
+        <span id="09-analitica-w-7" class="09-analitica-wd 09-analitica-bl"><i class="09-analitica-mk"></i>sea</span><span id="09-analitica-w-8" class="09-analitica-wd 09-analitica-bl"><i class="09-analitica-mk"></i>tarde.</span>
+      </div>
+
+      <div id="09-analitica-sc-1" class="09-analitica-sc" style="top:470px">
+        <span class="ic-tile" style="display:inline-grid;place-items:center;width:72px;height:72px;border-radius:20px;background:#fbefd2;color:#9a6408;flex:none"><svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="trending-up" aria-hidden="true"><path d="M16 7h6v6"/><path d="m22 7-8.5 8.5-5-5L2 17"/></svg></span>
+        <div class="09-analitica-sx">
+          <span class="09-analitica-sl">Proyección al cierre</span>
+          <div class="09-analitica-sv"><span id="09-analitica-vn-1" class="09-analitica-vn">0.0</span><small>%</small></div>
+        </div>
+      </div>
+
+      <div id="09-analitica-sc-2" class="09-analitica-sc" style="top:692px">
+        <span class="ic-tile" style="display:inline-grid;place-items:center;width:72px;height:72px;border-radius:20px;background:#fbe4e1;color:#b3261e;flex:none"><svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="user-round-x" aria-hidden="true"><path d="m16.5 16.5 5 5"/><path d="M2 21a8 8 0 0 1 11.531-7.18"/><path d="m21.5 16.5-5 5"/><circle cx="10" cy="8" r="5"/></svg></span>
+        <div class="09-analitica-sx">
+          <span class="09-analitica-sl">Alumnos en riesgo</span>
+          <div class="09-analitica-sv"><span id="09-analitica-vn-2" class="09-analitica-vn">0</span><small>de 24</small></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+  <script>
+    (function () {
+        var P = '09-analitica-';
+        var $ = function (id) { return document.getElementById(P + id); };
+        var tl = gsap.timeline({ paused: true });
+        window.__timelines = window.__timelines || {};
+        window.__timelines['09-analitica'] = tl;
+
+        /* ============================================================================================================
+           BLOQUE CANONICO v2 (sonido + camara). Se PEGA TAL CUAL dentro del <script> de cada cuadro, justo despues de crear `tl`
+           (var tl = gsap.timeline({ paused: true }); window.__timelines[ID_DEL_CUADRO] = tl;). No lo edites en el cuadro: edita este archivo.
+           Es idempotente: pegarlo en varios cuadros (mismo window) redefine las mismas funciones.
+
+           POR QUE EXISTE (contrato de sincronia v2, audit/sonido/REPORT.md 7): el instante de un sonido NO se escribe a mano. Se declara
+           como ETIQUETA del timeline con la MISMA variable de tiempo que el tween que acompana, y los scripts lo derivan:
+               extract-events.mjs --cues  ->  v2/sfx-cues.json (tiempos absolutos)  ->  mount-sfx.mjs (data-start = t - ancla del archivo)
+           Uso tipico:
+               var T = 1.05 + k * 0.3;                                                    // un solo numero para tween y sonido
+               tl.fromTo(bx[k], { opacity: 0, scale: 0.82 }, { opacity: 1, scale: 1, duration: 0.45, ease: 'back.out(1.7)', data: 'hero' }, T);
+               sfx(tl, T, 'ping-note' + (k + 1), 0.5);                                    // nombre del CATALOG.json; vol opcional
+           Convenciones:
+             - t es el instante del evento visual: inicio del tween de entrada (primer fotograma visible); para 'whoosh/swipe' el punto de
+               maxima velocidad; para sonidos con anclaje 'fin' (riser, zoom-in) el instante en que ocurre el impacto/llegada (ver CATALOG.json).
+             - `data: 'hero'` en un tween (entrada de un elemento principal, cambio de estado, contador, empuje de camara, trazo) le exige sonido:
+               verify-sfx.mjs avisa de los hero sin etiqueta sfx a +-33 ms de su inicio. Las funciones cam* lo ponen solas.
+             - Nunca llames a addLabel con nombres repetidos (GSAP sobrescribe): sfx() agrega un contador unico.
+           ============================================================================================================ */
+        window.SFXN = window.SFXN || 0;   // contador unico de etiquetas (compartido por todos los cuadros de la pagina)
+        window.KEYN = window.KEYN || 0;   // rotacion de teclas (continua entre frases)
+
+        /* sfx(tl, t, nombre, vol) -> etiqueta 'sfx:<nombre>@<vol>#<n>' en el instante t. vol omitido = volDefecto del catalogo. */
+        function sfx(tl, t, nombre, vol) {
+            tl.addLabel('sfx:' + nombre + '@' + (vol == null ? '' : vol) + '#' + (window.SFXN++), t);
+            return t;
+        }
+
+        /* sfxType(tl, t0, tiempos, opciones) -> tiempos absolutos de las teclas que suenan.
+           tiempos[i] = segundo (relativo a t0) en que se pinta el caracter i del texto (sale del mismo reloj que pinta el texto).
+           opciones: texto ('Hola mundo': para detectar inicios de palabra; los espacios no suenan), vol (0.35), maxPorSeg (14),
+                     enter (true | segundo absoluto: agrega key-enter; true = 0.14 s tras la ultima tecla), borrados ([segundos absolutos]: key-back).
+           Decima a <= 14 teclas/s: siempre suena la primera y la ultima; el acento (vol completo) va en inicios de palabra, las demas a 0.78.
+           Rota key-1..8 sin repetir seguidas; una etiqueta por tecla (mount-sfx las hornea en un solo wav por frase, al milisegundo). */
+        function sfxType(tl, t0, tiempos, op) {
+            op = op || {};
+            var txt = op.texto || '', vol = op.vol == null ? 0.35 : op.vol, gap = 1 / (op.maxPorSeg || 14), k = [], i, c, p;
+            var ult = -1;
+            for (i = 0; i < tiempos.length; i++) if (!txt || txt.charAt(i) !== ' ') ult = i;
+            for (i = 0; i < tiempos.length; i++) {
+                if (txt && txt.charAt(i) === ' ') continue;
+                c = { t: t0 + tiempos[i], ini: !!txt && (i === 0 || txt.charAt(i - 1) === ' '), ult: i === ult };
+                p = k[k.length - 1];
+                if (!p || c.t - p.t >= gap) k.push(c);
+                else if (k.length > 1 && (c.ult || (c.ini && !p.ini))) k[k.length - 1] = c;   // la ultima y las iniciales desplazan a una tecla normal
+                else if (c.ult) k.push(c);                                                       // solo hay una tecla antes: ambas suenan
+            }
+            var out = [];
+            k.forEach(function (q, j) {
+                var acento = j === 0 || q.ini || j === k.length - 1;
+                sfx(tl, q.t, 'key-' + ((window.KEYN++ * 5) % 8 + 1), +(vol * (acento ? 1 : 0.78)).toFixed(3));
+                out.push(q.t);
+            });
+            if (op.enter && k.length) sfx(tl, op.enter === true ? k[k.length - 1].t + 0.14 : op.enter, 'key-enter', +(vol * 1.1).toFixed(3));
+            (op.borrados || []).forEach(function (tb) { sfx(tl, tb, 'key-back', vol); });
+            return out;
+        }
+
+        /* sfxCount(tl, t0, t1, desde, hasta, opciones) -> tiempos absolutos de los 'tick'. Un tick por cambio de entero (el contador muestra
+           Math.round(valor)), <= 12/s, 4 alturas crecientes (tick-1..4 segun el avance), el ultimo con acento (tick-4 a vol x1.5).
+           opciones: ease ('power1.out': la MISMA ease del tween del contador; debe ser monotona), paso (1: valor entre ticks), vol (0.4), maxPorSeg (12). */
+        function sfxCount(tl, t0, t1, desde, hasta, op) {
+            op = op || {};
+            var ease = gsap.parseEase(op.ease || 'power1.out'), paso = op.paso || 1, vol = op.vol == null ? 0.4 : op.vol, gap = 1 / (op.maxPorSeg || 12);
+            var span = Math.abs(hasta - desde), n = Math.floor(span / paso + 1e-9), ts = [], s, lo, hi, m, it;
+            for (s = 1; s <= n; s++) {                       // instante en que el valor cruza (s - 0.5) pasos: se invierte la ease por biseccion
+                lo = 0; hi = 1;
+                for (it = 0; it < 32; it++) { m = (lo + hi) / 2; if (ease(m) * span < (s - 0.5) * paso) lo = m; else hi = m; }
+                ts.push(t0 + hi * (t1 - t0));
+            }
+            var k = [];
+            ts.forEach(function (t, j) {
+                var p = k[k.length - 1];
+                if (p === undefined || t - p >= gap) k.push(t);
+                else if (j === ts.length - 1 && k.length > 1) k[k.length - 1] = t;           // el ultimo siempre suena
+                else if (j === ts.length - 1) k.push(t);
+            });
+            k.forEach(function (t, j) {
+                var ultimo = j === k.length - 1;
+                sfx(tl, t, 'tick-' + (ultimo ? 4 : Math.min(3, Math.floor(4 * j / k.length)) + 1), +Math.min(1, vol * (ultimo ? 1.5 : 1)).toFixed(3));
+            });
+            return k;
+        }
+
+        /* readMark(tl, t, 'frase') -> etiqueta 'read:frase' en el instante en que una frase clave queda COMPLETA y legible. El director/verificador
+           exige que el corte a otro cuadro llegue >= 0.9 s despues (tiempo de lectura). */
+        function readMark(tl, t, frase) {
+            tl.addLabel('read:' + frase + '#' + (window.SFXN++), t);   // no se lee tl.labels: el compilador de render ejecuta el script con un timeline proxy sin esa propiedad
+            return t;
+        }
+
+        /* ---- CAMARA con GSAP puro (seek-safe). Cada helper hace un fromTo con los valores de partida que recuerda en el elemento (el estado
+           se encadena en el orden de las llamadas) e `immediateRender: false` SIEMPRE: sin eso el segundo fromTo sobre el mismo objetivo
+           aplica su `from` en el fotograma 0 y pisa al primero (bug del cuadro 6: entraba a 1.6 y saltaba a 1.0). Devuelven el fin del tween.
+           `el`: elemento o selector. Opciones comunes: dur, ease, foco [cx, cy] (punto de 1920x1080 que queda en el centro), x, y (px, pisan a foco),
+           W, H (tamano de escena, 1920x1080), sfx (nombre del catalogo o false), vol. Todos los tweens llevan data: 'hero'. ---- */
+        function camInit(el, escala, x, y) {
+            var e = typeof el === 'string' ? document.querySelector(el) : el;
+            e.__cam = { s: escala == null ? 1 : escala, x: x || 0, y: y || 0, r: 0 };
+            gsap.set(e, { transformOrigin: '50% 50%', scale: e.__cam.s, x: e.__cam.x, y: e.__cam.y, rotation: 0 });
+        }
+        function camTo(tl, el, t, a, o, dur0, ease0, sfx0) {
+            o = o || {};
+            var e = typeof el === 'string' ? document.querySelector(el) : el;
+            if (!e.__cam) camInit(e, 1, 0, 0);
+            var c = e.__cam, dur = o.dur == null ? dur0 : o.dur, W = o.W || 1920, H = o.H || 1080;
+            var s = a.s == null ? c.s : a.s, x = a.x == null ? c.x : a.x, y = a.y == null ? c.y : a.y, r = a.r == null ? c.r : a.r;
+            if (o.foco) { x = (W / 2 - o.foco[0]) * s; y = (H / 2 - o.foco[1]) * s; }
+            if (o.x != null) x = o.x;
+            if (o.y != null) y = o.y;
+            tl.fromTo(e, { scale: c.s, x: c.x, y: c.y, rotation: c.r },
+                { scale: s, x: x, y: y, rotation: r, duration: dur, ease: o.ease || ease0, immediateRender: false, data: 'hero' }, t);
+            e.__cam = { s: s, x: x, y: y, r: r };
+            var snd = o.sfx === undefined ? sfx0 : o.sfx;
+            if (snd) sfx(tl, t, snd, o.vol);
+            return t + dur;
+        }
+        /* camSnap: salto de zoom en ~0.18 s con ataque (snap-zoom). Suena 'snap' por defecto (sfx: false lo apaga). */
+        function camSnap(tl, el, t, escala, o) { return camTo(tl, el, t, { s: escala }, o, 0.18, 'power4.out', 'snap'); }
+        /* camPush: empuje lento (acercar). Sonido opcional: sfx(tl, fin, 'zoom-in') (anclaje 'fin': t = fin del tween). */
+        function camPush(tl, el, t, escala, o) { return camTo(tl, el, t, { s: escala }, o, 1.1, 'power2.inOut', null); }
+        /* camPull: alejar (escala por defecto 1) en ~0.7 s. */
+        function camPull(tl, el, t, escala, o) { return camTo(tl, el, t, { s: escala == null ? 1 : escala }, o, 0.7, 'power3.inOut', null); }
+        /* camPan: desplazamiento RELATIVO (dx, dy en px) respecto a la posicion actual, ~0.6 s. */
+        function camPan(tl, el, t, dx, dy, o) {
+            var e = typeof el === 'string' ? document.querySelector(el) : el;
+            var c = e.__cam || { x: 0, y: 0 };
+            return camTo(tl, el, t, { x: c.x + (dx || 0), y: c.y + (dy || 0) }, o, 0.6, 'power3.inOut', null);
+        }
+        /* camTilt: inclinacion (rotacion en grados, absoluta) ~0.5 s; camTilt(tl, el, t, 0) la endereza. */
+        function camTilt(tl, el, t, grados, o) { return camTo(tl, el, t, { r: grados }, o, 0.5, 'power2.inOut', null); }
+        /* ============================ fin del bloque canonico v2 ============================ */
+
+        /* ---------- Preparacion: trazos medidos (longitud real, no adivinada) ---------- */
+        var medir = function (el, respaldo) {
+            var l = 0;
+            try { l = el.getTotalLength(); } catch (e) { l = 0; }
+            if (!l) { l = respaldo; }
+            el.style.strokeDasharray = String(l);
+            el.style.strokeDashoffset = String(l);
+            return l;
+        };
+        var FIT = $('fit');
+        var LFIT = medir(FIT, 651);
+        var PRJ = medir($('mp'), 372);
+        var BAN = medir($('mb'), 372);
+        // la recta es una linea continua: el dasharray de medir() solo sirve para dibujarla; no se pisa la de la proyeccion (en su mascara)
+
+        /* ---------- Camara: UN mundo, solo helpers cam* (convencion x,y del plan; foco = punto que queda al centro) ---------- */
+        var world = $('world');
+        var DOLLY_T = 0.25;
+        /* Los cues 'asent' iban al inicio del tween de asentamiento (aparicion + 0.10 s) y sonaban 67-117 ms despues del primer fotograma
+           visible. Se adelantan 0.07 s: caen a aparicion + 0.03 s (<= 33 ms del tween de aparicion, que ya existe) y el sonido llega entre
+           +17 y +50 ms del primer fotograma visible. Los tweens visuales no cambian. */
+        var AVANCE_ASENT = 0.07;
+        camInit(world, 1, 0, 0);
+
+        /* 0.00-0.25: HEROE. Tarjeta, ejes, limite y pastilla ya estan en el fotograma 0 (la whip los trae); nada se anima aqui. */
+
+        /* ---------- 0.28-1.02: los 8 puntos observados saltan en cascada (0.07 s) ---------- */
+        var SEG = [8, 9.5, 10.5, 11.5, 13, 14, 15.5, 17];
+        var POP = { 0: ['pop-2', 0.38], 2: ['pop-4', 0.38], 4: ['pop-1', 0.38], 6: ['pop-3', 0.38], 7: ['ping-note8', 0.32] };
+        SEG.forEach(function (p, i) {
+            var T = i < 7 ? 0.28 + 0.07 * i : 0.77;
+            var o = { scale: 1, opacity: 1, duration: 0.25, ease: 'back.out(1.6)' };
+            if (POP[i]) { o.data = 'hero'; }
+            tl.fromTo($('pt-' + (i + 1)), { scale: 0, opacity: 0 }, o, T);
+            if (POP[i]) { sfx(tl, T, POP[i][0], POP[i][1]); }
+        });
+
+        /* ---------- 0.77-1.22: la recta de ajuste se dibuja S1 -> S8 (con el draw y la nota 8) ---------- */
+        var TFIT = 0.77;
+        tl.fromTo(FIT, { strokeDashoffset: LFIT }, { strokeDashoffset: 0, duration: 0.45, ease: 'power2.out', data: 'hero' }, TFIT);
+        sfx(tl, TFIT, 'draw', 0.3);
+
+        /* ---------- 0.25-2.00: DOLLY de seguimiento (cam[0]) ----------
+           DESVIACION documentada: la hoja lo pone en 0.77-2.00 (1.23 s), pero entonces 0.28-0.77 s solo se mueven puntos de 38 px y el medidor
+           da energia 0.04 (0.8 s "lentos"). Arranca al terminar la whip (0.25; la camara esta exenta del solape de entrada) con el mismo
+           destino (s 1.14, foco (1130,480)) y la misma ease, asi llega al snap de 2.02 s sin cambiar de rumbo. Velocidad media 8 %/s. */
+        /* DESVIACION 2 (revision 2.1): el foco (1130,480) a escala 1.14 deja el borde visible izquierdo en x 288 y recortaba el titulo
+           'Ausentismo semanal' y las etiquetas del eje Y durante ~1.3 s. Con foco (900,480) el borde visible queda en x 58 (< 90, el borde
+           izquierdo de la tarjeta): titulo y eje enteros durante toda la dolly; la punta de la recta (S8 en x 820, S11 en 1090) sigue dentro
+           del encuadre (58-1742). El snap de 2.02 s conserva su foco (1090,430): ahi el recorte es el golpe y el titulo ya no hace falta. */
+        camTo(tl, world, DOLLY_T, { s: 1.14 }, { foco: [900, 480], dur: 2.00 - DOLLY_T, ease: 'power1.inOut', sfx: false }, 2.00 - DOLLY_T, 'power1.inOut', null);
+
+        /* ---------- 1.22-2.02: la proyeccion acelera hasta S12 y la banda se abre siguiendo la punta ---------- */
+        tl.fromTo($('mp'), { strokeDashoffset: PRJ }, { strokeDashoffset: 0, duration: 0.8, ease: 'power2.in' }, 1.22);   /* sin 'hero': su sonido es el riser, que TERMINA en 2.02 */
+        tl.fromTo($('mb'), { strokeDashoffset: BAN }, { strokeDashoffset: 0, duration: 0.8, ease: 'power2.in' }, 1.22);
+        tl.fromTo($('band'), { opacity: 0 }, { opacity: 1, duration: 0.7, ease: 'power1.out' }, 1.22);
+
+        /* S9 y S10 (circulos huecos) con su tick */
+        var T9 = 1.50, T10 = 1.76;
+        tl.fromTo($('hp-9'), { scale: 0, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.2, ease: 'back.out(1.6)', data: 'hero' }, T9);
+        sfx(tl, T9, 'tick-2', 0.25);
+        tl.fromTo($('hp-10'), { scale: 0, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.2, ease: 'back.out(1.6)', data: 'hero' }, T10);
+        sfx(tl, T10, 'tick-3', 0.25);
+        tl.fromTo($('hp-12'), { scale: 0, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.22, ease: 'back.out(1.6)' }, 1.9);
+
+        /* el riser real (1 s) termina en el cruce */
+        var TX = 2.02;
+        sfx(tl, TX, 'riser-1s', 0.5);
+
+        /* ---------- 2.02-2.32: CRUCE EN S11 (impact-hit): nucleo + brillo + anillos + temblor; snap-zoom (cam[1]) ---------- */
+        tl.fromTo($('core'), { scale: 0.2, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.25, ease: 'back.out(2.2)', data: 'hero' }, TX);
+        sfx(tl, TX, 'impact-hit', 0.75);
+        tl.fromTo($('glow'), { scale: 0.3, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.3, ease: 'power2.out' }, TX);
+        [0, 1, 2].forEach(function (i) {
+            tl.fromTo($('ring-' + (i + 1)), { scale: 0.7, opacity: 0.85 }, { scale: 3.2, opacity: 0, duration: 0.5, ease: 'power2.out', immediateRender: false }, TX + 0.1 * i);   /* immediateRender:false: si no, los 3 anillos se ven desde el fotograma 0 */
+        });
+        tl.to($('xl-11'), { color: '#b3261e', duration: 0.2, ease: 'none' }, TX);
+        /* sin snap-zoom en el cruce (era un zoom innecesario): el énfasis lo dan los anillos, el temblor y el chip */
+
+        /* temblor de +-6 px durante 0.25 s: sacude la capa de la grafica (la camara solo se mueve con los helpers) */
+        var chart = $('chart');
+        [[6, -5], [-6, 4], [4, -3], [-2, 2], [0, 0]].forEach(function (d, i) {
+            tl.to(chart, { x: d[0], y: d[1], duration: 0.05, ease: 'sine.inOut' }, TX + 0.05 * i);
+        });
+
+        /* ---------- 2.07-2.37: pastilla "Cruza el limite en S11" (aparicion + asentamiento, ping-note5 al asentar) ---------- */
+        var chx = $('chx');
+        tl.fromTo(chx, { opacity: 0, scale: 0.55, y: 16 }, { opacity: 1, scale: 0.88, y: 5, duration: 0.1, ease: 'none' }, 2.07);
+        tl.fromTo(chx, { scale: 0.88, y: 5 }, { scale: 1, y: 0, duration: 0.3, ease: 'back.out(2)', immediateRender: false, data: 'hero' }, 2.17);
+        sfx(tl, 2.17 - AVANCE_ASENT, 'ping-note5', 0.4);
+
+        /* ---------- 2.30-2.70: PULL-BACK que revela la columna (cam[2]) con zoom-out ---------- */
+        camTo(tl, world, 2.3, { s: 1 }, { foco: [960, 540], dur: 0.4, ease: 'power3.out', sfx: 'zoom-out', vol: 0.3 }, 0.4, 'power3.out', null);
+
+        /* ---------- 2.35-3.30: titular por CASCADA DE PALABRAS (una cada 0.10 s: y 14 -> 0, blur 8 -> 0, 0.25 s) ---------- */
+        var TICKS = { 0: ['tick-1', 0.32], 2: ['tick-2', 0.32], 3: ['tick-3', 0.32], 7: ['tick-4', 0.42] };
+        /* cada palabra entra cuando la voz la dice (instantes de v2/voz-alineacion.json); antes iban una cada 0.10 s y se sentía apresurado */
+        var TW9 = [2.3, 2.72, 2.85, 3.51, 3.82, 3.91, 4.04, 4.22];
+        for (var w = 0; w < 8; w++) {
+            var TW = TW9[w];
+            var ow = { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.25, ease: 'power3.out' };
+            if (TICKS[w]) { ow.data = 'hero'; }
+            tl.fromTo($('w-' + (w + 1)), { opacity: 0, y: 14, filter: 'blur(8px)' }, ow, TW);
+            if (TICKS[w]) { sfx(tl, TW, TICKS[w][0], TICKS[w][1]); }
+        }
+        readMark(tl, 4.47, 'Detecta el patrón antes de que sea tarde.');
+
+        /* Cada tick del contador lleva su "golpecito" en la cifra (escala 1.07 -> 1 en 0.08 s): el sonido queda pegado a un tween real */
+        var bump = function (el, tiempos) {
+            tiempos.forEach(function (t) {
+                tl.fromTo(el, { scale: 1.07 }, { scale: 1, duration: 0.08, ease: 'power2.out', immediateRender: false }, t);
+            });
+        };
+
+        /* ---------- 2.60-3.15: tarjeta "Proyeccion al cierre" entra y cuenta 0 -> 22.3 % ---------- */
+        var sc1 = $('sc-1');
+        tl.fromTo(sc1, { opacity: 0, y: 40, scale: 0.94 }, { opacity: 1, y: 12, scale: 0.98, duration: 0.1, ease: 'none' }, 2.6);
+        tl.fromTo(sc1, { y: 12, scale: 0.98 }, { y: 0, scale: 1, duration: 0.35, ease: 'back.out(1.6)', immediateRender: false, data: 'hero' }, 2.7);
+        sfx(tl, 2.7 - AVANCE_ASENT, 'pop-3', 0.4);
+        var c1 = { v: 0 }, n1 = $('vn-1');
+        tl.fromTo(c1, { v: 0 }, { v: 22.3, duration: 0.45, ease: 'power2.out', data: 'hero',
+            onUpdate: function () { n1.textContent = c1.v.toFixed(1); } }, 2.7);
+        bump(n1, sfxCount(tl, 2.7, 3.15, 0, 22, { ease: 'power2.out', vol: 0.22 }));
+
+        /* ---------- 2.85-3.25: tarjeta "Alumnos en riesgo" entra y cuenta 0 -> 9 ---------- */
+        var sc2 = $('sc-2');
+        tl.fromTo(sc2, { opacity: 0, y: 40, scale: 0.94 }, { opacity: 1, y: 12, scale: 0.98, duration: 0.1, ease: 'none' }, 2.85);
+        tl.fromTo(sc2, { y: 12, scale: 0.98 }, { y: 0, scale: 1, duration: 0.3, ease: 'back.out(1.6)', immediateRender: false, data: 'hero' }, 2.95);
+        sfx(tl, 2.95 - AVANCE_ASENT, 'pop-4', 0.4);
+        var c2 = { v: 0 }, n2 = $('vn-2');
+        tl.fromTo(c2, { v: 0 }, { v: 9, duration: 0.3, ease: 'power2.out', data: 'hero',
+            onUpdate: function () { n2.textContent = String(Math.round(c2.v)); } }, 2.95);
+        bump(n2, sfxCount(tl, 2.95, 3.25, 0, 9, { ease: 'power2.out', vol: 0.22 }));
+
+        /* ---------- 3.25-3.50: ATERRIZA el 9: la tarjeta se tine rosa y pulsa; empujon lateral de camara (cam[3], sin rotacion) ---------- */
+        var TL = 3.25;
+        tl.to(sc2, { scale: 1.04, backgroundColor: '#fdeeec', borderColor: '#f1b9b4', duration: 0.12, ease: 'power2.out', data: 'hero' }, TL);
+        sfx(tl, TL, 'error-trim', 0.3);
+        tl.to(sc2, { scale: 1, duration: 0.18, ease: 'power2.inOut' }, TL + 0.12);
+        tl.to(n2, { color: '#b3261e', duration: 0.2, ease: 'none' }, TL);
+        /* sin empujón de cámara aquí: el titular se lee con la cámara quieta */
+
+        /* ---------- 3.30-3.56: el marcador azul barre "antes de que sea tarde." (palabra por palabra, reloj lineal) ---------- */
+        /* el subrayado acompaña a la voz: cada palabra de "antes de que sea tarde" se subraya en cuanto aparece (TW9[3..7]) */
+        for (var m = 0; m < 5; m++) {
+            var TM = TW9[3 + m] + 0.05;
+            var dm = m < 4 ? Math.max(0.08, Math.min(0.22, TW9[4 + m] - TW9[3 + m])) : 0.22;
+            tl.fromTo(document.querySelectorAll('[class~="09-analitica-mk"]')[m], { scaleX: 0 }, { scaleX: 1, duration: dm, ease: 'power1.out' }, TM);
+        }
+
+        /* ---------- 3.60-3.90: regreso de la camara en la cola de lectura (cam[4]) ---------- */
+        /* (sin regreso de cámara: ya no hay empujón) */
+
+        /* ---------- Cola de lectura (3.30-4.15): solo remates decorativos del marcador, sin informacion nueva ---------- */
+        tl.fromTo($('ring-1'), { scale: 0.7, opacity: 0.7 }, { scale: 3, opacity: 0, duration: 0.45, ease: 'power2.out', immediateRender: false }, 3.65);
+        tl.fromTo($('ring-2'), { scale: 0.7, opacity: 0.6 }, { scale: 3, opacity: 0, duration: 0.35, ease: 'power2.out', immediateRender: false }, 3.8);
+
+        /* la duracion del timeline es exactamente la del plan (4.5 s) */
+        tl.set({}, {}, 5.69);
+    })();
+  </script>
+</template>

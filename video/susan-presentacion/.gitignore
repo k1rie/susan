@@ -1,0 +1,22 @@
+# Salidas regenerables del video (el MP4 final pesa ~30 MB: se conserva en disco, no en git)
+renders/
+snapshots/
+.hyperframes/frame-packets/
+.media/
+node_modules/
+
+# caché de la locución (audio en base64 de ElevenLabs; se regenera con scripts/generar-voz.mjs)
+v2/voz-cache/
+
+
+# capturas de revisión por cuadro (scripts/preview-frame.mjs, frame-check.mjs): ~270 MB regenerables
+v2/preview/
+v2/revision/
+# respaldos de trabajo antes de cada ajuste (el historial de Git los reemplaza)
+v2/*.pre-*
+v2/index.sin-voz.html
+v2/plan.borrador-pre-revision.json
+# evidencia binaria de la auditoría (fotogramas y recortes de audio); los informes .md/.json sí se versionan
+audit/**/*.jpg
+audit/**/*.png
+audit/**/*.wav

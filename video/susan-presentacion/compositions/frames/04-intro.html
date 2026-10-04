@@ -1,0 +1,341 @@
+<template>
+<style>
+@font-face{font-family:"Hanken Grotesk";font-weight:400 700;font-style:normal;font-display:block;src:url("assets/fonts/HankenGrotesk-var.woff2") format("woff2");}
+
+#root{position:relative;width:1920px;height:1080px;overflow:hidden;
+ --ink:#1e1919;--canvas:#f7f5f2;--line:#e7e2dc;--blue:#0061fe;--violet:#8b6fe0;--pink:#f5a3c7;
+ font-family:'Hanken Grotesk',system-ui,sans-serif;color:var(--ink);-webkit-font-smoothing:antialiased}
+
+/* ---- fondo: crema -> degradado pastel con grano (clip propio, a pantalla completa) ---- */
+.\0000304-intro-bg{position:absolute;left:0;top:0;width:1920px;height:1080px;overflow:hidden}
+.\0000304-intro-cream{position:absolute;left:0;top:0;width:1920px;height:1080px;background:var(--canvas)}
+.\0000304-intro-wash{position:absolute;left:0;top:0;width:1920px;height:1080px}
+.\0000304-intro-base{position:absolute;left:0;top:0;width:1920px;height:1080px;
+ background:linear-gradient(128deg,#8fb6ff 0%,#b79cf5 36%,#f5a3c7 70%,#ffc89a 100%)}
+.\0000304-intro-drift{position:absolute;left:0;top:0;width:1920px;height:1080px;will-change:transform}
+.\0000304-intro-blob{position:absolute;width:1400px;height:1400px;border-radius:50%}
+.\0000304-intro-b1{left:-460px;top:-520px;background:radial-gradient(circle,rgba(143,182,255,.95) 0%,rgba(143,182,255,0) 68%)}
+.\0000304-intro-b2{left:1000px;top:-560px;background:radial-gradient(circle,rgba(183,156,245,.9) 0%,rgba(183,156,245,0) 68%)}
+.\0000304-intro-b3{left:-420px;top:380px;background:radial-gradient(circle,rgba(245,163,199,.9) 0%,rgba(245,163,199,0) 68%)}
+.\0000304-intro-b4{left:980px;top:360px;background:radial-gradient(circle,rgba(255,200,154,.95) 0%,rgba(255,200,154,0) 68%)}
+.\0000304-intro-grain{position:absolute;left:0;top:0;width:1920px;height:1080px;opacity:.32;mix-blend-mode:multiply;
+ background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
+.\0000304-intro-glow{position:absolute;left:210px;top:12px;width:1500px;height:960px;border-radius:50%;opacity:0;will-change:transform;
+ background:radial-gradient(ellipse at 50% 50%,rgba(255,255,255,.66) 0%,rgba(255,255,255,.3) 38%,rgba(255,255,255,0) 70%)}
+
+/* ---- escena: todo el lockup vive en el wrapper de camara (world); el fondo no es camara ---- */
+.\0000304-intro-stage{position:absolute;left:0;top:0;width:1920px;height:1080px}
+.\0000304-intro-world{position:absolute;left:0;top:0;width:1920px;height:1080px;will-change:transform}
+/* "Presentamos" no entra con animacion propia: lo trae el squeeze ya nitido */
+.\0000304-intro-pre{position:absolute;left:0;top:223px;width:1920px;text-align:center;font-size:64px;line-height:64px;
+ font-weight:500;letter-spacing:-0.01em;color:var(--ink)}
+
+.\0000304-intro-word{position:absolute;left:0;top:381px;width:1920px;height:320px;display:grid;justify-content:center;align-content:center;will-change:transform}
+.\0000304-intro-letters,.\0000304-intro-sweep{grid-area:1/1;font-size:320px;line-height:320px;font-weight:700;letter-spacing:-0.045em;
+ font-kerning:none;white-space:nowrap;margin-left:-2px}
+.\0000304-intro-letters{display:flex;color:var(--ink);position:relative;z-index:1}
+.\0000304-intro-L{display:block;will-change:transform,filter}
+.\0000304-intro-sweep{position:relative;z-index:2;color:transparent;-webkit-background-clip:text;background-clip:text;
+ background-image:linear-gradient(100deg,rgba(0,97,254,0) 0%,rgba(0,97,254,0) 42%,#0061fe 46.5%,#8b6fe0 50%,#e0509a 53.5%,rgba(224,80,150,0) 58%,rgba(224,80,150,0) 100%);
+ background-size:500% 100%;background-position:75% 50%}
+
+
+.\0000304-intro-row{position:absolute;left:0;top:640px;width:1920px;height:168px;display:flex;justify-content:center;align-items:center;gap:36px}
+.\0000304-intro-badge{box-sizing:border-box;width:168px;height:168px;border-radius:50%;background:#fff;border:2px solid var(--line);display:grid;place-items:center;will-change:transform}
+.\0000304-intro-shield{display:block;height:120px;width:auto}
+.\0000304-intro-pill{box-sizing:border-box;display:flex;align-items:center;height:112px;padding:0 62px;border-radius:999px;background:#fff;
+ border:2px solid var(--line);font-size:40px;line-height:40px;font-weight:600;letter-spacing:.01em;white-space:nowrap;
+ color:var(--ink);will-change:transform}
+.\0000304-intro-dot{display:block;flex:none;width:12px;height:12px;border-radius:50%;background:var(--blue);margin:0 26px}
+
+/* brillo suave bajo el eslogan: cama visual de la cascada */
+.\0000304-intro-glowb{position:absolute;left:260px;top:742px;width:1400px;height:300px;border-radius:50%;opacity:0;will-change:transform,opacity;
+ background:radial-gradient(ellipse at 50% 50%,rgba(255,255,255,.62) 0%,rgba(255,255,255,.28) 42%,rgba(255,255,255,0) 72%)}
+/* escena aparte del eslogan (estilo Google): corte limpio a crema y las palabras grandes aparecen una a una con la voz */
+.\0000304-intro-g{position:absolute;left:0;top:0;width:1920px;height:1080px;background:var(--canvas);opacity:0;display:flex;align-items:center;justify-content:center;overflow:hidden}
+/* mismo fondo que la escena final: crema con la malla pastel que florece desde abajo */
+.\0000304-intro-gmesh{position:absolute;left:-160px;top:470px;width:2240px;height:830px;opacity:.92;
+ background:radial-gradient(ellipse 720px 560px at 14% 640px,rgba(143,182,255,.95) 0%,rgba(143,182,255,.55) 45%,rgba(143,182,255,0) 100%),
+  radial-gradient(ellipse 720px 580px at 38% 690px,rgba(183,156,245,.92) 0%,rgba(183,156,245,.52) 45%,rgba(183,156,245,0) 100%),
+  radial-gradient(ellipse 720px 560px at 62% 670px,rgba(245,163,199,.9) 0%,rgba(245,163,199,.5) 45%,rgba(245,163,199,0) 100%),
+  radial-gradient(ellipse 720px 540px at 86% 620px,rgba(255,200,154,.95) 0%,rgba(255,200,154,.55) 45%,rgba(255,200,154,0) 100%)}
+.\0000304-intro-g .\0000304-intro-tag{position:relative;z-index:1}
+.\0000304-intro-tag{display:flex;flex-wrap:wrap;justify-content:center;align-content:center;gap:10px 34px;max-width:1500px;
+ font-size:128px;line-height:140px;font-weight:700;letter-spacing:-0.035em;color:var(--ink)}
+.\0000304-intro-w{display:block;will-change:transform,filter,opacity}
+</style>
+
+<div id="root" data-composition-id="04-intro" data-start="0" data-duration="5.97" data-width="1920" data-height="1080">
+
+  <div class="clip 04-intro-bg" data-start="0" data-duration="5.97" data-track-index="0" data-layout-allow-overflow>
+    <div class="04-intro-cream"></div>
+    <div class="04-intro-wash" id="04-intro-wash">
+      <div class="04-intro-base"></div>
+      <div class="04-intro-drift" id="04-intro-drift">
+        <div class="04-intro-blob 04-intro-b1"></div>
+        <div class="04-intro-blob 04-intro-b2"></div>
+        <div class="04-intro-blob 04-intro-b3"></div>
+        <div class="04-intro-blob 04-intro-b4"></div>
+      </div>
+      <div class="04-intro-grain"></div>
+    </div>
+    <div class="04-intro-glow" id="04-intro-glow"></div>
+  </div>
+
+  <div class="clip 04-intro-stage" data-start="0" data-duration="5.97" data-track-index="1">
+    <div class="04-intro-world" id="04-intro-world" data-camera>
+      <div class="04-intro-glowb" id="04-intro-glowb"></div>
+
+      <div class="04-intro-pre" id="04-intro-pre">Presentamos</div>
+
+      <div class="04-intro-word" id="04-intro-word">
+        <div class="04-intro-letters" aria-label="SUSAN" data-layout-allow-occlusion>
+          <span class="04-intro-L" id="04-intro-L1" data-layout-allow-occlusion>S</span><span class="04-intro-L" id="04-intro-L2" data-layout-allow-occlusion>U</span><span class="04-intro-L" id="04-intro-L3" data-layout-allow-occlusion>S</span><span class="04-intro-L" id="04-intro-L4" data-layout-allow-occlusion>A</span><span class="04-intro-L" id="04-intro-L5" data-layout-allow-occlusion>N</span>
+        </div>
+        <div class="04-intro-sweep" id="04-intro-sweep" aria-hidden="true" data-layout-allow-occlusion>SUSAN</div>
+      </div>
+
+
+
+    </div>
+    <div class="04-intro-g" id="04-intro-g">
+      <div class="04-intro-gmesh"></div>
+        <div class="04-intro-tag" id="04-intro-tag" aria-label="Asistencia académica, medida y a tiempo">
+          <span class="04-intro-w" id="04-intro-w1">Asistencia</span>
+          <span class="04-intro-w" id="04-intro-w2">académica,</span>
+          <span class="04-intro-w" id="04-intro-w3">medida</span>
+          <span class="04-intro-w" id="04-intro-w4">y</span>
+          <span class="04-intro-w" id="04-intro-w5">a</span>
+          <span class="04-intro-w" id="04-intro-w6">tiempo</span>
+        </div>
+    </div>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+<script>
+  (function () {
+    var $ = function (id) { return document.getElementById('04-intro-' + id); };
+    var tl = gsap.timeline({ paused: true });
+    window.__timelines = window.__timelines || {};
+    window.__timelines['04-intro'] = tl;
+
+/* ============================================================================================================
+   BLOQUE CANONICO v2 (sonido + camara). Se PEGA TAL CUAL dentro del <script> de cada cuadro, justo despues de crear `tl`
+   (var tl = gsap.timeline({ paused: true }); window.__timelines[ID_DEL_CUADRO] = tl;). No lo edites en el cuadro: edita este archivo.
+   Es idempotente: pegarlo en varios cuadros (mismo window) redefine las mismas funciones.
+
+   POR QUE EXISTE (contrato de sincronia v2, audit/sonido/REPORT.md 7): el instante de un sonido NO se escribe a mano. Se declara
+   como ETIQUETA del timeline con la MISMA variable de tiempo que el tween que acompana, y los scripts lo derivan:
+       extract-events.mjs --cues  ->  v2/sfx-cues.json (tiempos absolutos)  ->  mount-sfx.mjs (data-start = t - ancla del archivo)
+   Uso tipico:
+       var T = 1.05 + k * 0.3;                                                    // un solo numero para tween y sonido
+       tl.fromTo(bx[k], { opacity: 0, scale: 0.82 }, { opacity: 1, scale: 1, duration: 0.45, ease: 'back.out(1.7)', data: 'hero' }, T);
+       sfx(tl, T, 'ping-note' + (k + 1), 0.5);                                    // nombre del CATALOG.json; vol opcional
+   Convenciones:
+     - t es el instante del evento visual: inicio del tween de entrada (primer fotograma visible); para 'whoosh/swipe' el punto de
+       maxima velocidad; para sonidos con anclaje 'fin' (riser, zoom-in) el instante en que ocurre el impacto/llegada (ver CATALOG.json).
+     - `data: 'hero'` en un tween (entrada de un elemento principal, cambio de estado, contador, empuje de camara, trazo) le exige sonido:
+       verify-sfx.mjs avisa de los hero sin etiqueta sfx a +-33 ms de su inicio. Las funciones cam* lo ponen solas.
+     - Nunca llames a addLabel con nombres repetidos (GSAP sobrescribe): sfx() agrega un contador unico.
+   ============================================================================================================ */
+window.SFXN = window.SFXN || 0;   // contador unico de etiquetas (compartido por todos los cuadros de la pagina)
+window.KEYN = window.KEYN || 0;   // rotacion de teclas (continua entre frases)
+
+/* sfx(tl, t, nombre, vol) -> etiqueta 'sfx:<nombre>@<vol>#<n>' en el instante t. vol omitido = volDefecto del catalogo. */
+function sfx(tl, t, nombre, vol) {
+    tl.addLabel('sfx:' + nombre + '@' + (vol == null ? '' : vol) + '#' + (window.SFXN++), t);
+    return t;
+}
+
+/* sfxType(tl, t0, tiempos, opciones) -> tiempos absolutos de las teclas que suenan.
+   tiempos[i] = segundo (relativo a t0) en que se pinta el caracter i del texto (sale del mismo reloj que pinta el texto).
+   opciones: texto ('Hola mundo': para detectar inicios de palabra; los espacios no suenan), vol (0.35), maxPorSeg (14),
+             enter (true | segundo absoluto: agrega key-enter; true = 0.14 s tras la ultima tecla), borrados ([segundos absolutos]: key-back).
+   Decima a <= 14 teclas/s: siempre suena la primera y la ultima; el acento (vol completo) va en inicios de palabra, las demas a 0.78.
+   Rota key-1..8 sin repetir seguidas; una etiqueta por tecla (mount-sfx las hornea en un solo wav por frase, al milisegundo). */
+function sfxType(tl, t0, tiempos, op) {
+    op = op || {};
+    var txt = op.texto || '', vol = op.vol == null ? 0.35 : op.vol, gap = 1 / (op.maxPorSeg || 14), k = [], i, c, p;
+    var ult = -1;
+    for (i = 0; i < tiempos.length; i++) if (!txt || txt.charAt(i) !== ' ') ult = i;
+    for (i = 0; i < tiempos.length; i++) {
+        if (txt && txt.charAt(i) === ' ') continue;
+        c = { t: t0 + tiempos[i], ini: !!txt && (i === 0 || txt.charAt(i - 1) === ' '), ult: i === ult };
+        p = k[k.length - 1];
+        if (!p || c.t - p.t >= gap) k.push(c);
+        else if (k.length > 1 && (c.ult || (c.ini && !p.ini))) k[k.length - 1] = c;   // la ultima y las iniciales desplazan a una tecla normal
+        else if (c.ult) k.push(c);                                                       // solo hay una tecla antes: ambas suenan
+    }
+    var out = [];
+    k.forEach(function (q, j) {
+        var acento = j === 0 || q.ini || j === k.length - 1;
+        sfx(tl, q.t, 'key-' + ((window.KEYN++ * 5) % 8 + 1), +(vol * (acento ? 1 : 0.78)).toFixed(3));
+        out.push(q.t);
+    });
+    if (op.enter && k.length) sfx(tl, op.enter === true ? k[k.length - 1].t + 0.14 : op.enter, 'key-enter', +(vol * 1.1).toFixed(3));
+    (op.borrados || []).forEach(function (tb) { sfx(tl, tb, 'key-back', vol); });
+    return out;
+}
+
+/* sfxCount(tl, t0, t1, desde, hasta, opciones) -> tiempos absolutos de los 'tick'. Un tick por cambio de entero (el contador muestra
+   Math.round(valor)), <= 12/s, 4 alturas crecientes (tick-1..4 segun el avance), el ultimo con acento (tick-4 a vol x1.5).
+   opciones: ease ('power1.out': la MISMA ease del tween del contador; debe ser monotona), paso (1: valor entre ticks), vol (0.4), maxPorSeg (12). */
+function sfxCount(tl, t0, t1, desde, hasta, op) {
+    op = op || {};
+    var ease = gsap.parseEase(op.ease || 'power1.out'), paso = op.paso || 1, vol = op.vol == null ? 0.4 : op.vol, gap = 1 / (op.maxPorSeg || 12);
+    var span = Math.abs(hasta - desde), n = Math.floor(span / paso + 1e-9), ts = [], s, lo, hi, m, it;
+    for (s = 1; s <= n; s++) {                       // instante en que el valor cruza (s - 0.5) pasos: se invierte la ease por biseccion
+        lo = 0; hi = 1;
+        for (it = 0; it < 32; it++) { m = (lo + hi) / 2; if (ease(m) * span < (s - 0.5) * paso) lo = m; else hi = m; }
+        ts.push(t0 + hi * (t1 - t0));
+    }
+    var k = [];
+    ts.forEach(function (t, j) {
+        var p = k[k.length - 1];
+        if (p === undefined || t - p >= gap) k.push(t);
+        else if (j === ts.length - 1 && k.length > 1) k[k.length - 1] = t;           // el ultimo siempre suena
+        else if (j === ts.length - 1) k.push(t);
+    });
+    k.forEach(function (t, j) {
+        var ultimo = j === k.length - 1;
+        sfx(tl, t, 'tick-' + (ultimo ? 4 : Math.min(3, Math.floor(4 * j / k.length)) + 1), +Math.min(1, vol * (ultimo ? 1.5 : 1)).toFixed(3));
+    });
+    return k;
+}
+
+/* readMark(tl, t, 'frase') -> etiqueta 'read:frase' en el instante en que una frase clave queda COMPLETA y legible. El director/verificador
+   exige que el corte a otro cuadro llegue >= 0.9 s despues (tiempo de lectura). */
+function readMark(tl, t, frase) {
+    tl.addLabel('read:' + frase + '#' + (window.SFXN++), t);   // no se lee tl.labels: el compilador de render ejecuta el script con un timeline proxy sin esa propiedad
+    return t;
+}
+
+/* ---- CAMARA con GSAP puro (seek-safe). Cada helper hace un fromTo con los valores de partida que recuerda en el elemento (el estado
+   se encadena en el orden de las llamadas) e `immediateRender: false` SIEMPRE: sin eso el segundo fromTo sobre el mismo objetivo
+   aplica su `from` en el fotograma 0 y pisa al primero (bug del cuadro 6: entraba a 1.6 y saltaba a 1.0). Devuelven el fin del tween.
+   `el`: elemento o selector. Opciones comunes: dur, ease, foco [cx, cy] (punto de 1920x1080 que queda en el centro), x, y (px, pisan a foco),
+   W, H (tamano de escena, 1920x1080), sfx (nombre del catalogo o false), vol. Todos los tweens llevan data: 'hero'. ---- */
+function camInit(el, escala, x, y) {
+    var e = typeof el === 'string' ? document.querySelector(el) : el;
+    e.__cam = { s: escala == null ? 1 : escala, x: x || 0, y: y || 0, r: 0 };
+    gsap.set(e, { transformOrigin: '50% 50%', scale: e.__cam.s, x: e.__cam.x, y: e.__cam.y, rotation: 0 });
+}
+function camTo(tl, el, t, a, o, dur0, ease0, sfx0) {
+    o = o || {};
+    var e = typeof el === 'string' ? document.querySelector(el) : el;
+    if (!e.__cam) camInit(e, 1, 0, 0);
+    var c = e.__cam, dur = o.dur == null ? dur0 : o.dur, W = o.W || 1920, H = o.H || 1080;
+    var s = a.s == null ? c.s : a.s, x = a.x == null ? c.x : a.x, y = a.y == null ? c.y : a.y, r = a.r == null ? c.r : a.r;
+    if (o.foco) { x = (W / 2 - o.foco[0]) * s; y = (H / 2 - o.foco[1]) * s; }
+    if (o.x != null) x = o.x;
+    if (o.y != null) y = o.y;
+    tl.fromTo(e, { scale: c.s, x: c.x, y: c.y, rotation: c.r },
+        { scale: s, x: x, y: y, rotation: r, duration: dur, ease: o.ease || ease0, immediateRender: false, data: 'hero' }, t);
+    e.__cam = { s: s, x: x, y: y, r: r };
+    var snd = o.sfx === undefined ? sfx0 : o.sfx;
+    if (snd) sfx(tl, t, snd, o.vol);
+    return t + dur;
+}
+/* camSnap: salto de zoom en ~0.18 s con ataque (snap-zoom). Suena 'snap' por defecto (sfx: false lo apaga). */
+function camSnap(tl, el, t, escala, o) { return camTo(tl, el, t, { s: escala }, o, 0.18, 'power4.out', 'snap'); }
+/* camPush: empuje lento (acercar). Sonido opcional: sfx(tl, fin, 'zoom-in') (anclaje 'fin': t = fin del tween). */
+function camPush(tl, el, t, escala, o) { return camTo(tl, el, t, { s: escala }, o, 1.1, 'power2.inOut', null); }
+/* camPull: alejar (escala por defecto 1) en ~0.7 s. */
+function camPull(tl, el, t, escala, o) { return camTo(tl, el, t, { s: escala == null ? 1 : escala }, o, 0.7, 'power3.inOut', null); }
+/* camPan: desplazamiento RELATIVO (dx, dy en px) respecto a la posicion actual, ~0.6 s. */
+function camPan(tl, el, t, dx, dy, o) {
+    var e = typeof el === 'string' ? document.querySelector(el) : el;
+    var c = e.__cam || { x: 0, y: 0 };
+    return camTo(tl, el, t, { x: c.x + (dx || 0), y: c.y + (dy || 0) }, o, 0.6, 'power3.inOut', null);
+}
+/* camTilt: inclinacion (rotacion en grados, absoluta) ~0.5 s; camTilt(tl, el, t, 0) la endereza. */
+function camTilt(tl, el, t, grados, o) { return camTo(tl, el, t, { r: grados }, o, 0.5, 'power2.inOut', null); }
+/* ============================ fin del bloque canonico v2 ============================ */
+
+
+    var world = $('world');
+
+    /* ---- CAMARA (hoja cam[]): arranca ya en 1.08 para que el empuje de tension parta de un plano vivo ---- */
+    camInit(world, 1.08, (960 - 960) * 1.08, (540 - 540) * 1.08);
+    /* empuje que acelera con el riser (power2.in: velocidad maxima justo en el impacto) */
+    camTo(tl, world, 0.52, { s: 1.2 }, { foco: [960, 540], dur: 0.68, ease: 'power2.in' }, 0.68, 'power2.in', null);
+    /* PULL-BACK EN el golpe de 1.20 s: la camara invierte a velocidad maxima (ease out) */
+    camPull(tl, world, 1.20, 1, { foco: [960, 540], dur: 0.45, ease: 'power3.out', sfx: 'zoom-out', vol: 0.30 });
+    /* empuje suave 1.00 -> 1.06 sobre el centro mientras se revela el eslogan (v2.3 final): el seguimiento lateral x -150 corria el
+       lockup 150 px a la izquierda y, sin los destellos, dejaba vacio el tercio derecho; con foco (960,540) el lockup termina centrado
+       (wordmark en x 960) y el iris de salida nace en x = 0.5. Misma ventana (2.34-3.24 s) y mismo ease: el whoosh sigue cayendo en el pico. */
+    camTo(tl, world, 2.34, { s: 1.06 }, { foco: [960, 540], dur: 0.9, ease: 'power1.inOut', sfx: false }, 0.9, 'power1.inOut', null);
+    sfx(tl, 2.79, 'whoosh-m', 0.15);
+
+    /* El sonido de un asentamiento se adelanta 0.07 s: la aparicion (primer fotograma visible) ocurre 0.10 s antes y el pop llegaba
+       67-117 ms tarde; a inicio de aparicion + 0.03 s la etiqueta sigue a <= 33 ms del tween de aparicion. */
+    var AVANCE_ASENT = 0.07;
+
+    /* ---- Letras de SUSAN: aparicion (opacity + ~70 % del recorrido en 0.10 s) y asentamiento 0.10 s despues.
+       Nada antes de 0.42 s: el squeeze de entrada aun cubre el cuadro. La N termina de asentarse en 1.20 s, justo en el impacto. ---- */
+    var letras = [
+        { id: 'L1', t: 0.42, y: 150, pop: 'pop-1' },
+        { id: 'L2', t: 0.54, y: 150, pop: 'pop-2' },
+        { id: 'L3', t: 0.66, y: 150, pop: 'pop-3' },
+        { id: 'L4', t: 0.78, y: 150, pop: 'pop-4' },
+        { id: 'L5', t: 0.90, y: 150, pop: null }
+    ];
+    letras.forEach(function (l) {
+        var el = $(l.id), Tap = l.t, Tas = +(l.t + 0.10).toFixed(2);
+        tl.fromTo(el, { opacity: 0, y: l.y, filter: 'blur(12px)' },
+            { opacity: 1, y: l.y * 0.3, filter: 'blur(4px)', duration: 0.10, ease: 'power1.out' }, Tap);
+        tl.fromTo(el, { y: l.y * 0.3, filter: 'blur(4px)' },
+            { y: 0, filter: 'blur(0px)', duration: 0.20, ease: 'power3.out', immediateRender: false, data: l.pop ? 'hero' : undefined }, Tas);
+        if (l.pop) sfx(tl, Tas - AVANCE_ASENT, l.pop, 0.38);
+    });
+
+    /* ---- Tension: el brillo del fondo sube con el riser y estalla en el impacto ---- */
+    tl.fromTo($('glow'), { opacity: 0, scale: 0.6 }, { opacity: 0.35, scale: 0.8, duration: 0.68, ease: 'power2.in' }, 0.52);
+    tl.fromTo($('glow'), { opacity: 0.35, scale: 0.8 }, { opacity: 1, scale: 1.12, duration: 0.45, ease: 'power3.out', immediateRender: false }, 1.20);
+    tl.to($('glow'), { opacity: 0.5, scale: 1, duration: 0.8, ease: 'power2.inOut' }, 1.65);
+
+    /* ---- IMPACTO 1.20 s: el wordmark pulsa 1 -> 1.03 -> 1, los fondos pulsan y arranca el barrido por dentro de las letras ---- */
+    sfx(tl, 1.20, 'riser-1s', 0.55);
+    tl.fromTo($('word'), { scale: 1 }, { scale: 1.03, duration: 0.12, ease: 'power2.out', data: 'hero' }, 1.20);
+    sfx(tl, 1.20, 'impact-hit', 0.80);
+    tl.to($('word'), { scale: 1, duration: 0.50, ease: 'power3.out' }, 1.32);
+    tl.fromTo($('drift'), { scale: 1 }, { scale: 1.05, duration: 0.12, ease: 'power2.out' }, 1.20);
+    tl.to($('drift'), { scale: 1, duration: 0.6, ease: 'power3.out' }, 1.32);
+    /* el barrido de luz recorre las letras de 1.20 a 2.04 s, pero la banda solo entra en el texto hacia 1.45 s: el tween arranca ahi
+       (misma recta: 60.1 % -> 25 % hasta 2.04 s) y el 'sheen' se ancla a su primer fotograma visible con la misma variable T */
+    var T_SHEEN = 1.45;
+    tl.fromTo($('sweep'), { backgroundPosition: '60.1% 50%' },
+        { backgroundPosition: '25% 50%', duration: +(2.04 - T_SHEEN).toFixed(2), ease: 'none', immediateRender: false, data: 'hero' }, T_SHEEN);
+    sfx(tl, T_SHEEN, 'sheen', 0.30);
+
+    /* (sin escudo ni píldora UNACH · FCA: en esta escena solo aparece el nombre) */
+
+    /* ---- Eslogan: brillo suave (soft-in) y cascada de 6 palabras, una cada 0.12 s ---- */
+    /* corte limpio a la escena del eslogan (crema) un instante antes de la primera palabra */
+    tl.fromTo($('g'), { opacity: 0 }, { opacity: 1, duration: 0.001, ease: 'none' }, 2.18);
+    sfx(tl, 2.18, 'soft-in', 0.25);
+    var ticks = { 0: ['tick-1', 0.34], 1: ['tick-2', 0.34], 2: ['tick-3', 0.34], 5: ['tick-4', 0.42] };
+    /* las palabras entran EXACTAMENTE cuando las dice la voz (instantes medidos de la alineación de ElevenLabs, v2/voz-alineacion.json) */
+    var TW = [2.3, 2.93, 3.51, 3.99, 4.11, 4.19];
+    for (var k = 0; k < 6; k++) {
+        var Tw = TW[k];
+        tl.fromTo($('w' + (k + 1)), { opacity: 0, y: 26, scale: 0.94 },
+            { opacity: 1, y: 0, scale: 1, duration: 0.22, ease: 'power3.out', data: ticks[k] ? 'hero' : undefined }, Tw);
+        if (ticks[k]) sfx(tl, Tw, ticks[k][0], ticks[k][1]);
+    }
+    readMark(tl, 4.44, 'Asistencia académica, medida y a tiempo');
+
+    /* ---- Remate vivo sin informacion nueva (3.44-3.74): el brillo pulsa una vez ---- */
+    /* sin sonido: el pulso del brillo es decorativo (nada suena sobre imagen quieta). */
+    /* cola de lectura: el wordmark respira 1 -> 1.03 en linea recta (sin rotacion) hasta el final para que la lectura no se congele */
+    tl.fromTo($('word'), { scale: 1 }, { scale: 1.03, duration: 0.9, ease: 'none', immediateRender: false }, 3.3);
+    tl.fromTo($('glowb'), { scale: 1 }, { scale: 1.14, duration: 0.15, ease: 'power2.out', immediateRender: false }, 3.44);
+    tl.to($('glowb'), { scale: 1, duration: 0.15, ease: 'power2.inOut' }, 3.59);
+
+    /* duracion exacta del plan (4.2 s) */
+    tl.set({}, {}, 5.97);
+  })();
+</script>
+</template>

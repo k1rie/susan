@@ -1,0 +1,284 @@
+{
+ "generado": "2026-10-03T19:35:31.342Z",
+ "proyecto": "/Users/diegoguerrero/Developer/SUSAN/video/susan-presentacion",
+ "secciones": {
+  "biblioteca": {
+   "errores": [],
+   "avisos": [],
+   "notas": [
+    "riser-1s: RMS primeros 100 ms -66.409 dBFS -> ultimos 150 ms -15.789 dBFS (sube 50.62 dB)",
+    "riser-s: RMS primeros 100 ms -56.645 dBFS -> ultimos 150 ms -16.522 dBFS (sube 40.122 dB)",
+    "tick-1..4: frecuencia dominante 1000 < 1260 < 1590 < 2000 Hz",
+    "ping-note1..8: frecuencia dominante 2350 < 2640 < 2960 < 3520 < 3950 < 4700 < 5270 < 5920 Hz",
+    "pop-1..4: frecuencia dominante 530 < 640 < 780 < 930 Hz",
+    "61 archivos unicos, 14 alias"
+   ],
+   "ok": true
+  },
+  "etiquetas": {
+   "errores": [],
+   "avisos": [
+    "6 tween(s) hero sin sonido en 02-minutos: 02-minutos-ln-1@4.25, 02-minutos-chip1@4.45, 02-minutos-ln-2@4.65, 02-minutos-chip2@4.85, 02-minutos-eq@5.25, 02-minutos-arc2@5.45",
+    "1 tween(s) hero sin sonido en 03-tarde: 03-tarde-chip@9.45",
+    "6 tween(s) hero sin sonido en 04-intro: 04-intro-L1@10.97, 04-intro-L2@11.09, 04-intro-L3@11.21, 04-intro-L4@11.33, 04-intro-pill@12.34, 04-intro-badge@12.54",
+    "2 tween(s) hero sin sonido en 05-camara: 05-camara-num@16.3, 05-camara-chip@18.05",
+    "4 tween(s) hero sin sonido en 06-vivo: 06-vivo-reg-1@19.65, 06-vivo-reg-2@19.85, 06-vivo-reg-3@20.05, 06-vivo-r-label@21.6",
+    "2 tween(s) hero sin sonido en 07-revision: 07-revision-cursor@22.85, 07-revision-ghost-a@25.2",
+    "3 tween(s) hero sin sonido en 08-reportes: 08-reportes-chip-3@26.65, 08-reportes-chip-5@26.85, path@28.25",
+    "1 tween(s) hero sin sonido en 09-analitica: 09-analitica-chx@31.42",
+    "4 tween(s) hero sin sonido en 10-alumno: b@35, b@35.2, b@35.4, 10-alumno-chip-2@36.05",
+    "2 tween(s) hero sin sonido en 11-confianza: 11-confianza-pill-2@38.65, 11-confianza-pill-3@39.05",
+    "6 tween(s) hero sin sonido en 12-cierre: 12-cierre-l2@40.3, 12-cierre-c3@41.85, 12-cierre-c4@41.95, 12-cierre-unach@42.4, 12-cierre-pill@42.6, 12-cierre-fca@42.8",
+    "sonido sin evento visible: 03-tarde-23 (tap @9.9 s): solo hay: 03-tarde-chip scale 1>1.09, todos por debajo del umbral. Eliminalo, re-anclalo a un evento real (misma variable T) o agrega un cambio visible",
+    "hueco sin sonido de 1.169 s al final (43.881 - 45.05 s)"
+   ],
+   "notas": [
+    "257 cues: 117 a <= 33.333 ms del inicio de un tween, 140 por ventana (teclas/whoosh/ticks)",
+    "156 tweens hero distintos; 59 sin sonido: 22 de camara (por diseno, no se avisan) y 37 de otros elementos",
+    "teclas: 46, maximo 8 en una ventana de 1 s",
+    "13 marcas read:, 13 comparadas con el min_lectura de su entrada del plan (0.6-1.5 s)",
+    "events.json incoherente con sfx-cues.json: regenerado con extract-events.mjs --events",
+    "sonido sin evento visible: 69 cues de golpe revisados (tap/click/blip/soft-in/pop/check/stamp/snap/lock/shutter), 1 sin cambio perceptible a +-33.333 ms"
+   ],
+   "heroSinSonido": {
+    "camara": 22,
+    "otros": [
+     {
+      "cuadro": "02-minutos",
+      "t": 4.25,
+      "obj": "02-minutos-ln-1"
+     },
+     {
+      "cuadro": "02-minutos",
+      "t": 4.45,
+      "obj": "02-minutos-chip1"
+     },
+     {
+      "cuadro": "02-minutos",
+      "t": 4.65,
+      "obj": "02-minutos-ln-2"
+     },
+     {
+      "cuadro": "02-minutos",
+      "t": 4.85,
+      "obj": "02-minutos-chip2"
+     },
+     {
+      "cuadro": "02-minutos",
+      "t": 5.25,
+      "obj": "02-minutos-eq"
+     },
+     {
+      "cuadro": "02-minutos",
+      "t": 5.45,
+      "obj": "02-minutos-arc2"
+     },
+     {
+      "cuadro": "03-tarde",
+      "t": 9.45,
+      "obj": "03-tarde-chip"
+     },
+     {
+      "cuadro": "04-intro",
+      "t": 10.97,
+      "obj": "04-intro-L1"
+     },
+     {
+      "cuadro": "04-intro",
+      "t": 11.09,
+      "obj": "04-intro-L2"
+     },
+     {
+      "cuadro": "04-intro",
+      "t": 11.21,
+      "obj": "04-intro-L3"
+     },
+     {
+      "cuadro": "04-intro",
+      "t": 11.33,
+      "obj": "04-intro-L4"
+     },
+     {
+      "cuadro": "04-intro",
+      "t": 12.34,
+      "obj": "04-intro-pill"
+     },
+     {
+      "cuadro": "04-intro",
+      "t": 12.54,
+      "obj": "04-intro-badge"
+     },
+     {
+      "cuadro": "05-camara",
+      "t": 16.3,
+      "obj": "05-camara-num"
+     },
+     {
+      "cuadro": "05-camara",
+      "t": 18.05,
+      "obj": "05-camara-chip"
+     },
+     {
+      "cuadro": "06-vivo",
+      "t": 19.65,
+      "obj": "06-vivo-reg-1"
+     },
+     {
+      "cuadro": "06-vivo",
+      "t": 19.85,
+      "obj": "06-vivo-reg-2"
+     },
+     {
+      "cuadro": "06-vivo",
+      "t": 20.05,
+      "obj": "06-vivo-reg-3"
+     },
+     {
+      "cuadro": "06-vivo",
+      "t": 21.6,
+      "obj": "06-vivo-r-label"
+     },
+     {
+      "cuadro": "07-revision",
+      "t": 22.85,
+      "obj": "07-revision-cursor"
+     },
+     {
+      "cuadro": "07-revision",
+      "t": 25.2,
+      "obj": "07-revision-ghost-a"
+     },
+     {
+      "cuadro": "08-reportes",
+      "t": 26.65,
+      "obj": "08-reportes-chip-3"
+     },
+     {
+      "cuadro": "08-reportes",
+      "t": 26.85,
+      "obj": "08-reportes-chip-5"
+     },
+     {
+      "cuadro": "08-reportes",
+      "t": 28.25,
+      "obj": "path"
+     },
+     {
+      "cuadro": "09-analitica",
+      "t": 31.42,
+      "obj": "09-analitica-chx"
+     },
+     {
+      "cuadro": "10-alumno",
+      "t": 35,
+      "obj": "b"
+     },
+     {
+      "cuadro": "10-alumno",
+      "t": 35.2,
+      "obj": "b"
+     },
+     {
+      "cuadro": "10-alumno",
+      "t": 35.4,
+      "obj": "b"
+     },
+     {
+      "cuadro": "10-alumno",
+      "t": 36.05,
+      "obj": "10-alumno-chip-2"
+     },
+     {
+      "cuadro": "11-confianza",
+      "t": 38.65,
+      "obj": "11-confianza-pill-2"
+     },
+     {
+      "cuadro": "11-confianza",
+      "t": 39.05,
+      "obj": "11-confianza-pill-3"
+     },
+     {
+      "cuadro": "12-cierre",
+      "t": 40.3,
+      "obj": "12-cierre-l2"
+     },
+     {
+      "cuadro": "12-cierre",
+      "t": 41.85,
+      "obj": "12-cierre-c3"
+     },
+     {
+      "cuadro": "12-cierre",
+      "t": 41.95,
+      "obj": "12-cierre-c4"
+     },
+     {
+      "cuadro": "12-cierre",
+      "t": 42.4,
+      "obj": "12-cierre-unach"
+     },
+     {
+      "cuadro": "12-cierre",
+      "t": 42.6,
+      "obj": "12-cierre-pill"
+     },
+     {
+      "cuadro": "12-cierre",
+      "t": 42.8,
+      "obj": "12-cierre-fca"
+     }
+    ]
+   },
+   "sinEventoVisible": [
+    {
+     "id": "03-tarde-23",
+     "nombre": "tap",
+     "t": 9.9,
+     "cuadro": "03-tarde",
+     "candidatos": [
+      "03-tarde-chip scale 1>1.09"
+     ]
+    }
+   ],
+   "ok": true
+  },
+  "montaje": {
+   "errores": [],
+   "avisos": [
+    "salto de nivel de 33.886 dB entre segundos contiguos (> 12 dB)"
+   ],
+   "notas": [
+    "213 <audio> en el bloque sfx de index.html; 213 cues en sfx-mounted.json",
+    "aritmetica de montaje: error maximo 0 ms (tolerancia 1 ms); 1 con data-media-start",
+    "209 cues normales y 48 teclas (4 frases horneadas) cubiertos",
+    "mezcla recalculada: pico -3.09 dBFS en t=2.501 s (tope -1), 0 muestras >= 0.99",
+    "polifonia maxima 4 simultaneos (t=14.7 s); 0 cues atenuados por la regla",
+    "nivel: RMS maximo por segundo -17.705 dBFS, salto maximo entre segundos 33.886 dB"
+   ],
+   "ok": true
+  },
+  "render": {
+   "errores": [],
+   "avisos": [],
+   "notas": [
+    "213/213 cues dentro de +-33.3 ms  (medidos por correlacion: 205; error medio 0.001 ms, maximo 0.006 ms; 205/205 a <= 5 ms)"
+   ],
+   "detalle": {
+    "cues": 213,
+    "medidos": 205,
+    "estaticos": 8,
+    "fallos": 0,
+    "toleranciaMs": 33.333,
+    "errorMedioAbsMs": 0.001,
+    "errorMaxAbsMs": 0.006,
+    "decididosEnBanda": 0,
+    "dentroObjetivo": 205,
+    "objetivoMs": 5,
+    "gananciaGlobal": 0.993
+   },
+   "ok": true
+  }
+ },
+ "ok": true
+}
