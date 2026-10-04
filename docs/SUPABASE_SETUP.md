@@ -4,7 +4,9 @@ Objetivo: dejar tu proyecto Supabase listo (esquema, datos de demostración y cu
 Para producción real (cron, servicio de reconocimiento, respaldo) ver [`RUNBOOK.md`](./RUNBOOK.md).
 
 > Las migraciones son **idénticas** a las que se probaron en local (1232 aserciones positivas y 801 negativas). El camino contra Supabase usa el mismo SQL; el cliente web en
-> modo real se verificó contra un Supabase simulado (ver `docs/review/real-mode.md`), pero aún no contra un proyecto vivo: ante cualquier diferencia, avísame con el mensaje de error.
+> modo real se verificó contra un Supabase simulado (ver `docs/review/real-mode.md`) y, el 2026-10-03, contra un proyecto vivo (PostgreSQL 17): las 41 migraciones, la semilla,
+> las 30 cuentas y el inicio de sesión como docente y alumno funcionaron; la única diferencia fue el reloj de demostración (§4).
+> La semilla de Supabase es la base (`supabase/seed/`): el escenario extra del modo local (`scripts/seed-demo.sh`, cámara simulada, casos de revisión) no se carga aquí.
 
 ## 0. Qué necesitas
 
@@ -57,19 +59,31 @@ Crea en Auth las cuentas de la semilla con el **mismo uuid** de la tabla `usuari
 
 ## 4. Reloj de demostración (recomendado para probar)
 
-La semilla narra el **lunes 14-sep-2026 07:12**. Con el reloj real no habría sesiones "de hoy" para abrir. Pega en el SQL Editor `supabase/demo/demo_clock_on.sql`:
+La semilla narra el **lunes 14-sep-2026 07:12**. Con el reloj real no habría sesiones "de hoy" para abrir. Pega en el SQL Editor `supabase/demo/demo_clock_on.sql`
+(o `psql "$SUPABASE_DB_URL" -f supabase/demo/demo_clock_on.sql`):
 
 ```sql
-ALTER DATABASE postgres SET app.allow_fake_clock = 'on';
-ALTER DATABASE postgres SET app.fake_now = '2026-09-14 07:12:00-06';
+INSERT INTO app.reloj_demo (id, fake_now) VALUES (true, '2026-09-14 07:12:00-06')
+    ON CONFLICT (id) DO UPDATE SET fake_now = excluded.fake_now;
 ```
 
-Aplica a conexiones nuevas (si no se nota, espera unos minutos o reinicia la base en *Project Settings → Database*). La app mostrará el aviso "Reloj simulado activo".
-Para volver al reloj real: `supabase/demo/demo_clock_off.sql`.
+Efecto inmediato; la app muestra "Reloj simulado". En Supabase el rol `postgres` no es superusuario y **no puede** hacer `ALTER DATABASE … SET app.*`
+(«permission denied to set parameter»), por eso la migración `0236` añade la tabla `app.reloj_demo` (una fila, sin privilegios para `anon`/`authenticated`/`service_role`).
+El reloj queda congelado: la tarjeta para adelantarlo o ponerlo en marcha es solo del modo local. Para volver al reloj real: `supabase/demo/demo_clock_off.sql`.
 
 ## 5. Variables de entorno de la web
 
-Crea `web/.env.local` (está en `.gitignore`):
+**Forma corta (recomendada en la máquina de desarrollo):** llena `supabase/.env` (ignorado por Git) con `SUPABASE_URL`, `SUPABASE_ANON_KEY`,
+`SUPABASE_SERVICE_ROLE_KEY` (claves *Legacy*, formato `eyJ…`) y `SUPABASE_DB_URL` (botón *Connect* → *Session pooler*), y corre:
+
+```bash
+scripts/dev-supabase.sh          # http://localhost:3001 contra tu proyecto; el modo local (:3000) sigue intacto
+```
+
+El script exporta las variables solo a ese proceso y compila en `.next-supabase`. Para aplicar migraciones con la misma cadena:
+`supabase db push --db-url "<SUPABASE_DB_URL con puerto 5432 y sin ?pgbouncer=true>"` (agrega `--include-all` si una migración nueva queda antes de `0990`).
+
+**Forma manual:** crea `web/.env.local` (está en `.gitignore`):
 
 ```bash
 NEXT_PUBLIC_SUPABASE_URL=https://<ref>.supabase.co
