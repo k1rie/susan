@@ -1,0 +1,691 @@
+{
+ "fase": "completo",
+ "trabajos": [
+  {
+   "resumen": "Cuadros 01-hook y 02-minutos corregidos. En 01, 'roba' ya no queda pegada al borde y la cámara empuja en la ventana de salida, de modo que el zoom in 01->02 se lee como zoom. En 02, el timer es grande y no choca con la cifra, la fórmula y las tarjetas se leen hasta el corte, la cámara del slam ya no corta las tarjetas y los 4 cues 'asent' van adelantados. frame-check de los dos da 0 errores y 0 avisos, lucide --verify --strict da 0 errores en los 12 cuadros y el bloque canónico sigue idéntico en ambos. No ejecuté render, build-index, mount-sfx ni verify-sfx. Hubo una desviación del plan (ver 'cambios'): la manecilla del timer gira donde antes se dibujaba el trazo.",
+   "cambios": [
+    "01-hook.html, cam[2] (snap-zoom a 2.50 s): foco (800,600) -> (900,600), escala final 1.22 sin cambio. 'roba' termina en ~1780 px (margen ~140 px; antes 1895). La línea 2 y la línea 1 siguen completas en encuadre. Comentario con el porqué.",
+    "01-hook.html, nuevo camTo 'T_SALIDA' = 3.20 s, dur 0.30 s, power2.out, escala 1.22 -> 1.85 (x1.52 respecto al 1.22; en el compuesto del plan es un barrido de alrededor de x3.7 con el zoom x2 de la transición), foco (330,642) en el inicio de 'cada clase.', sfx: false. Sin sonido propio porque el zoom-in de la transición lo pone build-index. Elegí foco a la izquierda y ease 'out' porque con foco al centro y power2.in el texto seguía sobre la zona del anillo de 02 y el movimiento arrancaba casi parado. Ahora el texto barre hacia la mitad derecha desde el primer fotograma y el anillo de 02 (x 200-760) entra sobre crema. La lectura (2.50 + 0.70 = 3.20) no se invade.",
+    "01-hook.html: no tiene cues 'asent', por lo que la tarea común no aplica; los sonidos (soft-in, teclas, draw 2.50, snap 2.50) quedan intactos.",
+    "02-minutos.html, ícono héroe: tile 150 -> 200 px (borde crema de 8 px para separarlo de la pista), svg 96 -> 144 px (círculo del timer de 96 px de diámetro), trazo 1.5, duotono #f6dca0 sobre tile #fbefd2. Ya no va apilado sobre la cifra: está en posición absoluta cabalgando el borde superior del anillo (centro a 30 px del borde); la columna cifra + etiqueta baja 56 px (padding-top en #core). El tile queda a 34 px de la cápsula del eyebrow y a unos 60 px de la tinta de la cifra, sin chocar con '10 min' / '2 h 30'.",
+    "02-minutos.html, orden del svg del timer: el círculo con relleno duotono pasa a ir antes de las líneas, porque tapaba la manecilla (en la v2.0 no se veía).",
+    "02-minutos.html, DESVIACIÓN: el timer llega completo en el fotograma 0 (quité stroke-dasharray/offset y el tween de dibujado de timerParts). El tween de 0.30 s, que llevaba el cue 'draw', pasa a ser una vuelta completa de la manecilla (rotation 0 -> 360, svgOrigin '12 14', 0.40 s, power2.out, data hero) con el mismo sfx draw 0.35 a T_IN y la misma duración de cuenta 0->10. Lo hice así para que el cronómetro esté 'ya colocado' y no se dibuje sobre el texto saliente.",
+    "02-minutos.html, contraste de entrada del anillo: pista #e7e2dc/6 px -> #d3cbc1/9 px; brillo cálido (glow) visible desde el fotograma 0 (opacity 0.55, scale 0.8; el tween de 2.15 s parte de ese valor y sigue llegando a 1).",
+    "02-minutos.html, opacidad y legibilidad: tarjetas '× 3 grupos' y '× 5 días' bajan solo a 0.82 en 2.15 s (antes 0.4); conectores a 0.7 (antes 0.4). Fórmula '10 × 3 × 5 = 150 min': fuente 32 -> 36 px, cápsula 68 -> 76 px, borde #cfc7bd, color #4d4843; '150 min' arranca en #4d4843 y se enciende a tinta a 3.55 s (antes #9a948d).",
+    "02-minutos.html, cam[2] (slam, 3.20 s): foco (480,560) -> (920,560), escala 1.1, dur 0.16, power4.out. Anillo y tarjetas completos en pantalla x 168-1840 (margen >= 80 px); ya no hay tarjetas cortadas por el borde derecho. El plan declara foco (480,560) para este movimiento: lo cambié siguiendo el hallazgo de la revisión. Cambio de contrato que hay que reflejar en el plan.",
+    "02-minutos.html, cues 'asent' adelantados con la constante AVANCE_ASENT = 0.07, restada a la misma variable T del tween de asentamiento (comentada con el porqué): pop-2 de 'min' 0.80 -> 0.73; pop-4 de chip1 1.25 -> 1.18; pop-1 de chip2 1.65 -> 1.58; pop-3 de la fórmula 2.05 -> 1.98. Cada etiqueta cae a 30 ms del inicio de su tween de aparición (0.70, 1.15, 1.55, 1.95). Tweens visuales intactos.",
+    "Conservados sin tocar: slam impact-hit y riser-1s a 3.20 s, ticks y cuenta 10 -> 150 (2.88-3.08 s), read_mark 3.45 s, duraciones y transiciones."
+   ],
+   "pruebas": [
+    "node scripts/frame-check.mjs 01-hook 02-minutos: 0 errores, 0 avisos en ambos. 01: 0 tramos muertos, 0 etiquetas sfx huérfanas (22), lectura +0.7 s, cámara 4 tweens perceptibles, el push de salida pico 627 %/s. 02: 0 tramos muertos, 0 huérfanas (16), lectura +0.7 s, snap del slam pico 310 %/s (antes 852 %/s).",
+    "node scripts/lucide.mjs --verify compositions/frames/*.html --strict: 65 svg, 0 errores. El bloque canónico de ayudas es idéntico entre 01 y 02 (diff vacío).",
+    "Capturas de 01 abiertas con Read a 2.55, 2.90, 3.20, 3.30, 3.40 y 3.49 s: 'roba' acaba en ~1780 px y las dos líneas caben; 3.20 s sin recortes.",
+    "Capturas de 02 abiertas con Read a 0, 0.3, 0.5, 0.9, 1.6, 2.4, 3.3, 3.5, 4.1 s: timer de 200 px legible sobre el borde del anillo, sin choque con la cifra; a 3.5 y 4.1 s tarjetas completas, fórmula legible.",
+    "Simulé la transición 01->02 en un script de scratchpad (no el de build-index): saliente con escala 1 -> 2 power3.in y blur 16 px, entrante 1.15 -> 1 con fundido en la segunda mitad, ambos con las capturas a 30 fps. Con el empuje la escala del saliente cambia de forma visible desde el 2.º fotograma y el texto barre a la derecha. Solo queda un roce mínimo del anillo con la 'c' de 'cada' a 3.43 s. Sin texto sobre texto en la zona del anillo.",
+    "Etiquetas de los 4 cues 'asent' a +30 ms del inicio del tween de aparición (<= 33.3 ms), por lo que el sonido llega a +17/+50 ms del primer fotograma visible, dentro del objetivo."
+   ],
+   "pendientes": [
+    "Revisar tras el render final el 'x2' de la transición con el empuje de 01: la simulación es aproximada, no pasó por build-index ni por el compilador de render.",
+    "Actualizar v2/plan.json (frames[].cam de 01 y 02 y el frames[].sfx 'asent' de 02) para que el integrador (extract-events/mount-sfx/verify-sfx) no choque con los valores nuevos: cam[2] de 01 con foco (900,600) y un cam[3] nuevo a 3.20 s (dur 0.30, power2.out, s 1.85, foco (330,642), sin sfx); cam[2] de 02 con foco (920,560); T de los pops de 02 = 0.73, 1.18, 1.58, 1.98 (el anclaje 'asent' pasa a aparición + 0.03 s, como sugirió la revisión de sonido). No edité scripts/ ni el plan.",
+    "El contrato de íconos del plan decía tile 150 px / trazo 1.75 / --draw para el timer; ahora es tile 200 px, trazo 1.5 y sin dibujado (el timer llega ya completo). Conviene reflejarlo en la hoja del cuadro 02 y en el requisito 14 del plan si el integrador valida contra él."
+   ]
+  },
+  {
+   "resumen": "Cuadro 05-camara corregido en las tres tareas: elenco unificado con 03/06/08/10, colapso de la lista sin texto fantasma sobre la pila, y cues 'asent' adelantados. El tramo final y los pings no se tocaron. frame-check dio 0 errores, 0 avisos y 0 etiquetas huérfanas; lucide --verify --strict dio 0 errores.",
+   "cambios": [
+    "compositions/frames/05-camara.html, elenco (HTML): las 8 caras del recuadro de cámara, las 8 filas de la lista y la pila del colapso usan ahora el mismo elenco que el resto del video, con el fondo de assets/avatars/manifest.json. Orden: Ximena Torres (avatar-11-xt), Mateo Hernández (12-mh), Valeria Núñez (13-vn), Diego Ramírez (14-dr), Camila Vega (05-cv), Héctor Mendoza (10-hm), Sofía Gómez (18-sg), Luis Barrios (17-lb). Cara y nombre coinciden entre recuadro, lista y pila. Motivo: los mismos nombres de pila aparecían con otra cara y otro apellido en 03, 06, 08 y 10.",
+    "05-camara.html, entrada de filas (local 0.50-2.01 s, un cuadro por alumno): la fila se renderizaba dos veces porque el marcador pendiente (con el nombre en gris) quedaba bajo la fila real, que entra con y 24 -> 0. Cambios: (1) el marcador es ahora una barra gris sin texto (CSS .05-camara-pn); (2) un tween nuevo lo apaga (opacity 1 -> 0, 0.10 s, power1.in) en T+0.05 de cada fila, junto con la entrada de la fila real. Los tweens visuales existentes no cambian.",
+    "05-camara.html, colapso (local 2.65-2.90 s, abs 17.0-17.3): la opacidad de cada fila va en un tween propio de 0.09 s (power1.in), con el desplazamiento y la escala intactos (0.18 s, power3.in), y el escalonado entre filas baja de 0.01 a 0.006 s. Las filas quedan en opacity 0 en 2.74-2.78 s. La pila de avatares ahora entra desde 2.79 s con escalonado de 0.015 s (antes 2.76 y 0.02), así que termina en 2.895 s (antes 2.90). El latido de la pila en 2.93 y el resto de los tweens no se tocaron.",
+    "05-camara.html, cues 'asent': solo hay dos en el cuadro. Se añadió const AVANCE_ASENT = 0.07 con su comentario y se aplicó a pop-4 (chip '+16 más': 2.40 -> 2.33 s, aparición en 2.30) y a pop-1 (chip 'listo en 6 s': 3.80 -> 3.73 s, aparición en 3.70). Los tweens visuales no cambian. Cada etiqueta cae a 30 ms del inicio del tween de aparición, dentro del límite de 33 ms. 'check' (2.65), 'sparkle-short' (2.80), los pings, 'whoosh-*' y 'draw' están anclados a tween o pico y no se tocaron.",
+    "Cámara y tramo final (c): sin ningún cambio en camInit/camSnap/camTo/camPull ni en el empuje final (EMP_T 4.48, EMP_D 0.24, escala 2.0 hacia (1470,540)). Las duraciones del cuadro y los tiempos de los 8 pings tampoco cambian."
+   ],
+   "pruebas": [
+    "scripts/frame-check.mjs 05-camara: 0 errores, 0 avisos. Movimiento lento 0 s, muerto 0 s, pausa más larga sin evento visible 0.4 s. Sonido: 35 etiquetas sfx, 0 huérfanas. Lectura: read_mark en 4.0 s con +0.8 s de cola, igual que antes. Avatares reportados: 11-xt, 12-mh, 13-vn, 14-dr, 05-cv, 10-hm, 18-sg, 17-lb.",
+    "scripts/lucide.mjs --verify compositions/frames/05-camara.html --strict: 12 svg verificados, 0 errores.",
+    "Previews abiertos con Read (scripts/preview-frame.mjs, nuevo frente al original guardado en el scratchpad): en 0.80 s la lista muestra Ximena Torres y Mateo Hernández con barras grises debajo, sin nombres duplicados (antes aparecían los nombres pendientes en gris). En 2.00 s la lista muestra las 8 filas del nuevo elenco. En 2.76 s las filas restantes están casi apagadas y no hay pila todavía. En 2.80 y 2.85 s ya no queda texto y la pila entra limpia. En el original (v2.0), 2.76 y 2.80 s muestran las filas todavía visibles y los chips 'Presente' sobre el área de la pila. En 4.78 s la pila de 8 avatares con el elenco nuevo y el chip '+16 más' se ven limpios.",
+    "Handoff con 06, previews en 4.70, 4.75 y 4.78 s medidos con numpy sobre el verde del anillo: 4.70 s anillo de 391 px, centro (933, 539.5), todavía en el empuje; 4.75 s y 4.78 s anillo de 460 px, centro (959.5, 539.5). Se espera ~459 px y centro (959, 539): coincide en +1 px de diámetro y +0.5 px de centro, igual que el render anterior. Frente al original, 0 píxeles verdes distintos y 0 diferencias en la zona x > 1010 en los tres instantes; solo difieren las caras del cuadro y la pila, que son el cambio de elenco."
+   ],
+   "pendientes": [
+    "requests (v2/plan.json, no editado por mí): la columna frames[05-camara].avatars sigue con ['avatar-01-xr.svg' ... 'avatar-08-sc.svg']; debe pasar a ['avatar-11-xt.svg','avatar-12-mh.svg','avatar-13-vn.svg','avatar-14-dr.svg','avatar-05-cv.svg','avatar-10-hm.svg','avatar-18-sg.svg','avatar-17-lb.svg'] para que validate-plan y la documentación coincidan con el cuadro.",
+    "requests (v2/plan.json): los dos cues 'asent' de 05 (pop-4 T 2.4 y pop-1 T 3.8) deben pasar a T 2.33 y 3.73 en frames[05-camara].sfx, o a la regla 'tween+0.03' que adopte verify-sfx, antes de correr extract-events --cues, mount-sfx y verify-sfx. Yo no los ejecuté.",
+    "Opcional, hallazgo de gravedad baja sobre el snap-zoom 2 (2.65 s, 0.16 s): no se tocó. El hallazgo 'baja' sugería alargarlo a 0.20-0.22 s o mover el foco para no cortar la lista. Hoy el snap se solapa con el colapso, y la lista ya sale por completo antes.",
+    "Desviación documentada: en el colapso cambié también el inicio de la pila (2.76 -> 2.79 s) y el escalonado de las filas, no solo la opacidad de las filas. El motivo es que las filas lleguen a opacity 0 antes de que aparezca la primera cara de la pila. No se añadió ni se movió ningún cue de sonido por esto: las filas y la pila no llevan sfx.",
+    "No ejecuté hyperframes render, build-index, mount-sfx ni verify-sfx (los hace el integrador). Copia del original en el scratchpad: .../scratchpad/05-camara.orig.html."
+   ]
+  },
+  {
+   "resumen": "Cuadros 08 y 09 editados. En 08 la cámara cambió a otra familia de gesto: sigue al cursor y responde al clic con tilt-kick más empuje, sin pull-back ni pan diagonal. En 09 la dolly ya no recorta el título ni el eje Y. En ambos adelanté 0.07 s los cues 'asent'. frame-check da 0 errores en los dos, lucide --verify --strict da 0 errores, y no ejecuté render, build-index, mount-sfx ni verify-sfx.",
+   "cambios": [
+    "08-reportes.html, cámara: quité el pull-back 1.12 -> 1.00 (1.15 s) y el pan diagonal (-160,-110) del clic (2.05 s). El bloque nuevo, en tiempos locales, es: el pan de entrada 0.35-0.90 se conserva; de 1.40 a 2.05 la cámara sigue al cursor hacia el botón a 1.12 con foco (1085,520), ease power2.inOut; de 2.05 a 2.21, tilt-kick al clic con rotación -2 grados y empuje a 1.16, foco (1060,540), power4.out; de 2.21 a 2.65 la rotación se asienta y el foco baja a (1040,600) mientras llega el archivo y aparece el aviso, power2.inOut; de 3.10 a 3.45 regreso suave a 1.12 centrado, power2.out. Motivo: 07, 08 y 09 repetían el mismo compás (entrada, pull-back a 1.0, golpe o pan diagonal, regreso). Aquí es seguimiento lateral, tilt-kick con empuje y regreso, sin pull-back.",
+    "08-reportes.html, cámara, desviaciones del encargo: no es un empuje 1.00 -> 1.06 con foco (1120,650) porque el cuadro ya entra a 1.12 (handoff del push de 07) y 1.12 -> 1.06 sería un retroceso. Hago un empuje 1.12 -> 1.16 con el foco bajando hacia el aviso. Foco (1120,650) a 1.18 dejaba el borde izquierdo de la tarjeta a ras del encuadre y el botón a 12 px del borde superior. El cuadro termina a 1.12 en vez de 1.0 para no repetir un pull-back. El kick no desplaza el foco en y (foco (1060,540)); con (1100,610) frame-check lo contaba como snap, que 08 no debe tener. La tira de 1.15-2.05 (hueco de cámara de 0.9 s) la llena el seguimiento del cursor.",
+    "08-reportes.html, cues 'asent': añadí const AVANCE_ASENT = 0.07 con comentario del porqué. pop-2 pasa de Tv=1.05 a 0.98 (la aparición empieza en 0.95), pop-1 de Th=1.25 a 1.18 (aparición 1.15) y check de Tt=2.65 a 2.58 (aparición 2.55). Los tweens visuales no cambian y cada etiqueta queda a 30 ms de su tween de aparición.",
+    "09-analitica.html, dolly de 0.25 a 2.00: el foco pasa de (1130,480) a (900,480), manteniendo escala 1.14 y power1.inOut. El borde visible izquierdo pasa de x 288 a x 58, menor que el borde de la tarjeta (x 90), así que el título 'Ausentismo semanal' y las etiquetas del eje Y quedan enteros durante toda la dolly; la punta de la recta (S8 en x 820, S11 en 1090) sigue dentro del encuadre (58-1742). El snap 1.28 sobre S11 (foco (1090,430)), el riser que termina en el impacto y el contenido de lectura no cambian. El recorte que queda es el del propio golpe (2.02-2.35): a 2.40 s, ya en el pull-back, el eje Y aún queda cortado en el borde izquierdo ~0.1 s.",
+    "09-analitica.html, cues 'asent': mismo AVANCE_ASENT = 0.07 con comentario. ping-note5 pasa de 2.17 a 2.10 (aparición 2.07), pop-3 de 2.70 a 2.63 (aparición 2.60) y pop-4 de 2.95 a 2.88 (aparición 2.85)."
+   ],
+   "pruebas": [
+    "frame-check 08-reportes: 0 errores y 0 avisos; lento 0 %, muerto 0 s; cámara con 5 tweens perceptibles y 0 snaps (antes 4 tweens); 14 etiquetas sfx y 0 huérfanas; lectura 'CSV listo asistencia_3A.csv' en 2.9 s con +0.75 s de cola. Movimientos de cámara: 0.35-0.9 s pico 101 %/s, 1.4-2.05 s pico 33 %/s, 2.05-2.21 s pico 124 %/s, 2.21-2.65 s pico 44 %/s, 3.1-3.45 s pico 55 %/s. La pausa más larga sin cámara es 0.5 s (antes 0.7 s).",
+    "preview-frame 08 a 0.9, 1.4, 1.75, 2.0, 2.1, 2.15, 2.2, 2.35, 2.6, 2.9, 3.2 y 3.5 s, abiertos con Read. A 2.10 s el tilt de -2 grados se ve claro, y botón, filas con nombre, cifras y marca 20 % quedan dentro del encuadre. A 2.60 y 2.90 s el aviso 'CSV listo asistencia_3A.csv' queda entero y a 3.2 s la cámara regresa centrada. La barra de selectores ya no se recorta por arriba: queda entera en todos los instantes.",
+    "frame-check 09-analitica: 0 errores; 25 etiquetas sfx y 0 huérfanas; lectura 'Detecta el patrón antes de que sea tarde.' en 3.3 s con +0.85 s; dolly 0.25-2.0 s a 14 % de cambio, pico 15.9 %/s (media ~8 %/s), 1 snap (el de 2.02 s, que ya existía) y pausa más larga sin cámara 0.55 s (los 2.0 s de la dolly no quedan sin movimiento). Único aviso: 0.6 s lentos en 3.9-4.5 s, que ya existía antes de mis cambios y cae en la salida (whip).",
+    "preview-frame 09 a 0.8, 1.2, 1.6, 1.95, 2.1, 2.25, 2.4 y 2.55 s, abiertos con Read: título 'Ausentismo semanal' y eje Y completos de 0.8 a 1.95 s; el recorte solo aparece en el snap de 2.1-2.25 s y a 2.4 s el encuadre ya está casi completo.",
+    "node scripts/lucide.mjs --verify --strict en 08 y 09: 13 svg con data-lucide, 0 errores. El bloque canónico de helpers de 08 y 09 es idéntico entre sí; contra 07 solo difiere en sangría.",
+    "No comprobé las medidas de sonido (+17 a +50 ms del primer fotograma visible): los cues cumplen <= 33 ms de su tween de aparición según frame-check, pero lo confirmará verify-sfx del integrador. Los tweens visuales y los cues 'tween', 'pico', 'fin' y 'ventana' no se tocaron. No ejecuté render, build-index, mount-sfx ni verify-sfx."
+   ],
+   "pendientes": [
+    "requests (v2/plan.json, no lo edité): actualizar frames[08].cam. La hoja y el bloque máquina aún dicen pull-back 1.12 -> 1.00 en 1.15 y pan diagonal (-160,-110) en 2.05. Debe reflejar las 5 filas nuevas: entrada 0.35, seguimiento 1.40, kick 2.05, asentamiento 2.21 y regreso 3.10 (s, foco, r y ease como en los cambios). Cambiar camera.verb de 08 a tilt-kick con empuje, y corregir la regla 7(d), que dice 'pan diagonal (08)'. Los sfx de 08 y 09 con ancla 'asent' (pop-2 1.05, pop-1 1.25, check 2.65 en 08; ping-note5 2.17, pop-3 2.70, pop-4 2.95 en 09) deben llevar la T adelantada (-0.07 s) o verify-sfx rechazará el anclaje.",
+    "requests (integrador): regenerar extract-events --cues, mount-sfx y verify-sfx, y re-renderizar para 08 y 09. Mientras buscaba la opción de ayuda, 'node scripts/extract-events.mjs --help' ejecutó el script y reescribió el events.json del proyecto (1040 tweens, 0 incoherencias abs/local, ese estado ya incluye mis ediciones). Es un archivo generado, no editado a mano; conviene regenerarlo de todos modos.",
+    "Los dos hallazgos de gravedad baja de 08 que no pedía esta tarea quedan sin atender: el plural '1 faltas' durante la cuenta y que el icono del archivo cruza sobre las cifras de faltas. El pan diagonal con y -110 que recortaba los selectores ya no existe, así que ese hallazgo queda resuelto de paso.",
+    "Revisar en el render que el tilt-kick (-2 grados) se lea como cámara y no como error: la revisión anterior ya señalaba que 1.2-1.5 grados están en el límite de lo perceptible. A 2 grados se ve claro en el preview, pero conviene confirmarlo en movimiento."
+   ]
+  },
+  {
+   "resumen": "Cuadros 10-alumno y 11-confianza ajustados (no ejecuté render, build-index, mount-sfx ni verify-sfx). En 10: el teléfono queda a 95 px del borde izquierdo en la retención final y el titular entra desde 0.35 s. En 11: el escudo llega visible desde el local 0, el tecleo empieza a 0.35 s y no hay cuadro vacío. En ambos se adelantaron los cues 'asent' 0.07 s. frame-check da 0 errores y 0 etiquetas huérfanas en los dos, y lucide --verify --strict da 0 errores (20 svg).",
+   "cambios": [
+    "compositions/frames/10-alumno.html, cuadro 10 (a): el teléfono pasa de left 95 a left 175 px y el resplandor de -60 a 20 px. La cámara no cambia (el pan sigue en foco 1040 con x -80), así que en la retención 36.3-37.2 s abs el teléfono queda a x 95-565 en lugar de 15-485. Elegí mover el teléfono 80 px y no 40 porque con 40 px y pan -80 el margen sería 55 px, menor que los 80 px exigidos. Esto desvía de la sugerencia de 40 px.",
+    "compositions/frames/10-alumno.html, cuadro 10 (b): el titular por cascada de palabras arranca en T_TIT = 0.35 s (antes 0.40) con paso de 0.07 s (antes 0.10) y duración de 0.22 s (antes 0.25). Queda completo a 0.87 s (antes 1.15 s) y la primera palabra visible a 0.42 s. El marcador azul de 'propia' pasa de 1.05 a 0.85 s (misma relación con la palabra, que ahora entra a 0.63 s). El tanque al 88 %, calendario, read_mark 2.85 s, sonido de la cola y la cámara quedan igual.",
+    "compositions/frames/10-alumno.html, cues 'asent' (6): se resta la constante AVANCE_ASENT = 0.07, con su comentario del porqué. Los tweens visuales no cambian; cada cue usa la misma base T que su tween de asentamiento. Pops de columnas 1.60→1.53, 1.80→1.73 y 2.00→1.93; sparkle-short del chip de racha 2.20→2.13; pops de píldoras 2.45→2.38 y 2.65→2.58. Cada etiqueta cae a 0.03 s del inicio de su tween de aparición.",
+    "compositions/frames/11-confianza.html, entrada: el escudo llega con contraste desde el local 0. El contorno de fondo (sh0) sube de opacidad .32 a .62, el trazo parte ya dibujado al 55 % (strokeDashoffset 108→45) y el relleno blanco parte al 70 % (fillOpacity 0→0.7). Los dos terminan igual (offset 0, fill 1) en el mismo tween de 0.35 s, con su cue 'draw' en 0.35 s. El candado Lucide, las pastillas con íconos, read_mark 2.55 s y el sonido 'lock' en 0.95 s se conservan.",
+    "compositions/frames/11-confianza.html, titular: el tecleo se desplaza -0.10 s (K[0] 0.45→0.35, K[23] 1.80→1.70). Es la opción mínima de la tarea: la primera palabra empieza a 0.35 s, fin del solape, y las teclas horneadas siguen el mismo reloj K. No hice la cascada a 0.00-0.10 s porque el saliente 10 todavía se desvanece encima hasta 0.35 s y habría texto sobre texto, que el plan evita. Las teclas arrancan en 0.35 s; no suena nada antes de 0.35 s.",
+    "compositions/frames/11-confianza.html, cues 'asent' (3): los pops de las píldoras usan T - AVANCE_ASENT (0.07) en lugar de T. Quedan en 1.33, 1.73 y 2.13 (antes 1.40, 1.80 y 2.20), a 0.03 s de la aparición de cada píldora. Los ping-note (tween) y sparkle-short, lock, whoosh-rev (pico/tween) no se tocaron."
+   ],
+   "pruebas": [
+    "10-alumno, scripts/preview-frame.mjs en 0.0, 0.35, 0.42, 0.5, 0.7, 1.0, 3.0 y 3.5 s, abiertos con Read. A 0.42 s la mitad derecha ya tiene la píldora 'VISTA DEL ALUMNO' y 'Cada' entrando. A 0.70 s ya hay dos renglones (a 0.35 s sigue solo la píldora, porque nada nuevo antes de 0.35 s). A 3.0 s el teléfono está en x 95-565, titular hasta x 1665 y píldoras hasta 1497, sin desbordes.",
+    "11-confianza, preview en 0.0, 0.2, 0.35, 0.41, 0.47, 0.6, 1.0, 1.3, 1.45 y 2.6 s (abrí 0.2, 0.41 y 2.6). A 0.20 s se ve un escudo blanco con trazo azul saturado sobre el disco (antes, a 0.00 s, era pálido con halo). A 0.41 s aparecen 'T' y el cursor con el escudo ya fuerte. A 2.6 s el cuadro final está intacto: candado dentro del escudo, tres píldoras con sus íconos, 'bajo control' en azul, destello azul en la píldora 3.",
+    "frame-check 10-alumno: 0 errores, 0 avisos; lento 0 %, 0 s muertos; cámara 4 tweens perceptibles y 0.95 s como máximo sin cámara; 19 etiquetas sfx, 0 huérfanas; read_mark 2.85 s con +0.6 s.",
+    "frame-check 11-confianza: 0 errores y un aviso; 0 s muertos; 21 etiquetas sfx, 0 huérfanas; read_mark 2.55 s con +0.65 s; cámara 3 tweens perceptibles. El aviso es de movimiento: 0.9 s lentos (28 %) en 0.0-0.9 s, contra 0.8 s (25 %) del cuadro original medido con --dir. Sube 0.1 s porque el trazo del escudo, ya dibujado al 55 %, cambia menos píxeles. Los primeros 0.35 s van tapados por el solape. No lo corregí.",
+    "scripts/lucide.mjs --verify --strict sobre ambos HTML: 20 svg con data-lucide, 0 errores.",
+    "No medí a 15 fps las etiquetas de sonido en tiempo absoluto. La comprobación de que los cues quedan a <= 33 ms de la aparición es por construcción (aparición + 0.03 s). El integrador debe confirmarla con extract-events y verify-sfx."
+   ],
+   "pendientes": [
+    "La transición 10->11 la estampa build-index desde v2/plan.json y no se tocó. Conviene revisar tras el render que el escudo más contrastado se vea bien bajo el zoom out entre 36.85 y 37.20 s abs.",
+    "El plan sigue describiendo el teléfono en x 95-565 con pan x -80 y el tecleo de 11 de 0.45 a 1.80 s. Si quieren coherencia documental, actualicen esas cajas y tiempos en v2/plan.json (request: no lo edité).",
+    "Hallazgos de otros dueños que no hice por no ser de mi tarea: tamaño de los íconos de las pastillas de 11 (baja), datos de demostración 29/33 de 10 frente a 03 y 08 (baja), y ráfagas de tick-1 en 10 (sfxCount del helper)."
+   ]
+  },
+  {
+   "resumen": "Adelanté 0.07 s los 20 cues de sonido anclados al asentamiento en 03-tarde, 04-intro, 06-vivo, 07-revision y 12-cierre. Cada cue ahora cae a 0.03 s del inicio de la aparición. frame-check de los 5 cuadros da 0 errores, 0 avisos y 0 etiquetas huérfanas. `lucide --verify --strict` da 0 errores. No toqué ningún tween ni el aspecto visual.",
+   "cambios": [
+    "03-tarde.html: constante AVANCE_ASENT = 0.07 (con comentario del porqué) junto a T_PULSE. 1 cue movido: stamp del sello, de T_SETTLE (2.10) a T_SETTLE - AVANCE_ASENT (2.03). Aparición del sello en 2.00. Cámara, sacudida y tweens del chip siguen en T_SETTLE. El tap de T_PULSE, error-trim, el snap, el pop-2 de T_WORDS y los ticks no se tocan.",
+    "04-intro.html: AVANCE_ASENT = 0.07 antes del bloque de letras. 7 cues movidos, todos sfx(tl, Tas - AVANCE_ASENT, ...): los pops 1-4 de las letras S/U/S/A (0.52/0.64/0.76/0.88 pasan a 0.45/0.57/0.69/0.81), sparkle-short de los destellos (1.39 a 1.32), pop-2 de la pastilla (1.89 a 1.82) y pop-4 del escudo (2.09 a 2.02). riser-1s e impact-hit (1.20), soft-in, whoosh, ticks y zoom-out no se tocan.",
+    "06-vivo.html: AVANCE_ASENT = 0.07 antes de registro(). 6 cues movidos: los 5 pops de registro() ahora van en Ta + 0.10 - AVANCE_ASENT (registros 1-5: 0.80/1.00/1.20/1.85/2.20 pasan a 0.73/0.93/1.13/1.78/2.13) y el pop-1 de 'Presentes ahora' (2.55 a 2.48). Entrada y handoff sin cambios: velo, anillo y cuenta 24-21 intactos, y los ticks 0.20/0.30/0.40 siguen en su sitio.",
+    "07-revision.html: AVANCE_ASENT = 0.07 junto a Tg. 1 cue movido: pop-1 de la tarjeta fantasma (Tg + 0.10 a Tg + 0.10 - AVANCE_ASENT, de 2.65 a 2.58). El check de 1.06 es de anclaje tween y no se toca.",
+    "12-cierre.html: AVANCE_ASENT = 0.07 antes de TS. 5 cues movidos: stamp del slam de 'segundos.' (0.25 a 0.18) y los pops de SUSAN en 1.50/1.60/1.70/1.80 (pasan a 1.43/1.53/1.63/1.73). Los 3 de entrar() (escudo UNACH, pastilla y escudo FCA, 2.35/2.55/2.75) pasan a 2.28/2.48/2.68. El slam queda a 0.03 s de su aparición (0.15), después del impact-hit que pone la transición. riser-s e impact-lite (2.10), tap, whoosh, sparkle/chime, blip y soft-in no se tocan."
+   ],
+   "pruebas": [
+    "node scripts/frame-check.mjs 03-tarde 04-intro 06-vivo 07-revision 12-cierre: 5 cuadros, 0 errores, 0 avisos. Etiquetas sfx: 23, 17, 22, 16 y 17 respectivamente, 0 huérfanas en todos. 0 % de tiempo lento y 0 s muertos en los 5. Sin cambios en los tweens, las métricas de cámara y energía son las mismas de antes.",
+    "node scripts/lucide.mjs --verify (los 5 archivos) --strict: 16 svg verificados, 0 errores.",
+    "preview-frame de 06-vivo en t = 0, 0.8 y 2.55, y de 12-cierre en t = 0.2 y 1.6 (solo abrí con Read 06-vivo t=0 y 12-cierre t=0.2). El 06 t=0 muestra el anillo verde 24 / 24 centrado sobre crema, como el último fotograma de 05. El 12 t=0.2 muestra 'Pasa lista en segundos.' completo. Es lo esperado, porque solo cambié las etiquetas sfx.",
+    "Las etiquetas quedan a +0.03 s del inicio de la aparición, dentro del límite de 33.3 ms del contrato (el redondeo de coma flotante es del orden de 1e-16)."
+   ],
+   "pendientes": [
+    "El integrador debe ejecutar build-index, mount-sfx y verify-sfx. Los T de las hojas del plan para los cues 'asent' siguen siendo los del asentamiento (p. ej. stamp en T=2.10 de 03). Si verify-sfx o extract-events comparan la etiqueta contra el T del plan, ahora verán T - 0.07 y habrá que actualizar el plan. Si no, no hay nada que hacer.",
+    "Mis 5 cuadros tienen 20 cues movidos (1 + 7 + 6 + 1 + 5). Los demás cuadros con cues 'asent' no son míos y no los toqué.",
+    "Los 3 pops de 12-cierre (entrar) y el stamp de 12 quedan ahora a 0.03 s de su aparición, pero a la vez el sonido de los pops se adelanta respecto al plan. Revisar en verify-sfx que no choquen con el riser-s que empieza en 1.50."
+   ]
+  },
+  {
+   "resumen": "La mezcla estimada sube de -23.6 a -19.8 LUFS integrados, con pico verdadero de -5.6 a -2.8 dBFS. Los saltos de RMS entre segundos bajan de 14.6 a 9.1 dB, el máximo. Los cambios están en scripts/lib/sfx-lib.mjs, scripts/mount-sfx.mjs, scripts/bake-typing.mjs y assets/sfx/CATALOG.json. No toqué cuadros, plan ni index.html, ni ejecuté mount-sfx real, render, build-index ni verify-sfx real, ni regeneré assets/sfx/baked/ (sigue con los wav viejos). Las cifras salen de ejecutar mount-sfx en una copia de scratchpad (`--root`) con el mezclador de referencia sobre v2/sfx-cues.json. Medí el wav de esa mezcla con ffmpeg ebur128: -19.8 LUFS, pico verdadero -2.9 dBFS, LRA 4.7, de modo que la estimación del mezclador acierta a ±0.1 dB. Hay dos desviaciones respecto a lo pedido: subí las capas a +6 dB y no a +4, y el tecleo del gancho a +8 dB y no a +6 (detalle en cambios). El integrador debe re-ejecutar mount-sfx, que re-hornea los wav de teclas.",
+   "cambios": [
+    "scripts/lib/sfx-lib.mjs: nuevas constantes y funciones. GANANCIA_DB por categoría: tick, pop, ping, key, texture, whoosh, zoom, sparkle, chime, ui y alert +6 dB; riser +4; check +2; click +3; snap +2; impact 0. VOL_MAX_CUE = 0.80. EXTRA_TECLEO_DB = {'01-hook': 2}. También lineal(), volConGanancia(), AJUSTES_CUE, lufsIntegrado() (BS.1770-4, validado contra ffmpeg ebur128) y picoVerdadero() (sobremuestreo x4). mezclar(), leerWav() y escribirWav() no cambian, así que verify-sfx y el juguete siguen igual.",
+    "scripts/lib/sfx-lib.mjs, DESVIACIÓN 1: pediste +4 dB en las capas no percusivas. Con +4 el mezclador daba -21.0 LUFS, fuera de -20..-18, porque los topes de 0.80 por cue se comen parte de la subida en los ticks de 0.6. Subí a +6 en el grueso y lo dejé documentado en el comentario de GANANCIA_DB. El riser queda en +4 para no agrandar el salto previo al slam. Check, click y snap suben menos porque son los cues energéticos o transitorios que dominan sus segundos.",
+    "scripts/lib/sfx-lib.mjs, AJUSTES_CUE: mapa de ajustes por nombre de sonido y ventana de tiempo absoluta (no por id, para tolerar el renumerado y el desplazamiento de ±0.1 s de los cues asent), con vol final. Siete ajustes. Slam de 02-minutos (6.40 s): impact-hit 0.72 a 0.60, riser-1s a 0.70, whoosh-m de 5.53 s a 0.60. Slam de 09-analitica (31.27 s): impact-hit 0.75 a 0.60, draw de 30.02 s a 0.70, tick-2 de 30.75 s y tick-3 de 31.01 s a 0.60. Si una ventana no coincide con ningún cue, mount-sfx lo avisa.",
+    "scripts/mount-sfx.mjs: el volumen de etiqueta se multiplica por la ganancia de su categoría con tope 0.80, y un cue sin volumen en la etiqueta usa volDefecto, que ya la trae. Después se aplican los ajustes de AJUSTES_CUE. Tope de mezcla por defecto -1.5 dBFS (antes -1). Polifonía sigue en 4 (0 atenuados). Nueva opción --wav-referencia <ruta>. Informa LUFS estimado, pico verdadero estimado, muestras >= 0.99, volumen máximo de cue (sin contar los wav horneados), RMS de 0-2 s, los 6 mayores saltos entre segundos y el RMS por segundo. Todo queda también en v2/sfx-mounted.json (mezcla.*).",
+    "scripts/bake-typing.mjs: cada tecla horneada lleva la ganancia de key (+6 dB, tope 0.80) más EXTRA_TECLEO_DB, que da +2 dB solo en 01-hook. Picos horneados medidos en la copia de pruebas, antes y después: 01-hook -16.2 a -8.2 dBFS; 03-tarde -16.6 a -10.6; 05-camara -17.1 a -11.1; 11-confianza -18.1 a -12.1.",
+    "scripts/bake-typing.mjs, DESVIACIÓN 2: el gancho sube +8 dB en total y no +6, porque la categoría key ya sube +6 y el extra es +2. Lo hice por la meta del revisor de gancho >= -26 dBFS RMS. Con +8 el gancho queda en -29.1 / -32.8 / -29.2 dBFS RMS por segundo (antes -35.7 / -40.8 / -33.7) y sigue sin llegar a -26. Subir más llevaría el pico de las teclas por encima de -8 dBFS; si quieres solo +6, pon EXTRA_TECLEO_DB = {} en sfx-lib.",
+    "assets/sfx/CATALOG.json: los 66 sonidos de categorías no percusivas (incluidos los alias) cambian su volDefecto con la misma ganancia, con tope 0.80 (por ejemplo tick 0.40 a 0.80, key 0.35 a 0.70, check 0.50 a 0.63). Los impactos quedan igual. Cada entrada gana el campo gananciaDb, que verify-sfx ignora. Respaldo del original en el scratchpad (CATALOG.orig.json). Las 258 etiquetas actuales llevan vol explícito, así que volDefecto solo afecta a cues futuros sin vol."
+   ],
+   "pruebas": [
+    "Antes (v2.0, v2/sfx-mounted.json real): -23.62 LUFS estimados (ffmpeg ebur128 sobre el wav de referencia: -23.6; el MP4 real medía -23.7), pico verdadero -5.62 dBFS en t=11.68 s, mayor salto 14.59 dB (5->6 s), 0 muestras >= 0.99.",
+    "Después (copia en scratchpad): -19.825 LUFS estimados, -19.8 LUFS en ffmpeg ebur128, LRA 4.7 LU. Pico verdadero -2.8 dBFS estimado, -2.9 en ffmpeg. Pico de muestra -3.09 dBFS (astats -3.10) en t=2.501 s, al coincidir el snap con el tecleo del gancho. 0 muestras >= 0.99 y volumen máximo de cue 0.80. Polifonía máxima 4, 0 atenuados, el tope de mezcla -1.5 no tuvo que bajar nada. El RMS máximo por segundo es -17.3 dBFS.",
+    "Saltos de RMS entre segundos, 14.6 dB de máximo antes. Ahora: 30->31 s 9.09 dB, 15->16 s 8.71, 43->44 s 8.36, 10->11 s 7.92, 23->24 s 7.55. El 5->6 s pasó de 14.6 a menos de 7.3 dB y el 30->31 s de 13.8 a 9.1 dB; el 23->24 s y el 27->28 s eran de 11.1 y 10.1 dB solo por el check a 0.79, y bajan con su ganancia de +2. Tabla completa en v2/sfx-mounted.json, mezcla.rmsPorSegundoDbFS.",
+    "Comprobaciones: scripts/test-sfx-toy.mjs --sin-render pasa completo, con la biblioteca, las etiquetas y el montaje en OK. scripts/test-frame-helpers.mjs sale 'todas las pruebas OK'. verify-sfx --solo montaje sobre la copia de scratchpad da 'TODO OK', con aritmética de montaje con error de 0 ms y 0 muestras >= 0.99. Con la mezcla real de la copia ya no hay etiquetas huérfanas posibles, porque no toqué cuadros ni tiempos.",
+    "Comprobé que el árbol real no cambió: v2/sfx-mounted.json conserva generado 2026-10-03T16:55:41Z, assets/sfx/baked/ conserva sus fechas de 10:55 e index.html no se tocó. Todas las ejecuciones de mount-sfx fueron --dry o con --root a la copia."
+   ],
+   "pendientes": [
+    "Integrador: ejecutar extract-events --cues y mount-sfx sobre el index.html real. Eso re-hornea assets/sfx/baked/*.wav con la ganancia nueva, así que el estado actual de baked/ y el de index.html no cuadran hasta entonces. Después correr verify-sfx y re-medir el MP4 con ebur128. Espero -20..-19.5 LUFS integrados y pico verdadero <= -2.5 dBFS tras AAC.",
+    "Si los cuadros adelantan los cues asent 0.07 s, la mezcla casi no cambia. Las ventanas de AJUSTES_CUE (±0.1 s alrededor de 6.4, 5.53, 30.02, 30.75, 31.01 y 31.27 s) tienen holgura. Si mount-sfx avisa 'AJUSTES_CUE sin coincidencias', hay que revisar las ventanas.",
+    "requests: scripts/build-sfx-catalog.mjs (no es mío) tiene su propia tabla de volDefecto y regenera CATALOG.json; si se ejecuta, borra gananciaDb y devuelve los volDefecto viejos. Su tabla debe adoptar los volúmenes nuevos o no debe volver a ejecutarse. El respaldo funcional está en sfx-lib.mjs: volConGanancia usa GANANCIA_DB si falta gananciaDb, por lo que las etiquetas con vol siguen bien aunque se regenere el catálogo.",
+    "requests: scripts/verify-sfx.mjs conserva el tope -1 dBFS (+0.05) y el texto 'tope -1'. Con el tope por defecto de mount-sfx ahora en -1.5 sigue pasando; si se quiere que verify exija -1.5, es un cambio de una línea suyo.",
+    "El gancho (0-2.5 s) queda en -29.1 / -32.8 / -29.2 dBFS RMS por segundo, lejos del >= -26 del revisor. Con teclas sueltas y huecos solo llegaría subiendo el tecleo por encima de -8 dBFS de pico (hoy -8.2) o añadiendo capas al gancho en el cuadro 01-hook, que no es de esta tarea.",
+    "Los cues de ticks de 0.6 (con ganancia +6) quedan en el tope 0.80, lo que comprime un poco la diferencia entre un tick de 0.6 y uno de 0.45. Si se quiere conservar, bajar VOL_MAX_CUE no sirve; habría que subir el tope por categoría."
+   ]
+  }
+ ],
+ "integ": {
+  "ok": true,
+  "resumen": "Integración ronda 1 sin errores. 1) build-index regeneró index.html (12 cuadros, 45.05 s, 11 transiciones). 2) lint: 0 errores, 567 avisos (480 id_requires_css_escape, 58 id_override_reduced_specificity, 12 file_too_large, 7 studio_missing_editable_id, 4 negative_z_index, 3 gsap_repeated_fromto, etc.), igual tras montar el sonido; check: 0 errores, contraste 84/84 AA, Motion 0, ningún tl.labels leído (solo aparece en comentarios). 3) sonido: extract-events --cues (258 cues), mount-sfx (214 <audio>, error de aritmética 0 ms, pico -3.09 dBFS, polifonía máx. 4), verify-sfx --lectura-min 0.5: TODO OK, 0 errores, 57 avisos 'tween hero sin sonido'. 4) frame-check de los 12 cuadros: 0 errores (2 avisos de movimiento), 0 etiquetas huérfanas, read_marks idénticas al plan en los 12; lucide --verify --strict: 65 svg, 0 errores. Solape de entrada/salida: verificado por script contra sfx-cues.json y el plan (sin cues ni tweens visibles fuera de cámara dentro de las ventanas de solape; solo ambientales largos en 10-alumno y el bg de 08). 5) Handoff 05->06 (match cut): el anillo verde 24/24 queda en el mismo cuadro delimitador (x 730-1189, y 310-769, trazo 28 px) en 19.03 s y 19.05 s; diferencia media de píxeles 0.24 (solo antialias): perfecto. 6) 35 snapshots del index real (3 por cada una de las 11 transiciones, más 5 en el match cut) revisados con Read: sin bordes del entrante, lavados, parpadeos ni texto sobre texto fuera de lo diseñado. No hubo que corregir ningún script.",
+  "errores": [],
+  "infra_arreglos": [],
+  "avisos_tolerados": [
+   "lint: 480 id_requires_css_escape + 58 id_override_reduced_specificity + 12 composition_file_too_large + 7 studio_missing_editable_id (ids con prefijo numérico, conocido; falta de id en clips bg/stage de 03, 04, 06, 07, 10, 11)",
+   "lint 08-reportes: gsap_timeline_set_initial_hide sobre 'path' (tl.set a t=0); el snapshot de 08 en su inicio y en 29.275 s se ve correcto. Sugerencia opcional al dueño: pasar el set a immediateRender o fromTo con immediateRender:false",
+   "lint 09-analitica ('dwell/hold') y 11-confianza ('path' y 'rect'): gsap_repeated_fromto_without_baseline; 11 además overlapping_gsap_tweens en strokeDashoffset 0.55-0.77 s (candado y escudo comparten selector 'path'); visualmente correcto en 37.3-38.9 s. Sugerencia opcional: immediateRender:false en todos los fromTo salvo el primero",
+   "lint: negative_z_index en 07, 08, 09, 10 (z-index -1 dentro de clips con fondo propio): no se ve ningún elemento perdido en los snapshots",
+   "lint 05-camara: duplicate_media_discovery_risk (3 img con la misma fuente y tiempos: avatares repetidos); sin efecto en render",
+   "check Layout (ℹ y content_overlap/container_overflow/escaped_container/text_occluded/panel_out_of_canvas): inherentes al solape de cuadros, al world/cámara que se sale del contenedor y al shine de 12-cierre (c0..c4 bajo #12-cierre-shine, 42.55 s)",
+   "check Layout (4 avisos, cuadro 09-analitica, t=32.57-32.82 s): content_overlap entre palabras del titular ('Detecta' dentro de 'antes', 'de' dentro de 'de'/w-8) y 'Proyección al cierre' dentro de vn-1. Son cajas envolventes solapadas por la inclinación de cámara de 09; los snapshots 32.55/32.65/32.75/32.85 s no muestran texto sobre texto. Tolerado",
+   "frame-check 09-analitica: 0.6 s lentos (3.9-4.5 s locales, es la espera de lectura más el wipe de salida de 0.35 s)",
+   "frame-check 11-confianza: 0.9 s lentos (0.0-0.9 s locales; los primeros 0.35 s están cubiertos por el zoom out de 10->11, el escudo y el tecleo ya se mueven desde 0.35 s)",
+   "build-index AVISO transición 9 (wipe): sfx.peak 0 (scan) pero el pico de velocidad del wipe power3.inOut está en 0.50 de dur (33.575 s). El plan lo declara a propósito (scan es un golpe 'hit' de 200 ms que suena al arrancar la barrida, 33.40 s). Si se quiere el sonido en la mitad del barrido, el dueño del plan debería poner peak 0.5 (scan terminaría en 33.775 s, 25 ms después del wipe)",
+   "verify-sfx (b): 57 avisos 'tween hero sin sonido' en lugar de los ~17 esperados (39 no son world/cámara): 02-minutos 8, 12-cierre 8, 04-intro 7 (L1..L4, sp1, pill, badge), 08-reportes 6, 10-alumno 6, 05-camara 5, 06-vivo 5 (reg-1..3, r-label), 07-revision 4, 11-confianza 3, 03-tarde 2, 09-analitica 2, 01-hook 1. Solo avisos (sin --strict); no son errores de sincronía (122 de 258 cues anclados a <= 33 ms de un tween, 136 por ventana)",
+   "squeeze 03->04 (10.45-10.85 s): el entrante también se comprime en X (scaleX 0->1), así que 'Presentamos' se ve condensado a mitad de transición (10.65 s). Es el diseño actual de build-index (scaleX complementarios), no un fallo; si se prefiere sin distorsión del entrante, cambiar el squeeze a revelado con clip-path en el entrante (requeriría tocar build-index)"
+  ]
+ },
+ "render": {
+  "archivo": "/Users/diegoguerrero/Developer/SUSAN/video/susan-presentacion/renders/video-v2.1.mp4",
+  "duracion_s": 45.067,
+  "tamano_mb": 27.6,
+  "metricas": [
+   "RENDER: OK en 50.6 s (high, captura por pantalla; 1352 fotogramas; compile 1.9 s, captura 24.1 s, encode 15.5 s). Sin reloj de 45 s ni timeline sin registrar: los 12 cuadros salieron 'ready'. Lint: 0 errores, 567 avisos (no bloquean). v1 (renders/video.mp4) y v2.0 (renders/video-v2.0.mp4) intactos.",
+   "FFPROBE: h264 1920x1080, 30/30 fps, 1352 fotogramas, 4.96 Mb/s; audio AAC 48 kHz estéreo 175 kb/s; duración contenedor 45.067 s (video 45.0667, audio 45.056) = +0.017 s sobre 45.05, dentro de ±0.05. Tamaño 28 990 738 bytes = 27.6 MB (v2.0: 28 353 893).",
+   "SONIDO verify-sfx --video (tol 33.3 ms): 213/214 cues dentro de tolerancia; medidos por correlación 206 (+8 estáticos: risers/zoom-in anclaje 'fin'); error medio 0.001 ms, máximo 0.006 ms; 206/206 a <= 5 ms; ganancia global del render 0.991. Falla 1: 05-camara-8 (ping-note5, 15.42 s) con rho 0.41 (< 0.45) y amplitud ajustada 0.21 (< 0.5); error temporal 0.001 ms. Comprobación aparte con filtro pasabanda a 3950 Hz sobre el MP4: el ping SÍ suena, con el mismo nivel que sus vecinos y su ataque a +4.0 ms de su data-start (note4 +4.5, note6 +3.3 ms), cola previa 4 % del pico. Es un falso positivo del criterio de correlación/amplitud del verificador, no un desfase.",
+   "SONIDO secciones: (a) biblioteca OK 0 err; (c) montaje OK 0 err (214 cues montados, pico recalculado <= -1 dBFS); (d) render FALLA 1 (el de arriba); (b) etiquetas<->tween FALLA 10 errores, todos 'lectura corta' porque verify-sfx usa --lectura-min 0.9 por defecto y el plan fija min_lectura por marca de 0.6 a 0.85 (13 marcas; cortes con 0.60-0.85 s de lectura). Con --lectura-min 0.6 la sección (b) pasa con 0 errores y 57 avisos 'tween hero sin sonido' (no errores).",
+   "SONIDO mezcla: pico de muestra -3.03 dBFS (máx abs 0.705), pico verdadero -2.8 dBFS (<= -1 OK); muestras >= 0.99: 0; loudness integrada -19.9 LUFS, LRA 4.8 LU. RMS por ventana de 1 s: media -25.3 dBFS, rango -32.8 a -17.2; salto máximo entre ventanas consecutivas 9.1 dB (s 30->31), ninguno > 12 dB.",
+   "SILENCIOS: silencedetect -60 dB / 0.3 s: 12 tramos, el mayor 0.66 s (28.62-29.28, justo antes del corte 07->08... 08-reportes); ninguno > 1.0 s. Con ventanas de 0.1 s a -50 dBFS el tramo mudo más largo es 0.6 s. Cola final: sin silencio largo (hasta 45.0 s hay señal; último 'soft-in' a 44.45 s).",
+   "MOVIMIENTO (mismo método motion.py de la v1, 15 fps 320x180, bins de 0.1 s, umbral lento 0.30): v2.1 tiene 3.1 % del video lento (1.4 s de 45.05 s; meta <= 8 %: CUMPLE), 0 tramos muertos >= 1.0 s (meta 0: CUMPLE), tramo lento más largo 0.8 s (43.8-44.6 s, la cola del cierre; energía 0.195), otro de 0.6 s (40.4-41.0, inicio de 12-cierre tras el corte), ambos en 12-cierre (28 % de ese cuadro; el resto de cuadros 0 s lentos). Visual events (picos) 67 = 1.49/s, intervalo medio 0.65 s, mediano 0.60 s, máximo 1.4 s (43.3-44.7). Energía media 3.77, mediana 1.13, p25 0.42.",
+   "TABLA v1 / v2.0 / v2.1 (duración 56 / 45.05 / 45.05 s): % lento 25.5 / 4.4 / 3.1; segundos lentos (>= 0.6 s) 14.3 / 2.0 / 1.4; segundos muertos 9.1 / 0 / 0; tramo lento más largo 2.8 s (t 38.0) / 0.8 s / 0.8 s; eventos visuales 53 / 66 / 67; eventos por segundo 0.95 / 1.47 / 1.49; intervalo máx entre eventos 3.7 / 1.4 / 1.4 s; intervalo medio 1.07 / 0.66 / 0.65 s; energía mediana 0.58 / 1.12 / 1.13; bins de 0.1 s bajo 0.30: 35.7 / 17.8 / 17.6 %. Nota: 'bursts' (ráfagas >= 0.5) subió de 16 a 17 y su intervalo máximo es 8.6 s (v2.0: 7.6 s), métrica de ráfagas fuertes, no de movimiento perceptible. Por cuadro (energía media): F5 9.19, F8 6.25, F4 4.55, F6 3.71, F2 3.22, F11 3.04, F10 3.00, F7 2.40, F9 2.36, F3 2.26, F1 1.98, F12 1.78 (el más bajo y el único con tramos lentos).",
+   "ARCHIVOS de movimiento: audit/ritmo/motion-v2.json y motion-v2.png ahora son de v2.1 (generados con una copia de motion-v2.py apuntada a video-v2.1.mp4, matplotlib por PYLIB del scratchpad); los de la v2.0 se conservaron como motion-v2.0.json/png; motion.json/png (v1) intactos.",
+   "CAMARA (medida sobre los timelines reales del bundle compilado con extract-events.mjs, 49 tweens de '*-world' en 12 cuadros; velocidades = cambio medio / duración): snaps de zoom (<= 0.2 s, +5 pts de escala o más, power4.out): 8 (01-hook 1.12->1.22; 02 1.0->1.1; 05 x2 -> 1.09 y 1.10; 07 1.0->1.12; 09 1.14->1.28; 11 1.0->1.08; 12 recoil 1.06->1.01), más kicks de rotación rápidos: 3 (03 golpe lateral +1.4 grados en 0.1 s, 08 y 10 tilt-kick -2.5 grados en 0.16 s). Derivas < 3 %/s sin otra señal de movimiento (escala < 3 %/s, < 40 px/s y < 1 grado/s): 0 (meta 0 CUMPLE). Las 7 tweens con escala < 3 %/s y dur >= 0.5 s son paneos laterales o tilts de 140-599 px/s o 3 grados/s, no derivas. La deriva más lenta de escala es 01-hook 1.0->1.12 a 7.2 %/s y 09-analitica dolly 1.0->1.14 a 8.0 %/s (media; pico mayor por la curva). 51 movimientos de cámara totales (incl. 2 tweens de 'drift' en 04) = 1.09/s; con las 11 transiciones 1.33/s.",
+   "CAMARA verbos contiguos (plan.json): push-fast, pan, tilt, pull-back, whip, pull-back, snap, pan, dolly, tilt, snap, pull-back -> 12 cuadros, 8 verbos distintos, 0 pares contiguos iguales (pull-back se repite en 4->6 y 12 pero separado por whip/snap). Transiciones: zoom-in, cut, squeeze, iris, match, flash, push-left, whip-right, wipe-up, zoom-out, cut -> 0 pares contiguos iguales ('cut' dos veces, en 2->3 y 11->12, no contiguas). Huecos mayores sin ningún movimiento de cámara ni transición: 1.65 s final (43.4-45.05, hold del lockup de cierre), 1.03 s (17.7-18.73, 05-camara; único hueco interior > 1.0 s), 1.0 s (20.45-21.45, 06), 0.95 s (40.5-41.45, 12), 0.95 s (33.8-34.75, 10).",
+   "validate-plan: plan válido (12 cuadros, 11 transiciones, 45.05 s, 0 avisos)."
+  ],
+  "problemas": [
+   "verify-sfx.mjs --video sale con FALLO (codigo 1) por dos motivos, ninguno es un desfase de sincronía: (1) sección (d) 1 cue: 05-camara-8 ping-note5 @15.42 s con rho 0.41 y amplitud 0.21 (criterios del verificador: rho >= 0.45 y amplitud >= 0.5), error temporal 0.001 ms; el análisis independiente con pasabanda a 3950 Hz demuestra que el sonido está en el MP4 con nivel y ataque iguales a los de ping-note4/6. Dueño: herramienta verify-sfx-sync.py (residuo tras restar los otros cues sobre una cola de ping tonal solapada en pista 20 con ping-note2/note8) o el cuadro 05-camara si se quiere cumplir el criterio a la letra (por ejemplo separar/atenuar el solape de pings). Request: relajar o revisar el criterio rho para tonos puros, o aceptar este falso positivo.",
+   "(2) sección (b) 10 errores 'lectura corta': verify-sfx usa --lectura-min 0.9 por defecto pero el plan.json define min_lectura por marca (0.6-0.85 s) y los cuadros 01,02,03,04,05,06,08,09,10,11 dejan 0.60-0.85 s de lectura antes del corte. Con --lectura-min 0.6 la sección pasa. Request: que verify-sfx lea min_lectura del plan o que el plan y el umbral por defecto se alineen. Si se exige 0.9 s de lectura real, 10 de 11 cuadros no cumplen (F10 0.60 s, F4 0.61 s, F11 0.65 s son los más cortos).",
+   "Meta de movimiento cumplida en lo medido, pero 12-cierre concentra los únicos tramos lentos: 40.4-41.0 s (0.6 s, energía 0.12, mitad de los bins casi congelados) y 43.8-44.6 s (0.8 s, cola del lockup); ningún tramo muerto >= 1.0 s. Hueco de cámara interior > 1.0 s: 05-camara 17.7-18.73 s (1.03 s).",
+   "57 avisos 'tween hero sin sonido' en verify-sfx (sección b): no son errores y el 'hero' sin sonido incluye mayormente tweens de cámara que el plan declara sin sfx; se reportan por completitud.",
+   "Una errata propia al ejecutar: corrí por error audit/ritmo/camara.py (inventario de cámara de la v1, valores fijos); no modificó camara.json (mtime 07:46 intacto). Nada más fuera de lo pedido: v2/verify-sfx.json y v2/verify-sfx-sync.json se regeneraron por el propio verify-sfx (salida normal de la herramienta)."
+  ]
+ },
+ "revisiones": [
+  {
+   "revisor": "Cortes y transiciones (renders/video-v2.1.mp4)",
+   "veredicto": "aprobado_con_cambios",
+   "resumen": "Las 11 transiciones de la v2.1 están claramente mejor que las de la v1 (la v1 tenía 2 BIEN, 6 MEJORABLE y 3 MAL; ahora hay 10 BIEN, 1 MEJORABLE y 0 MAL). No encontré ningún defecto grave que un espectador note de inmediato. Reviso los 11 cortes con fotogramas a 15 fps (v2/revision/tiras/NN-a-MM.jpg, regenerados desde video-v2.1.mp4) y a 30 fps en las transiciones cortas, más métricas por fotograma del video entero. Lo que ya está bien: (1) el match 05->06 es invisible a nivel de píxel, con la caja del anillo verde idéntica (730-1189 x 310-769 px) en el último fotograma de 05 (#571) y el primero de 06 (#572). (2) Los bordes del cuadro entrante, que en la v1 destacaban (rectángulo pálido, panel oscuro sobre SUSAN), ya no aparecen en ninguna transición. (3) No hay texto sobre texto en ningún solape; 11->12 ya no lo tiene, el 'Pasa lista en' llega solo. (4) Solo hay un tramo de lavado crema, el del zoom out 10->11; la v1 lo tenía en casi todos los fundidos (contraste 44->6). (5) Se usan 9 familias y no se repite ninguna seguida; las direcciones alternan (push izquierda, whip derecha, wipe arriba). (6) Las transiciones caen en el instante del plan (±1 fotograma). (7) El saliente ya no queda quieto 0.8-1.2 s antes de cortar, como en la v1; el peor caso es 0.82 s en 10->11 y 0.68 s en 02->03. (8) El tiempo quieto del video baja de 35 % (v1) a 13.8 % (6.2 s de 45.07). (9) El héroe del entrante está legible tras cada corte. (10) El único pico aislado de la v1 (el salto de escala del cuadro 06) ya no existe. Lo único con peso es el zoom out 10->11: deja el cuadro casi en blanco durante 3-4 fotogramas y el saliente queda quieto 0.82 s antes; el resto son ajustes finos de baja gravedad.",
+   "metricas": [
+    "Veredictos por transición (T = inicio absoluto, d = duración): 01->02 zoom in T 3.20 d 0.30 = BIEN | 02->03 cut T 7.35 = BIEN | 03->04 squeeze T 10.45 d 0.40 = BIEN | 04->05 iris T 14.25 d 0.40 = BIEN (reparo baja) | 05->06 match T 19.05 = BIEN | 06->07 flash T 22.55 d 0.10 = BIEN (reparo baja) | 07->08 push left T 25.60 d 0.35 = BIEN | 08->09 whip right T 29.25 d 0.25 = BIEN | 09->10 wipe up T 33.40 d 0.35 = BIEN | 10->11 zoom out T 36.85 d 0.35 = MEJORABLE | 11->12 cut T 40.05 = BIEN.",
+    "Referencia v1 (audit/resultados-auditoria.json, hallazgos de cortes): BIEN 2, MEJORABLE 6, MAL 3. v2.1: BIEN 10, MEJORABLE 1, MAL 0. Fallos de la v1 ya resueltos: zoom-through con borde del entrante (04->05 y 01->02), salto 1.6x->1.0x del cuadro 06, fundidos que lavan a crema (08->09, 03->04, 02->03), texto sobre texto en 11->12 y 3 push LEFT seguidos.",
+    "Cierre de tiempos (frame = n/30 s): primer fotograma que cambia en cada transición = 3.233, 7.367, 10.50, 14.30, 19.067, 22.533, 25.667, 29.30, 33.467, 36.867, 40.067, es decir al instante de plan T (3.20, 7.35, 10.45, 14.25, 19.05, 22.55, 25.60, 29.25, 33.40, 36.85, 40.05) con 0-2 fotogramas de desfase por el inicio de cada ease. Duración total 45.067 s / 1352 fotogramas frente a 45.05 s del plan.",
+    "Match 05->06: en #570 y #571 (19.000 y 19.033 s) el anillo mide 459x459 px en (730-1189, 310-769); en #572 (19.067 s, primero de 06) idéntico (diferencia de 0-1 px en el trazo). Cifra '24 / 24' idéntica. El resto de 05 (panel oscuro, titular, avatares) desaparece en un fotograma, como debe ser. Después el anillo se retira a 432 px en #573.",
+    "Contraste (desv. estándar de luminancia) dentro de cada transición, antes -> mínimo: 01->02 49.9 -> 9.8 @3.47 (el entrante es solo el anillo en '0') | 02->03 30.9 -> 10.0 (el entrante es una tarjeta tenue con el caret) | 03->04 34.8 -> 11.6 (degradado liso) | 04->05 40.0 -> 39.9 | 05->06 81.8 -> 20.2 | 06->07 33.1 -> 13.0 (2 fotogramas, flash) | 07->08 23.7 -> 20.4 | 08->09 45.4 -> 10.1 (ejes vacíos) | 09->10 26.3 -> 22.3 | 10->11 44.6 -> 5.7 @37.20 (media 241 = lienzo 242: lavado real) | 11->12 27.9 -> 30.4. Solo 10->11 es lavado por mezcla; los demás valores bajos son contenido escaso del entrante, no velo crema.",
+    "Última acción del saliente antes de cada corte (último fotograma con diferencia >= 0.6): 01->02 0.43 s | 02->03 0.68 | 03->04 0.38 | 04->05 0.58 | 05->06 0.05 | 06->07 0.18 | 07->08 0.40 | 08->09 0.25 | 09->10 0.30 | 10->11 0.82 | 11->12 0.05. La v1 daba 0.8-1.2 s en 6 cortes.",
+    "Quietud global (tramos >= 0.3 s con diferencia media < 0.3 sobre 480x270, mismo método que audit/cortes/metricas.py): 6.2 s de 45.07 = 13.8 % (v1: 19.8 s de 56 = 35 %). Tramos más largos: 12-cierre 43.77-44.70 (retención final prevista), 10 cola 36.13-36.87 (0.73 s), 06 arranque 19.50-20.13 (0.63 s), 02 cola 6.90-7.37 (0.47 s), 12 frase 40.43-40.90 (0.47 s).",
+    "Parpadeos y saltos: no hay picos aislados de diferencia fuera de las transiciones (el único antiguo, 24.37 s en la v1, ya no existe). Los saltos de luminancia fuera de transición son todos movimientos de cámara previstos: whip interno de 05 en 16.13-16.23 con desenfoque, empuje final de 05 en 18.87-18.97, y blur-and-lift de 12 en 41.40-41.50.",
+    "Sin recortes del entrante en ninguna transición: zoom in (el entrante llega a 1.15 -> 1.0, no se ve su borde), squeeze (sliver de 8 px a 10.767 y limpio a 10.80), iris (4 fotogramas, 14.367-14.50), push (el saliente sale desvaneciéndose a la izquierda sin invadir la tabla), wipe (línea azul de 3 px con estela), whip (2.5 fotogramas con desenfoque), zoom out. Frase clave de 05 'Pasa lista en segundos.' completa 18.25-18.87 (0.62 s >= 0.6 del plan) antes de que el empuje final la recorte. Nota de método: los recortes aparentes tipo 'ANUAL' en las hojas de contacto de 02 eran la etiqueta de tiempo de la propia hoja; a resolución completa la píldora 'PASE DE LISTA MANUAL' está entera (v2/revision/ver f02_7.2 en scratchpad)."
+   ],
+   "hallazgos": [
+    {
+     "cuadro": "transicion:10->11",
+     "t": "36.85-37.30",
+     "gravedad": "media",
+     "que": "El zoom out mezcla saliente y entrante con fundido y deja el cuadro casi en blanco: es el único lavado crema que queda. Antes de la transición el saliente queda además quieto 0.82 s. El entrante llega a medias (escudo pálido) y solo hay un escudo y 1-2 teclas durante ~0.5 s.",
+     "evidencia": "Métricas por fotograma: contraste 44.6 antes -> 5.7 a 37.20 s, media de luminancia 241 (lienzo 242). Fotogramas #1113-#1116 (37.10-37.20 s) con std 15.4, 11.7, 7.6, 5.7. En 37.07-37.17 el saliente es una sombra borrosa de 'Cada alumno ve su propia asistencia' y el escudo del entrante se ve al ~30 % de opacidad, aunque el plan (regla 13) dice que el entrante ya está opaco debajo. Último movimiento del saliente a 36.03 s (cola quieta 36.03-36.85). Tras la transición el entrante tiene diferencia < 0.3 casi todo 37.2-37.85 (solo el escudo y las teclas 'T', 'Tu', 'Tus d'). Ver v2/revision/tiras/10-a-11.jpg y la hoja a 30 fps scratchpad/zoomout.jpg.",
+     "correccion": "Dueños: scripts/build-index.mjs (tipo zoom out) y 11-confianza.html. (a) Que el entrante, escudo y halo, esté a opacidad 1 desde T (sin fundido propio) y que el saliente termine de desvanecerse en 0.2 s en vez de 0.35 s, de modo que el contraste no baje de ~15; o bien reducir el blur del saliente de 14 a ~6 px para que su silueta siga contando. (b) Adelantar el tecleo de 11 a local 0.30 s (hoy empieza a 0.38 s y avanza lento los primeros 0.6 s) o dar al escudo un latido a 0.35 s, para que haya evento visual en 37.2-37.5. (c) Opcional en 10-alumno: acortar 0.2-0.3 s la cola quieta (las píldoras terminan a 36.2 s y hasta 36.85 solo se mueve nada), pasándolos a 11."
+    },
+    {
+     "cuadro": "transicion:04->05",
+     "t": "14.25-14.80",
+     "gravedad": "baja",
+     "que": "El iris termina en 14.57 y el snap-zoom de 05 llega 0.13 s después: el salto de escala del panel oscuro se siente como un segundo corte o un tropiezo justo tras el iris. Además, el inicio del iris sobre SUSAN muestra un disco oscuro con un avatar encima de la 'U' durante 3 fotogramas.",
+     "evidencia": "Diferencia por fotograma: iris 14.40 = 14.1, 14.433 = 27.3, 14.467 = 29.4, 14.50 = 11.2, 14.533 = 4.2; luego quieto 14.567-14.70 (0.0-0.6) y snap a 14.733 = 56.9 y 14.767 = 38.5, el pico más alto de todo el video. En 14.367-14.40 (#431-#432) el iris abre sobre el panel oscuro y se ve un círculo negro con un avatar en medio de 'SUSAN'. Hoja a 30 fps scratchpad/iris.jpg y snap05.jpg.",
+     "correccion": "Dueño 05-camara (frames[].cam[0], snap a t = 0.45 s local = 14.70 s): moverlo a ~0.70-0.75 s local (>= 0.3 s después del fin del iris) o bajar el salto de 9 % a 6 %. Pedir también que el panel de cámara de 05 entre ya con un borde/halo claro para que el primer fotograma del iris no sea un disco negro sobre el wordmark (alternativa: origen del iris en (0.42, 0.62) para que nazca sobre el eslogan, no sobre las letras)."
+    },
+    {
+     "cuadro": "transicion:05->06",
+     "t": "18.80-19.20",
+     "gravedad": "baja",
+     "que": "El match es invisible (anillo idéntico), pero el empuje final de 05 se detiene antes del corte (parada de ~1.5 fotogramas) y 06 invierte el sentido de golpe (el anillo crece y luego se encoge): lectura de rebote, no de continuidad de velocidad.",
+     "evidencia": "Diferencia por fotograma: 18.933 = 30.9, 18.967 = 32.7, 19.000 = 12.0, 19.033 = 0.00 (fotograma #571 idéntico a #570), 19.067 = 41.5 (corte). Diámetro del anillo: 445 px (#569) -> 459 (#570) -> 459 (#571) -> 459 (#572, primero de 06) -> 432 (#573) -> sigue reduciéndose. El empuje de 05 usa ease 'out' y llega a velocidad ~0 en el corte, mientras 06 arranca con power4.out a velocidad máxima.",
+     "correccion": "Dueño 05-camara (cam[5], empuje final t 4.5 dur 0.3): usar ease 'in' (power2.in/power3.in) para que el anillo siga creciendo a velocidad máxima hasta el instante 4.80 s y el match corte en movimiento; mantiene el anillo de 460 px en (960,540) del handoff. Opcional: que el pull-back de 06 empiece 1 fotograma después para no duplicar el pico. Nota: el titular 'Pasa lista en segundos.' se recorta al final de 05 (18.92-19.0), pero solo tras 0.62 s de lectura completa (18.25-18.87), conforme al plan."
+    },
+    {
+     "cuadro": "transicion:06->07",
+     "t": "22.53-22.60",
+     "gravedad": "baja",
+     "que": "El 'flash' no es un destello: dura 2 fotogramas y es un lavado casi del color del lienzo. Se lee como un fundido muy rápido, y su carácter de golpe depende del sonido. Además arranca 17 ms antes del T del plan.",
+     "evidencia": "Fotogramas #676 (22.533 s): saliente al ~60 % con velo crema, media 243.5, std 17.5; #677 (22.567): media 246 (pico), std 13, entrante ya al ~40 %; #678 (22.60): entrante pleno, std 24.8. El lienzo base es 242, así que el pico de luminancia es solo +4. Primer cambio en #676 aunque T = 22.55 (el flash empieza ~0.017 s antes). Hoja a 30 fps scratchpad/flash.jpg.",
+     "correccion": "Dueño scripts/build-index.mjs (tipo flash): poner un velo blanco #ffffff a opacidad 0.85-1 en 1 fotograma (pico real, p. ej. 22.567) entre el apagado del saliente y la aparición del entrante, para que el golpe de luz se vea y no solo se oiga; y alinear el inicio a T = 22.55 (no antes). Solo si el diseño admite un blanco puro sobre la paleta crema; si no, dejarlo como está: no es un defecto visible."
+    },
+    {
+     "cuadro": "transicion:02->03",
+     "t": "6.67-7.50",
+     "gravedad": "baja",
+     "que": "El corte no cae 'en la acción' como pide la regla 13 del plan: el saliente queda 0.68 s sin movimiento relevante (la diferencia cae bajo 0.3 desde 6.90) y el entrante arranca con el caret '.' y filas tenues (std 10). Es una cola de lectura planeada, no un fallo, pero el corte aterriza sobre un cuadro de poca energía.",
+     "evidencia": "Último movimiento del saliente a 6.67 s; diferencia 0.02-0.17 entre 7.03 y 7.33; salto del corte #221 (7.367) = 10.6, luego 1.25. Primer fotograma de 03 a resolución completa (scratchpad/m/c3_7.367.png): solo '.' + caret azul, la fila 'Mendoza Ríos Héctor' opaca y las otras al ~40 %. Cola quieta 6.90-7.37 (0.47 s).",
+     "correccion": "Dueño 02-minutos: añadir un microevento sin información nueva en 7.15-7.30 (latido del halo dorado o empuje 1.10 -> 1.14 con power2.in) para que el corte caiga con movimiento. En 03-tarde: que el titular entre ya con '…y' en el fotograma 0 (hoy '.'), de modo que el primer fotograma tenga texto legible; sin alargar la cola de lectura de 02 (6.65 + 0.7 = 7.35)."
+    },
+    {
+     "cuadro": "transicion:08->09",
+     "t": "29.25-29.60",
+     "gravedad": "baja",
+     "que": "El whip es muy breve (2.5 fotogramas útiles de 7.5 nominales por el ease expo.inOut) y el entrante llega con la gráfica vacía: ejes y 'Límite 20 %', sin puntos hasta 29.55 s ni titular hasta 31.75 s. Se lee bien, pero el héroe aparece 0.3 s después.",
+     "evidencia": "Diferencias: 29.267 = 0.32, 29.30 = 4.2, 29.333 = 10.2, 29.367 = 19.3 (saliente desplazado y borroso), 29.40 = 12.7 (entrante entrando por la izquierda, título 'smo semanal' recortado), 29.433 = 3.8 (asentado). Entre 29.43 y 29.55 el contraste es std 10-11 y la diferencia < 0.6; primer punto azul a 29.55. Hoja a 30 fps scratchpad/whip.jpg.",
+     "correccion": "Dueño 09-analitica: dibujar el primer punto y su etiqueta '8 %' en local 0 (bajo el whip) en vez de a 0.30 s, de modo que la gráfica no llegue vacía; y subir la duración efectiva del whip a 0.30 s con power4.inOut (más fotogramas de desenfoque) si se quiere que se perciba el barrido. Owner del tipo: build-index.mjs."
+    },
+    {
+     "cuadro": "10-alumno",
+     "t": "33.63-35.15",
+     "gravedad": "baja",
+     "que": "La cuadrícula de 'Tus clases' del teléfono se queda como rejilla gris vacía durante ~1.5 s tras el wipe; la regla 3 del plan prohíbe esqueletos grises al arranque. El resto del cuadro (contador, titular en cascada) sí tiene eventos.",
+     "evidencia": "v2/revision/tiras/internos-10.jpg: tiles 33.65-35.15 s con 33 celdas grises, primeras celdas coloreadas a 35.15 s; contador 0 -> 88 % de 33.63 a 34.65. Diferencia < 0.3 en 34.27-34.77 y 35.30-35.73.",
+     "correccion": "Dueño 10-alumno: colorear en cascada las primeras filas (3 por 0.1 s) desde 33.9 s en lugar de 35.15 s, o hacer que el teléfono llegue con las 2 primeras filas ya coloreadas; mantiene la identidad del plan sin esqueleto gris."
+    },
+    {
+     "cuadro": "global",
+     "t": "0.00-7.35",
+     "gravedad": "baja",
+     "que": "Los primeros 7 s concentran 4 de los primeros 5 gestos de cámara en zoom hacia adentro: empuje de 01 (0-1.66 s, 1.00 -> 1.12), snap de 01 a 2.50 s, la transición zoom in 01->02 (3.20-3.50) y el snap de 02 a 6.43 s. A partir de 7.35 los gestos cambian (squeeze, iris, whip, tilt, pan, wipe), así que la queja de 'se repiten los zooms' solo se sostiene en esta apertura. Juicio mío: puede ser intencional como escalada de la apertura.",
+     "evidencia": "Picos de diferencia por fotograma fuera de transiciones: 1.70 (9.1), 2.53 (15.6), 6.43 (9.4); transición 3.233-3.467 con diferencia 20-27. Después, el siguiente gesto fuerte es el snap de 05 a 14.73. Sin snap del mismo tipo vecino: 02 usa snap a 6.43 y 01 a 2.53, separados por la transición zoom in.",
+     "correccion": "Dueño 02-minutos (cam[2], snap 1.00 -> 1.10 a 3.20 s local = 6.40 s abs): sustituirlo por golpe lateral/rotación (+-1.5 grados con x +-18 px, 0.10 s power4.out) sobre el mismo golpe sonoro, de modo que 01 -> 02 solo tenga la transición como zoom y el slam de '2 h 30' no repita el gesto. Requiere actualizar frames[].cam de 02 en el plan y el recuento de 7 snaps a 6."
+    },
+    {
+     "cuadro": "global",
+     "t": "19.50-20.13, 25.07-25.67, 32.75-33.40, 36.13-36.87",
+     "gravedad": "baja",
+     "que": "Colas de lectura cuyo tramo final solo trae un cursor o nada: 06 arranque (0.63 s con solo dígitos y filas pequeñas), 07 cola con cursor (0.6 s), 09 cola (0.65 s) y 10 cola (0.73 s). Dentro de lo permitido por el plan, pero son los remanentes de la queja de 'se ve lento'.",
+     "evidencia": "Tramos con diferencia media < 0.3: 19.50-20.13, 21.77-22.13, 26.50-26.80, 33.17-33.47, 34.27-34.77, 36.13-36.87 (6.2 s en total = 13.8 %). Frases de pago legibles 0.7-1.1 s; la 07 'Tú decides los casos dudosos.' completa desde 24.55 s hasta 25.6 s = 1.05 s frente a un mínimo de 0.7 s.",
+     "correccion": "Candidatos a recortar 0.2-0.3 s la cola sin romper la lectura mínima: 07-revision (cola de 1.05 s de lectura) y 10-alumno (0.2 s); en 06 añadir un evento a 19.55-19.75 s (fila de 'Últimos registros' o tick del contador) para que el arranque no tenga el hueco de 0.63 s. El tiempo ganado se reparte en el plan sin alargar el total."
+    }
+   ]
+  },
+  {
+   "revisor": "ritmo-dinamismo",
+   "veredicto": "aprobado_con_cambios",
+   "resumen": "La v2.1 resuelve de forma clara la queja de \"se ve lento\": 3.1 % de tiempo lento (v1: 25.5 %), 0 tramos muertos (v1: 7 tramos, 9.1 s), el mayor tramo lento mide 0.8 s (v1: 2.8 s), un evento visual cada 0.65 s de media (v1: 1.07 s) y máximo 1.4 s entre eventos (v1: 3.7 s). Ese 1.4 s ocurre en dos sitios: el cierre, que es una retención deliberada de 1.65 s, y el hueco de F12 (ver M1). Con los tweens reales del timeline, la cámara nunca pasa de 1.03 s sin un movimiento (v1: 9 s), salvo la retención final del cierre. Los zooms ya se perciben: 7 snaps de +8 a +11 % medidos en el video, frente al 1-4 % de la v1. No encuentro ningún defecto \"alto\". Quedan 6 puntos medios y 4 bajos. Los medios son: (1) una pausa casi congelada de 0.9-1.0 s en F12 sobre una frase ya vista; (2) una meseta de 0.6-0.9 s al final de casi todos los cuadros (leer-y-cortar), que da un pulso regular; (3) los tres combos snap +9-11 % y pull-back de F5, F7 y F9 son casi idénticos y caen cada 6.6-7.7 s; (4) los primeros 11 s solo tienen empujes hacia adentro, hasta que F4 hace el primer retroceso; (5) hay 4.9 s sin ningún cambio de escala (31.8-36.8, F9 final y F10), porque el pull-back de F10 queda oculto bajo el wipe; (6) F6 tiene una calma de 0.7 s justo después del match cut. La métrica \"ráfagas\" de v1 se satura en v2 (el piso de energía supera 0.30 casi siempre y todo cuenta como una sola ráfaga, con \"máximo 8.6 s\"). No la uso como evidencia: la comparación válida es por picos con prominencia (0.65 s de media) y por tramos lentos.",
+   "metricas": [
+    "Misma métrica que v1 (15 fps, 320x180 gris, ventanas de 0.1 s, umbral lento 0.30). Duración del video: 45.07 s.",
+    "% lento (<0.30 sostenido >=0.6 s): v1 25.5 % (14.3 s) -> v2.1 3.1 % (1.4 s). v2.0 daba 4.4 %.",
+    "Tramos lentos: v1 7 tramos muertos (>=1.0 s) y 9.1 s en total -> v2.1 0 muertos y 2 tramos lentos: 40.4-41.0 (0.6 s, F12) y 43.8-44.6 (0.8 s, cierre, retención deliberada).",
+    "Mayor tramo lento: v1 2.8 s (38.0-40.8, F9) -> v2.1 0.8 s (43.8-44.6).",
+    "Con umbral 0.5 y >=0.9 s: solo 40.4-41.3 (F12, 0.9 s, energía media 0.14) y 43.5-44.7 (cierre, 1.2 s).",
+    "Ventanas <0.3: v1 35.7 % -> v2.1 17.6 %. Ventanas <0.5: 45.9 % -> 29.6 %. Mediana 0.58 -> 1.13 (0.99 sin los 0.5 s posteriores a cada transición). P25 0.18 -> 0.42. P10 0.07 -> 0.20.",
+    "La energía media sube de 1.78 a 3.77, pero esa cifra está inflada por flash, whip y cortes. Por eso uso mediana y percentiles.",
+    "Eventos visuales (picos con altura >=0.5 y prominencia >=0.3): v1 53 -> v2.1 67. Intervalo medio 1.07 s -> 0.65 s, mediano 0.90 -> 0.60 s, máximo 3.7 s -> 1.4 s. Hay 14 intervalos de 0.9-1.4 s. Los de 1.4 s son 40.0-41.4 (F12) y 43.3-44.7 (cierre, retención deliberada).",
+    "Distribución por cuadro, energía mediana (media): F1 1.19 (1.98), F2 0.81 (3.22), F3 0.84 (2.26), F4 2.19 (4.55), F5 3.36 (9.19), F6 1.13 (3.71), F7 1.04 (2.40), F8 5.52 (6.25), F9 1.23 (2.36), F10 0.79 (3.00), F11 0.85 (3.04), F12 0.39 (1.78). Los cuadros más tranquilos son F12, F10, F2, F3 y F11. Todos tienen 0 s lento salvo F12 (1.4 s).",
+    "Cámara medida en el video (flujo óptico LK, 30 fps) y cruzada con los tweens reales *-world de v2/sfx-cues.json: snaps de escala en 2.50 (+8.0 %), 6.40 (+8.8), 14.70 (+8.1), 16.90 (+8.9), 23.53 (+11.0), 31.27 (+10.7) y 37.80 (+8.0). Pull-backs en 11.47-11.90 (-10.3 %), 17.33-17.50 (-8.4), 19.1-19.3 (match), 23.83-24.00 (-9.6), 31.53-31.77 (-23.4) y 40.05-40.6 (-14.9). Empuje de F1 +14 % en 1.7 s. Dolly de F9 +13.7 % en 1.75 s. Pans medidos: F2 -160 px, F4 -142 px, F6 -78 px, F7 -78/-46 px, F9 -90 px.",
+    "Mayor tramo sin ningún tween de cámara (excluida la retención final de 1.65 s en 43.4-45.05): 1.03 s (17.7-18.73, F5). Otros tramos de 0.9-1.0 s: 20.45-21.45 (F6), 22.55-23.55 (F7, bajo el flash), 33.8-34.75 (F10), 40.5-41.45 (F12). En v1 el máximo era de 9 s.",
+    "Mayor tramo sin cambio de escala (con pans y tilts de por medio): 31.9-36.7 (4.9 s), 24.2-27.6 (3.5 s), 19.5-22.4 (3.0 s), 3.7-6.3 (2.6 s), 12.0-14.6 (2.6 s). Esta medición es aproximada porque el flujo óptico queda contaminado por el movimiento del contenido.",
+    "Lo que SÍ está bien: ningún tramo muerto >=1.0 s. Los snaps de +8-11 % se perciben y caen sobre golpes. Hay una familia variada de gestos: whip -677 px en 16.1, match zoom en 18.8-19.3 con pull-back, tilt-kick, recoil de F12 y zoom-out de transición en 36.85. Los cortes se hacen en movimiento (F11 -> F12 continúa el empuje). El tecleo y las cascadas mantienen el pulso entre snaps. Las 2 primeras secuencias (F1-F2) arrancan con evento a <=0.3 s y se ven vivas en las tiras."
+   ],
+   "hallazgos": [
+    {
+     "cuadro": "12-cierre",
+     "t": "40.4-41.4",
+     "gravedad": "media",
+     "que": "Pausa de ~1.0 s con el cuadro prácticamente congelado sobre \"Pasa lista en segundos.\", una frase que el espectador ya vio en F5. Es el hueco más largo sin evento fuera del cierre.",
+     "evidencia": "Energía de 0.0-0.3 durante 40.4-41.3 (media 0.14, la mitad de las ventanas <0.05; es el único tramo <0.30 sostenido fuera del cierre). El intervalo entre picos de 40.0 a 41.4 mide 1.4 s. Los tweens muestran cámara solo hasta 40.5 y el siguiente movimiento en 41.45. En v2/revision/ritmo/F12lento.jpg (40.3-41.4, paso 0.1 s) el texto no se mueve y solo crece el subrayado azul. La marca de lectura está en 40.55 y el cut-lift ocurre en 41.4: la frase está leída desde 40.45 y el espectador espera ~0.9 s.",
+     "correccion": "Cuadro 12 (dueño de 12-cierre). (a) Adelantar el barrido del subrayado a 40.30-40.65 en lugar de 40.8-41.05. (b) Añadir un micro-empuje 1.00 -> 1.03 (power2.in, 40.65-41.40) que llegue con velocidad al blur-and-lift, igual que F11 empuja hacia el corte. (c) Si el plan lo permite, recortar el cuadro 0.2-0.3 s: cut-lift en 41.15 y arrastrar el resto. No tocar el cierre de 1.65 s."
+    },
+    {
+     "cuadro": "global",
+     "t": "6.6-7.35, 9.75-10.45, 13.65-14.25, 18.25-19.05, 21.8-22.55, 24.7-25.6, 28.5-29.25, 32.55-33.4, 36.25-36.85, 39.4-40.05, 40.55-41.4",
+     "gravedad": "media",
+     "que": "Casi todos los cuadros terminan con la misma meseta de lectura: se anima, se detiene durante 0.6-0.9 s sin cámara y se corta. Suma ~8 s (18 % del video) y da un pulso regular de unos 3.5 s, que atenúa la sensación de dinamismo que pide la queja.",
+     "evidencia": "Duración de la lectura (marca de lectura en v2/sfx-cues.json hasta el inicio de la siguiente transición): F2 0.70 s, F3 0.70, F4 0.61, F5 0.80, F6 0.75, F7 0.90, F8 0.75, F9 0.85, F10 0.60, F11 0.65, F12 0.85. La energía en esas mesetas es 0.1-0.9 (F7 24.8-25.55: 0.9 0.7 0.6 0.4 0.4; F9 33.0-33.4: 0.7 0.0 0.0; F10 36.2-36.7: 0.2 0.1 0.2 0.3 0.3). En v2/revision/ritmo/tira-F07.jpg los fotogramas 24.80-25.55 son prácticamente iguales (solo se mueve el cursor). Ninguna es un defecto por sí sola (son lecturas deliberadas), pero juntas forman un patrón.",
+     "correccion": "En los cuadros con frase corta (07 \"Tú decides los casos dudosos\" 0.90 s, 09 0.85 s, 05 0.80 s) bajar la lectura a ~0.60-0.65 s adelantando la transición o, mejor, añadiendo una contramarcha de cámara que arranque 0.2 s antes del corte (el cuadro sale en movimiento, como ya hacen 11 y 03). Alternativa de bajo coste: dar a la última palabra clave un acento de ~0.15 s (pulso de escala 1.00 -> 1.02 -> 1.00 o un barrido de subrayado) en el centro de la meseta."
+    },
+    {
+     "cuadro": "transicion:05->09 (cuadros 05, 07, 09)",
+     "t": "16.90-17.50, 23.53-24.00, 31.27-31.77",
+     "gravedad": "media",
+     "que": "El combo \"snap-in rápido y pull-back\" se repite casi idéntico tres veces, separadas 6.6 y 7.7 s: es el zoom que la persona dueña dice que \"se repite\". En total hay 7 snaps de +8 a +11 % con la misma envolvente (0.16 s, power4.out), así que la amplitud no varía.",
+     "evidencia": "Flujo óptico en el video: F5 16.90 (+8.9 %) y 17.33-17.50 (-8.4 %); F7 23.53 (+11.0 %) y 23.83-24.00 (-9.6 %); F9 31.27 (+10.7 %) y 31.53-31.77 (-23.4 %, que incluye el regreso desde el dolly). Snaps de las 7 instancias: +8.0, +8.8, +8.1, +8.9, +11.0, +10.7, +8.0 %. Los tweens world confirman 23.55-23.71 / 23.85-24.25 en F7 y 31.27-31.43 / 31.55-31.95 en F9. F7 y F9 tienen exactamente la misma forma: snap sobre el golpe, pull-back de ~0.4 s, pan lateral posterior.",
+     "correccion": "Cuadro 09 (dueño de 09-analitica): sustituir el snap 1.14 -> 1.28 en 31.27 por un gesto de otra familia. Opción 1: snap hacia afuera (arrancar el dolly en 1.14 y golpear a 1.00 con rotación +-1.5 grados) sobre el cruce del 20 %. Opción 2: golpe lateral con x +-140 px, sin escala. Cuadro 07 (dueño de 07-revision): subir el snap de 1.12 a 1.16 o pasarlo a snap-out. Con eso, de los 7 snaps hacia adentro quedan 5 con amplitudes distintas (8, 9, 11, 16 %) y 2 variantes."
+    },
+    {
+     "cuadro": "01-hook, 02-minutos, 03-tarde",
+     "t": "0.0-11.4",
+     "gravedad": "media",
+     "que": "Los primeros 11 s solo tienen empujes y snaps hacia adentro; el primer retroceso llega en F4 (11.47). La dirección es monótona: push-in de F1, snap 2.5, zoom-in de la transición 3.2, snap 6.4, push-in de F3. Dos snaps iguales (2.5 y 6.4) caen en F1 y F2, separados 3.9 s.",
+     "evidencia": "Cámara medida: push +14 % en 0-1.7 s; snap +8.0 % en 2.50; zoom de transición +56.8 % en 3.20-3.57; snap +8.8 % en 6.40; push +6.4 % en 8.2-9.0 (F3). Primer escalado negativo: -10.3 % en 11.47-11.90 (F4); antes solo los -5.4 % de la distensión en 9.53-9.67 (F3), que un espectador no lee como retroceso. Ver v2/revision/ritmo/tira-F01.jpg, tira-F02.jpg y tira-F03.jpg.",
+     "correccion": "Cuadro 02 (dueño de 02-minutos): cambiar el snap de 6.40 por un golpe lateral o un snap-out con rotación (la tarjeta \"2 h 30\" ya trae su impact-hit). Dejar el snap-in solo en F1. Opcional en cuadro 03: sustituir el push final 1.00 -> 1.07 por un retroceso 1.06 -> 1.00 con el golpe de 8.87."
+    },
+    {
+     "cuadro": "10-alumno",
+     "t": "31.8-36.8",
+     "gravedad": "media",
+     "que": "5 s sin ningún cambio de escala visible (el final de F9 y todo F10); la cámara solo hace un tilt-kick de -2.5 grados y un pan de 80 px. El pull-back de arranque de F10 ocurre bajo el wipe y no se ve, y la queja es literalmente \"tarda mucho sin hacer zoom\".",
+     "evidencia": "Cambio de escala medido entre 33.4 y 33.9: +0.5 % (plan: -9.5 %; el wipe de 33.4-33.8 lo cubre). Los tweens world de F10 son 33.4-33.8, 34.75-34.91, 34.91-35.31 y 35.7-36.05, sin escala, y entre 33.8 y 34.75 no hay cámara (0.95 s). Mayor tramo sin zoom medido: 31.9-36.7 = 4.9 s. Ver v2/revision/ritmo/tira-F10.jpg (33.65-34.4: el teléfono llega ya a tamaño final).",
+     "correccion": "Cuadro 10: mover el pull-back de arranque a 33.75-34.15 (después del solape del wipe, ~0.35 s) para que se vea, o añadir un snap 1.00 -> 1.06 con foco al 88 % en 34.75 junto al tilt-kick. Con la cámara actual de 09 esto no repetiría un snap en contiguo (F9 termina en 33.15)."
+    },
+    {
+     "cuadro": "06-vivo",
+     "t": "19.45-20.25",
+     "gravedad": "media",
+     "que": "Calma de ~0.7-0.8 s justo después del match cut dramático: el tablero ya está asentado, la lista \"Últimos registros\" casi vacía y el tanque vacío, y la cámara quieta (el tilt llega en 20.05).",
+     "evidencia": "Energías de 19.55 a 20.05: 0.2 0.0 0.1 0.3 0.2 (<0.30, tramo de 0.6 s que el script de v2 ya marcaba como lento a umbral 0.5: 19.5-20.1, media 0.19). Intervalo entre picos 19.2 -> 20.2 = 1.0 s. En v2/revision/ritmo/F6lento.jpg (19.4-20.5, paso 0.1 s) los cuatro primeros fotogramas son prácticamente iguales; solo aparece una fila tenue al fondo de la lista. Los tweens world de F6 son 19.083-19.55 y 20.05-20.45: entre ambos hay 0.5 s sin cámara.",
+     "correccion": "Cuadro 06 (dueño de 06-vivo): adelantar la entrada de la actividad y el tilt de +1.2 grados de 20.05 a ~19.65, o hacer que las tres primeras filas de \"Últimos registros\" caigan en cascada desde 19.55 con un solo escalón de 80 ms (hoy llegan de una en una hasta 20.4). Alternativamente subir el tilt a 2 grados para que se perciba."
+    },
+    {
+     "cuadro": "07-revision / 08-reportes",
+     "t": "24.7-28.3",
+     "gravedad": "baja",
+     "que": "Pans repetidos en cuadros contiguos: F7 cierra con un pan diagonal (x -90, y -50) y F8 abre con un pan vertical de seguimiento (-190 px) y luego otro pan diagonal (x -160, y -110) en 27.65. En 3.6 s hay tres desplazamientos de la misma familia y ningún cambio de escala (24.2-27.6 = 3.5 s).",
+     "evidencia": "Medido: F7 24.7-24.8 con x -78 / y -46; F8 25.9-26.2 con y -50 / -74 / -45 / -23; F8 27.1-27.4 con x -131, y +42 y 27.6-28.1 con rotación -1.7 grados, x +23, y -23. Tweens world de 07 y 08: 24.7-25.1, 25.95-26.5, 27-27.65, 27.65-27.81 y 27.81-28.25. Entre 26.5 y 27.0 el cuadro queda casi quieto (energía 0.3-0.6, F8z.jpg).",
+     "correccion": "Cuadro 07: sustituir el pan diagonal final por un empuje sobre el titular (1.00 -> 1.05). Cuadro 08: el segundo pan (27.65) por un snap sobre el clic de \"Exportar\"; así F8 no repite el gesto de F7."
+    },
+    {
+     "cuadro": "03-tarde",
+     "t": "7.35-8.4",
+     "gravedad": "baja",
+     "que": "El arranque tras el corte seco es de baja energía durante ~0.9 s: tecleo, barras que crecen y un tilt de apenas 1 grado. La cámara de F3 apenas se nota hasta el golpe de 8.87.",
+     "evidencia": "Energías de 7.5 a 8.4: 0.3 0.7 0.2 0.5 0.3 0.4 0.4 (<0.8 durante 0.9 s, media 0.42). Rotación medida 7.4-7.5 de -0.7 y -0.3 grados (el plan pedía 0 -> -1.5 grados en 0.5 s). Sin cámara perceptible en 7.6-8.6 (1.03 s). Ver v2/revision/ritmo/tira-F03.jpg.",
+     "correccion": "Cuadro 03: subir el tilt inicial a -3 grados y empezar el empuje que acelera en 7.70 en vez de 8.25, de modo que la cámara se perciba durante el tecleo."
+    },
+    {
+     "cuadro": "05-camara",
+     "t": "17.7-18.75",
+     "gravedad": "baja",
+     "que": "Tras terminar el titular \"Pasa lista en segundos.\" hay ~0.7 s con la lista atenuándose y sin cámara, antes del último empuje de 18.73.",
+     "evidencia": "Energía de 17.6 a 18.5: media 0.73 (<1.0 durante 0.9 s). Tweens world: 17.35-17.7 y 18.73-18.97, sin cámara entre ambos (1.03 s, el mayor tramo sin tween del video). El plan dice que la lectura real es 0.60 s hasta que el titular sale de cuadro.",
+     "correccion": "Cuadro 05: adelantar el último empuje 0.25 s (a 18.48) o añadir un micro-pulso de escala 1.00 -> 1.03 en el chip \"listo en 6 s\" (18.25)."
+    },
+    {
+     "cuadro": "12-cierre",
+     "t": "43.4-45.05",
+     "gravedad": "baja",
+     "que": "La retención final de 1.65 s es la parte más quieta del video: energía media 0.19-0.27 y sin cámara. Es deliberada (cierre legible), pero es el único tramo largo sin ningún movimiento visible de cámara.",
+     "evidencia": "Energía 43.5-45.0: media 0.27 (<1.0 durante 1.5 s); tramo lento 43.8-44.6 de 0.8 s. El último tween world termina en 43.4. Ver v2/revision/ritmo/tira-F12.jpg (43.55-44.8, fotogramas casi idénticos).",
+     "correccion": "Cuadro 12: opcional, una deriva casi imperceptible 1.00 -> 1.012 (power1.inOut, 43.4-45.05) y el degradado inferior con movimiento continuo para que el cuadro \"respire\". No acortar la retención."
+    },
+    {
+     "cuadro": "global",
+     "t": "0.0-45.07",
+     "gravedad": "baja",
+     "que": "Limitación de la medición: la métrica de ráfagas de v1 se satura en v2 y la energía media está inflada por transiciones (flash, whip, cortes). Un revisor que compare solo ráfagas o media sacaría una conclusión equivocada: 17 ráfagas, intervalo medio 2.79 s y máximo 8.6 s, peor que en v1 en apariencia.",
+     "evidencia": "El umbral de ráfaga (energía >=0.3 de forma continua) casi nunca baja en v2 (piso de energía mayor), así que 20.1 -> 28.7 cuenta como una sola ráfaga aunque contenga 11 picos (6.5, 8.7, 5.6, 6.2, 6.5, 6.0, ...). Por picos con prominencia: 67 eventos, intervalo medio 0.65 s y máximo 1.4 s. Archivos: v2/revision/ritmo/motion-v21.json (métricas por 0.1 s) y cam21.json (cámara por fotograma).",
+     "correccion": "No requiere cambios en los cuadros. Para futuras comparaciones usar el % lento, la mediana y p25, y los picos con prominencia (no las ráfagas por umbral fijo) en audit/ritmo/motion-v2.py."
+    }
+   ]
+  },
+  {
+   "revisor": "Sonido y sincronía (renders/video-v2.1.mp4)",
+   "veredicto": "aprobado_con_cambios",
+   "resumen": "El sonido está técnicamente muy bien resuelto: los 214 audios de index.html caen en el MP4 exactamente donde se montaron (desfase de correlación 0.000 ms en los 214, error de montaje 0 ms) y la mezcla no satura. Lo que falla es la ubicación de unos pocos cues respecto a lo que se ve. De 30 cues contrastados con los fotogramas, 24 quedan a 33 ms o menos del primer cambio visible y 6 no. Cuatro de esos 6 son defectos que un espectador notaría: el chime con el sparkle (43.15 s) suenan 183 ms antes de que el barrido de brillo entre en SUSAN, el blip (43.85 s) 150 ms antes del brillo de la pastilla, el tap de 10-alumno (36.3 s) 133 ms antes de que se resalte una celda, y varios taps sin evento visible. verify-sfx.mjs --video da 213/214 cues dentro de ±33.3 ms. El único FALLA (05-camara-8, ping-note5) es un falso positivo del verificador: el nivel en su banda es idéntico al de la mezcla ideal y rho es 0.905. Quedan además 5 cues que suenan una trama completa antes de su primer cambio visible (30–33 ms, en el límite) y 10 frases con lectura corta que el verificador marca como error en su paso (b).",
+   "metricas": [
+    "verify-sfx.mjs --video renders/video-v2.1.mp4 (salida en v2/revision/verify-sfx-v21.out.txt y .json): (a) biblioteca OK, 58 archivos únicos y 14 alias; (b) etiquetas<->tween FALLA con 10 errores 'lectura corta' y 57 avisos de tween hero sin sonido; (c) montaje OK, 214 audios, error de aritmética 0 ms; (d) render FALLA con 1 error. 213/214 cues dentro de ±33.3 ms; 206 medidos por correlación (error medio 0.001 ms, máximo 0.006 ms, 206/206 a <= 5 ms) y 8 estáticos (anclaje fin).",
+    "El único cue fallido, 05-camara-8 ping-note5 a 15.42 s (rho 0.41, ganancia 0.21), es falso positivo: mi correlación sobre el residuo (render menos el resto de los cues) da lag 0.000 ms y rho 0.905. La energía de la banda 3.95 kHz es -28.4 dB en el render e idéntica a la ideal (-28.4 dB). Los 7 pings de 14.88 a 15.96 s coinciden en banda con la mezcla ideal con una diferencia <= 0.2 dB. Se oyen todos.",
+    "Verificación independiente con mi propio código (numpy/scipy): decodifiqué el MP4 a 48 kHz y reconstruí la mezcla ideal con los 214 cues (corr render/ideal 0.9982, ganancia 0.991; el residuo de -24.5 dB es ruido AAC). Correlación cruzada de cada cue contra su plantilla sobre el residuo aislado, ventana ±120 ms: lag 0.000 ms en los 214 y rho mínimo 0.905. Cruce del 50 % del pico: desviación <= 0.8 ms en los percusivos (p95 2.05 ms). Los 2 cues de ataque lento, click-soft2 (-15.5 ms) y soft-in (-2.4 ms), no son error: la correlación da 0.000 ms. Archivos en v2/revision/son/xcorr-214-cues.json y audio-30-cues.json.",
+    "30 cues contrastados con fotogramas (hojas v2/revision/son/h00-h11.png y k00-k03.png, ventana n-3..n+4 fotogramas). Convención: error = sonido menos primer fotograma con cambio visible. 0 a 3 ms: snap 01-hook-20 (2.50 s, el punto del tecleo aparece en el fotograma 75), pop 02-minutos-5 (+3 ms), check 05-camara-21 (0), stamp 12-cierre-1 (-3), sparkle 04-intro-8 (-3), sparkle 10-alumno-15 (-3). 10 a 23 ms: ping 05-camara-8 (-13), stamp 03-tarde-22 (+13), pop 06-vivo-5 (+13), flash main-6 (+17, el destello empieza en 22.533), sparkle 11-confianza-20 (-10), check 07-revision-9 (-23). Con 17 ms: thud main-2 (corte en 7.367), impact-hit 04-intro-7 (punch en 11.667), snap 10-alumno-11, impact-lite 12-cierre-10 (salto en 42.167), shutter main-5 (corte en 19.067).",
+    "5 cues quedan a 30-33 ms, el sonido un fotograma antes del primer cambio, justo en el límite de 33.3: click-soft2 07-revision-7 (23.40, anillo en 23.433), impact-hit 09-analitica-10 (31.27, zoom en 31.30), error-trim 09-analitica-25 (32.50, rosa en 32.533), lock 11-confianza-7 (37.80, aro en 37.833), pop-2 03-tarde-21 (9.10, 'se' en 9.133). Causa común: el tween arranca en el fotograma cuyo progreso es 0 o entre dos fotogramas, y el primer cambio es el siguiente.",
+    "6 cues fuera de tolerancia o sin evento visible: chime-trim y sparkle-short 12-cierre-15/14 a 43.15 s (barrido visible desde 43.333: -183 ms); blip 12-cierre-16 a 43.85 s (brillo de pastilla visible 44.00-44.10: -150 ms); tap 10-alumno-19 a 36.30 s (celda resaltada a 36.433: -133 ms); tap 12-cierre-2 a 40.85 s, tap 03-tarde-23 a 9.90 s y soft-in 04-intro-17 a 13.89 s (sin cambio visible en 8 fotogramas: sonido sin evento).",
+    "Riser a impacto: 02-minutos-15/16 (6.40 s), 09-analitica-9/10 (31.27 s) y 12-cierre-9/10 (42.15 s). El riser termina en data-start + duración = tCue, igual que el ataque del impacto, con 0.000 ms de diferencia. Sube de -29.9 a -18.5 dB RMS en los últimos 400 ms (+11 dB, 02-minutos) y de -38.8 a -20.6 dB (12-cierre, +18 dB). El impacto sube 3.3 dB (RMS 20 ms: -16.8 a -13.5 dB). En 12-cierre, f1264 es casi estático (diff 0.11) y f1265 salta (diff 2.43): el impacto cae sobre el golpe visual.",
+    "Transiciones: whoosh-l main-3 pico 10.65 s con el mayor cambio de imagen en 10.667; swipe main-8 pico 29.375 con el cambio en 29.367; shutter main-5 en 19.05 con el corte en 19.067; whoosh-rev + impact-hit en 40.04/40.05 con el corte en 40.067. Los whooshes caen dentro de la ventana de su transición; los zoom-in/out anclan en el fin o inicio de su tween (main-1, main-10, 04-intro-5).",
+    "Mezcla (mix.wav de 48 kHz decodificado del MP4): pico de muestra 0.705 (-3.0 dBFS), pico verdadero 4x -2.81 dBFS (ebur128: -2.8 dBFS), 0 muestras >= 0.99 y 0 >= 0.9. Sonoridad integrada -19.9 LUFS, LRA 4.8 LU, RMS medio -24 dB. Sin saturación ni clic digital: los saltos de 0.47-0.68 entre muestras son ataques de pings agudos de 4-6 kHz, no discontinuidades. DC -7.5e-5. L/R correlación 0.99 y compatibilidad mono (-24.02 dB frente a -24.0 dB por canal).",
+    "Dinámica: segundos más fuertes -17.2 dBFS (t=11 s, impacto) y -19.3 dBFS (t=31 s). Salto máximo RMS entre ventanas de 1 s completas: 9.1 dB (30 a 31 s), seguido de 8.8 dB (15 a 16 s) y 8.4 dB (43 a 44 s). Ningún salto supera 12 dB. Silencios por debajo de -50 dBFS en ventanas de 50 ms: 15 tramos, el mayor de 0.65 s (28.60-29.25). Ningún silencio >= 1.0 s. El hueco entre cues mayor es 1.02 s (21.53 a 22.55 s), con colas audibles en medio.",
+    "Polifonía: máximo 4 simultáneos medidos por verify-sfx (t=14.7 s); por data-duration hay hasta 5 solapados a 11.137 s (zoom-out + riser + impacto + pop). 0 cues atenuados. 10 cues en el segundo 8, 20 y 31 (máximo por segundo). Rango de volumen de cue 0.2-0.8.",
+    "Tecleo: 4 frases horneadas (01-hook 19 teclas, 03-tarde 7, 05-camara 11, 11-confianza 11). Ritmo 7.7-8.5 teclas/s, intervalos de 79 a 220 ms (p. ej. 120,120,159,120,120,159,220,79,160,99...), 8 timbres de tecla más key-back y key-enter, volumen 0.195-0.33. Suena a escritura humana irregular, no a ametralladora. Cubre el tecleo visible de 0.04 a 2.50 s en 01-hook.",
+    "Repeticiones idénticas seguidas, excluyendo teclas: solo ticks. 16 pares tick-N/tick-N consecutivos a 84-124 ms (06-vivo 20.452/20.539/20.625 son tick-1 x3 a 86 ms; 10-alumno 33.752/33.839/33.925 tick-1 x3). Un doble tick-4 a 27 ms (09-analitica-22/23 a 32.273/32.300). Pops, pings, whooshes, clicks e impactos no repiten archivo seguidos.",
+    "Cobertura: 214 audios (210 cues normales y 48 teclas), 4 risers/impactos emparejados, 3 whooshes de cuadro más 9 de transición. 57 tweens hero sin sonido (aviso del verificador; el plan los declara intencionados: pull-backs cortos y regresos de cámara).",
+    "Entrada y salida: audio de 45.056 s frente a video de 45.067 s (1352 fotogramas), start_time 0, sin desfase. Primera muestra 0.026 con rampa suave (sin clic de arranque). Cola final sin ruido (último 50 ms a 0). AAC 4.96 Mb/s, mezcla estéreo 48 kHz."
+   ],
+   "hallazgos": [
+    {
+     "cuadro": "12-cierre",
+     "t": "43.15 s (visible desde 43.333 s)",
+     "gravedad": "alta",
+     "que": "El chime-trim y el sparkle-short (12-cierre-15 y 12-cierre-14) suenan 183 ms antes de que el barrido de brillo entre en SUSAN.",
+     "evidencia": "Ambos cues están en tCue 43.15, que es el inicio del tween 12-cierre-shine (t0 43.15, t1 43.60). El audio está sincronizado con el montaje (lag 0.000 ms). Pero en k02/h11.png (fotogramas f1291-f1306) la imagen está quieta de 43.033 a 43.300. El brillo blanco sobre las letras aparece en f1300 (43.333). La diferencia de fotograma sube de 0.24 (f1299) a 1.34, 2.48 y 3.60 en f1300-1302 (región central: 0.26, 4.25, 9.28, 12.5). Es el remate de marca del video y el chime suena sobre una imagen quieta.",
+     "correccion": "Cuadro 12-cierre: o bien cambiar el barrido para que el brillo entre a la primera letra a +30 ms de 43.15 (empezar el gradiente de shine ya sobre el borde izquierdo de SUSAN, sin ease de salida larga), o bien mover las dos etiquetas sfx a T=3.28 local (43.33 s absoluto) y actualizar plan.json."
+    },
+    {
+     "cuadro": "12-cierre",
+     "t": "43.85 s (visible 44.00-44.10 s)",
+     "gravedad": "alta",
+     "que": "El blip (12-cierre-16) suena 150 ms antes del brillo blanco que recorre la pastilla UNACH.",
+     "evidencia": "El blip está en tCue 43.85, que es el inicio del tween 12-cierre-gloss (43.85 a 44.25). La diferencia de fotogramas en la región de la pastilla (y 150-200, x 190-370 de 560x315) es 0.07-0.08 en f1315-f1319 (43.833-43.967) y sube a 0.87, 1.79, 1.83 y 0.93 en f1320-f1323 (44.000-44.100). El frame k02.png (f1312-f1319) muestra la pastilla sin cambio.",
+     "correccion": "Cuadro 12-cierre: mover la etiqueta sfx del blip a T=4.00 local (44.00 s absoluto) y ajustar plan.json, o acortar el delay inicial del gloss para que arranque visible en 43.88."
+    },
+    {
+     "cuadro": "10-alumno",
+     "t": "36.30 s (visible 36.433 s)",
+     "gravedad": "alta",
+     "que": "El tap (10-alumno-19) no coincide con ningún evento visible. El plan lo describe como el botón central de la barra del teléfono que se hunde 4 px, imperceptible a 1920x1080.",
+     "evidencia": "En k00.png (f1086-f1093, 36.200-36.433) la maqueta del teléfono es idéntica. Lo único que cambia es una celda roja del calendario que aparece resaltada con contorno en f1093 (36.433, 133 ms después). La diferencia global de fotograma en f1086-f1089 es 0.16. El cue está a +0.000 ms en el audio.",
+     "correccion": "Cuadro 10-alumno: o mover el tap a T=3.03 (36.43 s) para que acompañe el resalte de la celda, o hacer visible el hundimiento del botón (escala 0.85 con rebote) o eliminar el cue (sin evento visible no debería sonar)."
+    },
+    {
+     "cuadro": "12-cierre",
+     "t": "40.85 s",
+     "gravedad": "media",
+     "que": "El tap (12-cierre-2) suena sin ningún cambio visible: el 'respiro' del marcador azul de 'segundos.' es imperceptible.",
+     "evidencia": "En k00.png (f1222-f1229, 40.733-40.967) la barra azul bajo 'segundos.' ya está presente y no cambia de forma discernible. El tween 12-cierre-bar (40.85 a 41.00) es solo un 'respiro'. El diff global en [t, t+3 f] es 0.31. Es un microevento declarado en el plan para que la lectura de 0.70 s no quede en silencio.",
+     "correccion": "Cuadro 12-cierre: aumentar la amplitud visible del respiro de la barra (alargar y aclarar el marcador) o quitar el tap; en ambos casos reflejar el cambio en plan.json."
+    },
+    {
+     "cuadro": "03-tarde",
+     "t": "9.90 s",
+     "gravedad": "media",
+     "que": "El tap (03-tarde-23) está en el inicio del tween del chip 'Sin derecho a examen', que ya está completo desde 9.5 s: no hay golpe visible.",
+     "evidencia": "En h02.png (f294-f301, 9.800-10.033) el chip está idéntico. El único cambio es el contador de la lista (14.0 a 14.3). El tween 03-tarde-chip 9.90-10.00 es un microrrebote sin amplitud perceptible. Diff global en [t, t+3 f]: 0.65.",
+     "correccion": "Cuadro 03-tarde: o dar al chip un rebote visible (escala 1 a 1.06 a 1) a 9.90 s o quitar el cue tap y anotarlo en el plan."
+    },
+    {
+     "cuadro": "04-intro",
+     "t": "13.89 s",
+     "gravedad": "media",
+     "que": "El soft-in (04-intro-17) suena sobre una imagen estática: no hay evento visual que lo justifique.",
+     "evidencia": "En k02.png (f413-f420, 13.767-14.000) el cuadro es idéntico, incluido el destello de sparkles. El diff global en [t, t+3 f] es 0.33. Diferencia de ataque medida contra la plantilla -2.4 ms: el sonido sí está donde se montó.",
+     "correccion": "Cuadro 04-intro: borrar la etiqueta sfx del soft-in de 13.89 s (04-intro-17) o asociarla a un movimiento visible de la cola de lectura."
+    },
+    {
+     "cuadro": "global",
+     "t": "7.35-40.05 s (5 cues)",
+     "gravedad": "baja",
+     "que": "Cinco cues se disparan exactamente en el inicio del tween y suenan un fotograma completo antes del primer cambio visible. Con 33 ms de adelanto el sonido se acerca al umbral de percepción de sonido adelantado.",
+     "evidencia": "Sonido menos primer fotograma con cambio: 07-revision-7 click-soft2 23.40 s (anillo en 23.433, -33 ms), 09-analitica-10 impact-hit 31.27 s (zoom en 31.30, -30 ms), 09-analitica-25 error-trim 32.50 s (rosa en 32.533, -33 ms), 11-confianza-7 lock 37.80 s (aro en 37.833, -33 ms), 03-tarde-21 pop-2 9.10 s ('se' en 9.133, -33 ms). Hojas h05, h06, h07, h08 y k03.",
+     "correccion": "Cuadros 07-revision, 09-analitica, 11-confianza y 03-tarde: desplazar esos cinco cues +1 fotograma (+0.033 s), o hacer que sus tweens arranquen en fotograma con progreso visible en el primer fotograma. El resto de los cues que probé quedan entre -17 y +17 ms."
+    },
+    {
+     "cuadro": "08-reportes",
+     "t": "28.18 s",
+     "gravedad": "baja",
+     "que": "El check de la exportación suena con la aparición del toast, 70-100 ms antes de que se dibuje la palomita.",
+     "evidencia": "En h06.png el toast 'CSV listo' aparece en f845 (28.167, -13 ms respecto al cue 28.18). El icono pasa de archivo a palomita entre f847 y f849 (28.233-28.300), con el tween path 28.25-28.50 como trazo de la palomita.",
+     "correccion": "Cuadro 08-reportes: mover el check a T=28.25 (inicio del trazo de la palomita), o separar el pop del toast y el check del trazo."
+    },
+    {
+     "cuadro": "global",
+     "t": "6.5-7.2 s, 20.45-34.6 s",
+     "gravedad": "baja",
+     "que": "Los ticks de cuenta repiten el mismo archivo hasta 3 veces seguidas a 86 ms y hay un doble tick-4 a solo 27 ms (suena como un flam).",
+     "evidencia": "06-vivo-9/10/11 tick-1 a 20.452, 20.539, 20.625 s; 10-alumno-2/3/4 tick-1 a 33.752, 33.839, 33.925 s; 09-analitica-22 y 23 tick-4 a 32.273 y 32.300 s (27 ms). 16 pares consecutivos idénticos entre 84 y 124 ms en total.",
+     "correccion": "Cuadros 06-vivo, 10-alumno y 09-analitica: usar los 4 timbres tick-1..4 con una subida más fina (un tono por tick), o alternar pequeña variación de volumen (-1.5 dB), y separar o fusionar el par de 27 ms de 09-analitica."
+    },
+    {
+     "cuadro": "global",
+     "t": "0-3 s",
+     "gravedad": "baja",
+     "que": "El gancho es la parte más baja de la mezcla.",
+     "evidencia": "RMS por segundo: -29.3, -32.8, -29.4 dBFS en los 3 primeros segundos, frente al medio de -24 dB. Hasta 2.5 s solo suenan el soft-in y el tecleo con volúmenes 0.23-0.33.",
+     "correccion": "Cuadro 01-hook: subir el volumen de las teclas a 0.4-0.45 y del soft-in a 0.5 para que el arranque tenga presencia; la mezcla tiene 2.8 dB de pico verdadero libre."
+    },
+    {
+     "cuadro": "global",
+     "t": "toda la mezcla",
+     "gravedad": "baja",
+     "que": "Nivel general bajo para un video de presentación: -19.9 LUFS integrado y pico verdadero -2.8 dBFS.",
+     "evidencia": "ebur128: I=-19.9 LUFS, LRA 4.8 LU, true peak -2.8 dBFS. Pico máximo en 2.50 s y en 11 s. Hay 2.8 dB de margen hasta -0.1 dBFS.",
+     "correccion": "Subir la ganancia global (volumen de cue) +2.5 dB como máximo. mount-sfx.mjs: tope de pico de -1.5 dBFS y regla de pico de mezcla -1 dBFS ya cumple."
+    },
+    {
+     "cuadro": "global",
+     "t": "3.2-40.05 s (10 cortes)",
+     "gravedad": "media",
+     "que": "El verificador marca 10 errores de lectura corta: la frase clave queda completa solo 0.6-0.85 s antes del corte siguiente (mínimo exigido 0.9 s).",
+     "evidencia": "Salida v2/revision/verify-sfx-v21.out.txt, sección (b): 01-hook 0.7 s, 02-minutos 0.7, 03-tarde 0.7, 04-intro 0.61, 05-camara 0.8, 06-vivo 0.75, 08-reportes 0.75, 09-analitica 0.85, 10-alumno 0.6, 11-confianza 0.65. 07-revision y 12-cierre pasan. La sección (b) falla y verify-sfx.mjs sale con código 1.",
+     "correccion": "Plan y cuadros dueños de cada corte: alargar la retención final de cada frase +0.2-0.3 s (cuadros 01 a 11 en plan.json, read_marks) o bajar el umbral --lectura-min a 0.6 de forma explícita si el ritmo rápido es intencional."
+    },
+    {
+     "cuadro": "05-camara",
+     "t": "15.42 s",
+     "gravedad": "baja",
+     "que": "El verificador (d) da FALLA en 05-camara-8 (ping-note5) con rho 0.41 y ganancia 0.21, pero el cue suena bien y en su sitio. Es un falso positivo de verify-sfx-sync.py.",
+     "evidencia": "Mi correlación sobre el residuo aislado: lag 0.000 ms, rho 0.905. Energía en la banda de ping-note5 (3.95 kHz): render -28.4 dB, ideal -28.4 dB, solo cue -28.5 dB. Los 7 pings de 14.88 a 15.96 s coinciden con la mezcla ideal con diferencia <= 0.2 dB. Posible causa: las ventanas de 05-camara-5..11 se solapan (cues a 180 ms, colas de 450 ms) y la ventana de comparación toma la ganancia del vecino.",
+     "correccion": "scripts/verify-sfx-sync.py (propietario de scripts): aislar el cue restando el resto de la mezcla ideal (como v2/revision/residuo.py) o comparar la energía en la banda del cue, no el coeficiente de ganancia en la ventana. Hoy el FALLA bloquea el build con exit 1 sin que haya defecto."
+    },
+    {
+     "cuadro": "global",
+     "t": "toda la mezcla",
+     "gravedad": "baja",
+     "que": "Lo que sí está bien: sin saturación, sin silencios largos, sin saltos de nivel bruscos, mezcla compatible con mono.",
+     "evidencia": "0 muestras >= 0.99, pico verdadero -2.81 dBFS, ningún silencio >= 1.0 s (máximo de 0.65 s por debajo de -50 dBFS), saltos máximos de 9.1 dB entre ventanas de 1 s completas, corr L/R 0.99. 213/214 cues dentro de ±33.3 ms por correlación (0.006 ms máximo en 206), tecleo irregular y humano (79-220 ms), 3 risers terminan exacto en su impacto.",
+     "correccion": "Ninguna. No tocar el montaje ni mount-sfx.mjs; los ajustes de arriba son de plan.json y de los cuadros 12-cierre, 10-alumno, 03-tarde y 04-intro."
+    }
+   ]
+  },
+  {
+   "revisor": "Diseño, íconos y legibilidad (renders/video-v2.1.mp4)",
+   "veredicto": "aprobado_con_cambios",
+   "resumen": "La v2.1 resuelve la queja de los íconos y mejora mucho la legibilidad. Revisé unos 110 fotogramas a 1920x1080 (cada 0.5 s por cuadro, cada read_mark, el último instante útil y las transiciones) más 4 hojas de contacto de transiciones. Los íconos Lucide ahora son grandes, nítidos y consistentes, en tiles estilo StatCard y duotono en los héroes. Los avatares Lorelei son los mismos personajes entre cuadros. Los números cuadran (10x3x5=150 min=2 h 30, 24 inscritos, 21+2+1=24, límite 20 %). La identidad crema/blanco/tinta/azul se respeta y no hay sombras en las tarjetas. No hay defectos de gravedad alta que un espectador note de inmediato. Hay cinco de gravedad media: el disco héroe del cuadro 11 pegado al borde superior y recortado al final, la lista del cuadro 5 cortada por el borde derecho, resplandores multicolor fuera de intro y cierre (05 y 10), el escudo UNACH desvaído frente al FCA en negro, y datos de porcentajes del cuadro 3 que no coinciden con las faltas del cuadro 8. Además hay detalles menores: iris sobre el wordmark, márgenes, mezcla de formatos \"%\" y sombra tenue en la pastilla del cierre. Las frases clave quedan completas y dentro del encuadre en todos los read_marks.",
+   "metricas": [
+    "node scripts/lucide.mjs --verify compositions/frames/*.html --strict: 65 svg con data-lucide, 0 errores (lucide 1.50.0).",
+    "Íconos medidos en pantalla: héroe timer (02) tile de ~190 px con glifo de ~105 px; héroe escudo+candado (11) disco de 300 px con escudo de ~130 px; sparkles (04) ~120 px; tiles de tarjetas de cifra (06) ~77 px con glifo de ~40 px; botones y píldoras (07/08/10) 36-44 px; el menor es el chevron de las píldoras de 08 (~24 px). Trazo 1.75-2.25: ya no hay trazo fino ilegible y es mucho mejor que el 26-30 px / tile 52 px de la v1 (audit/iconos/muestra.png, sección A).",
+    "Avatares Lorelei: recorte circular limpio en los 24 usos revisados. Mismos personajes en 03, 05, 06, 08 y 10: Héctor Mendoza (barba, fondo rosa), Ximena Torres (moño, fondo lila), Camila Vega, Valeria Núñez, Mateo Hernández y Diego Ramírez. No quedan siluetas.",
+    "Tarjetas sin sombra: perfil de píxeles bajo el borde inferior de las tarjetas (02 a 5.55 s, 09 a 33.35 s, 10 a 36.25 s) pasa directo a #f6f4f0, sin degradado de sombra. Única sombra tenue: pastilla del cierre (ver hallazgo).",
+    "Datos coherentes: 02 muestra 10 x 3 x 5 = 150 min y 2 h 30 a la semana. 06 pasa de 24/24 a 21 presentes + 2 retardos + 1 sin registro = 24 (88 % = 21/24). 10 muestra 29 de 33 clases = 88 % con 33 celdas llenas. Límite 20 % en 03, 08 y 09. 09: 17 % en S8, cruza el límite en S11, proyección 22.3 %.",
+    "Copy en español sin faltas: tildes correctas en Administración Financiera, académica, Proyección, Bitácora, límite, Núñez, Ríos y Héctor. 'AUTONOMA' sin tilde es el texto del escudo oficial (imagen), no del copy.",
+    "Frases clave en los read_marks: 2.5 s (01), 6.65 s (02), 9.75 s (03), 13.64 s (04), 18.25 s (05), 21.80 s (06), 24.70 s (07), 28.50 s (08), 32.55 s (09), 36.25 s (10), 39.40 s (11) y 40.55 s (12). En todos la frase está completa y dentro de 1920x1080, incluso con la cámara a su escala máxima (01 a 1.22x, 09 a 1.28x).",
+    "Cierre (12): lockup SUSAN + escudos + pastilla completo y quieto desde 43.40 s hasta 45.05 s (~1.65 s legible).",
+    "Degradado/resplandor multicolor fuera de intro y cierre: visibles en 01 (neblina violeta, 0-3.5 s), 05 (mancha azul-violeta-rosa tras el anillo, 17.1-18.7 s) y 10 (halo azul/rosa/ámbar tras el teléfono, 33.8-37.2 s). Con 11 (halo azul) y 02 (halo ámbar) son 5 de 12 cuadros con glow."
+   ],
+   "hallazgos": [
+    {
+     "cuadro": "11-confianza",
+     "t": "37.3-40.05 (más marcado de 39.5 a 40.05)",
+     "gravedad": "media",
+     "que": "El disco héroe del escudo (300 px) nace pegado al borde superior (margen de ~5 px) y, con el empuje final de cámara (1.08 -> 1.20 y y -70), queda recortado por el borde: se ve un disco cortado arriba antes del corte a 12. Toda la composición va alta: debajo de la última píldora quedan ~170 px vacíos.",
+     "evidencia": "scratchpad/fr/f11_l02.35_a039.20.png: borde superior del disco en y=5 (círculo de x 810-1110, y 5-305). dis/c39.9.png y sheet/s11b.png (39.50-40.03 s): píxeles no-fondo en y=0 en x 700-1200, disco cortado. Medido: min y = 5 (39.3 s), 3 (39.5 s), 2 (39.7 s), 0 (39.9 s). Fondo vacío bajo las píldoras: y 915-1080.",
+     "correccion": "Cuadro dueño: 11-confianza.html. Bajar el hero y la pila ~70-90 px (disco de y 75-375, titular ~y 455, píldoras ~y 640-990) para dejar margen superior >= 70 px a escala 1.2, o reducir el disco a 240 px. Si el empuje final usa foco (960,300), revisar que el disco siga dentro del encuadre a 1.20."
+    },
+    {
+     "cuadro": "05-camara",
+     "t": "15.0-16.1",
+     "gravedad": "media",
+     "que": "Durante el snap-zoom y el seguimiento (escala ~1.09 con foco desplazado), la tarjeta de lista y el anillo quedan cortados por el borde derecho: se leen nombres con chips 'Pr...' truncados y el anillo '5 / 24' tocando el borde. Parece un error de encuadre, no un desplazamiento intencional.",
+     "evidencia": "scratchpad/fr/f05_l00.85_a015.10.png: anillo '2 / 24' cortado en x=1920 y panel de lista en x 1570-1920 sin chips. scratchpad/fr/f05_l01.35_a015.60.png: filas 'Ximena Torres ... Pr', 'Mateo Hernández ... Pr' recortadas en el borde derecho (x=1920).",
+     "correccion": "Cuadro dueño: 05-camara.html. En el tramo de seguimiento (0.63-1.71 s locales, foco 640,450 -> 760,520) añadir una compensación de x/foco para que lista y anillo no pasen del margen derecho, o retrasar la entrada visible de lista/anillo hasta que arranque el whip (1.80 s). Alternativa: que la lista entre ya con la cámara en 1.00."
+    },
+    {
+     "cuadro": "05-camara / 10-alumno",
+     "t": "05: 17.1-18.7; 10: 33.8-37.2",
+     "gravedad": "media",
+     "que": "Resplandores de degradado pastel multicolor (azul, violeta, rosa, ámbar) tras el anillo 24/24 y tras el teléfono. La identidad pide degradado solo en intro y cierre; aquí se ve como una mancha de color fuerte (05) y un halo grande (10) fuera de esos cuadros.",
+     "evidencia": "scratchpad/fr/f05_l03.35_a017.60.png y f05_l04.00_a018.25.png (mancha azul-violeta-rosa de ~550 px). scratchpad/fr/f10_l01.35_a034.75.png y f10_l02.85_a036.25.png (halo azul/rosa/ámbar a la izquierda del teléfono). También halo ámbar en 02 (f02_l02.35_a005.55.png) y violeta en 01 (f01_l02.50_a002.50.png, neblina del plan).",
+     "correccion": "Cuadros dueños: 05-camara.html y 10-alumno.html. En 05, sustituir la mancha por un halo de un solo tono (verde 10-12 % para el anillo 24/24, que es lo que celebra el momento) o bajar su opacidad a <= 0.18; en 10, un halo azul 8 % sin rosa/ámbar. Si se quiere conservar el 'pulso de clímax' de 05, limitarlo a 0.3 s."
+    },
+    {
+     "cuadro": "12-cierre",
+     "t": "43.0-45.05",
+     "gravedad": "media",
+     "que": "Los dos escudos tienen peso visual muy distinto: el de UNACH es oliva fino, de bajo contraste y se desvanece sobre el degradado, mientras que el de FCA es negro sólido. En el lockup final se leen como dos marcas ajenas, y el de UNACH es el más débil. La pastilla 'UNACH · FCA C-I' proyecta además una sombra suave.",
+     "evidencia": "scratchpad/fr/f12_last.png y dis/c12pill.png (recorte x 540-1380, y 560-760): escudo izquierdo oliva (~#8a8450) con líneas finas, derecho negro (#000). Sombra difusa bajo la pastilla visible en el recorte ampliado.",
+     "correccion": "Cuadro dueño: 12-cierre.html. Aplicar el mismo tratamiento monocromo a ambos (filter: grayscale(1) contrast(1.4) brightness(.2), o tinta #1e1919) y subir el de UNACH a la misma altura óptica; quitar el box-shadow de la pastilla (usar solo borde blanco)."
+    },
+    {
+     "cuadro": "transicion:03->04 / dato coherencia 03 vs 08 vs 10",
+     "t": "9.75-10.45 (03), 26.45-28.50 (08), 34.75-36.8 (10)",
+     "gravedad": "baja",
+     "que": "Los porcentajes del cuadro 3 no corresponden a las faltas del cuadro 8, y el total de clases tampoco coincide con el del teléfono. En 03: Héctor 21.6 %, Valeria 17.7 %, Mateo 16.2 %, Diego 13.2 %. En 08: Héctor 8 faltas, Valeria 7, Diego 4, Mateo 3, de modo que el orden Mateo/Diego se invierte. 8/37 = 21.6 %, pero el teléfono del 10 dice '29 de 33 clases'. Un espectador atento puede notar que Mateo pasa de 16.2 % a '3 faltas'.",
+     "evidencia": "scratchpad/fr/f03_l03.10_a010.45.png (16.2/21.6/17.7/13.2 %). scratchpad/fr/f08_l03.50_a029.10.png (2/3/7/4/8 faltas). scratchpad/fr/f10_l03.40_a036.80.png ('29 de 33 clases', 88 %).",
+     "correccion": "Cuadros dueños: 03-tarde.html y 08-reportes.html (y 10 si se unifica el total). Fijar un total de 37 clases: Mateo 3/37 = 8.1 %, Diego 4/37 = 10.8 %, Valeria 7/37 = 18.9 %, Héctor 8/37 = 21.6 %. Ajustar las barras y cifras de 03 a esos valores y el teléfono de 10 a '32 de 37' (86 %) o dejar 29/33 y cambiar 08/03 a base 33 (Héctor 7/33 = 21.2 %)."
+    },
+    {
+     "cuadro": "04-intro",
+     "t": "14.3-14.45 (transición iris 04->05)",
+     "gravedad": "baja",
+     "que": "El iris que abre sobre el centro del wordmark (origen 0.42,0.5) deja ver por ~0.1 s un disco negro con una carita de avatar encima de las letras 'S' y 'A' de SUSAN. Parece una mancha ajena sobre el logotipo, no una apertura.",
+     "evidencia": "scratchpad/dis/t1.png, celda 14.35 s: disco oscuro con avatar entre 'SU' y 'AN' (~x 800, y 480, radio ~140 px). A 14.45 s el iris ya muestra el panel de cámara completo.",
+     "correccion": "Transición dueña: 04->05 en v2/plan.json / build-index.mjs. Mover el origen del iris al hueco entre el anillo/pastilla y el eslogan (p. ej. 0.5, 0.78), o hacer que el iris abra sobre el fondo del panel (sin avatar en el primer 0.1 s) o que el panel entre ya iluminado."
+    },
+    {
+     "cuadro": "04-intro",
+     "t": "10.45-11.4",
+     "gravedad": "baja",
+     "que": "Tras el iris de entrada se ven ~0.9 s de degradado vacío con solo 'Presentamos' (wordmark y escudos aparecen hacia 11.8 s). Para un cuadro de 4.2 s es un hueco visual notable, aunque la cámara se mueve.",
+     "evidencia": "scratchpad/fr/f04_l00.35_a010.80.png: solo gradiente + 'Presentamos' a 52 px; SUSAN visible a partir de f04_l01.35_a011.80.png.",
+     "correccion": "Cuadro dueño: 04-intro.html. Adelantar la entrada de SUSAN a ~0.45 s (o hacer que 'Presentamos' y el wordmark entren juntos), o anticipar el sparkle/escudo para llenar el primer segundo."
+    },
+    {
+     "cuadro": "02-minutos",
+     "t": "6.45-7.05",
+     "gravedad": "baja",
+     "que": "La eyebrow 'PASE DE LISTA MANUAL' queda a ~43 px del borde superior en el tramo final (con el snap a 1.10), por debajo del margen seguro (~54 px). Además los íconos users/calendar-days (tile de ~95 px, glifo de ~48 px, trazo 1.75) se ven ligeros junto a '3 grupos' y '5 días' (texto de ~80 px) y a la 'x' azul gruesa.",
+     "evidencia": "scratchpad/fr/f02_l03.45_a006.65.png: chip en y 43-117. Mismo frame: glifos users/calendar de ~48 px dentro de tile de ~95 px con trazo fino comparado con el texto.",
+     "correccion": "Cuadro dueño: 02-minutos.html. Bajar la eyebrow ~16 px (a y >= 60 con la cámara a 1.10) y subir el glifo de los tiles de las dos tarjetas a ~58 px con stroke 2 para equilibrar con el texto."
+    },
+    {
+     "cuadro": "06-vivo / 07-revision (íconos neutros)",
+     "t": "06: 19.4-22.3; 07: 22.9-25.5",
+     "gravedad": "baja",
+     "que": "Los íconos 'activity' (06, título 'Asistencia del grupo'), 'layers' (07, 'Pendientes') y 'users-round' (05, '+16 más') van en gris sobre tile beige: son los de menor contraste y significado del video, y se leen más apagados que el resto de la familia (azul, verde, dorado, rosa).",
+     "evidencia": "scratchpad/fr/f06_l02.35_a021.40.png (activity gris en tile #efeae6), f07_l01.85_a024.40.png (layers gris), f05_l04.40_a018.65.png (users-round gris).",
+     "correccion": "Cuadros dueños: 05, 06 y 07. Pasar a tile azul (activity, users-round) y dorado/azul (layers) con glifo en el color del tono para mantener la regla 'un tono por función'; subir el trazo a 2."
+    },
+    {
+     "cuadro": "09-analitica",
+     "t": "32.55-33.40",
+     "gravedad": "baja",
+     "que": "El marcador de 'antes de que sea tarde.' se pinta palabra por palabra con pastillas separadas por huecos (antes| de| que | sea| tarde.) en vez de un marcador continuo, y en el read_mark (32.55 s) solo la 'a' inicial tiene marcador: la frase se lee bien, pero el resaltado queda a medias y con aspecto entrecortado.",
+     "evidencia": "scratchpad/fr/f09_l03.30_a032.55.png (solo 'a' resaltada) y f09_l04.10_a033.35.png (cinco pastillas con huecos de ~8 px).",
+     "correccion": "Cuadro dueño: 09-analitica.html. Unir el marcador por línea (un solo span con box-decoration-break: clone o fondo continuo) y adelantar el barrido para que esté completo al read_mark (3.3 s)."
+    },
+    {
+     "cuadro": "global (tipografía/datos)",
+     "t": "09: 30.1-33.4; 03: 9.7-10.45; 05-10",
+     "gravedad": "baja",
+     "que": "Formatos mezclados de porcentaje: ejes de la gráfica en 09 con '10% 20% 30%' sin espacio, frente a '17 %', 'Límite 20 %', '98 %' y '88 %' con espacio. Además aparecen '21.6 %' y '22.3 %' con punto decimal.",
+     "evidencia": "scratchpad/fr/f09_l00.85_a030.10.png (ejes '30% 20% 10% 0%' mono vs. '17 %' y 'Límite 20 %'). f03_l02.40_a009.75.png ('Límite 20 %').",
+     "correccion": "Cuadro dueño: 09-analitica.html. Cambiar etiquetas de eje a '0 %', '10 %', '20 %', '30 %' (con espacio fino) para unificar con el resto del video."
+    },
+    {
+     "cuadro": "transicion:10->11",
+     "t": "36.95-37.25",
+     "gravedad": "baja",
+     "que": "El escudo del cuadro 11 aparece (37.15 s) encima del titular desenfocado 'Cada alumno ve su propia asistencia' durante ~0.3 s, y 'Tu' ya se teclea (37.25 s) mientras el texto saliente sigue visible a baja opacidad. Es un solape leve de texto con texto/ícono.",
+     "evidencia": "scratchpad/dis/t2.png celdas 37.05, 37.15 y 37.25: escudo sobre 'Cada alumno ve su propia asistencia' desenfocado.",
+     "correccion": "Transición dueña: zoom out 10->11 (v2/plan.json). Apagar la opacidad del titular y las píldoras de 10 en los primeros 0.15 s del zoom out, o retrasar 0.10 s la entrada del escudo de 11."
+    },
+    {
+     "cuadro": "08-reportes",
+     "t": "28.5-29.1",
+     "gravedad": "baja",
+     "que": "La notificación 'CSV listo / asistencia_3A.csv' se asienta rozando el borde derecho de la tarjeta (sobresale ~40 px) y el extremo de la línea punteada del 20 % toca su borde superior. El toast tapa además el pie de la fila 'Sin derecho'.",
+     "evidencia": "scratchpad/fr/f08_l03.50_a029.10.png: toast en x 1357-1773 frente a tarjeta hasta x 1732; línea punteada termina en el borde superior del toast (y ~840).",
+     "correccion": "Cuadro dueño: 08-reportes.html. Acortar la línea punteada para que termine en la fila de Héctor (y ~820) y alinear el borde derecho del toast con el de la tarjeta (x 1732) o separarlo claramente (>= 24 px)."
+    }
+   ]
+  }
+ ],
+ "confirmados": [
+  {
+   "cuadro": "12-cierre",
+   "t": "43.15 s (visible desde 43.333 s)",
+   "gravedad": "alta",
+   "que": "El chime-trim y el sparkle-short (12-cierre-15 y 12-cierre-14) suenan 183 ms antes de que el barrido de brillo entre en SUSAN.",
+   "evidencia": "Ambos cues están en tCue 43.15, que es el inicio del tween 12-cierre-shine (t0 43.15, t1 43.60). El audio está sincronizado con el montaje (lag 0.000 ms). Pero en k02/h11.png (fotogramas f1291-f1306) la imagen está quieta de 43.033 a 43.300. El brillo blanco sobre las letras aparece en f1300 (43.333). La diferencia de fotograma sube de 0.24 (f1299) a 1.34, 2.48 y 3.60 en f1300-1302 (región central: 0.26, 4.25, 9.28, 12.5). Es el remate de marca del video y el chime suena sobre una imagen quieta.",
+   "correccion": "Cuadro 12-cierre: o bien cambiar el barrido para que el brillo entre a la primera letra a +30 ms de 43.15 (empezar el gradiente de shine ya sobre el borde izquierdo de SUSAN, sin ease de salida larga), o bien mover las dos etiquetas sfx a T=3.28 local (43.33 s absoluto) y actualizar plan.json.",
+   "revisor": "Sonido y sincronía (renders/video-v2.1.mp4)",
+   "verificacion": {
+    "real": true,
+    "razon": "Lo confirmé con mediciones propias sobre renders/video-v2.1.mp4. Audio: el chime-trim y el sparkle-short arrancan a 43.14-43.15 s (RMS pasa de -180 dB a -16 dB en 10 ms), es decir en T=3.10 local, el inicio del tween 12-cierre-shine. Imagen: el brillo no entra en las letras hasta f1300 (43.333 s). La diferencia en la zona de SUSAN pasa de 0.46 (f1299) a 6.8, 14.8 y 19.9 en f1300-1302, y el brillo se ve en las tiras de fotogramas (primero sobre la S, luego sobre U-S-A, y a 43.43 sobre A-N). Todo el barrido visible dura unos 130 ms (43.33-43.47) y queda del todo apagado en f1305. El audio llega 183 ms antes de que se vea el primer brillo y unos 250 ms antes del centro del barrido; el audio sigue adelantado a la imagen más allá del umbral tolerable, y el contrato del proyecto pide menos de 33 ms. Causa real: en 12-cierre.html el barrido usa un gradiente de background-size 300 % con backgroundPosition 100% -> 0% y ease power2.inOut de 0.45 s. La banda recorre unos 0.13 del trayecto fuera del texto, y con inOut ese tramo tarda unos 0.12-0.18 s, así que el inicio del tween no es el inicio visible. Matices que bajan la gravedad de alta a media: (1) la imagen no está del todo quieta de 43.033 a 43.300; el pull-back 3 de cámara (2.95-3.35 local, power3.out) sigue desacelerando (diff de la zona de letras 9.2 en f1291, 2.6 en f1295, 0.46 en f1299), de modo que el chime coincide con el final de un movimiento de cámara y no con una imagen congelada; (2) el chime es una campana con cola de 1.8 s y pico a 4 ms, así que se percibe como remate de marca y no como golpe de un solo evento. Aun así el sonido de remate cae claramente antes del evento visual que lo motiva, y la queja original era justo la sincronía de sonidos.",
+    "correccion_ajustada": "Cuadro dueño: compositions/frames/12-cierre.html (sin tocar plan.json ni scripts). Opción preferida, que no mueve el sonido ni los tiempos del plan: cambiar el tween 12-cierre-shine (TB = 3.10) de { backgroundPosition: '100% 0%' } -> { '0% 0%' }, power2.inOut, 0.45 s, a { '87% 0%' } -> { '13% 0%' }, ease 'power1.out' o 'power2.out', duración 0.40-0.45 s. Con background-size 300 % la banda de luz ya queda pegada al borde izquierdo de las letras a 87 % y se sale por el derecho a 13 %, sin recorrido muerto fuera del texto, y con ease out el brillo entra en la primera letra a unos +30-60 ms de 43.15 s (f1295-1296). Mantener sfx(tl, TB, 'sparkle-short', 0.35) y sfx(tl, TB, 'chime-trim', 0.40) en TB = 3.10 y data:'hero' en el tween; el barrido debe terminar antes de los glints de escudos (3.45) y no alterar readMark 3.35. Verificar con preview-frame/frame-check y volver a medir en el render que el aumento de diferencia en la zona de SUSAN empiece en f1295-1296 y no en f1300. Alternativa si se prefiere conservar el barrido tal cual: mover las dos etiquetas sfx a T = 3.28 local (43.33 s absoluto) y actualizar frames[].sfx de 12-cierre en v2/plan.json, aunque esto acerca el chime al sparkle ya a 3.35 (readMark) y deja el sonido sobre el tramo más lento del gradiente. Gravedad real: media, no alta."
+   }
+  },
+  {
+   "cuadro": "12-cierre",
+   "t": "43.85 s (visible 44.00-44.10 s)",
+   "gravedad": "alta",
+   "que": "El blip (12-cierre-16) suena 150 ms antes del brillo blanco que recorre la pastilla UNACH.",
+   "evidencia": "El blip está en tCue 43.85, que es el inicio del tween 12-cierre-gloss (43.85 a 44.25). La diferencia de fotogramas en la región de la pastilla (y 150-200, x 190-370 de 560x315) es 0.07-0.08 en f1315-f1319 (43.833-43.967) y sube a 0.87, 1.79, 1.83 y 0.93 en f1320-f1323 (44.000-44.100). El frame k02.png (f1312-f1319) muestra la pastilla sin cambio.",
+   "correccion": "Cuadro 12-cierre: mover la etiqueta sfx del blip a T=4.00 local (44.00 s absoluto) y ajustar plan.json, o acortar el delay inicial del gloss para que arranque visible en 43.88.",
+   "revisor": "Sonido y sincronía (renders/video-v2.1.mp4)",
+   "verificacion": {
+    "real": true,
+    "razon": "Lo medí yo mismo en renders/video-v2.1.mp4. Audio: el blip arranca en 43.85 s (RMS de -35 a -20 dB en un solo paso de 10 ms; el pico es suyo, no de otro sonido). Imagen: recorté la pastilla (x 760-1160, y 615-705) y medí la diferencia frente al fotograma de 43.70 s. En 43.80-43.97 s es ruido de compresión (0.04-0.05 de media, máximo 4-5). En 44.000, 44.033 y 44.067 s sube a 3.27, 4.41 y 3.86 (máximo 32-34), y en 44.100 s vuelve a 0.09. El brillo se ve unos 3 fotogramas (~0.12 s) y su centro cae en 44.03 s (local 3.98), unos 180 ms después del blip. Causa: el tween del gloss usa power2.inOut (x de -200 a 560 en 0.40 s) y a 0.15 s su borde apenas entra en la pastilla (x ~ +13 de 410 px). Con el gradiente de 130 px, lo perceptible arranca hacia los 0.10-0.15 s. El plan ancló el blip al inicio del tween ('tween'), pero su propia regla de anclas dice que en inOut el sonido va al pico (mitad de la curva). Un adelanto de audio de 180 ms supera el límite de ±33 ms del contrato del proyecto y el umbral de detección habitual, así que un espectador atento oiría el tic antes del destello. No es ruido ni marca de tiempo tapando una esquina. La gravedad 'alta' es exagerada: el blip es muy bajo (vol 0.18), es un microevento decorativo de la retención final y el efecto es sutil. Aun así el defecto es real, y es de sincronía, justo lo que la persona dueña pidió revisar.",
+    "correccion_ajustada": "Cuadro dueño: 12-cierre (compositions/frames/12-cierre.html, línea ~630). No tocar el tween del gloss (3.80-4.20, power2.inOut, x -200 a 560). Cambiar el cue a su pico: usar una variable T única, por ejemplo var TGS = TG + 0.20 (= 4.00 local, 44.05 s absolutos), y poner sfx(tl, TGS, 'blip', 0.18). Con T = 4.00 el blip queda a unos 15-20 ms del centro visible del destello (44.03 s), dentro de ±33 ms. Si el tween de sincronía exige T = inicio del tween, la alternativa es cambiar la ease del gloss a 'power2.in' o 'power1.in' con delay 0, para que sea visible desde 3.88 s, o cambiar a duración 0.30 y arrancar en 3.90. Es preferible el cambio del cue. Plan: en v2/plan.json, frames[12-cierre].sfx, el blip pasa de T=3.80 anclaje 'tween' a T=4.00 anclaje 'pico', y el texto del beat '3.80-4.20 ... blip en T=3.80 (tween)' pasa a 'T=4.00 (pico)'. Después hay que regenerar v2/sfx-cues.json (extract-events.mjs --cues), volver a montar (mount-sfx.mjs) y comprobar con verify-sfx.mjs --lectura-min 0.5. No cambia la duración del cuadro (5.00 s) ni la cola de lectura: la ventana libre del lockup se mantiene. Gravedad real: media-baja, no alta (blip a vol 0.18 sobre un microevento decorativo).\""
+   }
+  }
+ ],
+ "descartados": 1,
+ "requests": []
+}

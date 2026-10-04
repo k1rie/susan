@@ -1,0 +1,21 @@
+{
+  "_doc": "Formato de cues v2: `t` es el instante ABSOLUTO (s) del evento visual (sale de las etiquetas sfx: del timeline del cuadro, no se escribe a mano). `sfx` es el nombre de la biblioteca v2 (archivo = <sfx>.wav en la carpeta de la biblioteca). `ref` es el tween al que acompaña (solo documentación/depuración).",
+  "libreria": "audit/sonido/derived",
+  "cues": [
+    { "id": "c01", "t": 0.002, "sfx": "pop-2", "vol": 0.5, "ref": "caso límite: golpe antes de que el archivo pueda empezar (data-start negativo -> media-start)" },
+    { "id": "c02", "t": 0.50, "sfx": "ping-note1", "vol": 0.5, "ref": "bracket 1" },
+    { "id": "c03", "t": 0.80, "sfx": "ping-note2", "vol": 0.5, "ref": "bracket 2" },
+    { "id": "c04", "t": 1.10, "sfx": "ping-note3", "vol": 0.5, "ref": "bracket 3" },
+    { "id": "c05", "t": 1.40, "sfx": "ping-note4", "vol": 0.5, "ref": "bracket 4" },
+    { "id": "c06", "t": 1.90, "sfx": "click-hard", "vol": 0.55, "ref": "pulsación del cursor" },
+    { "id": "c07", "t": 3.00, "sfx": "impact-hit", "vol": 0.7, "ref": "slam" },
+    { "id": "c08", "t": 3.00, "sfx": "riser-1s", "vol": 0.5, "ref": "el riser TERMINA en el slam (ancla = pico = final del archivo)" },
+    { "id": "c09", "t": 3.60, "sfx": "whoosh-s", "vol": 0.45, "ref": "transición: el PICO del whoosh en el punto medio" },
+    { "id": "c10", "t": 4.20, "sfx": "chime-trim", "vol": 0.45, "ref": "cambio de estado" },
+    { "id": "c11", "t": 5.20, "sfx": "tick", "vol": 0.4, "ref": "contador +1" },
+    { "id": "c12", "t": 5.27, "sfx": "tick", "vol": 0.4, "ref": "contador +1 (misma muestra, 70 ms después: solapa y NO se corta)" }
+  ],
+  "typing": [
+    { "id": "t01", "frame": "demo", "teclas": [6.0, 6.062, 6.121, 6.19, 6.248, 6.31, 6.43, 6.49, 6.552, 6.61, 6.67, 6.735], "vol": 0.35, "ref": "frase tecleada: 12 teclas con la cadencia REAL del reloj de texto" }
+  ]
+}

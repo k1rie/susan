@@ -1,0 +1,364 @@
+<template>
+    <style>
+        /* Tipografia: solo el archivo que existe en assets/fonts/ (ruta relativa a la raiz del proyecto) */
+        @font-face{font-family:"Hanken Grotesk";font-weight:400 700;font-style:normal;font-display:block;src:url("assets/fonts/HankenGrotesk-var.woff2") format("woff2");}
+
+        /* Las clases e ids llevan el prefijo "11-confianza-" (empieza con digito), por eso se escriben con selectores de atributo */
+        #root{position:absolute;left:0;top:0;width:1920px;height:1080px;overflow:hidden;
+            --ink:#1e1919;--card:#fff;--muted:#f0ede8;--mfg:#6f6a65;--line:#e7e2dc;--blue:#0061fe;--ok:#1f7a47;--ok-bg:#e3f4ea;--info-bg:#e1edfa;
+            font-family:'Hanken Grotesk',system-ui,sans-serif;color:var(--ink)}
+
+        /* Fondo a pantalla completa en su propio clip (crema del sistema) */
+        [class~="11-confianza-bg"]{position:absolute;left:0;top:0;width:1920px;height:1080px;background:#f7f5f2}
+
+        /* Mundo: la camara (scale/x/y) solo mueve este bloque */
+        [id="11-confianza-world"]{position:absolute;left:0;top:0;width:1920px;height:1080px}
+
+        /* Resplandor azul palido (el azul puro sobre crema se ve gris) detras del disco (centro 960,270), sin grano: el grano es solo de 04 y 12 */
+        [id="11-confianza-glow"]{position:absolute;left:510px;top:-180px;width:900px;height:900px;border-radius:50%;
+            background:radial-gradient(closest-side,rgba(205,224,250,.75),rgba(225,237,250,.32) 60%,rgba(225,237,250,0))}
+
+        /* Heroe: disco de 280 px (centro 960,270) con escudo de 160 px y candado de 72 px; todo con left/top, el transform es solo de GSAP.
+           Pila completa y=130-920 (centro 525): a la escala maxima de la camara (1.20, foco 525) el disco queda a 66 px del borde superior y la ultima pildora a 66 px del inferior (antes el disco nacia a 5 px y el empuje final lo recortaba). */
+        [id="11-confianza-disc"]{position:absolute;left:820px;top:130px;width:280px;height:280px;box-sizing:border-box;border-radius:50%;
+            background:var(--info-bg);border:2px solid rgba(0,97,254,.20)}
+        [id="11-confianza-ring"]{position:absolute;left:820px;top:130px;width:280px;height:280px;box-sizing:border-box;border-radius:50%;
+            border:5px solid rgba(0,97,254,.45);opacity:0;pointer-events:none}
+        [id="11-confianza-shield"]{position:absolute;left:880px;top:190px;width:160px;height:160px}
+        [id="11-confianza-shield"] svg{position:absolute;left:0;top:0;display:block;overflow:visible}
+        [id="11-confianza-sh0"]{opacity:.62}
+        /* pathLength=100 + offsets enteros (GSAP redondea strokeDashoffset a enteros); gap de 200 y arranque en 108/120 para que los casquetes redondos no dejen puntos */
+        [id="11-confianza-sh"] path{stroke-dasharray:100 200}
+        [id="11-confianza-lockbox"]{position:absolute;left:924px;top:238px;width:72px;height:72px}
+        [id="11-confianza-lk"]{display:block;overflow:visible}
+        [id="11-confianza-lk"] path{fill:none}
+        [id="11-confianza-lk"] *{stroke-dasharray:100 200}
+
+        /* Titular que se teclea: caracteres en flex (el ancho final ya esta reservado, asi queda centrado) */
+        [id="11-confianza-line"]{position:absolute;left:0;top:440px;width:1920px;height:130px;display:flex;justify-content:center;align-items:center;
+            white-space:pre;font-size:110px;font-weight:700;letter-spacing:-0.02em;line-height:130px;color:var(--ink)}
+        [class~="11-confianza-ch"]{position:relative;display:block;height:130px}
+        [class~="11-confianza-caret"]{position:absolute;left:100%;margin-left:4px;top:22px;bottom:22px;width:7px;border-radius:4px;background:var(--blue)}
+        [class~="11-confianza-acc"]{display:flex;color:var(--blue)}
+
+        /* Pildoras de 980x96: blancas, borde fino, sin sombra; palomita verde a la izquierda, icono Lucide en tile azul de 64 px a la derecha */
+        [class~="11-confianza-pill"]{position:absolute;left:470px;width:980px;height:96px;box-sizing:border-box;display:flex;align-items:center;gap:22px;
+            padding:0 16px 0 20px;background:var(--card);border:2px solid var(--line);border-radius:999px}
+        [class~="11-confianza-mk"]{width:56px;height:56px;border-radius:50%;background:var(--ok-bg);display:grid;place-items:center;flex:none}
+        [class~="11-confianza-mk"] svg{display:block;overflow:visible}
+        [class~="11-confianza-mk"] path{stroke-dasharray:100 200}
+        [class~="11-confianza-tx"]{flex:1;font-size:32px;line-height:40px;letter-spacing:-0.01em;font-weight:500;color:var(--mfg);white-space:nowrap}
+        [class~="11-confianza-tx"] b{font-weight:700;color:var(--ink)}
+        [class~="11-confianza-ic"]{display:block;width:64px;height:64px;flex:none}
+        [class~="11-confianza-ic"] svg{display:block}
+    </style>
+
+    <div id="root" data-composition-id="11-confianza" data-start="0" data-duration="4.4" data-width="1920" data-height="1080">
+        <div class="clip 11-confianza-bg" data-start="0" data-duration="4.4" data-track-index="0"></div>
+
+        <div id="11-confianza-world" data-camera>
+            <div id="11-confianza-glow"></div>
+            <div id="11-confianza-disc"></div>
+            <div id="11-confianza-ring"></div>
+            <div id="11-confianza-shield">
+                <svg xmlns="http://www.w3.org/2000/svg" width="160" height="160" viewBox="0 0 24 24" fill="none" stroke="#0061fe" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" data-lucide="shield" id="11-confianza-sh0" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="160" height="160" viewBox="0 0 24 24" fill="#ffffff" stroke="#0061fe" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" data-lucide="shield" id="11-confianza-sh" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z" pathLength="100"/></svg>
+            </div>
+            <div id="11-confianza-lockbox"><svg xmlns="http://www.w3.org/2000/svg" width="72" height="72" viewBox="0 0 24 24" fill="#e1edfa" stroke="#0061fe" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" data-lucide="lock-keyhole" id="11-confianza-lk" aria-hidden="true"><circle cx="12" cy="16" r="1" pathLength="100"/><rect x="3" y="10" width="18" height="12" rx="2" pathLength="100"/><path d="M7 10V7a5 5 0 0 1 10 0v3" pathLength="100"/></svg></div>
+
+            <div id="11-confianza-line">
+                <span class="11-confianza-ch">T<i class="11-confianza-caret"></i></span>
+                <span class="11-confianza-ch">u<i class="11-confianza-caret"></i></span>
+                <span class="11-confianza-ch">s<i class="11-confianza-caret"></i></span>
+                <span class="11-confianza-ch"> <i class="11-confianza-caret"></i></span>
+                <span class="11-confianza-ch">d<i class="11-confianza-caret"></i></span>
+                <span class="11-confianza-ch">a<i class="11-confianza-caret"></i></span>
+                <span class="11-confianza-ch">t<i class="11-confianza-caret"></i></span>
+                <span class="11-confianza-ch">o<i class="11-confianza-caret"></i></span>
+                <span class="11-confianza-ch">s<i class="11-confianza-caret"></i></span>
+                <span class="11-confianza-ch">,<i class="11-confianza-caret"></i></span>
+                <span class="11-confianza-ch"> <i class="11-confianza-caret"></i></span>
+                <span class="11-confianza-acc">
+                    <span class="11-confianza-ch">b<i class="11-confianza-caret"></i></span>
+                    <span class="11-confianza-ch">a<i class="11-confianza-caret"></i></span>
+                    <span class="11-confianza-ch">j<i class="11-confianza-caret"></i></span>
+                    <span class="11-confianza-ch">o<i class="11-confianza-caret"></i></span>
+                    <span class="11-confianza-ch"> <i class="11-confianza-caret"></i></span>
+                    <span class="11-confianza-ch">c<i class="11-confianza-caret"></i></span>
+                    <span class="11-confianza-ch">o<i class="11-confianza-caret"></i></span>
+                    <span class="11-confianza-ch">n<i class="11-confianza-caret"></i></span>
+                    <span class="11-confianza-ch">t<i class="11-confianza-caret"></i></span>
+                    <span class="11-confianza-ch">r<i class="11-confianza-caret"></i></span>
+                    <span class="11-confianza-ch">o<i class="11-confianza-caret"></i></span>
+                    <span class="11-confianza-ch">l<i class="11-confianza-caret"></i></span>
+                </span>
+                <span class="11-confianza-ch">.<i class="11-confianza-caret"></i></span>
+            </div>
+
+        <div id="11-confianza-pill-1" class="11-confianza-pill" style="top:600px">
+            <span id="11-confianza-mk-1" class="11-confianza-mk"><svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#1f7a47" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" data-lucide="check" id="11-confianza-ck-1" aria-hidden="true"><path d="M20 6 9 17l-5-5" pathLength="100"/></svg></span>
+            <span id="11-confianza-tx-1" class="11-confianza-tx"><b>Sin imágenes ni vectores</b> en la base de datos</span>
+            <span id="11-confianza-ic-1" class="11-confianza-ic"><span class="ic-tile" style="display:inline-grid;place-items:center;width:64px;height:64px;border-radius:18px;background:#e6eefc;color:#0061fe;flex:none"><svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" data-lucide="image-off" aria-hidden="true"><line x1="2" x2="22" y1="2" y2="22"/><path d="M10.41 10.41a2 2 0 1 1-2.83-2.83"/><line x1="13.5" x2="6" y1="13.5" y2="21"/><line x1="18" x2="21" y1="12" y2="15"/><path d="M3.59 3.59A1.99 1.99 0 0 0 3 5v14a2 2 0 0 0 2 2h14c.55 0 1.052-.22 1.41-.59"/><path d="M21 15V5a2 2 0 0 0-2-2H9"/></svg></span></span>
+        </div>
+        <div id="11-confianza-pill-2" class="11-confianza-pill" style="top:712px">
+            <span id="11-confianza-mk-2" class="11-confianza-mk"><svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#1f7a47" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" data-lucide="check" id="11-confianza-ck-2" aria-hidden="true"><path d="M20 6 9 17l-5-5" pathLength="100"/></svg></span>
+            <span id="11-confianza-tx-2" class="11-confianza-tx"><b>Cuatro roles</b>, cada uno con sus permisos</span>
+            <span id="11-confianza-ic-2" class="11-confianza-ic"><span class="ic-tile" style="display:inline-grid;place-items:center;width:64px;height:64px;border-radius:18px;background:#e6eefc;color:#0061fe;flex:none"><svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" data-lucide="user-cog" aria-hidden="true"><path d="M10 15H6a4 4 0 0 0-4 4v2"/><path d="m14.305 16.53.923-.382"/><path d="m15.228 13.852-.923-.383"/><path d="m16.852 12.228-.383-.923"/><path d="m16.852 17.772-.383.924"/><path d="m19.148 12.228.383-.923"/><path d="m19.53 18.696-.382-.924"/><path d="m20.772 13.852.924-.383"/><path d="m20.772 16.148.924.383"/><circle cx="18" cy="15" r="3"/><circle cx="9" cy="7" r="4"/></svg></span></span>
+        </div>
+        <div id="11-confianza-pill-3" class="11-confianza-pill" style="top:824px">
+            <span id="11-confianza-mk-3" class="11-confianza-mk"><svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#1f7a47" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" data-lucide="check" id="11-confianza-ck-3" aria-hidden="true"><path d="M20 6 9 17l-5-5" pathLength="100"/></svg></span>
+            <span id="11-confianza-tx-3" class="11-confianza-tx"><b>Bitácora</b> de cada consulta</span>
+            <span id="11-confianza-ic-3" class="11-confianza-ic"><span class="ic-tile" style="display:inline-grid;place-items:center;width:64px;height:64px;border-radius:18px;background:#e6eefc;color:#0061fe;flex:none"><svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" data-lucide="scroll-text" aria-hidden="true"><path d="M15 12h-5"/><path d="M15 8h-5"/><path d="M19 17V5a2 2 0 0 0-2-2H4"/><path d="M8 21h12a2 2 0 0 0 2-2v-1a1 1 0 0 0-1-1H11a1 1 0 0 0-1 1v1a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v2a1 1 0 0 0 1 1h3"/></svg></span></span>
+        </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <script>
+        (function () {
+            var $ = function (n) { return document.getElementById('11-confianza-' + n); };
+            var tl = gsap.timeline({ paused: true });
+            window.__timelines = window.__timelines || {};
+            window.__timelines['11-confianza'] = tl;
+
+            /* ============================================================================================================
+               BLOQUE CANONICO v2 (sonido + camara). Se PEGA TAL CUAL dentro del <script> de cada cuadro, justo despues de crear `tl`
+               (var tl = gsap.timeline({ paused: true }); window.__timelines[ID_DEL_CUADRO] = tl;). No lo edites en el cuadro: edita este archivo.
+               Es idempotente: pegarlo en varios cuadros (mismo window) redefine las mismas funciones.
+            
+               POR QUE EXISTE (contrato de sincronia v2, audit/sonido/REPORT.md 7): el instante de un sonido NO se escribe a mano. Se declara
+               como ETIQUETA del timeline con la MISMA variable de tiempo que el tween que acompana, y los scripts lo derivan:
+                   extract-events.mjs --cues  ->  v2/sfx-cues.json (tiempos absolutos)  ->  mount-sfx.mjs (data-start = t - ancla del archivo)
+               Uso tipico:
+                   var T = 1.05 + k * 0.3;                                                    // un solo numero para tween y sonido
+                   tl.fromTo(bx[k], { opacity: 0, scale: 0.82 }, { opacity: 1, scale: 1, duration: 0.45, ease: 'back.out(1.7)', data: 'hero' }, T);
+                   sfx(tl, T, 'ping-note' + (k + 1), 0.5);                                    // nombre del CATALOG.json; vol opcional
+               Convenciones:
+                 - t es el instante del evento visual: inicio del tween de entrada (primer fotograma visible); para 'whoosh/swipe' el punto de
+                   maxima velocidad; para sonidos con anclaje 'fin' (riser, zoom-in) el instante en que ocurre el impacto/llegada (ver CATALOG.json).
+                 - `data: 'hero'` en un tween (entrada de un elemento principal, cambio de estado, contador, empuje de camara, trazo) le exige sonido:
+                   verify-sfx.mjs avisa de los hero sin etiqueta sfx a +-33 ms de su inicio. Las funciones cam* lo ponen solas.
+                 - Nunca llames a addLabel con nombres repetidos (GSAP sobrescribe): sfx() agrega un contador unico.
+               ============================================================================================================ */
+            window.SFXN = window.SFXN || 0;   // contador unico de etiquetas (compartido por todos los cuadros de la pagina)
+            window.KEYN = window.KEYN || 0;   // rotacion de teclas (continua entre frases)
+            
+            /* sfx(tl, t, nombre, vol) -> etiqueta 'sfx:<nombre>@<vol>#<n>' en el instante t. vol omitido = volDefecto del catalogo. */
+            function sfx(tl, t, nombre, vol) {
+                tl.addLabel('sfx:' + nombre + '@' + (vol == null ? '' : vol) + '#' + (window.SFXN++), t);
+                return t;
+            }
+            
+            /* sfxType(tl, t0, tiempos, opciones) -> tiempos absolutos de las teclas que suenan.
+               tiempos[i] = segundo (relativo a t0) en que se pinta el caracter i del texto (sale del mismo reloj que pinta el texto).
+               opciones: texto ('Hola mundo': para detectar inicios de palabra; los espacios no suenan), vol (0.35), maxPorSeg (14),
+                         enter (true | segundo absoluto: agrega key-enter; true = 0.14 s tras la ultima tecla), borrados ([segundos absolutos]: key-back).
+               Decima a <= 14 teclas/s: siempre suena la primera y la ultima; el acento (vol completo) va en inicios de palabra, las demas a 0.78.
+               Rota key-1..8 sin repetir seguidas; una etiqueta por tecla (mount-sfx las hornea en un solo wav por frase, al milisegundo). */
+            function sfxType(tl, t0, tiempos, op) {
+                op = op || {};
+                var txt = op.texto || '', vol = op.vol == null ? 0.35 : op.vol, gap = 1 / (op.maxPorSeg || 14), k = [], i, c, p;
+                var ult = -1;
+                for (i = 0; i < tiempos.length; i++) if (!txt || txt.charAt(i) !== ' ') ult = i;
+                for (i = 0; i < tiempos.length; i++) {
+                    if (txt && txt.charAt(i) === ' ') continue;
+                    c = { t: t0 + tiempos[i], ini: !!txt && (i === 0 || txt.charAt(i - 1) === ' '), ult: i === ult };
+                    p = k[k.length - 1];
+                    if (!p || c.t - p.t >= gap) k.push(c);
+                    else if (k.length > 1 && (c.ult || (c.ini && !p.ini))) k[k.length - 1] = c;   // la ultima y las iniciales desplazan a una tecla normal
+                    else if (c.ult) k.push(c);                                                       // solo hay una tecla antes: ambas suenan
+                }
+                var out = [];
+                k.forEach(function (q, j) {
+                    var acento = j === 0 || q.ini || j === k.length - 1;
+                    sfx(tl, q.t, 'key-' + ((window.KEYN++ * 5) % 8 + 1), +(vol * (acento ? 1 : 0.78)).toFixed(3));
+                    out.push(q.t);
+                });
+                if (op.enter && k.length) sfx(tl, op.enter === true ? k[k.length - 1].t + 0.14 : op.enter, 'key-enter', +(vol * 1.1).toFixed(3));
+                (op.borrados || []).forEach(function (tb) { sfx(tl, tb, 'key-back', vol); });
+                return out;
+            }
+            
+            /* sfxCount(tl, t0, t1, desde, hasta, opciones) -> tiempos absolutos de los 'tick'. Un tick por cambio de entero (el contador muestra
+               Math.round(valor)), <= 12/s, 4 alturas crecientes (tick-1..4 segun el avance), el ultimo con acento (tick-4 a vol x1.5).
+               opciones: ease ('power1.out': la MISMA ease del tween del contador; debe ser monotona), paso (1: valor entre ticks), vol (0.4), maxPorSeg (12). */
+            function sfxCount(tl, t0, t1, desde, hasta, op) {
+                op = op || {};
+                var ease = gsap.parseEase(op.ease || 'power1.out'), paso = op.paso || 1, vol = op.vol == null ? 0.4 : op.vol, gap = 1 / (op.maxPorSeg || 12);
+                var span = Math.abs(hasta - desde), n = Math.floor(span / paso + 1e-9), ts = [], s, lo, hi, m, it;
+                for (s = 1; s <= n; s++) {                       // instante en que el valor cruza (s - 0.5) pasos: se invierte la ease por biseccion
+                    lo = 0; hi = 1;
+                    for (it = 0; it < 32; it++) { m = (lo + hi) / 2; if (ease(m) * span < (s - 0.5) * paso) lo = m; else hi = m; }
+                    ts.push(t0 + hi * (t1 - t0));
+                }
+                var k = [];
+                ts.forEach(function (t, j) {
+                    var p = k[k.length - 1];
+                    if (p === undefined || t - p >= gap) k.push(t);
+                    else if (j === ts.length - 1 && k.length > 1) k[k.length - 1] = t;           // el ultimo siempre suena
+                    else if (j === ts.length - 1) k.push(t);
+                });
+                k.forEach(function (t, j) {
+                    var ultimo = j === k.length - 1;
+                    sfx(tl, t, 'tick-' + (ultimo ? 4 : Math.min(3, Math.floor(4 * j / k.length)) + 1), +Math.min(1, vol * (ultimo ? 1.5 : 1)).toFixed(3));
+                });
+                return k;
+            }
+            
+            /* readMark(tl, t, 'frase') -> etiqueta 'read:frase' en el instante en que una frase clave queda COMPLETA y legible. El director/verificador
+               exige que el corte a otro cuadro llegue >= 0.9 s despues (tiempo de lectura). */
+            function readMark(tl, t, frase) {
+                tl.addLabel('read:' + frase + '#' + (window.SFXN++), t);   // no se lee tl.labels: el compilador de render ejecuta el script con un timeline proxy sin esa propiedad
+                return t;
+            }
+            
+            /* ---- CAMARA con GSAP puro (seek-safe). Cada helper hace un fromTo con los valores de partida que recuerda en el elemento (el estado
+               se encadena en el orden de las llamadas) e `immediateRender: false` SIEMPRE: sin eso el segundo fromTo sobre el mismo objetivo
+               aplica su `from` en el fotograma 0 y pisa al primero (bug del cuadro 6: entraba a 1.6 y saltaba a 1.0). Devuelven el fin del tween.
+               `el`: elemento o selector. Opciones comunes: dur, ease, foco [cx, cy] (punto de 1920x1080 que queda en el centro), x, y (px, pisan a foco),
+               W, H (tamano de escena, 1920x1080), sfx (nombre del catalogo o false), vol. Todos los tweens llevan data: 'hero'. ---- */
+            function camInit(el, escala, x, y) {
+                var e = typeof el === 'string' ? document.querySelector(el) : el;
+                e.__cam = { s: escala == null ? 1 : escala, x: x || 0, y: y || 0, r: 0 };
+                gsap.set(e, { transformOrigin: '50% 50%', scale: e.__cam.s, x: e.__cam.x, y: e.__cam.y, rotation: 0 });
+            }
+            function camTo(tl, el, t, a, o, dur0, ease0, sfx0) {
+                o = o || {};
+                var e = typeof el === 'string' ? document.querySelector(el) : el;
+                if (!e.__cam) camInit(e, 1, 0, 0);
+                var c = e.__cam, dur = o.dur == null ? dur0 : o.dur, W = o.W || 1920, H = o.H || 1080;
+                var s = a.s == null ? c.s : a.s, x = a.x == null ? c.x : a.x, y = a.y == null ? c.y : a.y, r = a.r == null ? c.r : a.r;
+                if (o.foco) { x = (W / 2 - o.foco[0]) * s; y = (H / 2 - o.foco[1]) * s; }
+                if (o.x != null) x = o.x;
+                if (o.y != null) y = o.y;
+                tl.fromTo(e, { scale: c.s, x: c.x, y: c.y, rotation: c.r },
+                    { scale: s, x: x, y: y, rotation: r, duration: dur, ease: o.ease || ease0, immediateRender: false, data: 'hero' }, t);
+                e.__cam = { s: s, x: x, y: y, r: r };
+                var snd = o.sfx === undefined ? sfx0 : o.sfx;
+                if (snd) sfx(tl, t, snd, o.vol);
+                return t + dur;
+            }
+            /* camSnap: salto de zoom en ~0.18 s con ataque (snap-zoom). Suena 'snap' por defecto (sfx: false lo apaga). */
+            function camSnap(tl, el, t, escala, o) { return camTo(tl, el, t, { s: escala }, o, 0.18, 'power4.out', 'snap'); }
+            /* camPush: empuje lento (acercar). Sonido opcional: sfx(tl, fin, 'zoom-in') (anclaje 'fin': t = fin del tween). */
+            function camPush(tl, el, t, escala, o) { return camTo(tl, el, t, { s: escala }, o, 1.1, 'power2.inOut', null); }
+            /* camPull: alejar (escala por defecto 1) en ~0.7 s. */
+            function camPull(tl, el, t, escala, o) { return camTo(tl, el, t, { s: escala == null ? 1 : escala }, o, 0.7, 'power3.inOut', null); }
+            /* camPan: desplazamiento RELATIVO (dx, dy en px) respecto a la posicion actual, ~0.6 s. */
+            function camPan(tl, el, t, dx, dy, o) {
+                var e = typeof el === 'string' ? document.querySelector(el) : el;
+                var c = e.__cam || { x: 0, y: 0 };
+                return camTo(tl, el, t, { x: c.x + (dx || 0), y: c.y + (dy || 0) }, o, 0.6, 'power3.inOut', null);
+            }
+            /* camTilt: inclinacion (rotacion en grados, absoluta) ~0.5 s; camTilt(tl, el, t, 0) la endereza. */
+            function camTilt(tl, el, t, grados, o) { return camTo(tl, el, t, { r: grados }, o, 0.5, 'power2.inOut', null); }
+            /* ============================ fin del bloque canonico v2 ============================ */
+
+            var world = $('world');
+            camInit(world, 1, 0, 0);
+
+            /* ---------- 0.00-0.35: heroe (disco + contorno del escudo) ya presente: lo trae el zoom out. Sin cues bajo el solape ---------- */
+
+            /* ---------- 0.35-0.80: el trazo del escudo se dibuja; el cuerpo blanco entra con el trazo para que se lea sobre el disco ---------- */
+            var shP = $('sh').querySelector('path');
+            var T_DRAW = 0.35;
+            /* El heroe llega con contraste desde el local 0 (push down 10->11, opaco: el entrante baja empujando al saliente, sin fundido): el trazo
+               ya viene dibujado al 55 % (offset 45, no 108), el cuerpo blanco al 70 % y el contorno de fondo (sh0) a .62, asi el disco nunca
+               llega con un escudo palido. El trazo SIGUE dibujandose desde 0.35 con su cue 'draw': solo cambia el punto de partida. */
+            tl.fromTo(shP, { strokeDashoffset: 45 }, { strokeDashoffset: 0, duration: 0.45, ease: 'power1.inOut', data: 'hero' }, T_DRAW);
+            sfx(tl, T_DRAW, 'draw', 0.4);
+            tl.fromTo(shP, { fillOpacity: 0.7 }, { fillOpacity: 1, duration: 0.40, ease: 'power1.out' }, T_DRAW + 0.05);
+
+            /* ---------- 0.55-0.90: el candado se dibuja dentro del escudo (arco, cuerpo y ojo de la cerradura) ---------- */
+            var lkEl = $('lk');
+            var lkShackle = lkEl.querySelector('path'), lkBody = lkEl.querySelector('rect'), lkEye = lkEl.querySelector('circle');
+            tl.fromTo(lkShackle, { strokeDashoffset: 108 }, { strokeDashoffset: 0, duration: 0.22, ease: 'power1.inOut' }, 0.55);
+            tl.fromTo(lkBody, { strokeDashoffset: 108 }, { strokeDashoffset: 0, duration: 0.28, ease: 'power1.inOut' }, 0.62);
+            tl.fromTo(lkBody, { fillOpacity: 0 }, { fillOpacity: 1, duration: 0.25, ease: 'power1.out' }, 0.65);
+            tl.fromTo(lkEye, { strokeDashoffset: 120, fillOpacity: 0 }, { strokeDashoffset: 0, fillOpacity: 1, duration: 0.10, ease: 'power1.out' }, 0.80);
+
+            /* ---------- 0.35-1.70: titular "Tus datos, bajo control." tecleado con reloj lineal (17 car/s, completo a 1.70 s).
+               Arranca en 0.35 (fin del solape, antes 0.45): entre 0.30 y 0.45 el cuadro quedaba casi vacio. No puede ir antes porque el saliente
+               (10) aun se desvanece encima y habria texto sobre texto. ---------- */
+            var K = [0.6, 0.62, 0.68, 0.74, 0.78, 0.86, 0.96, 1.02, 1.04, 1.14, 1.14, 1.34, 1.38, 1.46, 1.52, 1.54, 1.62, 1.66, 1.72, 1.8, 1.84, 1.9, 1.92, 2.08];   /* cada letra cuando la voz la dice (v2/voz-alineacion.json, línea 14) */
+            sfxType(tl, 0, K, { texto: 'Tus datos, bajo control.', vol: 0.25, maxPorSeg: 14 });
+            var chars = $('line').querySelectorAll('[class~="11-confianza-ch"]');
+            var carets = $('line').querySelectorAll('[class~="11-confianza-caret"]');
+            chars.forEach(function (c, i) {
+                tl.fromTo(c, { opacity: 0 }, { opacity: 1, duration: 0.001, ease: 'none' }, K[i]);
+            });
+            /* Cursor: viaja con la ultima letra tecleada; tras la ultima tecla parpadea con onda cuadrada de 0.3 s y se retira antes de la cola de lectura */
+            carets.forEach(function (c, i) {
+                tl.fromTo(c, { opacity: 0 }, { opacity: 1, duration: 0.001, ease: 'none' }, K[i]);
+                if (i < carets.length - 1) tl.to(c, { opacity: 0, duration: 0.001, ease: 'none' }, K[i + 1]);
+            });
+            var lastCaret = carets[carets.length - 1];
+            tl.to(lastCaret, { opacity: 0, duration: 0.001, ease: 'none' }, K[K.length - 1] + 0.35);
+            tl.to(lastCaret, { opacity: 1, duration: 0.001, ease: 'none' }, K[K.length - 1] + 0.65);
+            tl.to(lastCaret, { opacity: 0, duration: 0.001, ease: 'none' }, K[K.length - 1] + 0.95);
+
+            /* ---------- 0.95-1.25: CIERRA. Pulso del candado + onda azul del disco; camara snap-zoom sobre el candado (el golpe lo pone lock) ---------- */
+            var T_LOCK = 1.67;   /* el candado cierra cuando la voz dice "control" */
+            /* El candado parte de 0.90 (no de 1): con scale 1 el primer fotograma del cue 'lock' era identico al anterior y el cambio visible llegaba
+               33 ms tarde (revision de sonido: aro visible a +33 ms). Ahora el salto 0.90 -> 1.12 es visible en el propio fotograma del golpe. */
+            tl.fromTo($('lockbox'), { scale: 0.90 }, { scale: 1.12, duration: 0.12, ease: 'power2.out', data: 'hero' }, T_LOCK);
+            sfx(tl, T_LOCK, 'lock', 0.55);
+            tl.to($('lockbox'), { scale: 1, duration: 0.18, ease: 'power2.inOut' }, T_LOCK + 0.12);
+            /* immediateRender:false: el opacity 0.6 solo rige desde T_LOCK; sin eso el aro se veria desde el local 0 */
+            tl.fromTo($('ring'), { opacity: 0.6 }, { opacity: 0.8, duration: 0.04, ease: 'none', immediateRender: false }, T_LOCK);
+            tl.fromTo($('ring'), { scale: 1 }, { scale: 1.5, duration: 0.30, ease: 'power2.out' }, T_LOCK);
+            tl.to($('ring'), { opacity: 0, duration: 0.26, ease: 'power2.out' }, T_LOCK + 0.04);
+            /* sin snap-zoom en el candado: el cuadro entraba todo de golpe */
+
+            /* ---------- 1.30-2.79: tres pildoras; cada una aparece (opacidad + 70 % del recorrido en 0.10 s) y asienta 0.10 s despues; la palomita suena al empezar su trazo ---------- */
+            var pills = [
+                { n: 1, S: 2.4, pop: 'pop-2', note: 'ping-note5' },
+                { n: 2, S: 2.82, pop: 'pop-4', note: 'ping-note6' },
+                { n: 3, S: 3.24, pop: 'pop-1', note: 'ping-note8' }
+            ];
+            var AVANCE_ASENT = 0.07;
+            pills.forEach(function (p) {
+                var pill = $('pill-' + p.n), ck = $('ck-' + p.n).querySelector('path'), tx = $('tx-' + p.n), ic = $('ic-' + p.n);
+                var A = p.S, T = p.S + 0.10, C = p.S + 0.22;
+                tl.fromTo(pill, { opacity: 0, y: 30 }, { opacity: 1, y: 9, duration: 0.10, ease: 'none' }, A);
+                tl.fromTo(pill, { y: 9 }, { y: 0, duration: 0.35, ease: 'power3.out', immediateRender: false, data: 'hero' }, T);
+                /* cue 'asent' adelantado 0.07 s (-> aparicion + 0.03): sonaba 67-117 ms despues del primer fotograma visible de la pildora;
+                   la etiqueta sigue a <= 33 ms del tween de aparicion y el tween de asentamiento (T) no cambia */
+                sfx(tl, T - AVANCE_ASENT, p.pop, 0.38);
+                tl.fromTo(tx, { clipPath: 'inset(-12px 100% -12px 0px)' }, { clipPath: 'inset(-12px 0% -12px 0px)', duration: 0.30, ease: 'power2.out' }, T);
+                tl.fromTo(ic, { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.30, ease: 'power3.out' }, T + 0.05);
+                tl.fromTo(ck, { strokeDashoffset: 108 }, { strokeDashoffset: 0, duration: 0.22, ease: 'power2.out', data: 'hero' }, C);
+                sfx(tl, C, p.note, 0.38);
+            });
+
+            /* Frase clave completa: "Tus datos, bajo control." + las tres garantias (la bitacora cierra a 2.54 s) */
+            readMark(tl, 3.74, 'Tus datos, bajo control. Bitácora de cada consulta');
+
+            /* ---------- 2.54-2.79: destello azul en el borde de la ultima pildora al cerrar su palomita ---------- */
+            var T_FL = 3.48;
+            tl.fromTo($('pill-3'), { borderColor: '#e7e2dc' }, { borderColor: '#0061fe', duration: 0.10, ease: 'power2.out', data: 'hero' }, T_FL);
+            sfx(tl, T_FL, 'sheen-s', 0.28);
+            tl.to($('pill-3'), { borderColor: '#e7e2dc', duration: 0.15, ease: 'power2.inOut' }, T_FL + 0.10);
+
+            /* ---------- 2.40-3.20: remate decorativo sin informacion nueva. Cascada de confirmacion (tinte de cada pildora + latido de su palomita),
+               latido del escudo y expansion del resplandor del disco: mantiene vivo el tramo entre el pan y el empuje al corte ---------- */
+            [1, 2, 3].forEach(function (n, i) {
+                var S = 3.64 + i * 0.07;
+                tl.fromTo($('mk-' + n), { scale: 1 }, { scale: 1.16, duration: 0.14, ease: 'power2.out' }, S);
+                tl.to($('mk-' + n), { scale: 1, duration: 0.22, ease: 'power2.inOut' }, S + 0.14);
+                tl.fromTo($('pill-' + n), { backgroundColor: '#ffffff' }, { backgroundColor: '#eaf2ff', duration: 0.12, ease: 'power2.out' }, S);
+                tl.to($('pill-' + n), { backgroundColor: '#ffffff', duration: 0.30, ease: 'power2.inOut' }, S + 0.12);
+            });
+            tl.fromTo($('shield'), { scale: 1 }, { scale: 1.05, duration: 0.18, ease: 'power2.out' }, 3.64);
+            tl.to($('shield'), { scale: 1, duration: 0.40, ease: 'power2.inOut' }, 3.82);
+            tl.fromTo($('glow'), { scale: 1 }, { scale: 1.45, duration: 0.80, ease: 'none' }, 3.64);
+
+            /* ---------- Camara: pan vertical siguiendo la pila (1.80-2.35) y empuje al corte (2.90-3.20, velocidad maxima en el corte seco).
+               Ajuste de la revision: el foco final es el CENTRO de la pila (960,525) en vez de (960,620): a 1.20 el disco queda entero (66 px de margen)
+               y las tres pildoras tambien; el pan sigue siendo vertical (de la zona del candado a la pila completa) y el empuje es solo de escala. ---------- */
+            camTo(tl, world, 2.3, { s: 1.08 }, { foco: [960, 525], dur: 0.7, ease: 'power2.inOut', sfx: false }, 0.7, 'power2.inOut', null);   /* sigue a las píldoras mientras entran */
+            camTo(tl, world, 4.1, { s: 1.2 }, { foco: [960, 525], dur: 0.30, ease: 'power3.in', sfx: false }, 0.30, 'power3.in', null);
+            /* sin whoosh-rev: el barrido invertido sonaba raro justo antes de la voz del cierre (pedido de la persona dueña) */
+        })();
+    </script>
+</template>

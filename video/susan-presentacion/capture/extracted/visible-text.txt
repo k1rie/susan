@@ -1,0 +1,9 @@
+SUSAN — Sistema centralizado de registro digital de asistencia académica con análisis numérico del ausentismo. UNACH · FCA C-I.
+Mensaje: Pasa lista en segundos y entiende la asistencia de tus grupos.
+Pase de lista con cámara: reconocimiento facial en el aula; el docente abre la sesión, la cámara reconoce a los alumnos y la asistencia queda registrada (presente, retardo, ausente, justificado).
+Revisión: los casos dudosos llegan al docente con su evidencia para confirmar, corregir o rechazar.
+Reportes por grupo y periodo con exportación a CSV y PDF.
+Analítica numérica: tendencia semanal, medias móviles, regresión y proyección del ausentismo; cruce del límite de faltas (20 %) y alumnos en riesgo.
+Portal del alumno: su asistencia por materia, calendario de racha, avisos de límite de faltas y proyección.
+Privacidad y seguridad: ningún vector facial ni imagen en tablas relacionales; roles (docente, alumno, administrador, técnico); bitácora de consultas.
+Interfaz: lienzo crema, panel blanco, tinta casi negra, tarjetas con icono en pastilla, anillo fino de estados, barras de píldora, mapa de calor y calendario de racha, medidor de líquido, barra de navegación móvil flotante.

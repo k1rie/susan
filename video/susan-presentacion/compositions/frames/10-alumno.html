@@ -1,0 +1,470 @@
+<template>
+<style>
+/* Tipografia: solo archivos de assets/fonts/ (rutas relativas a la raiz del proyecto) */
+@font-face{font-family:"Hanken Grotesk";font-weight:400 700;font-style:normal;font-display:block;src:url("assets/fonts/HankenGrotesk-var.woff2") format("woff2");}
+@font-face{font-family:"Geist Mono";font-weight:400 700;font-style:normal;font-display:block;src:url("assets/fonts/GeistMono-var.woff2") format("woff2");}
+
+#root{position:absolute;left:0;top:0;width:1920px;height:1080px;overflow:hidden;
+ --ink:#1e1919;--card:#fff;--canvas:#f7f5f2;--muted:#f0ede8;--mfg:#6f6a65;--lt:#9a948d;--line:#e7e2dc;--blue:#0061fe;
+ --ok:#1f7a47;--ok-bg:#e3f4ea;--warn:#9a6408;--warn-bg:#fbefd2;--bad:#b3261e;--info:#1f5fa8;--info-bg:#e1edfa;
+ --g-ok:#27a06a;--g-warn:#c98100;--g-bad:#de4d44;
+ font-family:'Hanken Grotesk',system-ui,sans-serif;color:var(--ink);font-feature-settings:'tnum' 1}
+
+/* fondo de pantalla completa: capa propia, fuera de la camara */
+.\31 0-alumno-bg{position:absolute;left:0;top:0;width:1920px;height:1080px;background:var(--canvas)}
+/* mundo: unico objetivo de la camara (escala, x, y, rotacion) */
+.\31 0-alumno-world{position:absolute;left:0;top:0;width:1920px;height:1080px}
+
+/* resplandor detras del telefono (decorativo): UN solo tono, el azul de acento a baja opacidad. El degradado multicolor con grano
+   es solo de 04-intro y 12-cierre (frame.md); aqui un halo de color fuerte competia con el titular */
+.\31 0-alumno-glow{position:absolute;left:20px;top:20px;width:780px;height:1040px;border-radius:50%;
+ background:radial-gradient(closest-side at 50% 50%,rgba(0,97,254,.10),rgba(0,97,254,.04) 55%,rgba(0,97,254,0) 100%)}
+
+/* telefono 470x960, radio 72, contorno de tinta de 6 px, pantalla blanca (interior 458x948).
+   left 175 (antes 95): el pan final de la camara (x -80) lo deja a 95 px del borde izquierdo en la retencion y no a 15 px */
+.\31 0-alumno-phone{position:absolute;left:175px;top:50px;width:470px;height:960px;box-sizing:border-box;border:6px solid var(--ink);border-radius:72px;background:#fff;overflow:hidden;isolation:isolate}
+
+.\31 0-alumno-hd{position:absolute;left:24px;right:24px;top:24px;height:60px;display:flex;align-items:center;gap:14px}
+.\31 0-alumno-av{display:block;width:56px;height:56px;border-radius:50%;border:2px solid var(--line);box-sizing:border-box;background:#e4d8ff;flex:none}
+.\31 0-alumno-who{display:flex;flex-direction:column;gap:3px;line-height:1.1;white-space:nowrap}
+.\31 0-alumno-who b{font-size:25px;font-weight:700;letter-spacing:-.01em}
+.\31 0-alumno-who span{font-size:20px;font-weight:500;color:var(--mfg)}
+.\31 0-alumno-bell{position:relative;margin-left:auto;width:56px;height:56px;border-radius:50%;background:var(--muted);display:grid;place-items:center;flex:none}
+.\31 0-alumno-bell svg{display:block}
+.\31 0-alumno-dot{position:absolute;right:8px;top:7px;width:15px;height:15px;box-sizing:border-box;border-radius:50%;background:var(--g-bad);border:2.5px solid var(--muted)}
+
+/* tarjetas blancas, borde fino, sin sombra */
+.\31 0-alumno-card{position:absolute;left:24px;width:410px;box-sizing:border-box;background:var(--card);border:2px solid var(--line);border-radius:28px;padding:22px}
+.\31 0-alumno-hero{top:100px;height:286px}
+.\31 0-alumno-cal{top:402px;height:374px}
+.\31 0-alumno-tt{display:flex;align-items:center;gap:12px;height:56px}
+.\31 0-alumno-tt > span.\31 0-alumno-lb{font-size:25px;font-weight:500;color:var(--mfg);white-space:nowrap}
+.\31 0-alumno-ic{flex:none}
+.\31 0-alumno-ic svg{display:block}
+
+/* estado: texto + color */
+.\31 0-alumno-st{margin-left:auto;display:inline-flex;align-items:center;gap:9px;height:42px;padding:0 16px;border-radius:999px;background:var(--ok-bg);color:var(--ok);font-size:21px;font-weight:600;white-space:nowrap;transform-origin:100% 50%}
+.\31 0-alumno-st::before{content:'';width:11px;height:11px;border-radius:50%;background:currentColor}
+
+/* medidor de liquido */
+.\31 0-alumno-bod{display:flex;align-items:center;gap:22px;margin-top:14px}
+.\31 0-alumno-tank{position:relative;width:138px;height:164px;box-sizing:border-box;border:2px solid var(--line);border-radius:44px;background:var(--muted);overflow:hidden;isolation:isolate;flex:none}
+.\31 0-alumno-liq{position:absolute;left:0;top:0;width:134px;height:160px}
+.\31 0-alumno-bd{position:absolute;left:0;top:0;width:134px;height:160px;background:linear-gradient(180deg,#27a06a 0%,#1f8c5d 100%)}
+.\31 0-alumno-w1{position:absolute;left:0;top:-15px;width:603px;height:20px;display:block;fill:var(--g-ok)}
+.\31 0-alumno-w2{position:absolute;left:0;top:-19px;width:603px;height:20px;display:block;fill:#9ddcb9}
+.\31 0-alumno-rt{display:flex;flex-direction:column;justify-content:center;gap:12px;min-width:0}
+.\31 0-alumno-num{white-space:nowrap;line-height:1;transform-origin:0% 60%}
+.\31 0-alumno-num b{font-size:96px;font-weight:700;letter-spacing:-.03em;line-height:1}
+.\31 0-alumno-num small{font-size:40px;font-weight:600;color:var(--mfg);letter-spacing:0}
+.\31 0-alumno-cap{font-family:'Geist Mono',ui-monospace,monospace;font-size:19px;font-weight:400;color:var(--mfg);white-space:nowrap}
+
+/* calendario de racha: 5 filas x 7 semanas, contornos al inicio y se puebla por columnas */
+.\31 0-alumno-rc{margin-left:auto;display:inline-flex;align-items:center;gap:6px;height:56px;padding:0 18px 0 8px;border-radius:999px;background:var(--warn-bg);color:var(--warn);font-size:22px;font-weight:700;white-space:nowrap;transform-origin:100% 50%;position:relative;overflow:hidden}
+/* banda de luz que cruza el chip de racha una vez (la acompana el sonido sheen-s); fuera del flujo flex */
+.\31 0-alumno-sh{position:absolute;left:-70px;top:0;width:46px;height:100%;background:linear-gradient(100deg,rgba(255,255,255,0),rgba(255,255,255,.85),rgba(255,255,255,0));opacity:0;pointer-events:none}
+.\31 0-alumno-rc svg{display:block;flex:none;transform-origin:50% 90%}
+.\31 0-alumno-grid{margin-top:14px;display:grid;grid-auto-flow:column;grid-template-columns:repeat(7,44px);grid-template-rows:repeat(5,44px);gap:9px}
+.\31 0-alumno-ce{position:relative;display:block;box-sizing:border-box;width:44px;height:44px;border-radius:13px;border:2px solid var(--line);background:#faf8f5}
+.\31 0-alumno-ce[data-s="pend"]{border:2px dashed #d6cfc6;background:transparent}
+.\31 0-alumno-ce b{position:absolute;left:-2px;top:-2px;width:44px;height:44px;display:block;border-radius:13px;opacity:0}
+.\31 0-alumno-ce[data-s="ok"] b{background:rgba(39,160,106,.5)}
+.\31 0-alumno-ce[data-s="ok"][data-k="1"] b{background:var(--g-ok)}
+.\31 0-alumno-ce[data-s="warn"] b{background:var(--g-warn)}
+.\31 0-alumno-ce[data-s="bad"] b{background:var(--g-bad)}
+
+/* barra de navegacion flotante: pildora blanca con borde y boton central negro */
+.\31 0-alumno-nav{position:absolute;left:16px;right:16px;bottom:22px;height:88px;box-sizing:border-box;background:#fff;border:2px solid var(--line);border-radius:999px;display:flex;align-items:center;justify-content:space-between;padding:0 14px}
+.\31 0-alumno-ni{width:76px;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:18px;font-weight:600;color:#757069;white-space:nowrap}
+.\31 0-alumno-ni.\31 0-alumno-on{color:var(--ink)}
+.\31 0-alumno-ni svg{display:block}
+.\31 0-alumno-sp{width:92px;height:1px;flex:none}
+.\31 0-alumno-ctr{position:absolute;left:50%;top:-36px;margin-left:-46px;width:92px;height:92px;box-sizing:border-box;border-radius:50%;background:#fff;border:2px solid var(--line);display:grid;place-items:center}
+.\31 0-alumno-cb{width:76px;height:76px;border-radius:50%;background:var(--ink);color:#fff;display:grid;place-items:center}
+.\31 0-alumno-cb svg{display:block}
+/* anillo de la pulsacion del boton central: nace al tocar (tap) y se expande; el boton se encoge al 0.86 */
+.\31 0-alumno-tr{position:absolute;left:-2px;top:-2px;width:92px;height:92px;box-sizing:border-box;border-radius:50%;border:5px solid rgba(0,97,254,.6);opacity:0;pointer-events:none}
+
+/* columna derecha: etiqueta, titular por palabras y dos pildoras */
+.\31 0-alumno-eb{position:absolute;left:900px;top:168px;height:64px;box-sizing:border-box;display:inline-flex;align-items:center;gap:14px;padding:0 30px 0 14px;border-radius:999px;background:rgba(0,97,254,.08);color:var(--blue);font-size:26px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;transform-origin:50% 100%}
+.\31 0-alumno-eb svg{display:block;flex:none}
+.\31 0-alumno-h{position:absolute;left:900px;top:252px;width:900px;margin:0;font-size:120px;font-weight:700;letter-spacing:-.02em;line-height:124px;color:var(--ink)}
+.\31 0-alumno-ln{display:block;white-space:nowrap;height:124px}
+.\31 0-alumno-wd{position:relative;display:inline-block}
+.\31 0-alumno-pr{color:var(--blue)}
+.\31 0-alumno-mk{position:absolute;left:-10px;right:-10px;top:56px;bottom:12px;border-radius:14px;background:rgba(0,97,254,.13);z-index:-1;transform-origin:0% 50%;opacity:0}
+.\31 0-alumno-chips{position:absolute;left:900px;top:688px;display:flex;gap:22px}
+.\31 0-alumno-chip{display:inline-flex;align-items:center;gap:18px;height:88px;box-sizing:border-box;padding:0 38px 0 16px;border-radius:999px;background:var(--card);border:2px solid var(--line);font-size:34px;font-weight:600;white-space:nowrap;transform-origin:50% 100%}
+.\31 0-alumno-chip .\31 0-alumno-ic{display:block}
+</style>
+<script id="10-alumno-gsap" src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+
+<div id="root" data-composition-id="10-alumno" data-start="0" data-duration="4.03" data-width="1920" data-height="1080">
+  <div class="clip 10-alumno-bg" data-start="0" data-duration="4.03" data-track-index="0"></div>
+  <div class="10-alumno-world" id="10-alumno-world" data-camera>
+
+    <div class="10-alumno-glow" id="10-alumno-glow" data-layout-ignore></div>
+
+    <div class="10-alumno-phone" id="10-alumno-phone">
+      <div class="10-alumno-hd">
+        <img class="10-alumno-av" src="assets/avatars/avatar-11-xt.svg" alt="">
+        <div class="10-alumno-who"><b>Ximena Torres</b><span>Grupo 3A</span></div>
+        <div class="10-alumno-bell"><svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" data-lucide="bell" aria-hidden="true"><path d="M10.268 21a2 2 0 0 0 3.464 0"/><path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"/></svg><i class="10-alumno-dot" id="10-alumno-dot"></i></div>
+      </div>
+
+      <div class="10-alumno-card 10-alumno-hero" id="10-alumno-hero">
+        <div class="10-alumno-tt">
+          <span class="10-alumno-ic" style="display:inline-grid;place-items:center;width:56px;height:56px;border-radius:16px;background:#e3f4ea;color:#1f7a47;flex:none"><svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="calendar-check" aria-hidden="true"><path d="M8 2v3"/><path d="M16 2v3"/><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="m9 15 2 2 4-4"/></svg></span>
+          <span class="10-alumno-lb">Tu asistencia</span>
+          <div class="10-alumno-st" id="10-alumno-ok">Al día</div>
+        </div>
+        <div class="10-alumno-bod">
+          <div class="10-alumno-tank" id="10-alumno-tank">
+            <div class="10-alumno-liq" id="10-alumno-liq">
+              <svg class="10-alumno-w2" id="10-alumno-w2" viewBox="0 0 603 20" preserveAspectRatio="none" aria-hidden="true"><path d="M0 10q16.75 10 33.5 0t33.5 0t33.5 0t33.5 0t33.5 0t33.5 0t33.5 0t33.5 0t33.5 0t33.5 0t33.5 0t33.5 0t33.5 0t33.5 0t33.5 0t33.5 0t33.5 0t33.5 0V20H0Z"/></svg>
+              <div class="10-alumno-bd"></div>
+              <svg class="10-alumno-w1" id="10-alumno-w1" viewBox="0 0 603 20" preserveAspectRatio="none" aria-hidden="true"><path d="M0 10q16.75 -10 33.5 0t33.5 0t33.5 0t33.5 0t33.5 0t33.5 0t33.5 0t33.5 0t33.5 0t33.5 0t33.5 0t33.5 0t33.5 0t33.5 0t33.5 0t33.5 0t33.5 0t33.5 0V20H0Z"/></svg>
+            </div>
+          </div>
+          <div class="10-alumno-rt">
+            <div class="10-alumno-num" id="10-alumno-fig"><b id="10-alumno-n">0</b><small>&nbsp;%</small></div>
+            <span class="10-alumno-cap">29 de 33 clases</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="10-alumno-card 10-alumno-cal" id="10-alumno-cal">
+        <div class="10-alumno-tt">
+          <span class="10-alumno-lb">Tus clases</span>
+          <div class="10-alumno-rc" id="10-alumno-rc"><svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="#f5d27a" stroke="#9a6408" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="flame" aria-hidden="true"><path d="M12 3q1 4 4 6.5t3 5.5a1 1 0 0 1-14 0 5 5 0 0 1 1-3 1 1 0 0 0 5 0c0-2-1.5-3-1.5-5q0-2 2.5-4"/></svg><span>Racha de 7</span><i class="10-alumno-sh" id="10-alumno-sh" data-layout-ignore></i></div>
+        </div>
+        <div class="10-alumno-grid" id="10-alumno-grid"><i class="10-alumno-ce" data-s="ok"><b></b></i><i class="10-alumno-ce" data-s="ok"><b></b></i><i class="10-alumno-ce" data-s="ok"><b></b></i><i class="10-alumno-ce" data-s="ok"><b></b></i><i class="10-alumno-ce" data-s="ok"><b></b></i><i class="10-alumno-ce" data-s="ok"><b></b></i><i class="10-alumno-ce" data-s="ok"><b></b></i><i class="10-alumno-ce" data-s="bad"><b></b></i><i class="10-alumno-ce" data-s="ok"><b></b></i><i class="10-alumno-ce" data-s="ok"><b></b></i><i class="10-alumno-ce" data-s="ok"><b></b></i><i class="10-alumno-ce" data-s="warn"><b></b></i><i class="10-alumno-ce" data-s="ok"><b></b></i><i class="10-alumno-ce" data-s="ok"><b></b></i><i class="10-alumno-ce" data-s="ok"><b></b></i><i class="10-alumno-ce" data-s="ok"><b></b></i><i class="10-alumno-ce" data-s="ok"><b></b></i><i class="10-alumno-ce" data-s="ok"><b></b></i><i class="10-alumno-ce" data-s="bad"><b></b></i><i class="10-alumno-ce" data-s="ok"><b></b></i><i class="10-alumno-ce" data-s="ok"><b></b></i><i class="10-alumno-ce" data-s="ok"><b></b></i><i class="10-alumno-ce" data-s="ok"><b></b></i><i class="10-alumno-ce" data-s="ok"><b></b></i><i class="10-alumno-ce" data-s="ok"><b></b></i><i class="10-alumno-ce" data-s="warn"><b></b></i><i class="10-alumno-ce" data-s="ok" data-k="1"><b></b></i><i class="10-alumno-ce" data-s="ok" data-k="1"><b></b></i><i class="10-alumno-ce" data-s="ok" data-k="1"><b></b></i><i class="10-alumno-ce" data-s="ok" data-k="1"><b></b></i><i class="10-alumno-ce" data-s="ok" data-k="1"><b></b></i><i class="10-alumno-ce" data-s="ok" data-k="1"><b></b></i><i class="10-alumno-ce" data-s="ok" data-k="1"><b></b></i><i class="10-alumno-ce" data-s="pend"></i><i class="10-alumno-ce" data-s="pend"></i></div>
+      </div>
+
+      <div class="10-alumno-nav">
+        <div class="10-alumno-ni 10-alumno-on"><svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" data-lucide="house" aria-hidden="true"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span>Inicio</span></div>
+        <div class="10-alumno-ni"><svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" data-lucide="book-open" aria-hidden="true"><path d="M12 5v16"/><path d="M20.001 19A2 2 0 0022 17V5a2 2 0 00-1.999-2L16 3.002A5 5 0 0012 5a5 5 0 00-4-2H4a2 2 0 00-2 2v12a2 2 0 001.999 2H8a5 5 0 014 2 5 5 0 014-2z"/></svg><span>Clases</span></div>
+        <div class="10-alumno-sp"></div>
+        <div class="10-alumno-ni"><svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" data-lucide="bell" aria-hidden="true"><path d="M10.268 21a2 2 0 0 0 3.464 0"/><path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"/></svg><span>Avisos</span></div>
+        <div class="10-alumno-ni"><svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" data-lucide="user-round" aria-hidden="true"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-16 0"/></svg><span>Perfil</span></div>
+        <div class="10-alumno-ctr"><i class="10-alumno-tr" id="10-alumno-tr"></i><div class="10-alumno-cb" id="10-alumno-cb"><svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" data-lucide="qr-code" aria-hidden="true"><rect width="5" height="5" x="3" y="3" rx="1"/><rect width="5" height="5" x="16" y="3" rx="1"/><rect width="5" height="5" x="3" y="16" rx="1"/><path d="M21 16h-3a2 2 0 0 0-2 2v3"/><path d="M21 21v.01"/><path d="M12 7v3a2 2 0 0 1-2 2H7"/><path d="M3 12h.01"/><path d="M12 3h.01"/><path d="M12 16v.01"/><path d="M16 12h1"/><path d="M21 12v.01"/><path d="M12 21v-1"/></svg></div></div>
+      </div>
+    </div>
+
+    <div class="10-alumno-eb" id="10-alumno-eb"><span class="10-alumno-ebi" id="10-alumno-ebi" style="display:block"><svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" data-lucide="graduation-cap" aria-hidden="true"><path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z"/><path d="M22 10v6"/><path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"/></svg></span><span>Vista del alumno</span></div>
+
+    <h1 class="10-alumno-h" id="10-alumno-h" data-layout-allow-overlap>
+      <span class="10-alumno-ln" data-layout-allow-overlap><span class="10-alumno-wd" data-layout-allow-overlap>Cada</span> <span class="10-alumno-wd" data-layout-allow-overlap>alumno</span> <span class="10-alumno-wd" data-layout-allow-overlap>ve</span></span>
+      <span class="10-alumno-ln" data-layout-allow-overlap><span class="10-alumno-wd" data-layout-allow-overlap>su</span> <span class="10-alumno-wd 10-alumno-pr" id="10-alumno-pr" data-layout-allow-overlap><i class="10-alumno-mk" id="10-alumno-mk"></i>propia</span></span>
+      <span class="10-alumno-ln" data-layout-allow-overlap><span class="10-alumno-wd" data-layout-allow-overlap>asistencia.</span></span>
+    </h1>
+
+    <div class="10-alumno-chips" id="10-alumno-chips">
+      <div class="10-alumno-chip" id="10-alumno-chip-1"><span class="10-alumno-ic" style="display:inline-grid;place-items:center;width:56px;height:56px;border-radius:16px;background:#fbefd2;color:#9a6408;flex:none"><svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="bell-ring" aria-hidden="true"><path d="M10.268 21a2 2 0 0 0 3.464 0"/><path d="M22 8c0-2.3-.8-4.3-2-6"/><path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"/><path d="M4 2C2.8 3.7 2 5.7 2 8"/></svg></span><span>Aviso de límite</span></div>
+      <div class="10-alumno-chip" id="10-alumno-chip-2"><span class="10-alumno-ic" style="display:inline-grid;place-items:center;width:56px;height:56px;border-radius:16px;background:#e6eefc;color:#0061fe;flex:none"><svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="trending-up" aria-hidden="true"><path d="M16 7h6v6"/><path d="m22 7-8.5 8.5-5-5L2 17"/></svg></span><span>Proyección</span></div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+    var byId = function (id) { return document.getElementById('10-alumno-' + id); };
+    var byCls = function (c, root) { return Array.prototype.slice.call((root || document).getElementsByClassName('10-alumno-' + c)); };
+
+    function build() {
+        var world = byId('world'), glow = byId('glow'), fig = byId('fig'), num = byId('n'), tank = byId('tank');
+        var liq = byId('liq'), w1 = byId('w1'), w2 = byId('w2'), ok = byId('ok'), dot = byId('dot');
+        var rc = byId('rc'), cb = byId('cb'), tr = byId('tr'), eb = byId('eb'), ebi = byId('ebi'), mk = byId('mk');
+        var chip1 = byId('chip-1'), chip2 = byId('chip-2');
+        var words = byCls('wd');
+
+        var tl = gsap.timeline({ paused: true });
+        window.__timelines = window.__timelines || {};
+        window.__timelines['10-alumno'] = tl;
+
+/* ============================================================================================================
+   BLOQUE CANONICO v2 (sonido + camara). Se PEGA TAL CUAL dentro del <script> de cada cuadro, justo despues de crear `tl`
+   (var tl = gsap.timeline({ paused: true }); window.__timelines[ID_DEL_CUADRO] = tl;). No lo edites en el cuadro: edita este archivo.
+   Es idempotente: pegarlo en varios cuadros (mismo window) redefine las mismas funciones.
+
+   POR QUE EXISTE (contrato de sincronia v2, audit/sonido/REPORT.md 7): el instante de un sonido NO se escribe a mano. Se declara
+   como ETIQUETA del timeline con la MISMA variable de tiempo que el tween que acompana, y los scripts lo derivan:
+       extract-events.mjs --cues  ->  v2/sfx-cues.json (tiempos absolutos)  ->  mount-sfx.mjs (data-start = t - ancla del archivo)
+   Uso tipico:
+       var T = 1.05 + k * 0.3;                                                    // un solo numero para tween y sonido
+       tl.fromTo(bx[k], { opacity: 0, scale: 0.82 }, { opacity: 1, scale: 1, duration: 0.45, ease: 'back.out(1.7)', data: 'hero' }, T);
+       sfx(tl, T, 'ping-note' + (k + 1), 0.5);                                    // nombre del CATALOG.json; vol opcional
+   Convenciones:
+     - t es el instante del evento visual: inicio del tween de entrada (primer fotograma visible); para 'whoosh/swipe' el punto de
+       maxima velocidad; para sonidos con anclaje 'fin' (riser, zoom-in) el instante en que ocurre el impacto/llegada (ver CATALOG.json).
+     - `data: 'hero'` en un tween (entrada de un elemento principal, cambio de estado, contador, empuje de camara, trazo) le exige sonido:
+       verify-sfx.mjs avisa de los hero sin etiqueta sfx a +-33 ms de su inicio. Las funciones cam* lo ponen solas.
+     - Nunca llames a addLabel con nombres repetidos (GSAP sobrescribe): sfx() agrega un contador unico.
+   ============================================================================================================ */
+window.SFXN = window.SFXN || 0;   // contador unico de etiquetas (compartido por todos los cuadros de la pagina)
+window.KEYN = window.KEYN || 0;   // rotacion de teclas (continua entre frases)
+
+/* sfx(tl, t, nombre, vol) -> etiqueta 'sfx:<nombre>@<vol>#<n>' en el instante t. vol omitido = volDefecto del catalogo. */
+function sfx(tl, t, nombre, vol) {
+    tl.addLabel('sfx:' + nombre + '@' + (vol == null ? '' : vol) + '#' + (window.SFXN++), t);
+    return t;
+}
+
+/* sfxType(tl, t0, tiempos, opciones) -> tiempos absolutos de las teclas que suenan.
+   tiempos[i] = segundo (relativo a t0) en que se pinta el caracter i del texto (sale del mismo reloj que pinta el texto).
+   opciones: texto ('Hola mundo': para detectar inicios de palabra; los espacios no suenan), vol (0.35), maxPorSeg (14),
+             enter (true | segundo absoluto: agrega key-enter; true = 0.14 s tras la ultima tecla), borrados ([segundos absolutos]: key-back).
+   Decima a <= 14 teclas/s: siempre suena la primera y la ultima; el acento (vol completo) va en inicios de palabra, las demas a 0.78.
+   Rota key-1..8 sin repetir seguidas; una etiqueta por tecla (mount-sfx las hornea en un solo wav por frase, al milisegundo). */
+function sfxType(tl, t0, tiempos, op) {
+    op = op || {};
+    var txt = op.texto || '', vol = op.vol == null ? 0.35 : op.vol, gap = 1 / (op.maxPorSeg || 14), k = [], i, c, p;
+    var ult = -1;
+    for (i = 0; i < tiempos.length; i++) if (!txt || txt.charAt(i) !== ' ') ult = i;
+    for (i = 0; i < tiempos.length; i++) {
+        if (txt && txt.charAt(i) === ' ') continue;
+        c = { t: t0 + tiempos[i], ini: !!txt && (i === 0 || txt.charAt(i - 1) === ' '), ult: i === ult };
+        p = k[k.length - 1];
+        if (!p || c.t - p.t >= gap) k.push(c);
+        else if (k.length > 1 && (c.ult || (c.ini && !p.ini))) k[k.length - 1] = c;   // la ultima y las iniciales desplazan a una tecla normal
+        else if (c.ult) k.push(c);                                                       // solo hay una tecla antes: ambas suenan
+    }
+    var out = [];
+    k.forEach(function (q, j) {
+        var acento = j === 0 || q.ini || j === k.length - 1;
+        sfx(tl, q.t, 'key-' + ((window.KEYN++ * 5) % 8 + 1), +(vol * (acento ? 1 : 0.78)).toFixed(3));
+        out.push(q.t);
+    });
+    if (op.enter && k.length) sfx(tl, op.enter === true ? k[k.length - 1].t + 0.14 : op.enter, 'key-enter', +(vol * 1.1).toFixed(3));
+    (op.borrados || []).forEach(function (tb) { sfx(tl, tb, 'key-back', vol); });
+    return out;
+}
+
+/* sfxCount(tl, t0, t1, desde, hasta, opciones) -> tiempos absolutos de los 'tick'. Un tick por cambio de entero (el contador muestra
+   Math.round(valor)), <= 12/s, 4 alturas crecientes (tick-1..4 segun el avance), el ultimo con acento (tick-4 a vol x1.5).
+   opciones: ease ('power1.out': la MISMA ease del tween del contador; debe ser monotona), paso (1: valor entre ticks), vol (0.4), maxPorSeg (12). */
+function sfxCount(tl, t0, t1, desde, hasta, op) {
+    op = op || {};
+    var ease = gsap.parseEase(op.ease || 'power1.out'), paso = op.paso || 1, vol = op.vol == null ? 0.4 : op.vol, gap = 1 / (op.maxPorSeg || 12);
+    var span = Math.abs(hasta - desde), n = Math.floor(span / paso + 1e-9), ts = [], s, lo, hi, m, it;
+    for (s = 1; s <= n; s++) {                       // instante en que el valor cruza (s - 0.5) pasos: se invierte la ease por biseccion
+        lo = 0; hi = 1;
+        for (it = 0; it < 32; it++) { m = (lo + hi) / 2; if (ease(m) * span < (s - 0.5) * paso) lo = m; else hi = m; }
+        ts.push(t0 + hi * (t1 - t0));
+    }
+    var k = [];
+    ts.forEach(function (t, j) {
+        var p = k[k.length - 1];
+        if (p === undefined || t - p >= gap) k.push(t);
+        else if (j === ts.length - 1 && k.length > 1) k[k.length - 1] = t;           // el ultimo siempre suena
+        else if (j === ts.length - 1) k.push(t);
+    });
+    k.forEach(function (t, j) {
+        var ultimo = j === k.length - 1;
+        sfx(tl, t, 'tick-' + (ultimo ? 4 : Math.min(3, Math.floor(4 * j / k.length)) + 1), +Math.min(1, vol * (ultimo ? 1.5 : 1)).toFixed(3));
+    });
+    return k;
+}
+
+/* readMark(tl, t, 'frase') -> etiqueta 'read:frase' en el instante en que una frase clave queda COMPLETA y legible. El director/verificador
+   exige que el corte a otro cuadro llegue >= 0.9 s despues (tiempo de lectura). */
+function readMark(tl, t, frase) {
+    tl.addLabel('read:' + frase + '#' + (window.SFXN++), t);   // no se lee tl.labels: el compilador de render ejecuta el script con un timeline proxy sin esa propiedad
+    return t;
+}
+
+/* ---- CAMARA con GSAP puro (seek-safe). Cada helper hace un fromTo con los valores de partida que recuerda en el elemento (el estado
+   se encadena en el orden de las llamadas) e `immediateRender: false` SIEMPRE: sin eso el segundo fromTo sobre el mismo objetivo
+   aplica su `from` en el fotograma 0 y pisa al primero (bug del cuadro 6: entraba a 1.6 y saltaba a 1.0). Devuelven el fin del tween.
+   `el`: elemento o selector. Opciones comunes: dur, ease, foco [cx, cy] (punto de 1920x1080 que queda en el centro), x, y (px, pisan a foco),
+   W, H (tamano de escena, 1920x1080), sfx (nombre del catalogo o false), vol. Todos los tweens llevan data: 'hero'. ---- */
+function camInit(el, escala, x, y) {
+    var e = typeof el === 'string' ? document.querySelector(el) : el;
+    e.__cam = { s: escala == null ? 1 : escala, x: x || 0, y: y || 0, r: 0 };
+    gsap.set(e, { transformOrigin: '50% 50%', scale: e.__cam.s, x: e.__cam.x, y: e.__cam.y, rotation: 0 });
+}
+function camTo(tl, el, t, a, o, dur0, ease0, sfx0) {
+    o = o || {};
+    var e = typeof el === 'string' ? document.querySelector(el) : el;
+    if (!e.__cam) camInit(e, 1, 0, 0);
+    var c = e.__cam, dur = o.dur == null ? dur0 : o.dur, W = o.W || 1920, H = o.H || 1080;
+    var s = a.s == null ? c.s : a.s, x = a.x == null ? c.x : a.x, y = a.y == null ? c.y : a.y, r = a.r == null ? c.r : a.r;
+    if (o.foco) { x = (W / 2 - o.foco[0]) * s; y = (H / 2 - o.foco[1]) * s; }
+    if (o.x != null) x = o.x;
+    if (o.y != null) y = o.y;
+    tl.fromTo(e, { scale: c.s, x: c.x, y: c.y, rotation: c.r },
+        { scale: s, x: x, y: y, rotation: r, duration: dur, ease: o.ease || ease0, immediateRender: false, data: 'hero' }, t);
+    e.__cam = { s: s, x: x, y: y, r: r };
+    var snd = o.sfx === undefined ? sfx0 : o.sfx;
+    if (snd) sfx(tl, t, snd, o.vol);
+    return t + dur;
+}
+/* camSnap: salto de zoom en ~0.18 s con ataque (snap-zoom). Suena 'snap' por defecto (sfx: false lo apaga). */
+function camSnap(tl, el, t, escala, o) { return camTo(tl, el, t, { s: escala }, o, 0.18, 'power4.out', 'snap'); }
+/* camPush: empuje lento (acercar). Sonido opcional: sfx(tl, fin, 'zoom-in') (anclaje 'fin': t = fin del tween). */
+function camPush(tl, el, t, escala, o) { return camTo(tl, el, t, { s: escala }, o, 1.1, 'power2.inOut', null); }
+/* camPull: alejar (escala por defecto 1) en ~0.7 s. */
+function camPull(tl, el, t, escala, o) { return camTo(tl, el, t, { s: escala == null ? 1 : escala }, o, 0.7, 'power3.inOut', null); }
+/* camPan: desplazamiento RELATIVO (dx, dy en px) respecto a la posicion actual, ~0.6 s. */
+function camPan(tl, el, t, dx, dy, o) {
+    var e = typeof el === 'string' ? document.querySelector(el) : el;
+    var c = e.__cam || { x: 0, y: 0 };
+    return camTo(tl, el, t, { x: c.x + (dx || 0), y: c.y + (dy || 0) }, o, 0.6, 'power3.inOut', null);
+}
+/* camTilt: inclinacion (rotacion en grados, absoluta) ~0.5 s; camTilt(tl, el, t, 0) la endereza. */
+function camTilt(tl, el, t, grados, o) { return camTo(tl, el, t, { r: grados }, o, 0.5, 'power2.inOut', null); }
+/* ============================ fin del bloque canonico v2 ============================ */
+
+        /* ---------- tiempos del cuadro (locales; una sola variable por tween y sonido) ---------- */
+        var T_FILL = 0.35, FILL_DUR = 1.00;          /* tanque y cifra: 0.35-1.35 */
+        var T_LAND = T_FILL + FILL_DUR;              /* 1.35: aterriza el 88 % = chip, onda y golpe de camara */
+        var T_COL = [1.50, 1.70, 1.90];              /* aparicion de cada grupo de columnas (asentamiento = +0.10) */
+        var COL_SFX = ['pop-2', 'pop-4', 'pop-1'], COL_VOL = [0.38, 0.36, 0.38];
+        var T_RC = 2.10;                             /* chip Racha de 7: aparicion; asentamiento +0.10 */
+        var T_PAN = 2.30;
+        var T_P1 = 2.35, T_P2 = 2.55;                /* pildoras: aparicion; asentamiento +0.10 */
+        var T_TAP = 2.90;
+        /* Los cues 'asent' iban al inicio del tween de asentamiento (aparicion + 0.10) y sonaban 67-117 ms despues del primer fotograma visible.
+           Se adelantan 0.07 s (-> aparicion + 0.03): la etiqueta sigue a <= 33 ms del tween de APARICION y el sonido llega a +17..+50 ms del primer
+           fotograma. Los tweens visuales no cambian. */
+        var AVANCE_ASENT = 0.07;
+
+        /* ---------- CAMARA: solo con los helpers (cam[] de la hoja) ---------- */
+        camInit(world, 1.10, 374, 22);                                                                                   /* arranca al 1.10 con foco (620,520) */
+        camTo(tl, world, 0.00, { s: 1 }, { foco: [960, 540], dur: 0.40, ease: 'power3.out', sfx: false });                /* PULL-BACK bajo el wipe */
+        /* EMPUJE de escala visible mientras sube el 88 % (0.40-1.35): 1.00 -> 1.045 hacia el telefono y el titular a ~4.7 %/s medios (pico 7.4 %/s). Llega a su
+           maximo justo en el aterrizaje. Es la unica escala perceptible entre 33.8 y 35.3 s abs, antes 5 s sin zoom
+           (el pull-back de arranque ocurre bajo el wipe). Sin snap: los vecinos 09 y 11 ya lo usan. Foco (950,548): centro del telefono + titular
+           (contenido x 175-1745), un poco por debajo del centro. Sin sonido propio: debajo suenan fill y ticks */
+        camTo(tl, world, 0.40, { s: 1.045 }, { foco: [950, 548], dur: 0.95, ease: 'sine.inOut', sfx: false });
+        /* GOLPE al aterrizar el 88 % (v2.3, sin rotacion): empuje diagonal corto (~42 px) y +3.5 % de escala en 0.16 s. A 1.08 con foco (985,530)
+           el telefono (y 50-1010, x 330-800) y el contenido (x 175-1745) quedan enteros: ventana x 97-1873, y 30-1030. */
+        camTo(tl, world, T_LAND, { s: 1.08 }, { foco: [985, 530], dur: 0.16, ease: 'power4.out', sfx: 'snap', vol: 0.4 });
+        /* el regreso del golpe (1.51-1.91) devuelve la escala a 1.00: asienta la toma */
+        camTo(tl, world, T_LAND + 0.16, { s: 1 }, { foco: [960, 540], dur: 0.40, ease: 'power3.inOut', sfx: false });
+        /* PAN hacia las pildoras con un alejamiento a 0.96: en la retencion final el telefono (alto 960) queda con 70 px arriba y 89 abajo y
+           el titular y las pildoras con holgura; a 1.00 el telefono dejaba 50/70 px */
+        camTo(tl, world, T_PAN, { s: 0.96 }, { foco: [1040, 540], dur: 0.35, ease: 'power2.inOut', sfx: false });
+        sfx(tl, 2.47, 'whoosh-m', 0.15);                                                                                  /* pico del pan (2.30 + 0.175) */
+
+        /* ---------- ESCENA 1 (0.00-0.35): el telefono llega completo bajo el wipe; la columna derecha ya trae la etiqueta ---------- */
+        /* derivas decorativas (sin informacion): el liquido ondula todo el cuadro y el resplandor respira */
+        tl.fromTo(w1, { x: 0 }, { x: -268, duration: 4.03, ease: 'none' }, 0);
+        tl.fromTo(w2, { x: -268 }, { x: 0, duration: 4.03, ease: 'none' }, 0);
+        tl.fromTo(glow, { scale: 1 }, { scale: 1.05, duration: 4.03, ease: 'sine.inOut' }, 0);
+
+        /* ---------- ESCENA 2 (0.35-1.35): tanque 0 -> 88 % y cifra 0 -> 88 con la misma ease ---------- */
+        tl.fromTo(liq, { y: 182 }, { y: 19, duration: FILL_DUR, ease: 'power2.out', data: 'hero' }, T_FILL);
+        sfx(tl, T_FILL, 'fill', 0.40);
+        var cnt = { v: 0 };
+        tl.fromTo(cnt, { v: 0 }, { v: 88, duration: FILL_DUR, ease: 'power2.out', data: 'hero',
+            onUpdate: function () { num.textContent = String(Math.round(cnt.v)); } }, T_FILL);
+        sfxCount(tl, T_FILL, T_LAND, 0, 88, { ease: 'power2.out', vol: 0.22 });
+        /* la cifra crece de 0.62 a 1 hacia el final de la cuenta */
+        tl.fromTo(fig, { scale: 0.62 }, { scale: 1, duration: FILL_DUR, ease: 'power2.in' }, T_FILL);
+
+        /* etiqueta VISTA DEL ALUMNO: salta (sin sonido propio: debajo suenan el llenado y los ticks) */
+        tl.fromTo(eb, { y: 0 }, { y: -14, duration: 0.14, ease: 'power2.out' }, 0.35);
+        tl.fromTo(eb, { y: -14 }, { y: 0, duration: 0.18, ease: 'bounce.out', immediateRender: false }, 0.49);
+        tl.fromTo(ebi, { scale: 0.45, opacity: 0 }, { scale: 1.22, opacity: 1, duration: 0.16, ease: 'power3.out' }, 0.35);   /* opacity 0 antes de 0.35: sin un icono minusculo bajo la barrida */
+        tl.fromTo(ebi, { scale: 1.22 }, { scale: 1, duration: 0.24, ease: 'back.out(2)', immediateRender: false }, 0.51);
+
+        /* titular por cascada de palabras desde el fin del solape (0.35, antes 0.40): una cada 0.07 s (antes 0.10), y 14 -> 0, blur 6 -> 0,
+           0.22 s (completo a 0.87 s, antes 1.15 s). La mitad derecha estaba vacia hasta ~1 s; con el wipe no puede haber nada nuevo antes de 0.35 */
+        var T_TIT = 0.35, PASO_TIT = 0.07;
+        words.forEach(function (w, i) {
+            tl.fromTo(w, { opacity: 0, y: 14, filter: 'blur(6px)' }, { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.22, ease: 'power3.out' }, T_TIT + i * PASO_TIT);
+        });
+        /* marcador azul que se dibuja detras de "propia" (propia entra a 0.63; el marcador 0.22 s despues, con la palabra ya nitida) */
+        tl.fromTo(mk, { scaleX: 0, opacity: 1 }, { scaleX: 1, opacity: 1, duration: 0.30, ease: 'power3.out' }, 0.85);
+
+        /* ---------- ESCENA 3 (1.35-1.65): aterriza el 88 % ---------- */
+        tl.fromTo(ok, { opacity: 0, scale: 0.5 }, { opacity: 1, scale: 1.12, duration: 0.10, ease: 'power2.out' }, T_LAND);
+        tl.fromTo(ok, { scale: 1.12 }, { scale: 1, duration: 0.22, ease: 'back.out(2.4)', immediateRender: false }, T_LAND + 0.10);
+        tl.fromTo(tank, { scale: 1 }, { scale: 1.06, duration: 0.10, ease: 'power2.out' }, T_LAND);
+        tl.fromTo(tank, { scale: 1.06 }, { scale: 1, duration: 0.30, ease: 'elastic.out(1,0.5)', immediateRender: false }, T_LAND + 0.10);
+        /* la superficie deja una onda: la amplitud sube y se calma */
+        [w1, w2].forEach(function (w) {
+            tl.set(w, { transformOrigin: '50% 100%' }, 0);
+            tl.fromTo(w, { scaleY: 1 }, { scaleY: 2.4, duration: 0.12, ease: 'power2.out' }, T_LAND);
+            tl.fromTo(w, { scaleY: 2.4 }, { scaleY: 1, duration: 0.55, ease: 'power2.inOut', immediateRender: false }, T_LAND + 0.12);
+        });
+
+        /* ---------- calendario de racha: 35 contornos y los cuadros se pueblan por columnas (aparicion + asentamiento) ---------- */
+        var cells = byCls('ce', byId('grid'));
+        cells.forEach(function (c, idx) {
+            var b = c.getElementsByTagName('b')[0];
+            if (!b) return;                                                  /* los pendientes se quedan en contorno */
+            var col = Math.floor(idx / 5), row = idx % 5;
+            var g = col < 3 ? 0 : (col < 5 ? 1 : 2);
+            var t0 = T_COL[g] + (col - [0, 3, 5][g]) * 0.04 + row * 0.012;
+            tl.fromTo(b, { opacity: 0, scale: 0 }, { opacity: 1, scale: 0.7, duration: 0.10, ease: 'power2.out' }, t0);
+            tl.fromTo(b, { scale: 0.7 }, { scale: 1, duration: 0.20, ease: 'back.out(2.4)', immediateRender: false, data: (col === [0, 3, 5][g] && row === 0) ? 'hero' : undefined }, t0 + 0.10);
+        });
+        T_COL.forEach(function (t, g) { sfx(tl, t + 0.10 - AVANCE_ASENT, COL_SFX[g], COL_VOL[g]); });     /* asent adelantado: aparicion + 0.03 */
+
+        /* chip Racha de 7 con la llama (relleno duotono ambar) */
+        tl.fromTo(rc, { opacity: 0, scale: 0.4 }, { opacity: 1, scale: 0.7, duration: 0.10, ease: 'power2.out' }, T_RC);
+        tl.fromTo(rc, { scale: 0.7 }, { scale: 1, duration: 0.24, ease: 'back.out(2.6)', immediateRender: false, data: 'hero' }, T_RC + 0.10);
+        /* barrido de luz sobre el chip al asentarse (sustituye al sparkle-short de la v2.2): un solo sonido, mismo T que el barrido */
+        var T_SH = T_RC + 0.10, sh = byId('sh');
+        tl.fromTo(sh, { x: 0, opacity: 1 }, { x: 330, opacity: 1, duration: 0.30, ease: 'power1.inOut' }, T_SH);
+        sfx(tl, T_SH, 'sheen-s', 0.32);
+
+        /* ---------- pildoras: saltan una tras otra; el punto rojo de la campana late ---------- */
+        [[chip1, T_P1, 'pop-3', 0.36], [chip2, T_P2, 'pop-2', 0.36]].forEach(function (p) {
+            tl.fromTo(p[0], { opacity: 0, y: 30, scale: 0.8 }, { opacity: 1, y: 9, scale: 0.94, duration: 0.10, ease: 'power2.out' }, p[1]);
+            tl.fromTo(p[0], { y: 9, scale: 0.94 }, { y: 0, scale: 1, duration: 0.26, ease: 'back.out(2.4)', immediateRender: false, data: 'hero' }, p[1] + 0.10);
+            sfx(tl, p[1] + 0.10 - AVANCE_ASENT, p[2], p[3]);                                               /* asent adelantado */
+        });
+        tl.fromTo(dot, { scale: 1 }, { scale: 1.8, duration: 0.16, ease: 'power2.out' }, T_P1);
+        tl.fromTo(dot, { scale: 1.8 }, { scale: 1, duration: 0.30, ease: 'power2.inOut', immediateRender: false }, T_P1 + 0.16);
+
+        /* lectura completa: titular + pildoras (+0.60 s hasta el final util 3.45 s) */
+        readMark(tl, 2.85, 'Cada alumno ve su propia asistencia. Aviso de límite · Proyección');
+
+        /* ---------- cola de lectura (2.90-3.45): solo remates sin informacion nueva ---------- */
+        /* tap visible a 1920x1080 (antes: hundimiento de 4 px, imperceptible, y el cue sonaba sobre imagen quieta): el boton se encoge al
+           0.86 (-11 px) con rebote y un anillo azul nace y se expande; el cue 'tap' sigue pegado al inicio de este tween (T_TAP) */
+        tl.fromTo(cb, { scale: 1 }, { scale: 0.86, duration: 0.08, ease: 'power2.out', data: 'hero' }, T_TAP);
+        sfx(tl, T_TAP, 'tap', 0.30);
+        tl.fromTo(cb, { scale: 0.86 }, { scale: 1, duration: 0.26, ease: 'back.out(2.6)', immediateRender: false }, T_TAP + 0.08);
+        tl.fromTo(tr, { opacity: 0, scale: 1 }, { opacity: 0.6, scale: 1.12, duration: 0.06, ease: 'power2.out' }, T_TAP);
+        tl.fromTo(tr, { opacity: 0.6, scale: 1.12 }, { opacity: 0, scale: 1.75, duration: 0.40, ease: 'power2.out', immediateRender: false }, T_TAP + 0.06);
+        var flame = rc.getElementsByTagName('svg')[0];
+        /* parpadeo de la llama solo con escala vertical (v2.3: sin giro; el ancla de la base evita que 'flote') */
+        tl.set(flame, { transformOrigin: '50% 88%' }, 0);
+        tl.fromTo(flame, { scaleY: 1 }, { scaleY: 1.22, duration: 0.07, ease: 'power2.out' }, T_TAP);
+        tl.fromTo(flame, { scaleY: 1.22 }, { scaleY: 0.92, duration: 0.07, ease: 'power1.inOut', immediateRender: false }, T_TAP + 0.07);
+        tl.fromTo(flame, { scaleY: 0.92 }, { scaleY: 1.12, duration: 0.06, ease: 'power1.inOut', immediateRender: false }, T_TAP + 0.14);
+        tl.fromTo(flame, { scaleY: 1.12 }, { scaleY: 1, duration: 0.12, ease: 'power2.out', immediateRender: false }, T_TAP + 0.20);
+        /* la campana de la pildora y la flecha de proyeccion se mueven un instante */
+        var bellIc = chip1.getElementsByTagName('svg')[0], trendIc = chip2.getElementsByTagName('svg')[0];
+        /* la campana ya no se balancea (v2.3): pulso de escala en el mismo tramo 3.00-3.46 s */
+        tl.fromTo(bellIc, { scale: 1 }, { scale: 1.14, duration: 0.12, ease: 'power2.out' }, 3.00);
+        tl.fromTo(bellIc, { scale: 1.14 }, { scale: 1, duration: 0.34, ease: 'back.out(2.6)', immediateRender: false }, 3.12);
+        tl.fromTo(trendIc, { x: 0, y: 0 }, { x: 4, y: -4, duration: 0.14, ease: 'power2.out' }, 3.12);
+        tl.fromTo(trendIc, { x: 4, y: -4 }, { x: 0, y: 0, duration: 0.22, ease: 'power2.inOut', immediateRender: false }, 3.26);
+        tl.fromTo(ok, { scale: 1 }, { scale: 1.08, duration: 0.12, ease: 'power2.out', immediateRender: false }, 3.20);
+        tl.fromTo(ok, { scale: 1.08 }, { scale: 1, duration: 0.18, ease: 'power2.inOut', immediateRender: false }, 3.32);
+
+        /* ola decorativa por columnas en el calendario durante la cola de lectura: sin informacion nueva ni sonido propio,
+           solo evita que el cuadro quede inerte mientras se lee la frase (el tap y la llama son demasiado pequenos para el medidor) */
+        cells.forEach(function (c, idx) {
+            var b = c.getElementsByTagName('b')[0];
+            if (!b) return;
+            var col = Math.floor(idx / 5), row = idx % 5, tw = 2.92 + col * 0.055 + row * 0.008;
+            tl.fromTo(b, { scale: 1 }, { scale: 1.16, duration: 0.08, ease: 'power2.out', immediateRender: false }, tw);
+            tl.fromTo(b, { scale: 1.16 }, { scale: 1, duration: 0.16, ease: 'power2.inOut', immediateRender: false }, tw + 0.08);
+        });
+
+        /* la duracion del timeline es exactamente la del plan */
+        tl.set(world, {}, 4.03);
+        num.textContent = '0';
+    }
+
+    /* gsap ya esta cargado (el <script> va antes de este bloque): el timeline se construye de forma sincrona, sin esperar a 'load' */
+    build();
+})();
+</script>
+</template>

@@ -1,0 +1,536 @@
+<template>
+    <style>
+        /* Fuente real del proyecto (variable 400-700); ruta relativa a la raiz. */
+        @font-face {
+            font-family: "Hanken Grotesk";
+            font-style: normal;
+            font-weight: 400 700;
+            font-display: block;
+            src: url("assets/fonts/HankenGrotesk-var.woff2") format("woff2");
+        }
+
+        /* La raiz se estiliza por id (nunca por clase) y NO pinta el fondo: eso es del clip. */
+        #root {
+            --hook-ink: #1e1919;
+            --hook-blue: #0061fe;
+            --hook-canvas: #f7f5f2;
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 1920px;
+            height: 1080px;
+            overflow: hidden;
+            font-family: "Hanken Grotesk", system-ui, sans-serif;
+            color: var(--hook-ink);
+            -webkit-font-smoothing: antialiased;
+            text-rendering: geometricPrecision;
+        }
+
+        /* Fondo crema a pantalla completa en su propio clip. */
+        [id="01-hook-bg"] {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 1920px;
+            height: 1080px;
+            background: var(--hook-canvas);
+        }
+
+        /* Neblina azul-violeta de la esquina inferior derecha (ambient-glow-bloom, pico <= 0.45).
+           El estado de reposo vive en CSS; el tween la hace florecer desde 0.2 (fotograma 0 ya con neblina) hasta 0.42. */
+        [id="01-hook-haze"] {
+            position: absolute;
+            left: 650px;
+            top: 20px;
+            width: 1740px;
+            height: 1520px;
+            z-index: 1;
+            opacity: 0.2;
+            transform-origin: 62% 62%;
+            background:
+                radial-gradient(closest-side at 64% 60%, rgba(30, 100, 255, 1) 0%, rgba(30, 100, 255, 0) 72%),
+                radial-gradient(closest-side at 52% 56%, rgba(150, 105, 245, 0.85) 0%, rgba(150, 105, 245, 0) 78%),
+                radial-gradient(closest-side at 69% 64%, rgba(255, 150, 200, 0.65) 0%, rgba(255, 150, 200, 0) 70%);
+        }
+
+        /* Grano fino solo dentro de la mancha (misma tecnica del kit, enmascarado al halo). */
+        [id="01-hook-grain"] {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.5;
+            mix-blend-mode: multiply;
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+            -webkit-mask-image: radial-gradient(closest-side at 62% 62%, #000 0%, rgba(0, 0, 0, 0) 80%);
+            mask-image: radial-gradient(closest-side at 62% 62%, #000 0%, rgba(0, 0, 0, 0) 80%);
+        }
+
+        /* Bloque de texto: 170 px, interlineado fijo en px para que la linea base sea predecible.
+           Linea 1 centrada en y=454 (0.42 del alto); el bloque queda centrado en la mitad del cuadro. */
+        [id="01-hook-stage"] {
+            position: absolute;
+            left: 240px;
+            top: 352px;
+            width: 1560px;
+            z-index: 3;
+        }
+
+        [class~="01-hook-line"] {
+            position: relative;
+            display: block;
+            height: 188px;
+            font-size: 170px;
+            font-weight: 700;
+            line-height: 188px;
+            letter-spacing: -0.02em;
+            white-space: nowrap;
+        }
+
+        [class~="01-hook-txt"] {
+            white-space: pre;
+        }
+
+        [class~="01-hook-ink"] {
+            color: var(--hook-ink);
+        }
+
+        [class~="01-hook-accent"] {
+            color: var(--hook-blue);
+        }
+
+        /* Caret de entrada de texto: del renglon a la altura de mayusculas, siempre azul.
+           El parpadeo lo escribe el script como funcion pura del tiempo. */
+        [class~="01-hook-caret"] {
+            display: inline-block;
+            width: 9px;
+            height: 136px;
+            margin-left: 4px;
+            border-radius: 5px;
+            background: var(--hook-blue);
+            vertical-align: -17px;
+            opacity: 1;
+        }
+
+        /* Copia invisible: obliga a cargar la fuente desde el primer cuadro y fija el ancho final. */
+        [class~="01-hook-ghost"] {
+            visibility: hidden;
+            white-space: pre;
+        }
+
+        [class~="01-hook-ghost-abs"] {
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+
+        /* Envoltura de la linea 2: el marcador se dimensiona contra el texto final, no el tecleado. */
+        [class~="01-hook-wrap"] {
+            position: relative;
+            display: inline-block;
+            vertical-align: top;
+            height: 188px;
+        }
+
+        [class~="01-hook-live"] {
+            position: absolute;
+            left: 0;
+            top: 0;
+            white-space: nowrap;
+        }
+
+        /* Marcador (css-marker-patterns, modo highlight): azul suave al 15 %, bajo el cuerpo de las letras. */
+        [id="01-hook-bar"] {
+            position: absolute;
+            display: block;
+            left: -10px;
+            right: -24px;
+            top: 58px;
+            bottom: 21px;
+            border-radius: 14px;
+            background: rgba(0, 97, 254, 0.15);
+            transform-origin: left center;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        /* Destello decorativo que recorre el marcador en la cola de lectura (sin informacion nueva):
+           mantiene el cuadro vivo mientras se lee la frase completa. */
+        [id="01-hook-sheen"] {
+            position: absolute;
+            left: -260px;
+            top: 0;
+            bottom: 0;
+            width: 240px;
+            background: linear-gradient(100deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.85) 50%, rgba(255, 255, 255, 0) 100%);
+        }
+
+        [class~="01-hook-live"],
+        [class~="01-hook-ghost"] {
+            z-index: 1;
+        }
+
+        /* Mundo de la camara: UN wrapper con scale/x/y/rotation (nunca width/height); contiene neblina y bloque de texto. */
+        [id="01-hook-world"] {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 1920px;
+            height: 1080px;
+            transform-origin: 50% 50%;
+        }
+    </style>
+
+        <div id="root" data-composition-id="01-hook" data-start="0" data-duration="2.6" data-width="1920" data-height="1080">
+        <div class="clip" id="01-hook-bg" data-start="0" data-duration="2.6" data-track-index="0"></div>
+
+        <div id="01-hook-world" data-camera>
+            <div id="01-hook-haze"><div id="01-hook-grain"></div></div>
+
+            <div id="01-hook-stage">
+                <div class="01-hook-line" id="01-hook-l1"><span class="01-hook-txt 01-hook-ink" id="01-hook-t1"></span><span class="01-hook-caret" id="01-hook-c1"></span><span class="01-hook-ghost 01-hook-ghost-abs" aria-hidden="true">Pasar lista te roba</span></div>
+                <div class="01-hook-line" id="01-hook-l2"><span class="01-hook-wrap"><span id="01-hook-bar"><span id="01-hook-sheen"></span></span><span class="01-hook-ghost" aria-hidden="true">cada clase.</span><span class="01-hook-live"><span class="01-hook-txt 01-hook-accent" id="01-hook-t2"></span><span class="01-hook-caret" id="01-hook-c2"></span></span></span></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <script>
+        (function () {
+            var DUR = 2.6;   // T_MARK (2.05) + 0.55 del único zoom, que corta directo al cuadro 02
+            var MEDIO = 0.3;     // medio periodo del parpadeo (periodo 0.6 s)
+            var EPS = 1e-6;      // el reloj lineal puede dar 2.4999999 en un fotograma exacto: sin esto la tecla se pierde un cuadro
+            var ENTER = 1.267;    // Enter: el caret cae a la linea 2 (mismo instante que key-enter y el seguimiento vertical)
+            var T_MARK = 2.05;   // la frase queda completa (la voz termina a 2.10): marcador + neblina + snap-zoom + draw caen juntos
+            var CARET_DX = 1334; // del final de la linea 1 al inicio de la linea 2 (medido con getBoundingClientRect a 1.6 s)
+
+            // Tecleo SINCRONIZADO con la voz: cada letra aparece cuando la locución la pronuncia (tiempos por carácter de v2/voz-alineacion.json, línea 01).
+            // Linea 1: se teclea completa y SIN errores (la persona dueña no quiere el tropiezo de la v1: "rroba" -> borrar -> "roba").
+            // '<' = retroceso (ya no se usa en este cuadro, pero el reloj lo soporta). Tiempos LOCALES; 'roba' ocupa el hueco de la correccion.
+            var K1 = [
+                [0.18, 'P'],
+                [0.296, 'a'],
+                [0.366, 's'],
+                [0.424, 'a'],
+                [0.493, 'r'],
+                [0.528, ' '],
+                [0.575, 'l'],
+                [0.61, 'i'],
+                [0.691, 's'],
+                [0.737, 't'],
+                [0.784, 'a'],
+                [0.83, ' '],
+                [0.888, 't'],
+                [0.935, 'e'],
+                [0.969, ' '],
+                [1.028, 'r'],
+                [1.086, 'o'],
+                [1.144, 'b'],
+                [1.202, 'a']
+            ];
+
+            // Linea 2: tras Enter escribe "cada clase." en azul; el punto cae a 2.50 = read_mark.
+            var K2 = [
+                [1.283, 'c'],
+                [1.318, 'a'],
+                [1.387, 'd'],
+                [1.434, 'a'],
+                [1.469, ' '],
+                [1.504, 'c'],
+                [1.562, 'l'],
+                [1.631, 'a'],
+                [1.713, 's'],
+                [1.794, 'e'],
+                [1.921, '.']
+            ];
+
+            // Convierte las teclas en estados completos de texto (discrete-text-sequence).
+            function estados(teclas) {
+                var texto = '';
+                var salida = [{ t: 0, text: '' }];
+                for (var i = 0; i < teclas.length; i++) {
+                    if (teclas[i][1] === '<') {
+                        texto = texto.slice(0, -1);
+                    } else {
+                        texto += teclas[i][1];
+                    }
+                    salida.push({ t: teclas[i][0], text: texto });
+                }
+                return salida;
+            }
+
+            function tiempos(teclas, inicio) {
+                var salida = [inicio];
+                for (var i = 0; i < teclas.length; i++) {
+                    salida.push(teclas[i][0]);
+                }
+                return salida;
+            }
+
+            // Tiempos de las teclas que PINTAN un caracter (sin el retroceso): alimentan a sfxType con el mismo reloj del texto.
+            function soloCaracteres(teclas) {
+                var salida = [];
+                for (var i = 0; i < teclas.length; i++) {
+                    if (teclas[i][1] !== '<') {
+                        salida.push(teclas[i][0]);
+                    }
+                }
+                return salida;
+            }
+
+            var E1 = estados(K1);
+            var E2 = estados(K2);
+            var CAMBIOS1 = tiempos(K1, 0);
+            var CAMBIOS2 = tiempos(K2, ENTER);
+
+            // Busqueda inversa: el ultimo estado cuyo tiempo ya paso.
+            function textoEn(lista, t) {
+                for (var i = lista.length - 1; i >= 0; i--) {
+                    if (t + EPS >= lista[i].t) {
+                        return lista[i].text;
+                    }
+                }
+                return '';
+            }
+
+            // Ultimo cambio (tecla) previo a t. Funcion pura: igual al avanzar o retroceder.
+            function ultimoCambio(lista, t) {
+                var ultimo = lista[0];
+                for (var i = 0; i < lista.length; i++) {
+                    if (lista[i] <= t + EPS) {
+                        ultimo = lista[i];
+                    }
+                }
+                return ultimo;
+            }
+
+            // Onda cuadrada: fijo mientras se teclea (cada tecla reinicia la fase) y parpadea en reposo.
+            function encendido(t, lista) {
+                return Math.floor((t + EPS - ultimoCambio(lista, t)) / MEDIO) % 2 === 0;
+            }
+
+            var t1 = document.getElementById('01-hook-t1');
+            var t2 = document.getElementById('01-hook-t2');
+            var c1 = document.getElementById('01-hook-c1');
+            var c2 = document.getElementById('01-hook-c2');
+            var haze = document.getElementById('01-hook-haze');
+            var bar = document.getElementById('01-hook-bar');
+            var sheen = document.getElementById('01-hook-sheen');
+            var world = document.getElementById('01-hook-world');
+
+            function pintar(t) {
+                var enLinea2 = t + EPS >= ENTER;
+                t1.textContent = textoEn(E1, t);
+                t2.textContent = textoEn(E2, t);
+                c1.style.opacity = (!enLinea2 && encendido(t, CAMBIOS1)) ? '1' : '0';
+                c2.style.opacity = (enLinea2 && encendido(t, CAMBIOS2)) ? '1' : '0';
+            }
+
+            // Reloj: la escritura se pinta en el setter, asi corre en cada render del timeline
+            // (incluso en los saltos con eventos suprimidos) y no depende de callbacks.
+            var reloj = {};
+            var tActual = 0;
+            Object.defineProperty(reloj, 't', {
+                enumerable: true,
+                configurable: true,
+                get: function () { return tActual; },
+                set: function (v) { tActual = v; pintar(v); }
+            });
+            pintar(0);
+
+            var tl = gsap.timeline({ paused: true });
+            window.__timelines = window.__timelines || {};
+            window.__timelines['01-hook'] = tl;
+
+            /* ============================================================================================================
+               BLOQUE CANONICO v2 (sonido + camara). Se PEGA TAL CUAL dentro del <script> de cada cuadro, justo despues de crear `tl`
+               (var tl = gsap.timeline({ paused: true }); window.__timelines[ID_DEL_CUADRO] = tl;). No lo edites en el cuadro: edita este archivo.
+               Es idempotente: pegarlo en varios cuadros (mismo window) redefine las mismas funciones.
+
+               POR QUE EXISTE (contrato de sincronia v2, audit/sonido/REPORT.md 7): el instante de un sonido NO se escribe a mano. Se declara
+               como ETIQUETA del timeline con la MISMA variable de tiempo que el tween que acompana, y los scripts lo derivan:
+                   extract-events.mjs --cues  ->  v2/sfx-cues.json (tiempos absolutos)  ->  mount-sfx.mjs (data-start = t - ancla del archivo)
+               Uso tipico:
+                   var T = 1.05 + k * 0.3;                                                    // un solo numero para tween y sonido
+                   tl.fromTo(bx[k], { opacity: 0, scale: 0.82 }, { opacity: 1, scale: 1, duration: 0.45, ease: 'back.out(1.7)', data: 'hero' }, T);
+                   sfx(tl, T, 'ping-note' + (k + 1), 0.5);                                    // nombre del CATALOG.json; vol opcional
+               Convenciones:
+                 - t es el instante del evento visual: inicio del tween de entrada (primer fotograma visible); para 'whoosh/swipe' el punto de
+                   maxima velocidad; para sonidos con anclaje 'fin' (riser, zoom-in) el instante en que ocurre el impacto/llegada (ver CATALOG.json).
+                 - `data: 'hero'` en un tween (entrada de un elemento principal, cambio de estado, contador, empuje de camara, trazo) le exige sonido:
+                   verify-sfx.mjs avisa de los hero sin etiqueta sfx a +-33 ms de su inicio. Las funciones cam* lo ponen solas.
+                 - Nunca llames a addLabel con nombres repetidos (GSAP sobrescribe): sfx() agrega un contador unico.
+               ============================================================================================================ */
+            window.SFXN = window.SFXN || 0;   // contador unico de etiquetas (compartido por todos los cuadros de la pagina)
+            window.KEYN = window.KEYN || 0;   // rotacion de teclas (continua entre frases)
+
+            /* sfx(tl, t, nombre, vol) -> etiqueta 'sfx:<nombre>@<vol>#<n>' en el instante t. vol omitido = volDefecto del catalogo. */
+            function sfx(tl, t, nombre, vol) {
+                tl.addLabel('sfx:' + nombre + '@' + (vol == null ? '' : vol) + '#' + (window.SFXN++), t);
+                return t;
+            }
+
+            /* sfxType(tl, t0, tiempos, opciones) -> tiempos absolutos de las teclas que suenan.
+               tiempos[i] = segundo (relativo a t0) en que se pinta el caracter i del texto (sale del mismo reloj que pinta el texto).
+               opciones: texto ('Hola mundo': para detectar inicios de palabra; los espacios no suenan), vol (0.35), maxPorSeg (14),
+                         enter (true | segundo absoluto: agrega key-enter; true = 0.14 s tras la ultima tecla), borrados ([segundos absolutos]: key-back).
+               Decima a <= 14 teclas/s: siempre suena la primera y la ultima; el acento (vol completo) va en inicios de palabra, las demas a 0.78.
+               Rota key-1..8 sin repetir seguidas; una etiqueta por tecla (mount-sfx las hornea en un solo wav por frase, al milisegundo). */
+            function sfxType(tl, t0, tiempos, op) {
+                op = op || {};
+                var txt = op.texto || '', vol = op.vol == null ? 0.35 : op.vol, gap = 1 / (op.maxPorSeg || 14), k = [], i, c, p;
+                var ult = -1;
+                for (i = 0; i < tiempos.length; i++) if (!txt || txt.charAt(i) !== ' ') ult = i;
+                for (i = 0; i < tiempos.length; i++) {
+                    if (txt && txt.charAt(i) === ' ') continue;
+                    c = { t: t0 + tiempos[i], ini: !!txt && (i === 0 || txt.charAt(i - 1) === ' '), ult: i === ult };
+                    p = k[k.length - 1];
+                    if (!p || c.t - p.t >= gap) k.push(c);
+                    else if (k.length > 1 && (c.ult || (c.ini && !p.ini))) k[k.length - 1] = c;   // la ultima y las iniciales desplazan a una tecla normal
+                    else if (c.ult) k.push(c);                                                       // solo hay una tecla antes: ambas suenan
+                }
+                var out = [];
+                k.forEach(function (q, j) {
+                    var acento = j === 0 || q.ini || j === k.length - 1;
+                    sfx(tl, q.t, 'key-' + ((window.KEYN++ * 5) % 8 + 1), +(vol * (acento ? 1 : 0.78)).toFixed(3));
+                    out.push(q.t);
+                });
+                if (op.enter && k.length) sfx(tl, op.enter === true ? k[k.length - 1].t + 0.14 : op.enter, 'key-enter', +(vol * 1.1).toFixed(3));
+                (op.borrados || []).forEach(function (tb) { sfx(tl, tb, 'key-back', vol); });
+                return out;
+            }
+
+            /* sfxCount(tl, t0, t1, desde, hasta, opciones) -> tiempos absolutos de los 'tick'. Un tick por cambio de entero (el contador muestra
+               Math.round(valor)), <= 12/s, 4 alturas crecientes (tick-1..4 segun el avance), el ultimo con acento (tick-4 a vol x1.5).
+               opciones: ease ('power1.out': la MISMA ease del tween del contador; debe ser monotona), paso (1: valor entre ticks), vol (0.4), maxPorSeg (12). */
+            function sfxCount(tl, t0, t1, desde, hasta, op) {
+                op = op || {};
+                var ease = gsap.parseEase(op.ease || 'power1.out'), paso = op.paso || 1, vol = op.vol == null ? 0.4 : op.vol, gap = 1 / (op.maxPorSeg || 12);
+                var span = Math.abs(hasta - desde), n = Math.floor(span / paso + 1e-9), ts = [], s, lo, hi, m, it;
+                for (s = 1; s <= n; s++) {                       // instante en que el valor cruza (s - 0.5) pasos: se invierte la ease por biseccion
+                    lo = 0; hi = 1;
+                    for (it = 0; it < 32; it++) { m = (lo + hi) / 2; if (ease(m) * span < (s - 0.5) * paso) lo = m; else hi = m; }
+                    ts.push(t0 + hi * (t1 - t0));
+                }
+                var k = [];
+                ts.forEach(function (t, j) {
+                    var p = k[k.length - 1];
+                    if (p === undefined || t - p >= gap) k.push(t);
+                    else if (j === ts.length - 1 && k.length > 1) k[k.length - 1] = t;           // el ultimo siempre suena
+                    else if (j === ts.length - 1) k.push(t);
+                });
+                k.forEach(function (t, j) {
+                    var ultimo = j === k.length - 1;
+                    sfx(tl, t, 'tick-' + (ultimo ? 4 : Math.min(3, Math.floor(4 * j / k.length)) + 1), +Math.min(1, vol * (ultimo ? 1.5 : 1)).toFixed(3));
+                });
+                return k;
+            }
+
+            /* readMark(tl, t, 'frase') -> etiqueta 'read:frase' en el instante en que una frase clave queda COMPLETA y legible. El director/verificador
+               exige que el corte a otro cuadro llegue >= 0.9 s despues (tiempo de lectura). */
+            function readMark(tl, t, frase) {
+                tl.addLabel('read:' + frase + '#' + (window.SFXN++), t);   // no se lee tl.labels: el compilador de render ejecuta el script con un timeline proxy sin esa propiedad
+                return t;
+            }
+
+            /* ---- CAMARA con GSAP puro (seek-safe). Cada helper hace un fromTo con los valores de partida que recuerda en el elemento (el estado
+               se encadena en el orden de las llamadas) e `immediateRender: false` SIEMPRE: sin eso el segundo fromTo sobre el mismo objetivo
+               aplica su `from` en el fotograma 0 y pisa al primero (bug del cuadro 6: entraba a 1.6 y saltaba a 1.0). Devuelven el fin del tween.
+               `el`: elemento o selector. Opciones comunes: dur, ease, foco [cx, cy] (punto de 1920x1080 que queda en el centro), x, y (px, pisan a foco),
+               W, H (tamano de escena, 1920x1080), sfx (nombre del catalogo o false), vol. Todos los tweens llevan data: 'hero'. ---- */
+            function camInit(el, escala, x, y) {
+                var e = typeof el === 'string' ? document.querySelector(el) : el;
+                e.__cam = { s: escala == null ? 1 : escala, x: x || 0, y: y || 0, r: 0 };
+                gsap.set(e, { transformOrigin: '50% 50%', scale: e.__cam.s, x: e.__cam.x, y: e.__cam.y, rotation: 0 });
+            }
+            function camTo(tl, el, t, a, o, dur0, ease0, sfx0) {
+                o = o || {};
+                var e = typeof el === 'string' ? document.querySelector(el) : el;
+                if (!e.__cam) camInit(e, 1, 0, 0);
+                var c = e.__cam, dur = o.dur == null ? dur0 : o.dur, W = o.W || 1920, H = o.H || 1080;
+                var s = a.s == null ? c.s : a.s, x = a.x == null ? c.x : a.x, y = a.y == null ? c.y : a.y, r = a.r == null ? c.r : a.r;
+                if (o.foco) { x = (W / 2 - o.foco[0]) * s; y = (H / 2 - o.foco[1]) * s; }
+                if (o.x != null) x = o.x;
+                if (o.y != null) y = o.y;
+                tl.fromTo(e, { scale: c.s, x: c.x, y: c.y, rotation: c.r },
+                    { scale: s, x: x, y: y, rotation: r, duration: dur, ease: o.ease || ease0, immediateRender: false, data: 'hero' }, t);
+                e.__cam = { s: s, x: x, y: y, r: r };
+                var snd = o.sfx === undefined ? sfx0 : o.sfx;
+                if (snd) sfx(tl, t, snd, o.vol);
+                return t + dur;
+            }
+            /* camSnap: salto de zoom en ~0.18 s con ataque (snap-zoom). Suena 'snap' por defecto (sfx: false lo apaga). */
+            function camSnap(tl, el, t, escala, o) { return camTo(tl, el, t, { s: escala }, o, 0.18, 'power4.out', 'snap'); }
+            /* camPush: empuje lento (acercar). Sonido opcional: sfx(tl, fin, 'zoom-in') (anclaje 'fin': t = fin del tween). */
+            function camPush(tl, el, t, escala, o) { return camTo(tl, el, t, { s: escala }, o, 1.1, 'power2.inOut', null); }
+            /* camPull: alejar (escala por defecto 1) en ~0.7 s. */
+            function camPull(tl, el, t, escala, o) { return camTo(tl, el, t, { s: escala == null ? 1 : escala }, o, 0.7, 'power3.inOut', null); }
+            /* camPan: desplazamiento RELATIVO (dx, dy en px) respecto a la posicion actual, ~0.6 s. */
+            function camPan(tl, el, t, dx, dy, o) {
+                var e = typeof el === 'string' ? document.querySelector(el) : el;
+                var c = e.__cam || { x: 0, y: 0 };
+                return camTo(tl, el, t, { x: c.x + (dx || 0), y: c.y + (dy || 0) }, o, 0.6, 'power3.inOut', null);
+            }
+            /* camTilt: inclinacion (rotacion en grados, absoluta) ~0.5 s; camTilt(tl, el, t, 0) la endereza. */
+            function camTilt(tl, el, t, grados, o) { return camTo(tl, el, t, { r: grados }, o, 0.5, 'power2.inOut', null); }
+            /* ============================ fin del bloque canonico v2 ============================ */
+
+            // ---- Camara: empuje que acelera con el tecleo -> seguimiento vertical -> snap-zoom sobre el marcador. ----
+            // Los tres focos encuadran SIEMPRE la frase completa (linea 1 x 245-1570, linea 2 x 245-1010).
+            camInit(world, 1, 0, 0);
+            /* el empuje termina EXACTAMENTE en el salto de línea (ENTER): el seguimiento vertical parte de donde está la cámara, sin brinco */
+            camTo(tl, world, 0, { s: 1.12 }, { foco: [900, 560], dur: ENTER, ease: 'power1.in', sfx: false }, ENTER, 'power1.in', null);
+            camTo(tl, world, ENTER, { s: 1.12 }, { foco: [900, 624], dur: 0.25, ease: 'power3.out', sfx: false }, 0.25, 'power3.out', null);
+            // El foco x del snap es 900 (no 800): a 1.22 la linea 1 (x 245-1570) acaba en 1773 px, con 147 px de margen al borde derecho
+            // (con 800 'roba' terminaba en 1895, a 25 px del borde). Sigue conteniendo la linea 2 (x 161-1094 en pantalla).
+            // (sin snap aquí: el único zoom del cuadro arranca en T_MARK y lleva a la siguiente escena; ver T_SALIDA)
+
+            // Ventana de salida (3.20-3.50, la lectura ya termino): la camara empuja de 1.22 a 1.85 (x1.5) con foco en el INICIO de 'cada clase.'
+            // (x 330) y ease 'out' (ataque inmediato: se mueve desde el primer fotograma, y cuando el zoom de la transicion acelera la camara ya hizo casi todo su recorrido). Asi el zoom in de la transicion (el saliente x2 en power3.in, que por si solo casi no se nota en los
+            // 3 primeros fotogramas) CONTINUA un movimiento que ya venia con fuerza. El foco a la izquierda empuja el texto hacia la mitad
+            // derecha: el anillo de 02 (x 200-760) entra sobre crema y no sobre 'cada clase.'. Sin sonido propio: lo pone el zoom-in de la transicion.
+            var T_SALIDA = T_MARK; // el ÚNICO zoom: arranca cuando la frase queda completa y termina en el corte al cuadro 02
+            // El zoom a "cada clase" ES la transición al cuadro 02: acelera (power3.in) hasta el corte seco y se desenfoca al final; el 02 entra
+            // acercado y desenfocado sobre el cronómetro (misma zona de la pantalla) y se aleja: un solo movimiento continuo.
+            camTo(tl, world, T_SALIDA, { s: 3.6 }, { foco: [430, 640], dur: 0.55, ease: 'power2.in', sfx: false });
+            tl.fromTo(world, { filter: 'blur(0px)' }, { filter: 'blur(10px)', duration: 0.19, ease: 'power2.in', immediateRender: false }, T_SALIDA + 0.36);
+
+            // ---- Texto: un solo reloj lineal para pintar texto y caret; las teclas suenan con los MISMOS tiempos. ----
+            tl.to(reloj, { t: DUR, duration: DUR, ease: 'none', data: 'hero' }, 0);
+            sfxType(tl, 0, soloCaracteres(K1), { texto: 'Pasar lista te roba', vol: 0.30, maxPorSeg: 14, enter: ENTER });
+            sfxType(tl, 0, soloCaracteres(K2), { texto: 'cada clase.', vol: 0.30, maxPorSeg: 14 });
+
+            // ---- Neblina: florece desde el fotograma 0 (0.2 -> 0.42) y pulsa con el golpe del marcador. ----
+            var T_HAZE = 0;
+            tl.fromTo(haze,
+                { opacity: 0.2, scale: 0.86 },
+                { opacity: 0.42, scale: 1, duration: 0.9, ease: 'power2.out', data: 'hero' },
+                T_HAZE);
+            sfx(tl, T_HAZE, 'soft-in', 0.30);
+
+            // ---- Enter: el caret SALTA al inicio de la linea 2 (como al teclear de verdad). Antes volaba 0.25 s, pero ahora el tecleo sigue a
+            // la voz y "cada" empieza a escribirse apenas 16 ms despues del Enter: el texto aparecia mientras el caret seguia en el aire. ----
+            tl.fromTo(c2,
+                { x: CARET_DX, y: -188 },
+                { x: 0, y: 0, duration: 0.01, ease: 'none', data: 'hero' },
+                ENTER);
+
+            // ---- Golpe de 2.50: marcador azul + pulso de neblina (la frase ya esta completa y legible). ----
+            tl.fromTo(bar,
+                { scaleX: 0, skewX: -2 },
+                { scaleX: 1, skewX: -2, duration: 0.24, ease: 'power3.out', data: 'hero' },
+                T_MARK);
+            sfx(tl, T_MARK, 'draw', 0.35);
+            tl.fromTo(haze, { opacity: 0.42 }, { opacity: 0.6, duration: 0.15, ease: 'power2.out', immediateRender: false }, T_MARK);
+            tl.fromTo(haze, { opacity: 0.6 }, { opacity: 0.42, duration: 0.15, ease: 'power2.inOut', immediateRender: false }, T_MARK + 0.15);
+
+            // ---- Cola de lectura (2.74-3.20): solo remates decorativos, nada de informacion nueva. ----
+            // Destello sobre el marcador y respiracion lenta de la neblina; ambos terminan antes de la ventana de salida (3.20).
+            tl.fromTo(sheen, { x: 0 }, { x: 1180, duration: 0.36, ease: 'power1.inOut' }, T_MARK + 0.2);
+            tl.fromTo(haze, { opacity: 0.42, scale: 1 }, { opacity: 0.52, scale: 1.1, duration: 0.5, ease: 'power1.inOut', immediateRender: false }, T_MARK + 0.25);
+
+            readMark(tl, T_MARK, 'Pasar lista te roba cada clase.');
+        })();
+    </script>
+</template>
