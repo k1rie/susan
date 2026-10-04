@@ -12,7 +12,8 @@ import zlib from 'node:zlib';
 const args = process.argv.slice(2);
 const json = args.includes('--json');
 const web = path.resolve(args.find((a) => !a.startsWith('--')) ?? 'web');
-const next = fs.realpathSync(path.join(web, '.next'));
+// NEXT_DIST_DIR permite medir un build hecho en otro directorio (p. ej. NEXT_DIST_DIR=.next-bundle) sin pisar el .next del servidor de desarrollo.
+const next = fs.realpathSync(path.join(web, process.env.NEXT_DIST_DIR || '.next'));
 
 const RUTAS = {
     '/login': '(public)/login',

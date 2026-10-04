@@ -1,5 +1,5 @@
 import BrandMark from '@/components/layout/BrandMark/BrandMark.jsx';
-import { BlurText } from '@/components/motion';
+import BlurText from '@/components/motion/BlurText';
 import Resaltado from '@/components/home/Resaltado';
 import PanelProducto from '../PanelProducto';
 

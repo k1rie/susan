@@ -1,16 +1,20 @@
 'use client';
 
 import { usePathname, useRouter } from 'next/navigation';
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import Alert from '@/components/ui/Alert/Alert.jsx';
+import { Suspense, lazy, useCallback, useEffect, useMemo, useState } from 'react';
 import { modulosActivos, modulosProximos } from '@/lib/modulos.js';
 import BottomNav from '../BottomNav/BottomNav.jsx';
-import PaletaComandos from '../PaletaComandos/PaletaComandos.jsx';
 import { construirComandos } from '../PaletaComandos/paleta.utils.js';
 import { ShellContext } from '../ShellContext.jsx';
 import Sidebar from '../Sidebar/Sidebar.jsx';
-import { navParaRol } from '../Sidebar/navItems.js';
+import { accionCentralParaRol, navParaRol } from '../Sidebar/navItems.js';
 import TopbarMovil from '../TopbarMovil/TopbarMovil.jsx';
+
+// Carga diferida (presupuesto de JS inicial de /docente, docs/DECISIONS.md): la paleta solo hace falta al abrirla y el reloj de
+// demostración solo existe en modo local. React.lazy en vez de next/dynamic: no suma el runtime de next/dynamic al shell.
+const cargarPaleta = () => import('../PaletaComandos/PaletaComandos.jsx');
+const PaletaComandos = lazy(cargarPaleta);
+const RelojDemo = lazy(() => import('../RelojDemo/RelojDemo.jsx'));
 
 // Estructura de las pantallas autenticadas (referencia: Dropbox Dash): lienzo crema con el riel a la izquierda y el contenido en un
 // panel blanco flotante de esquinas redondeadas que hace su propio scroll en escritorio; en móvil, barra superior + barra inferior
@@ -25,6 +29,8 @@ export default function AppShell({ me, relojSimulado = false, onSalir, children 
     const cerrarPaleta = useCallback(() => setPaletaAbierta(false), []);
 
     const nav = useMemo(() => navParaRol(me?.rol), [me?.rol]);
+    // Botón central de la barra inferior móvil: la acción principal del rol (docente: «Pasar lista»); null = búsqueda por omisión.
+    const accionCentral = useMemo(() => accionCentralParaRol(me?.rol), [me?.rol]);
     const activos = useMemo(() => modulosActivos(me?.rol), [me?.rol]);
     const proximos = useMemo(() => modulosProximos(me?.rol), [me?.rol]);
     const comandos = useMemo(() => construirComandos({ nav, activos, proximos }), [nav, activos, proximos]);
@@ -38,6 +44,18 @@ export default function AppShell({ me, relojSimulado = false, onSalir, children 
         window.addEventListener('susan:sesion-expirada', alExpirar);
         return () => window.removeEventListener('susan:sesion-expirada', alExpirar);
     }, [router, pathname]);
+
+    // Precarga la paleta cuando el navegador queda libre, para que el primer ⌘K abra sin esperar la descarga.
+    // Si la precarga falla (sin red) no pasa nada: la paleta se vuelve a pedir al abrirla.
+    useEffect(() => {
+        const precargar = () => cargarPaleta().catch(() => {});
+        if (typeof window.requestIdleCallback === 'function') {
+            const id = window.requestIdleCallback(precargar);
+            return () => window.cancelIdleCallback?.(id);
+        }
+        const id = window.setTimeout(precargar, 2000);
+        return () => window.clearTimeout(id);
+    }, []);
 
     // ⌘K / Ctrl+K abre la paleta desde cualquier pantalla.
     useEffect(() => {
@@ -76,14 +94,21 @@ export default function AppShell({ me, relojSimulado = false, onSalir, children 
                     className="min-h-dvh min-w-0 flex-1 bg-card pb-24 pt-14 lg:m-2 lg:ml-0 lg:min-h-0 lg:overflow-y-auto lg:rounded-2xl lg:border lg:border-border/60 lg:pb-0 lg:pt-0"
                 >
                     {relojSimulado && (
-                        <div className="mx-auto max-w-[68rem] px-4 pt-4 lg:px-12">
-                            <Alert tone="warning">Reloj simulado activo (solo desarrollo)</Alert>
+                        // Reloj de demostración (solo desarrollo local): muestra la hora simulada y deja adelantarla para probar el ciclo de una sesión.
+                        <div className="mx-auto max-w-[68rem] px-4 pt-3 lg:px-12">
+                            <Suspense fallback={null}>
+                                <RelojDemo />
+                            </Suspense>
                         </div>
                     )}
                     <div className="mx-auto w-full max-w-[68rem] px-4 pb-16 pt-6 lg:px-12 lg:pt-10">{children}</div>
                 </main>
-                <BottomNav items={nav} pathname={pathname} onMas={() => setMenuAbierto(true)} />
-                <PaletaComandos open={paletaAbierta} onClose={cerrarPaleta} comandos={comandos} onSalir={onSalir} />
+                <BottomNav items={nav} pathname={pathname} onMas={() => setMenuAbierto(true)} onBuscar={abrirPaleta} accionCentral={accionCentral} />
+                {paletaAbierta && (
+                    <Suspense fallback={null}>
+                        <PaletaComandos open onClose={cerrarPaleta} comandos={comandos} onSalir={onSalir} />
+                    </Suspense>
+                )}
             </div>
         </ShellContext.Provider>
     );

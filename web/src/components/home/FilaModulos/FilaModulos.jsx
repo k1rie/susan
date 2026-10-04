@@ -1,7 +1,7 @@
 import { ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { useId } from 'react';
-import { StaggerList } from '@/components/motion';
+import StaggerList from '@/components/motion/StaggerList';
 import ModuloCard from '../ModuloCard';
 
 // Sección de tarjetas de módulo (como «Created by me» en Dash): título + subtítulo, enlace «Ver todo» y una cuadrícula de
