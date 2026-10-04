@@ -168,12 +168,21 @@ def create_app(settings: Settings | None = None, storage=None, embedder=None) ->
         app.state.vision = Vision(emb, settings)
         app.state.manager = IndexManager(st, settings.dimension, emb.model_name, settings.index_accept_models)
         app.state.storage = st
-        if settings.index_bootstrap_version:
+        # Al arrancar (deploy, reinicio o despertar tras dormir) la memoria esta vacia: se carga la version fijada a mano o,
+        # si no hay, la que la base marca en uso. Sin esto el servicio no reconoceria a nadie hasta la siguiente activacion.
+        version, origen = settings.index_bootstrap_version, 'INDEX_BOOTSTRAP_VERSION'
+        if not version:
+            origen = 'indice en uso de la base'
             try:
-                app.state.manager.activate(settings.index_bootstrap_version)
-                log.info('Indice %s cargado al arrancar.', settings.index_bootstrap_version)
+                version = st.active_index_version()
+            except Exception as e:
+                log.error('No se pudo consultar el indice en uso: %s', getattr(e, 'message', e))
+        if version:
+            try:
+                app.state.manager.activate(version)
+                log.info('Indice %s cargado al arrancar (%s).', version, origen)
             except Exception as e:  # el servicio sigue vivo; recognize respondera 409 hasta activar
-                log.error('No se pudo cargar INDEX_BOOTSTRAP_VERSION: %s', getattr(e, 'message', e))
+                log.error('No se pudo cargar el indice %s (%s): %s', version, origen, getattr(e, 'message', e))
         yield
 
     app = FastAPI(title='SUSAN recognition-service', version='1.0.0', lifespan=lifespan,

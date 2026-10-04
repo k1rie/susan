@@ -34,7 +34,7 @@ modelos ya descargados; sin `MODEL_DIR` toma `.models/`).
 | `STORAGE_DIR` | `web/.local/storage` (ruta absoluta del repo) | Raiz del modo local |
 | `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `BUCKET` | `-`, `-`, `susan-private` | Storage REST con service_role (solo servidor) |
 | `INDEX_ACCEPT_MODELS` | vacia (estricto) | Lista separada por comas de modelos de indice AJENOS que se aceptan al **leer** (activar, manifiesto, base de un `build`). Solo para pruebas locales: `scripts/dev-modo.sh` la fija a `fake-hash` en modo insightface y a `buffalo_s` en modo fake. Un `build` siempre escribe el indice nuevo con el modelo propio. Cargar un indice ajeno deja un `WARNING` en el log |
-| `INDEX_BOOTSTRAP_VERSION` | vacia | Version a cargar al iniciar; sin ella, 409 `INDEX_NOT_LOADED` hasta `/v1/index/activate` |
+| `INDEX_BOOTSTRAP_VERSION` | vacia | Version a cargar al iniciar. Vacia: con `STORAGE_BACKEND=supabase` se carga la que la base marca en uso (`svc_indice_en_uso`), asi un reinicio o despertar no deja el servicio sin indice; en local o sin indice en uso, 409 `INDEX_NOT_LOADED` hasta `/v1/index/activate` |
 | `ALLOW_PRIVATE_CAMERAS` | `0` | `1` permite camaras en IP privadas/loopback (LAN). Link-local/metadatos siempre bloqueados |
 | `EMBEDDER_CONCURRENCY` | `2` | Inferencias simultaneas maximas |
 | `MIN_FACE_PX`, `MIN_BRIGHTNESS`, `MAX_BRIGHTNESS`, `MIN_SHARPNESS` | 80, 50, 215, 40 | Umbrales de `/v1/photo/check` (y de la calidad por foto de `/v1/photo/check-set`) |
