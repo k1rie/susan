@@ -1,0 +1,11 @@
+{
+    "version": "0.0.1",
+    "configurations": [
+        {
+            "name": "web-supabase",
+            "runtimeExecutable": "bash",
+            "runtimeArgs": ["scripts/dev-supabase.sh"],
+            "port": 3001
+        }
+    ]
+}
