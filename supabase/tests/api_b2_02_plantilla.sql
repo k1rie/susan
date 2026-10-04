@@ -14,6 +14,11 @@ SELECT t.ok((SELECT id_indice IS NULL AND faiss_id IS NULL AND activa FROM publi
     'fila nueva activa con id_indice y faiss_id nulos');
 SELECT t.ok(public.api_plantilla_registrar(t.id_alumno('A003'), t.id_consent('A003'), t.ruta('registro', 'A003', 1, 'jpg')) -> 'plantilla_archivada' = 'null'::jsonb,
     'sin plantilla previa: plantilla_archivada null');
+-- Compatibilidad con la firma anterior (0235 agrega p_fotos como 5.o parametro opcional): una foto = una fila orden 1.
+SELECT t.eq((SELECT count(*)::int FROM public.plantilla_foto WHERE id_plantilla = t.id_plantilla('A002')), 1, 'alta de una foto: una fila orden 1 en plantilla_foto (trigger)');
+SELECT t.eq((public.api_plantilla_registrar(p_id_alumno => t.id_alumno('A003'), p_id_consent => t.id_consent('A003'),
+    p_objeto_foto => t.ruta('registro', 'A003', 9, 'jpg'), p_ip => '10.0.0.9'::inet) ->> 'n_fotos')::int, 1,
+    'llamada por nombre con los 4 argumentos anteriores: n_fotos 1');
 SELECT t.eq((SELECT count(*)::int FROM public.bitacora_auditoria WHERE accion = 'alta_plantilla' AND entidad = 'plantilla_facial'
               AND valor_anterior IS NULL), 2, 'bitacora alta_plantilla sin valor anterior (2 altas)');
 

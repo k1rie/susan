@@ -39,6 +39,7 @@ class InsightFaceEmbedder(Embedder):
                 det_score=float(f.det_score),
                 embedding=emb / max(float(np.linalg.norm(emb)), 1e-12),
                 frontal=_es_frontal(getattr(f, 'kps', None)),
+                yaw_ratio=_razon_giro(getattr(f, 'kps', None)),
             ))
         return faces
 
@@ -53,3 +54,22 @@ def _es_frontal(kps) -> bool:
     if ancho < 1e-6:
         return False
     return abs(nariz[0] - (izq[0] + der[0]) / 2) / ancho < 0.35
+
+
+def _razon_giro(kps) -> float | None:
+    """Razon de giro COMPENSADA por la inclinacion de la cabeza: |(nariz - punto medio de los ojos) . u| / distancia
+    interocular, con u el vector unitario del ojo izquierdo al derecho.
+
+    La heuristica heredada (_es_frontal) usa solo la coordenada x de la nariz y confunde inclinar la cabeza (roll) con girarla
+    (yaw): con 8 rostros reales, un rostro de yaw +7 y roll -25 grados daba 0.282 y otro de yaw -36 daba 0.079. Proyectar sobre
+    el eje de los ojos quita el roll y correlaciona 0.91 con |yaw| 3D (modelo 1k3d68) frente a 0.60 de la heredada;
+    razon ~ 0.55 * tan(yaw), asi que 0.15 es un giro de ~15 grados y 0.40 ~ 36. Ojos coincidentes: infinito (no frontal)."""
+    if kps is None or len(kps) < 3:
+        return None
+    izq, der, nariz = (np.asarray(kps[i], dtype=np.float64) for i in range(3))
+    d = der - izq
+    dist = float(np.linalg.norm(d))
+    if dist < 1e-6:
+        return float('inf')
+    u = d / dist
+    return abs(float((nariz - (izq + der) / 2) @ u)) / dist

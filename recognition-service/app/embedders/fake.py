@@ -75,6 +75,14 @@ class FakeEmbedder(Embedder):
     def __init__(self, dimension: int = 512):
         self.dimension = dimension
 
+    # Ganchos para las pruebas: una subclase puede cambiar como se deriva el vector de la semilla o fijar una razon de
+    # giro (el embedder fake no la mide: devuelve None y el modo de conjunto cae al booleano `frontal`).
+    def vector_for(self, seed: int) -> np.ndarray:
+        return seed_to_vector(seed, self.dimension)
+
+    def yaw_ratio_for(self, seed: int) -> float | None:
+        return None
+
     def detect(self, rgb: np.ndarray) -> list[DetectedFace]:
         r, g, b = (rgb[..., i].astype(np.int16) for i in range(3))
         mask = (r > 180) & (g < 80) & (b > 180)  # marco magenta (tolerante a JPEG)
@@ -84,10 +92,12 @@ class FakeEmbedder(Embedder):
                 continue  # ruido: no es un marco de cara
             cx, cy = (x1 + x2) // 2, (y1 + y2) // 2
             parche = rgb[cy - 1:cy + 2, cx - 1:cx + 2].reshape(-1, 3).mean(axis=0)
+            seed = color_to_seed(parche)
             out.append(DetectedFace(
                 bbox=(float(x1), float(y1), float(x2), float(y2)),
                 det_score=0.99,
-                embedding=seed_to_vector(color_to_seed(parche), self.dimension),
+                embedding=self.vector_for(seed),
                 frontal=True,
+                yaw_ratio=self.yaw_ratio_for(seed),
             ))
         return out

@@ -1,13 +1,15 @@
 #!/usr/bin/env bash
 # Levanta todo SUSAN en modo local (sin Docker ni Supabase): PostgreSQL + servicio de
-# reconocimiento (EMBEDDER=fake) + Next en desarrollo. Idempotente: lo que ya corre se respeta.
+# reconocimiento + Next en desarrollo. Idempotente: lo que ya corre se respeta.
 # Uso: scripts/dev-all.sh        (detener: scripts/dev-stop.sh [--all])
 # Variables: WEB_PORT (3000) · RECOGNITION_PORT (8000) · RECOGNITION_SERVICE_API_KEY (dev-local-key)
 #            SUSAN_FAKE_NOW (def. '2026-09-14 07:12:00-06', el escenario de la semilla; 'off' = reloj real)
+#            RECOGNITION_EMBEDDER (fake|insightface; prioridad sobre el modo guardado por scripts/dev-modo.sh; def. fake)
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 source "$ROOT/scripts/local-dir.sh"   # SUSAN_LOCAL_DIR: fuera de iCloud si el proyecto esta en el Escritorio
+source "$ROOT/scripts/recognition-lib.sh"   # modo del embedder y arranque del servicio (compartido con dev-modo.sh)
 RUN_DIR="$SUSAN_LOCAL_DIR/run"
 STORAGE_DIR_ABS="$SUSAN_LOCAL_DIR/storage"
 WEB_PORT="${WEB_PORT:-3000}"
@@ -43,18 +45,28 @@ log "PostgreSQL local (db-up --seed)"
 "$ROOT/scripts/db-up.sh" --seed
 
 # ---------------------------------------------------------------------------- 2. Reconocimiento
+# Version del indice facial en uso (vacia si todavia no hay ninguna). El servicio la carga al arrancar: sin esto, tras
+# cada reinicio responderia 409 INDEX_NOT_LOADED hasta que alguien pulse "Sincronizar servicio" en la consola tecnica.
+# Se lee en un subshell para que db-common.sh no deje variables ni PATH modificados en este script.
+INDEX_VERSION="$( source "$ROOT/scripts/db-common.sh"; "$PGBIN/psql" -X -Atq -d "$DB_NAME" \
+    -c "SELECT version FROM indice_faiss WHERE en_uso LIMIT 1" 2>/dev/null || true )"
+
 if vivo "$RUN_DIR/recognition.pid"; then
     log "Servicio de reconocimiento ya corre (pid $(cat "$RUN_DIR/recognition.pid"))"
+    # Un servicio que arranco antes de existir el indice (o sin esta variable) se pone al dia sin reiniciarlo.
+    if [ -n "$INDEX_VERSION" ] && ! curl -s --max-time 3 "http://127.0.0.1:$REC_PORT/health" | grep -q '"index_loaded":true'; then
+        log "Cargando el indice facial $INDEX_VERSION en el servicio que ya corre"
+        curl -s -o /dev/null --max-time 60 -X POST -H "X-API-Key: $API_KEY" -H 'Content-Type: application/json' \
+            -d "{\"version\":\"$INDEX_VERSION\"}" "http://127.0.0.1:$REC_PORT/v1/index/activate" \
+            || log "No se pudo cargar el indice: usa 'Sincronizar servicio' en /tecnico."
+    fi
 else
-    log "Arrancando servicio de reconocimiento en :$REC_PORT (EMBEDDER=fake; la 1a vez crea el venv)"
-    (
-        cd "$ROOT/recognition-service"
-        EMBEDDER=fake STORAGE_BACKEND=local STORAGE_DIR="$STORAGE_DIR_ABS" \
-            API_KEY="$API_KEY" PORT="$REC_PORT" \
-            nohup ./run-local.sh fake > "$RUN_DIR/recognition.log" 2>&1 &
-        echo $! > "$RUN_DIR/recognition.pid"
-    )
-    esperar "http://127.0.0.1:$REC_PORT/health" "El servicio de reconocimiento" 300 "$RUN_DIR/recognition.pid" "$RUN_DIR/recognition.log"
+    # Modo del embedder: RECOGNITION_EMBEDDER > $SUSAN_LOCAL_DIR/run/embedder (lo escribe scripts/dev-modo.sh) > fake.
+    MODO_EMBEDDER="$(rec_modo_elegido)" || exit 1
+    log "Arrancando servicio de reconocimiento en :$REC_PORT (EMBEDDER=$MODO_EMBEDDER; la 1a vez crea el venv${INDEX_VERSION:+; indice $INDEX_VERSION})"
+    rec_arrancar "$MODO_EMBEDDER" "$INDEX_VERSION"
+    # insightface sin modelos descargados tarda mas (descarga ~120 MB): scripts/dev-modo.sh insightface lo hace con progreso.
+    esperar "http://127.0.0.1:$REC_PORT/health" "El servicio de reconocimiento" 700 "$RUN_DIR/recognition.pid" "$RUN_DIR/recognition.log"
 fi
 
 # ---------------------------------------------------------------------------- 3. Next (dev)

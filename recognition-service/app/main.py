@@ -6,13 +6,13 @@ import json
 import logging
 import time
 from contextlib import asynccontextmanager
-from typing import Optional
+from typing import Annotated, Optional
 
 import numpy as np
 from fastapi import Depends, FastAPI, File, Form, Header, Request, UploadFile
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, StringConstraints, model_validator
 
 from app import imaging
 from app.builder import build_index
@@ -21,12 +21,18 @@ from app.config import VERSION_RE, Settings
 from app.embedders import create_embedder
 from app.errors import ApiError, unauthorized, validation
 from app.index import IndexManager, index_object
+from app.samples import consolidar, diversidad, trunc3
 from app.storage import StorageError, create_storage
 from app.vision import Vision
 
 log = logging.getLogger('susan.recognition')
 
 Version = str
+
+# Techo duro de fotos por plantilla: lo comparten SQL (api_plantilla_registrar) y el proxy de Next. Settings.validate lo
+# exige como tope de TEMPLATE_MAX_PHOTOS; aqui acota el esquema de /v1/index/build antes de tomar el lock.
+MAX_FOTOS_ENTRADA = 8
+RutaObjeto = Annotated[str, StringConstraints(min_length=1, max_length=512)]
 
 
 class EntryIn(BaseModel):
@@ -35,14 +41,15 @@ class EntryIn(BaseModel):
     faiss_id: int = Field(ge=0)
     keep: Optional[bool] = None
     objeto_foto: Optional[str] = Field(default=None, min_length=1, max_length=512)
+    # Plantilla de varias fotos: se promedian en UN vector (un faiss_id). Una sola foto va por `objeto_foto`.
+    objetos_foto: Optional[list[RutaObjeto]] = Field(default=None, min_length=2, max_length=MAX_FOTOS_ENTRADA)
 
     @model_validator(mode='after')
     def _una_forma(self):
-        if self.keep is True and self.objeto_foto is None:
+        formas = [self.keep is True, self.objeto_foto is not None, self.objetos_foto is not None]
+        if sum(formas) == 1:
             return self
-        if self.keep in (None, False) and self.objeto_foto is not None:
-            return self
-        raise ValueError('Cada entrada es {keep:true} o {objeto_foto}, no ambas ni ninguna.')
+        raise ValueError('Cada entrada es exactamente una de {keep:true}, {objeto_foto} u {objetos_foto}.')
 
 
 class BuildIn(BaseModel):
@@ -74,6 +81,79 @@ def _check_prefix(prefix: str) -> str:
     return prefix
 
 
+def _check_set(vision: Vision, settings: Settings, crudas: list[bytes | None]) -> dict:
+    """Cuerpo de /v1/photo/check-set (ver README). `crudas[i]` es None si la foto excedio el tope de bytes."""
+    fotos: list[dict] = []
+    embs: dict[int, np.ndarray] = {}  # solo fotos candidatas (pasaron calidad), por indice de envio
+    for i, data in enumerate(crudas):
+        try:
+            if data is None:
+                raise imaging.invalid_image('La imagen excede el tamano maximo.')
+            rgb = imaging.decode_image(data, settings.max_image_pixels)
+        except ApiError:
+            fotos.append({'indice': i, 'estado': 'ilegible', 'rostros': 0, 'un_solo_rostro': False, 'calidad': None,
+                          'motivo_rechazo': 'No se pudo leer la imagen.', 'motivo_codigo': 'IMAGEN_INVALIDA',
+                          'coseno_resto': None})
+            continue
+        res, emb = vision.analyze(rgb, settings.template_max_yaw_ratio)
+        foto = {'indice': i, 'estado': 'calidad' if res['motivo_rechazo'] else 'aceptada', **res, 'coseno_resto': None}
+        fotos.append(foto)
+        if emb is not None:
+            embs[i] = emb
+
+    cand = sorted(embs)  # indices de envio de las candidatas
+    ambiguo = False
+    aceptadas: list[int] = []
+    cosenos: dict[int, float] = {}
+    mat = np.vstack([embs[i] for i in cand]) if cand else None
+    if len(cand) >= 2:
+        c = consolidar(mat, settings.template_outlier_cosine, settings.template_min_photos,
+                        settings.template_link_cosine)
+        ambiguo = c.ambiguo
+        for pos, i in enumerate(cand):
+            if c.cosenos[pos] is not None:
+                fotos[i]['coseno_resto'] = trunc3(c.cosenos[pos])
+        if ambiguo:
+            # Sin una persona mayoritaria no se sabe cual es la correcta: se rechazan todas, que repitan la captura
+            for i in cand:
+                fotos[i].update(estado='inconsistente', motivo_codigo='CONJUNTO_AMBIGUO',
+                                motivo_rechazo='Las fotos no coinciden entre si.')
+        else:
+            aceptadas = [cand[pos] for pos in c.usadas]
+            for pos in c.descartadas:
+                fotos[cand[pos]].update(estado='inconsistente', motivo_codigo='NO_COINCIDE',
+                                        motivo_rechazo='La foto no parece de la misma persona que las demas.')
+            cosenos = {cand[pos]: c.cosenos[pos] for pos in c.usadas}
+    else:
+        aceptadas = list(cand)  # una sola candidata: nada contra que compararla
+
+    coseno_max_par = None
+    advertencias: list[str] = []
+    if len(aceptadas) >= 2:
+        pos_aceptadas = [cand.index(i) for i in aceptadas]
+        coseno_max_par, grupos = diversidad(mat, pos_aceptadas, settings.template_dup_cosine)
+        # Rafaga de fotogramas casi iguales: el promedio no aporta variedad. Solo se avisa si hay grupos colapsados
+        # (grupos < aceptadas); dos fotos distintas todavia por debajo del minimo no son "casi identicas".
+        if grupos < settings.template_min_photos and grupos < len(aceptadas):
+            advertencias.append('DIVERSIDAD_BAJA')
+    vals = list(cosenos.values())
+    return {
+        'total': len(crudas),
+        'aceptadas': len(aceptadas),
+        'minimo': settings.template_min_photos,
+        'maximo': settings.template_max_photos,
+        'suficiente': len(aceptadas) >= settings.template_min_photos,
+        'consistente': None if len(cand) < 2 else not (ambiguo or any(f['estado'] == 'inconsistente' for f in fotos)),
+        'ambiguo': ambiguo,
+        'umbral_coseno': settings.template_outlier_cosine,
+        'coseno_min': trunc3(min(vals)) if vals else None,
+        'coseno_medio': trunc3(sum(vals) / len(vals)) if vals else None,
+        'coseno_max_par': trunc3(coseno_max_par),
+        'advertencias': advertencias,
+        'fotos': fotos,
+    }
+
+
 def create_app(settings: Settings | None = None, storage=None, embedder=None) -> FastAPI:
     settings = settings or Settings.from_env()
     settings.validate()  # produccion sin API_KEY: no arranca
@@ -86,7 +166,7 @@ def create_app(settings: Settings | None = None, storage=None, embedder=None) ->
         emb = embedder or create_embedder(settings)
         app.state.settings = settings
         app.state.vision = Vision(emb, settings)
-        app.state.manager = IndexManager(st, settings.dimension, emb.model_name)
+        app.state.manager = IndexManager(st, settings.dimension, emb.model_name, settings.index_accept_models)
         app.state.storage = st
         if settings.index_bootstrap_version:
             try:
@@ -157,11 +237,28 @@ def create_app(settings: Settings | None = None, storage=None, embedder=None) ->
         rgb = imaging.decode_image(read_upload(image), settings.max_image_pixels)
         return request.app.state.vision.check_photo(rgb)
 
+    @app.post('/v1/photo/check-set', dependencies=auth)
+    def photo_check_set(request: Request, images: list[UploadFile] = File(...)):
+        """Verifica un CONJUNTO de fotos de una plantilla: calidad por foto + consistencia de identidad. No guarda nada
+        y no devuelve vectores: solo cosenos escalares (RNF-03)."""
+        if not 1 <= len(images) <= settings.template_max_photos:
+            raise validation(f'Envie de 1 a {settings.template_max_photos} imagenes en el campo images.')
+        crudas: list[bytes | None] = []
+        total_bytes = 0
+        for f in images:
+            data = f.file.read(settings.max_image_bytes + 1)
+            total_bytes += len(data)
+            if total_bytes > settings.template_max_total_bytes:
+                raise validation('El conjunto de imagenes excede el tamano maximo.')
+            # Una foto enorme no tumba el conjunto: sale 'ilegible' y las demas se evaluan
+            crudas.append(data if len(data) <= settings.max_image_bytes else None)
+        return _check_set(request.app.state.vision, settings, crudas)
+
     @app.post('/v1/index/build', dependencies=auth)
     def index_build(body: BuildIn, request: Request):
         s = request.app.state
         return build_index(body.version, body.base_version, [e.model_dump() for e in body.entries],
-                           s.manager, s.vision, s.storage, settings.max_image_pixels)
+                           s.manager, s.vision, s.storage, settings.max_image_pixels, settings)
 
     @app.post('/v1/index/activate', dependencies=auth)
     def index_activate(body: ActivateIn, request: Request):

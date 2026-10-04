@@ -1,6 +1,6 @@
 # Dominio BIOMETRIA — consentimiento, plantilla facial, índice FAISS, servicio de reconocimiento, consola técnica y jobs
 
-Estado: contrato v1 (BASE). Fuente: `docs/spec/Avance1.txt` (Tablas 3-6, 13, 14-32, 34, 36; BPMN-03; Figura 10 flujos 1, 3 y 7) y `docs/ARCHITECTURE.md` §2-§5.
+Estado: contrato v1 (BASE) más la extensión **plantilla de varias fotos** (migración `0235`, §4 de este documento). Fuente: `docs/spec/Avance1.txt` (Tablas 3-6, 13, 14-32, 34, 36; BPMN-03; Figura 10 flujos 1, 3 y 7) y `docs/ARCHITECTURE.md` §2-§5.
 Este documento es ley para: db-api-b (SQL 02xx), recognition (servicio Python), route-handlers (`web/src/app/api`, `lib/server`, `lib/http`), data-layer (`lib/api/biometria.js`), screens-admin (montaje de paneles) y screens-tecnico (`/tecnico`).
 
 Convenciones usadas (todas de `ARCHITECTURE.md` §2): solo-RPC; `api_*` a `authenticated`, `svc_*` a `service_role`; esquema `app` privado; todo tiempo de negocio con `app.now()`; errores `RAISE EXCEPTION '<mensaje>' USING ERRCODE = 'P0001', HINT = '<CODIGO>'`; JSON `snake_case`; listas `{ total, items }` con `p_limit` (def. 50, máx. 200) y `p_offset`; fechas ISO 8601 (`fecha` = `YYYY-MM-DD`, instantes con offset `-06:00`).
@@ -15,8 +15,8 @@ Nombres de archivo sugeridos para db-api-b: `supabase/migrations/0210_biometria_
 
 Dentro:
 
-- M2 Registro biométrico: consentimiento (RF-15, RN-13), plantilla única con archivado (RN-12), índice FAISS versionado con cambio atómico (RF-16, RNF-09).
-- Servicio de reconocimiento (Python/FastAPI + `faiss-cpu`): endpoints de salud, estado de índice, verificación de foto, construcción/activación de índice y reconocimiento (parte de RF-03/RF-04/RF-05).
+- M2 Registro biométrico: consentimiento (RF-15, RN-13), plantilla única con archivado (RN-12) formada por 1 foto (heredada) o por 3 a 8 fotos cuyos embeddings se promedian en UN vector (§4), índice FAISS versionado con cambio atómico (RF-16, RNF-09).
+- Servicio de reconocimiento (Python/FastAPI + `faiss-cpu`): endpoints de salud, estado de índice, verificación de foto y de conjuntos de fotos (`/v1/photo/check-set`), construcción/activación de índice y reconocimiento (parte de RF-03/RF-04/RF-05).
 - Consola del técnico: cámaras (solo estatus), parámetros del sistema (RNF-02), estado y reconstrucción del índice.
 - Programador de tareas: 5 jobs (`cerrar-sesiones`, `resolver-pendientes`, `purgar-recortes`, `reconstruir-indice`, `recalcular`) y la cuenta de servicio.
 - Parte biométrica de P-06 (paneles `ConsentimientoPanel` y `PlantillaFacialPanel`), montada por la página del alumno (dominio admin).
@@ -27,9 +27,9 @@ Fuera (otros dominios): alta/edición del alumno (admin), `POST /api/sesiones/{i
 
 | Requisito | Artefactos que lo cubren |
 |---|---|
-| RF-15 plantilla solo con consentimiento firmado y vigente, foto con un solo rostro vectorizable, foto en bucket | `api_consentimiento_registrar`, `api_consentimientos_alumno`, `api_plantilla_registrar`, `app.consentimiento_vigente`, `trg_plantilla_rn13` (contrato en §5), `POST /api/consentimientos`, `POST /api/alumnos/{id}/plantilla`, `POST /api/plantilla/verificar`, servicio `POST /v1/photo/check`, componentes `ConsentimientoPanel`, `PlantillaFacialPanel`, `CalidadFotoResumen` (P-06) |
-| RF-16 archivar anterior, versión nueva del índice con todas las activas, `faiss_id`, cambio atómico sin interrumpir | `api_plantilla_registrar` (archivar y luego insertar), `svc_indice_plan`, `svc_indice_registrar`, `svc_indice_activar`, `svc_indice_revertir`, `svc_indice_en_uso`, `lib/server/indice.js::reconstruirIndice`, servicio `/v1/index/build` y `/v1/index/activate`, job `reconstruir-indice`, `IndiceFacialPanel` |
-| RN-12 una plantilla activa por alumno, un índice en uso | `ux_plantilla_facial_activa`, `ux_indice_faiss_en_uso` (db-schema), orden archivar-insertar en `api_plantilla_registrar`, orden FALSE-TRUE en `svc_indice_activar`/`svc_indice_revertir` |
+| RF-15 plantilla solo con consentimiento firmado y vigente, fotos con un solo rostro vectorizable, fotos en bucket | `api_consentimiento_registrar`, `api_consentimientos_alumno`, `api_plantilla_registrar` (con `p_fotos`), tabla `plantilla_foto`, `app.consentimiento_vigente`, `trg_plantilla_rn13` (contrato en §5), `POST /api/consentimientos`, `POST /api/alumnos/{id}/plantilla`, `POST /api/plantilla/verificar`, `GET /api/documentos/plantilla_foto/{id}`, servicio `POST /v1/photo/check` y `POST /v1/photo/check-set`, componentes `ConsentimientoPanel`, `PlantillaFacialPanel`, `CapturaGuiadaPlantilla`, `SubidaFotosPlantilla`, `GaleriaTomas`, `CalidadFotoResumen` (P-06) |
+| RF-16 archivar anterior, versión nueva del índice con todas las activas, `faiss_id`, cambio atómico sin interrumpir | `api_plantilla_registrar` (archivar y luego insertar), `svc_indice_plan` (con `objetos_foto`), `svc_indice_registrar`, `svc_indice_activar`, `svc_indice_revertir`, `svc_indice_en_uso`, `lib/server/indice.js::reconstruirIndice`, servicio `/v1/index/build` y `/v1/index/activate`, job `reconstruir-indice`, `IndiceFacialPanel` |
+| RN-12 una plantilla activa por alumno, un índice en uso | `ux_plantilla_facial_activa`, `ux_indice_faiss_en_uso` (db-schema), orden archivar-insertar en `api_plantilla_registrar`, orden FALSE-TRUE en `svc_indice_activar`/`svc_indice_revertir`. Con varias fotos RN-12 se conserva: sigue habiendo UNA fila activa de `plantilla_facial` y UN `faiss_id` por alumno; las fotos viven en la tabla hija `plantilla_foto` y el promedio es un solo vector (§4) |
 | RN-13 sin consentimiento vigente no hay plantilla | `trg_plantilla_rn13` (red de seguridad), validación previa en `api_plantilla_registrar`, `app.consentimiento_vigente`, botón "Registrar plantilla" deshabilitado sin consentimiento vigente, `app.vencer_consentimientos` (job `recalcular`) |
 | RF-03 (servicio) muestreo por cámara | Servicio `POST /v1/recognize` con `camera_url` (el muestreo lo orquesta el dominio sesiones); `api_camaras_estado` expone `ultima_captura` y `capturas_24h` para vigilar las 80 ± 1 capturas |
 | RF-04 búsqueda k-NN solo entre inscritos con consentimiento | Servicio `/v1/recognize` con `allowed_faiss_ids` + `IDSelectorBatch`; índice `IndexIDMap2(IndexFlatIP)`; `svc_indice_en_uso` para el arranque |
@@ -41,7 +41,7 @@ Fuera (otros dominios): alta/edición del alumno (admin), `POST /api/sesiones/{i
 | RF-22 (parte técnico) cámaras | `api_camaras_estado`, `api_camara_cambiar_estatus`, `CamarasEstado` |
 | RNF-01 k-NN <= 50 ms p95 con 20 000; captura <= 7.5 s | Servicio: estrategia de búsqueda (§4B.6), presupuesto de tiempos (§4B.7), pruebas SVC-20..SVC-24 |
 | RNF-02 parámetros calibrables, con bitácora | `api_parametros_listar`, `api_parametro_actualizar`, `app.parametro_meta`, `ParametrosEditor` |
-| RNF-03 0 vectores/imágenes en la BD | Solo `faiss_id` y rutas `objeto_*`; vector solo en memoria y en el JSON del bucket; prueba SQL-48 |
+| RNF-03 0 vectores/imágenes en la BD | Solo `faiss_id` y rutas `objeto_*`; vector solo en memoria y en el JSON del bucket; prueba SQL-48. `plantilla_foto` guarda únicamente rutas, 4 medidas de calidad y un coseno escalar por foto (`coseno_resto`); el promedio y el descarte de fotos ajenas ocurren en el servicio y ningún vector toca la BD |
 | RNF-04 URL firmada <= 300 s | `POST /api/alumnos/{id}/documento-url` usa `vigencia_url_firmada_seg` (tope 300 impuesto por `app.parametro_meta`) |
 | RNF-05 purga de recortes a 7 días, `objeto_recorte` -> NULL, fila conservada | `svc_job_purgar_recortes_listar`, `svc_job_purgar_recortes_marcar`, `POST /api/jobs/purgar-recortes` |
 | RNF-06 sin reconocimiento sin consentimiento | `allowed_faiss_ids` lo arma sesiones con consentimiento vigente (`app.consentimiento_vigente`); `api_consentimiento_revocar` archiva la plantilla |
@@ -50,7 +50,7 @@ Fuera (otros dominios): alta/edición del alumno (admin), `POST /api/sesiones/{i
 | RNF-12 independencia del lenguaje | El servicio solo conoce `faiss_id`, `id_plantilla` y rutas; JSON de índice documentado |
 | RNF-13 360 px | Paneles y consola en una columna, tablas como lista de tarjetas (§2) |
 | RNF-14 índice reconstruible | `svc_indice_plan(p_completa => true)` + `/v1/index/build` con `base_version = null` |
-| BPMN-03 | Alta/consentimiento: `ConsentimientoPanel` -> `POST /api/consentimientos`. Compuerta RN-13: `api_plantilla_registrar`. Foto + calidad: `/v1/photo/check`. Archivar/insertar: `api_plantilla_registrar`. Construir y precargar: `/v1/index/build` + `/v1/index/activate (preload_only)`. Cambio de versión: `svc_indice_activar` |
+| BPMN-03 | Alta/consentimiento: `ConsentimientoPanel` -> `POST /api/consentimientos`. Compuerta RN-13: `api_plantilla_registrar`. Fotos + calidad: `/v1/photo/check` (una foto) o `/v1/photo/check-set` (3 a 8 fotos). Archivar/insertar: `api_plantilla_registrar`. Construir y precargar: `/v1/index/build` + `/v1/index/activate (preload_only)`. Cambio de versión: `svc_indice_activar` |
 | Figura 10 flujo 1 | Fotograma -> `/v1/recognize` (`image` o `camera_url`) |
 | Figura 10 flujo 3 | Recortes -> bucket `recortes/{id_sesion}/{id_captura}/{n}.jpg` subidos por el servicio |
 | Figura 10 flujo 7 | Nueva versión del índice: `/v1/index/build` -> `indice/<version>.json` -> `svc_indice_registrar` -> `svc_indice_activar` |
@@ -99,12 +99,14 @@ Acciones (vía `@/lib/http/biometria`, que llama a los Route Handlers):
 | Registrar consentimiento (PDF + fechas) | `registrarConsentimiento(formData)` | `POST /api/consentimientos` |
 | Revocar consentimiento | `revocarConsentimiento({ idConsent })` | `POST /api/consentimientos/{id}/revocar` |
 | Ver documento / foto (URL firmada) | `solicitarUrlDocumento({ idAlumno, tipo, idRegistro })` | `POST /api/alumnos/{id}/documento-url` |
-| Verificar calidad de la foto | `verificarFoto(blob)` | `POST /api/plantilla/verificar` |
-| Registrar plantilla | `registrarPlantilla({ idAlumno, idConsent, foto })` | `POST /api/alumnos/{id}/plantilla` |
+| Verificar calidad de UNA foto (camino heredado) | `verificarFoto(blob)` | `POST /api/plantilla/verificar` (campo `foto`) |
+| Verificar el conjunto de tomas (1 a 8 fotos) | `verificarFotos(blobs, { idAlumno, idConsent, signal })` | `POST /api/plantilla/verificar` (campo `fotos` repetido, §4.3) |
+| Registrar plantilla | `registrarPlantilla({ idAlumno, idConsent, foto })` (una foto) o `registrarPlantilla({ idAlumno, idConsent, fotos }, { signal })` (varias) | `POST /api/alumnos/{id}/plantilla` (§4.3) |
+| Abrir una foto de la plantilla (URL firmada) | `solicitarUrlDocumento({ tipo: 'plantilla_foto', idRegistro: id_foto })` | `GET /api/documentos/plantilla_foto/{id}` (§4.3) |
 
 #### Componente `admin/ConsentimientoPanel`
 
-Carpeta `web/src/components/admin/ConsentimientoPanel/` (`ConsentimientoPanel.jsx`, `useConsentimientos.js`, `consentimiento.utils.js`, `ConsentimientoPanel.test.jsx`, `index.js`).
+Carpeta `web/src/components/admin/alumnos/ConsentimientoPanel/` (`ConsentimientoPanel.jsx`, `useConsentimientos.js`, `consentimiento.utils.js`, `ConsentimientoPanel.test.jsx`, `index.js`).
 
 | Prop | Tipo | Descripción |
 |---|---|---|
@@ -119,12 +121,13 @@ Responsabilidad y contenido:
 3. Botón "Revocar" (solo sobre el consentimiento vigente) con `ConfirmDialog`: "Al revocar, se archivará la plantilla facial ligada y el alumno pasará a pase de lista manual." Tras confirmar llama `revocarConsentimiento`.
 4. Formulario "Registrar consentimiento" (colapsado si ya hay uno vigente, abierto si no): `Field`+`Input type="date"` fecha de firma (máx. hoy), fecha "vigente hasta" (> firma), `FileInput accept="application/pdf"` (máx. 10 MB). Validación de cliente solo de conveniencia (la real es servidor). Envía `FormData` con `id_alumno`, `fecha_firma`, `vigencia_hasta`, `documento`.
 5. Historial: lista de tarjetas (no tabla) con fecha de firma, vigencia, estatus y plantillas activas ligadas.
+6. Tras revocar, si la respuesta de la ruta trae `indice.estado === 'pendiente'` (la reconstrucción del índice falló), muestra un aviso `warning` "Consentimiento revocado": "El índice facial conserva el vector hasta que se reconstruya; pide a un técnico que lo reconstruya." La revocación solo es efectiva cuando el índice se reconstruye y queda `activada`.
 
 Estados: cargando (`Spinner`), vacío ("Este alumno aún no tiene consentimientos registrados. Registre el documento firmado para habilitar la plantilla facial."), error (`ErrorState` con "Reintentar"). Errores de acción en `Alert`: se muestra el `message` del `ApiError`.
 
-#### Componente `admin/PlantillaFacialPanel`
+#### Componente `admin/alumnos/PlantillaFacialPanel`
 
-Carpeta `web/src/components/admin/PlantillaFacialPanel/` (`PlantillaFacialPanel.jsx`, `usePlantillaFacial.js`, `plantillaFacial.utils.js`, test, `index.js`).
+Carpeta `web/src/components/admin/alumnos/PlantillaFacialPanel/` (`PlantillaFacialPanel.jsx`, `usePlantillaFacial.js`, `plantillaFacial.utils.js`, test, `index.js`). Desde la extensión de varias fotos el panel arma la plantilla con **3 a 8 tomas** (5 guiadas) en lugar de una sola foto; los componentes hijos están más abajo.
 
 | Prop | Tipo | Descripción |
 |---|---|---|
@@ -134,35 +137,77 @@ Carpeta `web/src/components/admin/PlantillaFacialPanel/` (`PlantillaFacialPanel.
 
 Responsabilidad y contenido:
 
-1. Bloque "Plantilla actual": si existe `activa`: fecha de registro, "Indexada: sí/no", "Versión del índice: v003" (o "pendiente de indexar"), botón "Ver foto" (URL firmada, `tipo: 'plantilla'`, `idRegistro: id_plantilla`) y "N plantillas archivadas". Sin plantilla: "Sin plantilla facial; el alumno pasa lista de forma manual (RNF-06)."
+1. Bloque "Plantilla actual": si existe `activa`: fecha de registro, "Fotos: N" (`activa.n_fotos`), "Indexada: sí/no", "Versión del índice: v003" (o "pendiente de indexar"), botón "Ver foto" (URL firmada, `tipo: 'plantilla'`, `idRegistro: id_plantilla`; es la foto principal) y "N plantillas archivadas". Con `n_fotos > 1` un `ui/Detalles` "Ver las N fotos" con un botón "Abrir foto K" por foto (`solicitarUrlDocumento` con `tipo: 'plantilla_foto'` e `idRegistro: id_foto`; el enlace caduca en 5 minutos). Si `coseno_medio` no es `null`, un `ui/Detalles` "Consistencia entre fotos": "Al registrar, cada foto se parecía en promedio 0.74 a las demás (mínimo 0.51). Dato informativo medido por el servicio de reconocimiento." (sin bandas Alta/Media/Baja: el umbral no está calibrado con fotos independientes reales). Si es `null` y `n_fotos` es 1: "Plantilla de una sola foto: se recomienda registrar de 3 a 5 tomas." Sin plantilla: "Sin plantilla facial; el alumno pasa lista de forma manual (RNF-06)."
 2. Si no hay consentimiento vigente: `Alert` "Registre un consentimiento vigente para habilitar la captura" y la captura queda deshabilitada (no se monta `CameraCapture`).
-3. Con consentimiento vigente: `CameraCapture` (ui-kit) con óvalo guía si el ui-kit lo ofrece (si no, se omite en la base) y alternativa `FileInput accept="image/jpeg"`. Lo único exigido al ui-kit es que entregue un `Blob` `image/jpeg`.
-4. Al tener la imagen: vista previa + verificación automática `verificarFoto(blob)` (spinner "Verificando calidad…"). Se muestra `CalidadFotoResumen`.
-5. Botones: "Repetir captura" y "Registrar plantilla". "Registrar plantilla" está habilitado solo si: hay consentimiento vigente, `resultado.un_solo_rostro === true`, `resultado.motivo_rechazo === null`, no hay envío en curso. Si ya existe plantilla activa, el texto indica "Reemplazar plantilla (la anterior se archivará)".
-6. Al confirmar: `registrarPlantilla({ idAlumno, idConsent, foto })`. Éxito (201): `Alert` "Plantilla registrada. El índice se actualiza en segundo plano" y sondeo de `plantillaAlumno` cada 5 s, máximo 24 intentos, hasta `activa.indexada === true`; el sondeo se cancela al desmontar. Luego llama `onCambio`.
-7. Errores: `FOTO_RECHAZADA` (muestra el motivo en español con el mapa de `plantillaFacial.utils.js`), `RN_13_CONSENTIMIENTO_NO_VIGENTE`, `RECONOCIMIENTO_NO_DISPONIBLE` ("El servicio de reconocimiento no responde; reintente"), cualquier otro con su `message`.
+3. Con consentimiento vigente, dos modos (segmento "Usar cámara" / "Subir fotos", ambos botones con `aria-pressed`; cambiar de modo CONSERVA las tomas, con un tope de 8 en total):
+   - **Cámara guiada** (por defecto): `CapturaGuiadaPlantilla`, 5 pasos.
+   - **Subir fotos**: `SubidaFotosPlantilla`, de 3 a 8 archivos JPG.
+   Un `ui/Detalles` breve "¿Por qué varias fotos?" explica: "SUSAN promedia las fotos para reconocer mejor con distintos ángulos y luz."
+4. **Modelo de tomas.** Cada toma es `{ id, origen: 'camara'|'archivo', paso: 0..4|null, blob, nombre, estado, motivoCodigo, motivo, cosenoResto, calidad, duplicadaDeId }`, con `estado` en `verificando | aceptada | calidad | inconsistente | ilegible | duplicada`. El orden de envío es por `paso` (las de archivo, con `paso: null`, al final) y luego por `id`; la primera es la foto principal. El servidor NO guarda sesiones de captura: cada cambio del conjunto (o de su orden) dispara, con *debounce* de 300 ms y `AbortController`, `verificarFotos(blobs, { idAlumno, idConsent })` con TODAS las fotos sostenidas (1 a 8). El resultado se aplica con el instantáneo de ids de ESA petición (`resultado.fotos[k]` a `ids[k]`, nunca por la posición actual del arreglo) y solo si la petición no se abortó; `duplicada_de` (índice) se convierte a `duplicadaDeId`. *Stale-while-revalidate*: cada toma conserva su estado previo y solo las nuevas muestran "Verificando". Si la petición falla (503 incluido) aparece `verificacion.error` con "Reintentar verificación" y las tomas sin resultado siguen en `verificando`. `minimo` y `maximo` salen del resultado (por defecto 3 y 8) y solo sirven para mostrar.
+5. **Registrar** (`puedeRegistrar`): consentimiento vigente, `tomas.length >= minimo`, todas `aceptada`, `resultado.suficiente`, `!resultado.ambiguo`, sin envío ni verificación en curso y sin sondeo del índice en curso. Botón "Registrar plantilla con N fotos" o, si ya hay plantilla activa, "Reemplazar plantilla (la anterior se archivará)". Llama `registrarPlantilla({ idAlumno, idConsent, fotos })` con los blobs en orden de envío. Acción secundaria (variante `ghost`) "Registrar solo con esta foto (menos precisa)": solo con exactamente 1 toma aceptada (`puedeRegistrarUna`); usa el camino heredado de una foto (campo `foto`), para las personas que no superan el filtro de consistencia.
+6. **Contador y mensajes.** Texto plano y una región `role="status"` `aria-live="polite"` `sr-only` que anuncia el último cambio ("Toma 3 aceptada." / "Toma 3 no aceptada: falta iluminación."). Sin tomas: "Captura al menos 3 tomas."; con tomas: "Tomas aceptadas: A de T (mínimo 3)." más " Repite o quita las tomas marcadas." si alguna no está aceptada, o " Faltan N toma(s) aceptada(s) para registrar." si solo falta cantidad. Si `ambiguo`: "Las tomas no coinciden entre sí. Revisa que todas sean del mismo alumno." La advertencia `DIVERSIDAD_BAJA` es un `Alert` info "Las tomas son casi idénticas; varía el ángulo, la expresión o la luz." (no bloquea). Tras repetir o quitar una toma el foco pasa al botón de captura (cámara) o al de "Agregar fotos" (archivo).
+7. **Envío.** Mientras `envio.cargando`: `<p role="status">` "Subiendo N fotos y actualizando el índice. Puede tardar un minuto; no cierres esta ventana.", controles de captura y de repetir/quitar deshabilitados y un listener `beforeunload`. Éxito (201): `limpiar()`, `Alert` success "Plantilla registrada con N fotos. Índice listo, versión vXXX." (con una foto, "Plantilla registrada con 1 foto."), y sondeo de `plantillaAlumno` cada 5 s (`SONDEO_INTERVALO_MS`), máximo 24 intentos, hasta `activa.indexada === true`; el sondeo se cancela al desmontar. Si `indice.estado` es `'pendiente'`: `Alert` warning "Plantilla guardada, índice pendiente: la plantilla quedó guardada pero el índice no se pudo actualizar; pide a un técnico que lo reconstruya." Si `muestra.descartadas.length > 0`: `Alert` warning "El índice descartó N foto(s) al promediar; revisa la consistencia." Luego llama `onCambio`.
+8. **Errores** (`mensajeErrorPlantilla`): `FOTO_RECHAZADA` (camino de una foto; usa `details.motivo_codigo` antes que la frase), `FOTOS_RECHAZADAS` ("Algunas fotos no sirven: repite las tomas marcadas.", y marca las tomas con el instantáneo de ids del envío), `FOTOS_INSUFICIENTES` ("Se necesitan al menos N fotos.", N = `details.minimo`), `FOTOS_DUPLICADAS` ("Hay fotos repetidas: usa tomas distintas."), `DEMASIADOS_ARCHIVOS` ("Máximo 8 fotos."), `ARCHIVO_DEMASIADO_GRANDE` ("Una foto pesa demasiado."), `RN_13_CONSENTIMIENTO_NO_VIGENTE`, `SERVICIO_RECONOCIMIENTO_NO_DISPONIBLE` ("El servicio de reconocimiento no responde; reintente", con botón "Reintentar"; el código antiguo `RECONOCIMIENTO_NO_DISPONIBLE` nunca coincidía con el de la ruta) y cualquier otro con su `message`.
 
-`plantillaFacial.utils.js` exporta `MOTIVOS_RECHAZO` y `esFotoAceptable(resultado)`:
+`plantillaFacial.utils.js` exporta `textoMotivo(codigo, { guiada })`, que busca por `motivo_codigo` y, si no hay código, muestra la frase del servicio tal cual (ya no existe el formato "Calidad insuficiente (frase)"), además de `esFotoAceptable(resultado)` (compatibilidad del camino de una foto) y `MOTIVOS_RECHAZO`. `motivo_rechazo` es una frase de lectura humana del servicio; el código estable es `motivo_codigo`:
 
-| `motivo_rechazo` | Texto |
+| `motivo_codigo` | Texto |
 |---|---|
 | `SIN_ROSTRO` | No se detectó ningún rostro. |
 | `MULTIPLES_ROSTROS` | Hay más de un rostro en la imagen. |
 | `ROSTRO_PEQUENO` | El rostro es muy pequeño; acérquese a la cámara. |
-| `NO_FRONTAL` | Mire de frente a la cámara. |
+| `NO_FRONTAL` | Mire de frente a la cámara. (En la captura guiada: "Giraste demasiado; vuelve a mirar hacia la cámara.") |
 | `POCA_LUZ` | Falta iluminación. |
 | `EXCESO_LUZ` | Exceso de luz o contraluz. |
 | `BORROSA` | La imagen está borrosa; mantenga quieta la cámara. |
+| `IMAGEN_INVALIDA` | No se pudo leer la imagen. |
+| `NO_COINCIDE` / `CONJUNTO_AMBIGUO` | Texto por estado de la toma: "No parece la misma persona" / "Las tomas no coinciden entre sí". |
+| `DUPLICADA` | Igual a la toma K. |
 
-#### Componente `admin/CalidadFotoResumen`
+#### Componente `admin/alumnos/CapturaGuiadaPlantilla`
 
-Carpeta `web/src/components/admin/CalidadFotoResumen/`. Presentacional.
+Carpeta `web/src/components/admin/alumnos/CapturaGuiadaPlantilla/` (`CapturaGuiadaPlantilla.jsx`, `capturaGuiada.utils.js` con `PASOS_TOMA` y `ordenarTomas`, test, `index.js`). Props: `{ tomas, minimo, maximo, deshabilitado, onCapturar(blob, paso), onRepetir(id), onQuitar(id) }`.
+
+Cámara `<CameraCapture ovalGuide showShutter={false} ref={camRef} />` montada durante las 5 tomas. Botón propio (`ui/Button`) "Capturar toma K de 5" (K = primer paso libre; las tomas 4 y 5 llevan " (opcional)"): hace `await camRef.current.capture()` dentro de `try/catch` (si el fotograma no está listo, "La cámara aún no está lista; espera un momento e inténtalo de nuevo.") y llama `onCapturar(blob, paso)`. Se deshabilita sin paso libre ("Las 5 tomas están capturadas"), con 8 tomas o con `deshabilitado`. El título y la indicación del siguiente paso se muestran sobre la cámara en un `<p aria-live="polite">`. Las indicaciones van en tú porque se leen a la persona fotografiada y asumen la vista en espejo de `CameraCapture` (`facingMode: user`):
+
+| Paso | Clave | Título | Indicación | Ícono (Lucide) |
+|---|---|---|---|---|
+| 1 | `frente` | De frente | Mira de frente a la cámara, con el rostro dentro del óvalo. | `ScanFace` |
+| 2 | `izquierda` | Gira a la izquierda | Gira la cabeza un poco hacia tu izquierda (unos 15 grados) sin dejar de ver la cámara. | `ArrowLeft` |
+| 3 | `derecha` | Gira a la derecha | Ahora gira un poco hacia tu derecha (unos 15 grados). | `ArrowRight` |
+| 4 | `arriba` | Inclina hacia arriba | Levanta ligeramente la barbilla, sin cerrar los ojos. | `ArrowUp` |
+| 5 | `variacion` | Otra expresión o luz | Sonríe o cambia un poco la luz o el lugar. Mantén el rostro completo visible. | `SunMedium` |
+
+"Repetir" libera el paso de esa toma (queda como siguiente) y conserva las demás; el conjunto se vuelve a verificar. El orden de envío es por paso, así que repetir no desalinea nada.
+
+#### Componente `admin/alumnos/SubidaFotosPlantilla`
+
+Carpeta `web/src/components/admin/alumnos/SubidaFotosPlantilla/` (`SubidaFotosPlantilla.jsx`, `subidaFotos.utils.js` con `normalizarFoto`, test, `index.js`). Botón "Agregar fotos (JPG)" con un `<input type="file" accept="image/jpeg" multiple hidden>` propio (`ui/FileInput` no acepta `multiple`) y el texto "Elige de 3 a 8 fotos distintas del mismo alumno." (con `minimo`/`maximo` reales). Cada archivo debe ser JPEG y pesar <= 15 MB ("«nombre» no es JPG." / "«nombre» pesa más de 15 MB."). `normalizarFoto` lo re-codifica con canvas a JPEG de calidad 0.9 en 1280x960 (960x1280 en vertical), sin ampliar y respetando la orientación EXIF (`createImageBitmap` con `imageOrientation: 'from-image'`, o `Image` como alternativa); si la normalización falla la foto se **rechaza** ("No se pudo preparar «nombre».") y nunca se sube el original, que podría llevar EXIF con GPS. Si caben menos fotos que las elegidas: "Solo caben N foto(s) más (máximo 8)." Los errores van en una lista `role="alert"`. Mismos estados y rejilla que la cámara, con "Quitar" (`Trash2`) en lugar de "Repetir".
+
+#### Componente `admin/alumnos/GaleriaTomas`
+
+Carpeta `web/src/components/admin/alumnos/GaleriaTomas/` (presentacional, compartido por los dos modos). Props: `{ ranuras: [{ clave, numero, titulo, toma|null, destacada }], accion: 'repetir'|'quitar', onAccion(id), deshabilitado }`.
+
+Rejilla `<ul className="grid grid-cols-2 gap-2 min-[480px]:grid-cols-3 sm:grid-cols-5">` (2 columnas a 360 px, sin desborde horizontal). Cada `<li>` lleva `aria-label` "Toma K de N, <título>, <estado>": miniatura `aspect-[4/3]` `object-cover` (la `ObjectURL` se libera al quitar, repetir, limpiar y desmontar; `alt` "Toma K: <título>"); bajo ella el estado como **texto con ícono** (`flex items-start gap-1 text-xs break-words`; nunca `Badge` en píldora ni solo color) y un `ui/Button` `size="sm"` `w-full` con texto corto "Repetir" (`RotateCcw`) o "Quitar" (`Trash2`) y `aria-label` "Repetir toma K" / "Quitar toma K"; también en las tomas aceptadas. Las ranuras vacías (modo cámara) muestran número y título del paso y la siguiente lleva `aria-current="step"`.
+
+| Estado | Ícono | Texto | Token |
+|---|---|---|---|
+| `verificando` | `LoaderCircle` (gira con `motion-safe:animate-spin`) | Verificando… | `text-muted-foreground` |
+| `aceptada` | `CircleCheck` | Aceptada | `text-presente` |
+| `calidad` | `CircleAlert` | el texto del motivo (`textoMotivo`) | `text-ausente` |
+| `inconsistente` | `CircleAlert` | No parece la misma persona; si el conjunto es ambiguo, Las tomas no coinciden entre sí | `text-retardo` |
+| `ilegible` | `CircleAlert` | No se pudo leer la imagen | `text-ausente` |
+| `duplicada` | `Copy` | Igual a la toma K | `text-retardo` |
+
+#### Componente `admin/alumnos/CalidadFotoResumen`
+
+Carpeta `web/src/components/admin/alumnos/CalidadFotoResumen/`. Presentacional.
 
 | Prop | Tipo |
 |---|---|
-| `resultado` | `{ rostros: number, un_solo_rostro: boolean, calidad: { brillo: number, nitidez: number, tamano_rostro: number, frontal: boolean }, motivo_rechazo: string \| null }` |
+| `resultado` | Una foto del conjunto (`{ rostros, un_solo_rostro, calidad: { brillo, nitidez, tamano_rostro_px, tamano_rostro, frontal }, motivo_rechazo, motivo_codigo, coseno_resto }`) o el resultado heredado de `POST /api/plantilla/verificar` con `foto` |
 
-Muestra lista de 5 renglones (Rostros detectados, Brillo, Nitidez, Tamaño del rostro en px, De frente) con texto "Correcto"/"Revisar" y el motivo si lo hay. Texto y color (no solo color).
+Muestra 5 renglones (Rostros detectados, Brillo, Nitidez, Tamaño del rostro en px, De frente) con texto "Correcto"/"Revisar" y el motivo si lo hay. Cada renglón se decide por `motivo_codigo` (`BORROSA`, `POCA_LUZ`, `EXCESO_LUZ`, `ROSTRO_PEQUENO`, `NO_FRONTAL`); antes marcaba siempre "Correcto" porque comparaba contra códigos y el servicio devuelve frases. Se muestra dentro de UN solo `ui/Detalles` agregado "Ver detalles de calidad" (un bloque por toma con su `coseno_resto`). Texto y color (no solo color).
 
 ### 2.2 Consola `/tecnico`
 
@@ -211,7 +256,7 @@ Estados: cargando, error, y servicio no disponible (la sección de estado de BD 
 | `consentimientoRegistrar({ idAlumno, fechaFirma, vigenciaHasta, objetoDocumento })` | `api_consentimiento_registrar` |
 | `consentimientoRevocar({ idConsent })` | `api_consentimiento_revocar` |
 | `consentimientosAlumno({ idAlumno, limit, offset })` | `api_consentimientos_alumno` |
-| `plantillaRegistrar({ idAlumno, idConsent, objetoFoto })` | `api_plantilla_registrar` |
+| `plantillaRegistrar({ idAlumno, idConsent, objetoFoto, fotos? })` | `api_plantilla_registrar` (`fotos` pasa como `p_fotos`; sus objetos ya llevan claves `snake_case`) |
 | `plantillaAlumno({ idAlumno, limit, offset })` | `api_plantilla_alumno` |
 | `documentoUrlAutorizar({ tipo, idRegistro })` | `api_documento_url_autorizar` |
 | `indiceEstado({ limit, offset })` | `api_indice_estado` |
@@ -220,7 +265,9 @@ Estados: cargando, error, y servicio no disponible (la sección de estado de BD 
 | `camarasEstado({ estatus, limit, offset })` | `api_camaras_estado` |
 | `camaraCambiarEstatus({ idCamara, estatus })` | `api_camara_cambiar_estatus` |
 
-`web/src/lib/http/biometria.js` (route-handlers): `registrarConsentimiento(formData)`, `revocarConsentimiento({ idConsent })`, `solicitarUrlDocumento({ idAlumno, tipo, idRegistro })`, `verificarFoto(blob)`, `registrarPlantilla({ idAlumno, idConsent, foto })`, `obtenerEstadoIndice()`, `reconstruirIndice({ completa })`, `sincronizarIndice()`, `revertirIndice({ idIndice })`. Todas devuelven el JSON o lanzan `ApiError` con `code` del cuerpo `{ error: { code, message, details? } }`.
+`web/src/lib/http/biometria.js` (route-handlers): `registrarConsentimiento(formData)`, `revocarConsentimiento({ idConsent })`, `solicitarUrlDocumento({ idAlumno, tipo, idRegistro })`, `verificarFoto(blob)`, `verificarFotos(blobs, { idAlumno, idConsent, signal })`, `registrarPlantilla({ idAlumno, idConsent, foto, fotos }, { signal })`, `obtenerEstadoIndice()`, `reconstruirIndice({ completa })`, `sincronizarIndice()`, `revertirIndice({ idIndice })`. `verificarFotos` arma un multipart con `fotos` repetido (`foto-1.jpg`, …), `id_alumno` e `id_consent`; `registrarPlantilla` envía `fotos` repetido si recibe un arreglo y `foto` si recibe una sola (camino heredado). `solicitarUrlDocumento({ tipo: 'plantilla_foto', idRegistro: id_foto })` no necesita código nuevo. Todas devuelven el JSON o lanzan `ApiError` con `code` del cuerpo `{ error: { code, message, details? } }`.
+
+Las funciones de `lib/api/biometria.js` no añaden envoltorios nuevos (siguen 72 `api_*`): solo cambian los argumentos de `plantillaRegistrar` y las claves devueltas por `plantillaAlumno` y `documentoUrlAutorizar` (ver §3.4 a §3.6). El wrapper convierte solo claves de primer nivel.
 
 ---
 
@@ -259,7 +306,9 @@ Estados: cargando, error, y servicio no disponible (la sección de estado de BD 
 | `SERVICIO_NO_CONFIGURADO` | La cuenta de servicio del sistema no está configurada. | `app.id_cuenta_servicio()` sin fila |
 | `BLOQUEO_OCUPADO` | El recurso está en uso por otro proceso. | Solo informativo: `svc_bloqueo_adquirir` devuelve `false`, no lanza |
 
-Mapeo de restricciones (23xxx) a código, que la capa de datos aplica si una escritura directa las dispara (las RPC las evitan con validación previa): `ux_plantilla_facial_activa` -> `RN_12_PLANTILLA_ACTIVA_DUPLICADA`; `ux_indice_faiss_en_uso` -> `RN_12_INDICE_EN_USO_DUPLICADO`; `uq_indice_faiss_version` -> `INDICE_VERSION_DUPLICADA`; `uq_plantilla_indice_faiss_id` -> `INDICE_MAPEO_INVALIDO`; `ck_plantilla_indexada` -> `INDICE_MAPEO_INVALIDO`; `ck_consentimiento_vigencia` -> `VALIDACION`.
+Mapeo de restricciones (23xxx) a código, que la capa de datos aplica si una escritura directa las dispara (las RPC las evitan con validación previa): `ux_plantilla_facial_activa` -> `RN_12_PLANTILLA_ACTIVA_DUPLICADA`; `ux_indice_faiss_en_uso` -> `RN_12_INDICE_EN_USO_DUPLICADO`; `uq_indice_faiss_version` -> `INDICE_VERSION_DUPLICADA`; `uq_plantilla_indice_faiss_id` -> `INDICE_MAPEO_INVALIDO`; `ck_plantilla_indexada` -> `INDICE_MAPEO_INVALIDO`; `ck_consentimiento_vigencia` -> `VALIDACION`. `ck_plantilla_foto_calidad` no tiene mapeo propio (`errors.js` no cambia): un `INSERT` directo con calidad inválida falla con 23514; la RPC lo evita con `app.calidad_foto_valida` y responde `VALIDACION`.
+
+La extensión de varias fotos (§4) no añade códigos `P0001`: `api_plantilla_registrar` reutiliza `VALIDACION` y `RUTA_INVALIDA`. Los códigos nuevos (`FOTOS_RECHAZADAS`, `FOTOS_INSUFICIENTES`, `FOTOS_DUPLICADAS`, `DEMASIADOS_ARCHIVOS`) son de los Route Handlers y están en §4.3.
 
 ### 3.1 `api_consentimiento_registrar`
 
@@ -359,23 +408,34 @@ CREATE FUNCTION public.api_plantilla_registrar(
     p_id_alumno    integer,
     p_id_consent   integer,
     p_objeto_foto  text,
-    p_ip           inet DEFAULT NULL
+    p_ip           inet DEFAULT NULL,
+    p_fotos        jsonb DEFAULT NULL
 ) RETURNS jsonb
 ```
 
-- Llama: `administrador` (desde `POST /api/alumnos/{id}/plantilla`, después de verificar la foto y subirla). `SECURITY DEFINER`.
-- Lee: `alumno`, `consentimiento`. Escribe: `plantilla_facial`, `bitacora_auditoria`.
-- Reglas, en UNA transacción y en este orden (RN-12, RN-13, RF-15, RF-16):
+- Llama: `administrador` (desde `POST /api/alumnos/{id}/plantilla`, después de verificar las fotos y subirlas). `SECURITY DEFINER`.
+- Lee: `alumno`, `consentimiento`. Escribe: `plantilla_facial`, `plantilla_foto`, `bitacora_auditoria`.
+- Firma (migración `0235`): se hizo `DROP` de la firma de 4 argumentos y `CREATE` de la de 5 (un *overload* haría ambigua la llamada por nombre y el adaptador local toma la primera función con ese nombre). `p_ip` sigue siendo el 4.º: toda llamada posicional o por nombre anterior sigue valiendo. Sin `p_fotos` todo es idéntico al comportamiento anterior (una foto), más la fila `orden = 1` de `plantilla_foto` que crea el trigger.
+- `p_fotos` (si no es `NULL`): arreglo JSON de 3 a 8 objetos **en orden de captura**; el primero es la foto principal. Claves por elemento: `objeto_foto` (obligatoria, texto), `calidad` (opcional; ausente, `null` JSON o un objeto que cumpla `app.calidad_foto_valida`) y `coseno_resto` (opcional; ausente, `null` JSON o número entre -1 y 1, que se guarda redondeado a 3 decimales). Cualquier otra clave es inválida. `calidad` y `coseno_resto` los aporta el llamador (el servicio, vía la ruta Next) y son **informativos, no verificables en SQL**. Ejemplo:
+
+```json
+[ { "objeto_foto": "registro/17/0f8e1c2a-aaaa-4bbb-8ccc-123456789abc.jpg",
+    "calidad": { "brillo": 120.5, "nitidez": 88.2, "tamano_rostro_px": 210, "frontal": true },
+    "coseno_resto": 0.812 }, ... ]
+```
+
+- Reglas, en UNA transacción y en este orden (RN-12, RN-13, RF-15, RF-16). TODA la validación va antes de escribir: un rechazo no archiva la plantilla activa.
   1. Rol `administrador`.
   2. `SELECT ... FROM alumno WHERE id_alumno = p_id_alumno FOR UPDATE` (serializa altas concurrentes del mismo alumno). `NO_ENCONTRADO` si no existe; `ALUMNO_INACTIVO` si `estatus <> 'activo'`.
-  3. `p_objeto_foto` cumple `registro/{p_id_alumno}/<uuid>.jpg` (`RUTA_INVALIDA`).
+  3. Si `p_fotos IS NULL`: `p_objeto_foto` cumple `registro/{p_id_alumno}/<uuid>.jpg` (`RUTA_INVALIDA`, incluida la ruta `NULL`). Si `p_fotos IS NOT NULL`: (a) es un arreglo de 3 a 8 elementos, si no `VALIDACION` "Una plantilla de varias fotos lleva de 3 a 8 fotos."; (b) cada elemento es un objeto con `objeto_foto` de tipo texto, solo las 3 claves permitidas, `calidad` ausente/`null`/válida y `coseno_resto` ausente/`null`/número en [-1, 1], si no `VALIDACION` "La descripción de las fotos no es válida."; (c) cada `objeto_foto` cumple `registro/{p_id_alumno}/<uuid>.jpg` (`RUTA_INVALIDA`); (d) sin rutas repetidas, si no `VALIDACION` "Las fotos no pueden repetirse."; (e) `p_objeto_foto` es `NULL` o igual a `p_fotos->0->>'objeto_foto'`, si no `VALIDACION` "La foto principal debe ser la primera de la lista."
   4. Consentimiento: existe (`NO_ENCONTRADO`), `id_alumno` coincide (`RN_13_CONSENTIMIENTO_AJENO`), `app.consentimiento_vigente(p_id_consent)` (`RN_13_CONSENTIMIENTO_NO_VIGENTE`).
-  5. ARCHIVAR primero: `UPDATE plantilla_facial SET activa = false WHERE id_alumno = p_id_alumno AND activa RETURNING id_plantilla, id_consent`.
-  6. INSERTAR después: `INSERT INTO plantilla_facial (id_alumno, id_consent, id_indice, faiss_id, objeto_foto, fecha_registro, activa) VALUES (p_id_alumno, p_id_consent, NULL, NULL, p_objeto_foto, app.now(), true)`. El índice único parcial no es diferible: el orden inverso falla con 23505.
-  7. `app.bitacora('alta_plantilla', 'plantilla_facial', <id_plantilla nueva>, <anterior>, <nuevo>, p_ip)`; `anterior` = `{ "id_plantilla": <archivada>, "id_consent": <su consentimiento>, "activa": true }` o `NULL` si no había; `nuevo` = `{ "id_plantilla": <nueva>, "id_consent": p_id_consent, "objeto_foto": p_objeto_foto, "activa": true, "plantilla_archivada": <id|null> }`.
-- La foto anterior NO se borra del bucket (la plantilla queda archivada, RN-12).
+  5. ARCHIVAR primero: `UPDATE plantilla_facial SET activa = false WHERE id_alumno = p_id_alumno AND activa RETURNING id_plantilla, id_consent`, y DESPUÉS INSERTAR: `INSERT INTO plantilla_facial (id_alumno, id_consent, id_indice, faiss_id, objeto_foto, fecha_registro, activa) VALUES (p_id_alumno, p_id_consent, NULL, NULL, <la principal>, app.now(), true)`. El índice único parcial no es diferible: el orden inverso falla con 23505. El trigger `trg_plantilla_foto_principal` (AFTER INSERT OR UPDATE OF `objeto_foto`) crea la fila `plantilla_foto` con `orden = 1`.
+  6. Con `p_fotos`: `UPDATE plantilla_foto SET calidad, coseno_resto` del elemento 0 `WHERE orden = 1` e `INSERT` de los elementos 1..n-1 con `orden` 2..n.
+  7. `app.bitacora('alta_plantilla', 'plantilla_facial', <id_plantilla nueva>, <anterior>, <nuevo>, p_ip)`; `anterior` = `{ "id_plantilla": <archivada>, "id_consent": <su consentimiento>, "activa": true }` o `NULL` si no había; `nuevo` = `{ "id_plantilla": <nueva>, "id_consent": p_id_consent, "objeto_foto": <la principal>, "activa": true, "plantilla_archivada": <id|null>, "n_fotos": <n> }`.
+- **Las fotos anteriores NO se borran del bucket**: la plantilla archivada conserva su foto principal y sus fotos extra (RN-12; `activa = false` es el único "archivado"). Las fotos extra no tienen bandera propia: su estado es el de la plantilla padre. La decisión de qué fotos son ajenas o inconsistentes NO es de esta RPC: la toma el servicio de reconocimiento (§4) y llega aquí como el escalar informativo `coseno_resto`.
+- Atómica: una falla no deja filas en `plantilla_foto` ni archiva la anterior.
 
-Retorno:
+Retorno (claves anteriores intactas más `n_fotos`; `n_fotos = 1` sin `p_fotos`):
 
 ```json
 {
@@ -386,11 +446,12 @@ Retorno:
   "indexada": false,
   "plantilla_archivada": 33,
   "fecha_registro": "2026-09-14T09:12:41-06:00",
-  "requiere_reconstruccion": true
+  "requiere_reconstruccion": true,
+  "n_fotos": 5
 }
 ```
 
-Errores: `NO_AUTORIZADO`; `NO_ENCONTRADO` ("El alumno no existe." / "El consentimiento no existe."); `ALUMNO_INACTIVO`; `RUTA_INVALIDA`; `RN_13_CONSENTIMIENTO_AJENO`; `RN_13_CONSENTIMIENTO_NO_VIGENTE` ("El consentimiento no está firmado y vigente: la alta se rechaza.").
+Errores (ningún código nuevo): `NO_AUTORIZADO`; `NO_ENCONTRADO` ("El alumno no existe." / "El consentimiento no existe."); `ALUMNO_INACTIVO`; `VALIDACION` (solo por `p_fotos`); `RUTA_INVALIDA`; `RN_13_CONSENTIMIENTO_AJENO`; `RN_13_CONSENTIMIENTO_NO_VIGENTE` ("El consentimiento no está firmado y vigente: la alta se rechaza.").
 
 ### 3.5 `api_plantilla_alumno`
 
@@ -402,8 +463,9 @@ CREATE FUNCTION public.api_plantilla_alumno(
 ) RETURNS jsonb
 ```
 
-- Llama: `administrador`. `SECURITY INVOKER` (+ rol explícito). Lee: `plantilla_facial`, `indice_faiss`, `consentimiento`.
+- Llama: `administrador`. `SECURITY INVOKER` (+ rol explícito). Lee: `plantilla_facial`, `plantilla_foto`, `indice_faiss`, `consentimiento`.
 - `activa.indexada` = `id_indice IS NOT NULL`; `activa.en_uso` = su `id_indice` es la versión en uso; `consentimiento_vigente` = `app.consentimiento_vigente(id_consent)`.
+- Claves nuevas dentro de `activa` (las demás intactas): `n_fotos`; `coseno_min` y `coseno_medio` (mínimo y media de `coseno_resto`, 3 decimales; `null` en plantillas de una foto); `fotos`, ordenadas por `orden`, con `id_foto`, `orden`, `principal` (`orden = 1`), `calidad` (`{ brillo, nitidez, tamano_rostro_px, frontal }` o `null`) y `coseno_resto` (o `null`). En `archivadas.items[]` se añade `n_fotos`. Fallback defensivo: si una plantilla no tuviera filas en `plantilla_foto`, `n_fotos = 1` y `fotos = []`. **Nunca se emite `objeto_foto`**: la ruta solo sale por `api_documento_url_autorizar`. La pantalla la sigue llamando con `limit` 1.
 - `archivadas` paginadas (`{ total, items }`), orden `fecha_registro DESC`.
 
 Retorno:
@@ -420,28 +482,37 @@ Retorno:
     "version_indice": "v003",
     "faiss_id": 1042,
     "en_uso": true,
-    "consentimiento_vigente": true
+    "consentimiento_vigente": true,
+    "n_fotos": 5,
+    "coseno_min": 0.512,
+    "coseno_medio": 0.744,
+    "fotos": [
+      { "id_foto": 101, "orden": 1, "principal": true,
+        "calidad": { "brillo": 120.5, "nitidez": 88.2, "tamano_rostro_px": 210, "frontal": true },
+        "coseno_resto": 0.812 }
+    ]
   },
-  "archivadas": { "total": 1, "items": [ { "id_plantilla": 33, "id_consent": 4, "fecha_registro": "2025-08-21T10:02:11-06:00" } ] },
+  "archivadas": { "total": 1, "items": [ { "id_plantilla": 33, "id_consent": 4, "fecha_registro": "2025-08-21T10:02:11-06:00", "n_fotos": 1 } ] },
   "indice_en_uso": { "id_indice": 3, "version": "v003" }
 }
 ```
 
-`activa` es `null` si no hay plantilla activa; `indice_en_uso` es `null` si no hay índice. Errores: `NO_AUTORIZADO`; `NO_ENCONTRADO` ("El alumno no existe.").
+(`fotos` se abrevia a un elemento en el ejemplo.) `activa` es `null` si no hay plantilla activa; `indice_en_uso` es `null` si no hay índice. Errores: `NO_AUTORIZADO`; `NO_ENCONTRADO` ("El alumno no existe.").
 
 ### 3.6 `api_documento_url_autorizar`
 
 ```sql
 CREATE FUNCTION public.api_documento_url_autorizar(
-    p_tipo        text,      -- 'consentimiento' | 'plantilla'
-    p_id_registro integer,   -- id_consent o id_plantilla
+    p_tipo        text,      -- 'consentimiento' | 'plantilla' | 'plantilla_foto'
+    p_id_registro integer,   -- id_consent, id_plantilla o id_foto
     p_ip          inet DEFAULT NULL
 ) RETURNS jsonb
 ```
 
-- Llama: `administrador` (desde `POST /api/alumnos/{id}/documento-url`). `SECURITY DEFINER`.
-- Lee: `consentimiento` o `plantilla_facial`. Escribe: `bitacora_auditoria`.
-- Reglas (RF-19, RNF-04, RNF-08): cada emisión de URL asienta `app.bitacora('consulta', <'consentimiento'|'plantilla_facial'>, p_id_registro, NULL, jsonb_build_object('id_alumno', ...), p_ip)`. Devuelve la ruta y la vigencia de la URL; el Route Handler crea la URL firmada.
+- Llama: `administrador` (desde `POST /api/alumnos/{id}/documento-url` y `GET /api/documentos/plantilla_foto/{id}`). `SECURITY DEFINER`.
+- Lee: `consentimiento`, `plantilla_facial` o `plantilla_foto`. Escribe: `bitacora_auditoria`.
+- Reglas (RF-19, RNF-04, RNF-08): cada emisión de URL asienta `app.bitacora('consulta', <'consentimiento'|'plantilla_facial'>, p_id_registro, NULL, jsonb_build_object('id_alumno', ...), p_ip)` ANTES de devolver. Devuelve la ruta y la vigencia de la URL; el Route Handler crea la URL firmada.
+- `p_tipo = 'plantilla'` devuelve la foto principal de la plantilla (sin cambios). `p_tipo = 'plantilla_foto'` (`p_id_registro` = `id_foto`) devuelve la ruta de esa foto, incluso si su plantilla está archivada (igual que `'plantilla'`), y asienta `app.bitacora('consulta', 'plantilla_facial', <id_plantilla>, NULL, { id_alumno, id_foto, orden }, p_ip)` (`ck_bitacora_entidad` no cambia). `NO_ENCONTRADO` ("La foto de la plantilla no existe.") si no existe. Cualquier otro tipo: `VALIDACION` ("Tipo de documento no válido.").
 - `vigencia_seg = LEAST(app.param_num('vigencia_url_firmada_seg'), 300)`.
 
 Retorno:
@@ -452,6 +523,20 @@ Retorno:
   "id_registro": 41,
   "id_alumno": 17,
   "objeto": "registro/17/3f1c2a9e-5b7d-4c0e-9a41-0d2f6b8e7a11.jpg",
+  "vigencia_seg": 300
+}
+```
+
+Con `plantilla_foto` el JSON añade `id_plantilla` y `orden`:
+
+```json
+{
+  "tipo": "plantilla_foto",
+  "id_registro": 103,
+  "id_alumno": 17,
+  "id_plantilla": 41,
+  "orden": 3,
+  "objeto": "registro/17/9b2d6c1e-0a3f-4e7b-8d55-2c1f0a9e4b73.jpg",
   "vigencia_seg": 300
 }
 ```
@@ -660,7 +745,7 @@ Errores: `NO_AUTORIZADO`; `NO_ENCONTRADO`; `VALIDACION` ("Estatus de cámara no 
 CREATE FUNCTION public.svc_indice_plan(p_completa boolean DEFAULT false) RETURNS jsonb
 ```
 
-- Llama: Route Handler (`lib/server/indice.js`) con `service_role`. `SECURITY DEFINER`. Solo lectura: `indice_faiss`, `plantilla_facial`, `parametro_sistema`. No toma bloqueos.
+- Llama: Route Handler (`lib/server/indice.js`) con `service_role`. `SECURITY DEFINER`. Solo lectura: `indice_faiss`, `plantilla_facial`, `plantilla_foto`, `parametro_sistema`. No toma bloqueos.
 - Contrato:
   - `dimension` = `app.param_num('dimension_vector')`.
   - `base` = índice `en_uso` si existe, su `dimension` coincide con `dimension` y `p_completa = false`; si no `null` (con `motivo_sin_base`: `"sin_indice"`, `"dimension_cambiada"` o `"completa"`).
@@ -668,6 +753,7 @@ CREATE FUNCTION public.svc_indice_plan(p_completa boolean DEFAULT false) RETURNS
   - `version_sugerida` = `'v' || lpad((1 + coalesce(max(substring(version from '^v(\d+)$')::int), 0))::text, 3, '0')` (la versión cabe en `VARCHAR(12)`).
   - `totales`: `activas`, `nuevas` (`not en_base`), `en_base`, `obsoletas` (`activa = false` con `id_indice = base.id_indice`; 0 si no hay base).
   - `nada_que_hacer` = `nuevas = 0 AND obsoletas = 0 AND base IS NOT NULL`.
+  - Cada elemento de `entries` gana `objetos_foto`: arreglo de rutas en orden de `plantilla_foto.orden` (la principal primero; fallback `[objeto_foto]` si faltaran filas) cuando `en_base = false`, y `null` cuando `en_base = true` (el vector se conserva con `keep`). `objeto_foto` (la principal) se conserva. Solo entran las plantillas ACTIVAS, incluidas las de consentimiento vencido (`app.vencer_consentimientos` no archiva); las fotos de plantillas archivadas o revocadas quedan fuera del índice igual que su foto principal.
 
 Retorno:
 
@@ -680,8 +766,9 @@ Retorno:
   "totales": { "activas": 500, "nuevas": 2, "en_base": 498, "obsoletas": 0 },
   "nada_que_hacer": false,
   "entries": [
-    { "id_plantilla": 12, "id_alumno": 3, "faiss_id": 1001, "id_indice": 3, "en_base": true, "objeto_foto": "registro/3/5d2e...jpg" },
-    { "id_plantilla": 41, "id_alumno": 17, "faiss_id": 1043, "id_indice": null, "en_base": false, "objeto_foto": "registro/17/3f1c...jpg" }
+    { "id_plantilla": 12, "id_alumno": 3, "faiss_id": 1001, "id_indice": 3, "en_base": true, "objeto_foto": "registro/3/5d2e...jpg", "objetos_foto": null },
+    { "id_plantilla": 41, "id_alumno": 17, "faiss_id": 1043, "id_indice": null, "en_base": false, "objeto_foto": "registro/17/3f1c...jpg",
+      "objetos_foto": ["registro/17/3f1c...jpg", "registro/17/a77e...jpg", "registro/17/c902...jpg"] }
   ]
 }
 ```
@@ -912,3 +999,204 @@ CREATE FUNCTION public.svc_job_recalcular(p_periodo text DEFAULT NULL) RETURNS j
 ```
 
 Errores de las `svc_job_*`: no lanzan por fallos de elementos individuales (van en `errores`); lanzan `SERVICIO_NO_CONFIGURADO` si falta la cuenta de servicio, y `VALIDACION` por argumentos inválidos.
+
+---
+
+## 4. Plantilla de varias fotos (extensión 17 de `docs/DECISIONS.md`)
+
+Una plantilla pasa de UNA foto a **3 a 8 fotos** (5 guiadas). El servicio de reconocimiento embebe cada foto, descarta las ajenas, promedia los vectores L2-normalizados (centroide) y vuelve a normalizar: el resultado es **UN vector y UN `faiss_id`** por plantilla, así que RN-12 y todo el flujo del índice quedan intactos. El promedio y el descarte ocurren en el servicio porque el vector solo puede vivir en memoria y en el JSON del índice (RNF-03). Las plantillas existentes de una foto siguen funcionando sin migración manual. Calibración y decisiones: `docs/DECISIONS.md` (sección 6) y `recognition-service/README.md`.
+
+### 4.1 Modelo de datos (migración `0235_plantilla_fotos.sql`)
+
+- **Una fila de `plantilla_facial` por plantilla** (RN-12, un `faiss_id`, `ux_plantilla_facial_activa` y el flujo de índice sin cambios) más la tabla hija **`plantilla_foto`** (la 20.ª tabla; la spec habla de 19). `plantilla_facial.objeto_foto` sigue siendo la foto principal. Se descartó un `jsonb`/arreglo dentro de `plantilla_facial` (rompe la 3FN, pierde la FK y el borrado por objeto, y RNF-03 prohíbe columnas de arreglo).
+
+| Columna de `plantilla_foto` | Tipo | Notas |
+|---|---|---|
+| `id_foto` | `integer` identity | PK `pk_plantilla_foto` |
+| `id_plantilla` | `integer` NOT NULL | FK `fk_plantilla_foto_plantilla` a `plantilla_facial`, `ON DELETE RESTRICT` |
+| `orden` | `smallint` NOT NULL | 1..8 (`ck_plantilla_foto_orden`); `uq_plantilla_foto_orden` único por `(id_plantilla, orden)`. `orden = 1` es la foto principal = `plantilla_facial.objeto_foto` |
+| `objeto_foto` | `varchar(255)` NOT NULL | Ruta `registro/{id_alumno}/<uuid>.jpg` en el bucket privado |
+| `calidad` | `jsonb` | `{ brillo, nitidez, tamano_rostro_px, frontal }` medidas por el servicio al registrar; `NULL` en plantillas anteriores; informativo. `ck_plantilla_foto_calidad` usa `app.calidad_foto_valida` |
+| `coseno_resto` | `numeric(4,3)` | Coseno medio de la foto contra las demás fotos aceptadas, medido por el servicio al registrar; `NULL` en plantillas de una foto; informativo, no verificable en SQL (`ck_plantilla_foto_coseno`: -1..1) |
+
+- `app.calidad_foto_valida(p jsonb) → boolean` (lista blanca; la usan el `CHECK` y la RPC, así la RPC responde `VALIDACION` y nunca un 23514 crudo): `NULL` es válido; debe ser un objeto con solo las claves `brillo` (número 0..255), `nitidez` (número 0..1 000 000), `tamano_rostro_px` (entero 0..100 000) y `frontal` (booleano).
+- **Invariante por trigger**: `trg_plantilla_foto_principal` (AFTER INSERT OR UPDATE OF `objeto_foto` en `plantilla_facial`) inserta o sincroniza la fila `orden = 1`. Así toda plantilla tiene al menos una fila y ningún lector distingue plantillas heredadas de nuevas; la RPC, las fixtures y cualquier `INSERT` directo quedan coherentes. El *backfill* de las plantillas existentes es un `INSERT ... SELECT` idempotente. `svc_indice_plan` y `api_plantilla_alumno` hacen además fallback a `objeto_foto` si faltaran filas.
+- **RLS y permisos**: RLS activa; `REVOKE ALL` a `PUBLIC`, `anon` y `authenticated` (también sobre la secuencia); `GRANT SELECT` a `authenticated` con la política `admin_ve_todo` (solo el administrador lee; el docente sigue viendo la foto principal por `plantilla_facial`); `GRANT ALL` a `service_role`. Nadie escribe salvo funciones `DEFINER`.
+- **Las fotos rechazadas no se suben ni se guardan**: lo que está en `plantilla_foto` es exactamente lo aceptado al registrar. No hay columna `incluida`. Minimiza datos biométricos y evita guardar el rostro de un tercero (un *outlier* suele ser otra persona).
+- Sin RPC `api_*` nueva (siguen 72). Cambian: `api_plantilla_registrar` (§3.4, 5.º parámetro `p_fotos`), `api_plantilla_alumno` (§3.5), `api_documento_url_autorizar` (§3.6, tipo `plantilla_foto`) y `svc_indice_plan` (§3.12, `objetos_foto`). En Supabase real, tras aplicar `0235` hay que recargar el esquema de PostgREST (`NOTIFY pgrst, 'reload schema'`).
+
+### 4.2 Servicio de reconocimiento
+
+Autenticación `X-API-Key` como siempre. Nunca viaja un vector ni un embedding (ninguna clave con esas palabras) y nada se guarda en `check-set`.
+
+#### Variables de entorno nuevas (todas con defecto)
+
+| Variable | Defecto | Significado |
+|---|---|---|
+| `TEMPLATE_MIN_PHOTOS` | 3 | Mínimo de fotos aceptadas de una plantilla |
+| `TEMPLATE_MAX_PHOTOS` | 8 | Máximo de fotos (techo duro compartido con SQL y con el proxy de Next) |
+| `TEMPLATE_OUTLIER_COSINE` | 0.35 | Coseno medio mínimo de una foto contra las demás al REGISTRAR; `0` apaga el descarte (modo calibración) |
+| `TEMPLATE_BUILD_OUTLIER_COSINE` | `min(0.25, TEMPLATE_OUTLIER_COSINE)` | Umbral propio, más permisivo, del constructor del índice |
+| `TEMPLATE_LINK_COSINE` | 0.30 | Segundo criterio de consistencia: las fotos conservadas deben formar UN grupo (dos fotos se enlazan si su coseno es >= este valor); detecta mezclas balanceadas de dos personas; `0` lo apaga. El constructor usa `min(0.20, este valor)` |
+| `TEMPLATE_MAX_YAW_RATIO` | 0.40 | Razón de giro máxima en modo conjunto (unos 36 grados) |
+| `TEMPLATE_DUP_COSINE` | 0.97 | Coseno desde el cual dos fotos se consideran casi idénticas |
+| `TEMPLATE_MAX_TOTAL_BYTES` | 31 457 280 (30 MiB) | Tope de bytes de una petición a `/check-set` |
+
+`Settings.validate()` falla al arrancar si no se cumple: `3 <= min <= max <= 8`; `0 <= outlier < 1`; `0 <= build <= outlier`; `0 <= link < 1`; `0.1 <= yaw <= 1`; `0.8 <= dup <= 1`; `total_bytes >= max_image_bytes`.
+
+#### Criterio de consistencia (`app/samples.py::consolidar`)
+
+Una foto debe parecerse, **en promedio**, al menos `TEMPLATE_OUTLIER_COSINE` a las demás fotos que se conservan. Se usa la media de pares y no el coseno contra el centroide porque este último infla el coseno cuando las demás fotos son una mezcla de dos personas (el centroide pierde norma): dejaba pasar conjuntos balanceados 3+3 y 4+4. Pero la media de pares tampoco ve una mezcla balanceada cuando las fotos de cada persona se parecen mucho entre sí (coseno ~0.8: la media de cada foto cae en 0.35-0.36), por eso hay un segundo criterio, el **enlace de grupo** (paso 3). Algoritmo (aritmética en `float64`; el centroide se entrega en `float32`):
+
+1. Mientras queden más de 2 fotos, calcula la media de cada foto contra las demás conservadas.
+2. Descarta la peor (empate: menor índice) si está por debajo del umbral y repite; si no, para. La comparación es con `>=` (un coseno igual al umbral se conserva).
+3. Con 3 o más fotos conservadas y `TEMPLATE_LINK_COSINE > 0` (y descarte activo), las fotos conservadas deben formar UNA componente conexa (enlace = coseno >= `TEMPLATE_LINK_COSINE`); si quedan 2 o más grupos el conjunto es ambiguo (mezcla de personas). Basta un compañero parecido por foto, así que una toma genuina difícil no rompe el conjunto.
+4. Al final el conjunto es **ambiguo** si quedan 2 y su coseno mutuo es menor que el umbral, si las descartadas son al menos tantas como las usadas (sin mayoría) o si no hay centroide (suma de norma casi nula).
+5. En un conjunto ambiguo TODAS las candidatas pasan a `inconsistente`.
+
+`n < 2` devuelve la entrada. Los cosenos mostrados se truncan (no se redondean) a 3 decimales para que un valor bajo el umbral nunca se muestre como el umbral. El umbral 0.35 es una **hipótesis calibrable** (variable de entorno; la respuesta expone `coseno_resto` por foto). Detalles en `docs/DECISIONS.md`.
+
+#### Razón de giro compensada
+
+`DetectedFace.yaw_ratio` guarda la razón compensada por la inclinación de la cabeza: `|(nariz - punto medio de los ojos) · u| / distancia interocular`, con `u` el vector unitario del ojo izquierdo al derecho. La heurística heredada usa solo la coordenada `x` de la nariz y confunde inclinación con giro. En modo conjunto `frontal = yaw_ratio < TEMPLATE_MAX_YAW_RATIO`; el booleano `frontal` heredado de `/v1/photo/check` NO cambia. Las tomas guiadas piden 15 grados (razón 0.15).
+
+#### `POST /v1/photo/check` (sin cambios de contrato)
+
+Una imagen, mismo JSON; solo se añade (aditivo) la clave `motivo_codigo` junto a `motivo_rechazo` (que sigue siendo una frase en español legible, no un código):
+
+| `motivo_rechazo` (frase) | `motivo_codigo` |
+|---|---|
+| No se detecto ningun rostro. | `SIN_ROSTRO` |
+| Hay mas de un rostro en la foto. | `MULTIPLES_ROSTROS` |
+| El rostro es demasiado pequeno (...) | `ROSTRO_PEQUENO` |
+| El rostro no esta de frente. | `NO_FRONTAL` |
+| La foto esta muy oscura. | `POCA_LUZ` |
+| La foto esta sobreexpuesta. | `EXCESO_LUZ` |
+| La foto esta desenfocada. | `BORROSA` |
+| (sin rechazo) | `null` |
+
+Los códigos `IMAGEN_INVALIDA`, `NO_COINCIDE` y `CONJUNTO_AMBIGUO` solo aparecen en `check-set`.
+
+#### `POST /v1/photo/check-set`
+
+`multipart/form-data` con el campo `images` REPETIDO (de 1 a `TEMPLATE_MAX_PHOTOS` archivos). 0 archivos o más del máximo, o una suma de bytes leídos mayor que `TEMPLATE_MAX_TOTAL_BYTES`: 422 `VALIDATION_ERROR`; sin clave: 401. Un archivo que supere `MAX_IMAGE_BYTES`, tenga demasiados píxeles o no decodifique NO tumba la petición: esa foto sale `ilegible`.
+
+Por foto, en orden: decodifica; `analyze(rgb, TEMPLATE_MAX_YAW_RATIO)`; con `motivo_rechazo != null` el estado es `calidad`. Con las candidatas (sin motivo) y al menos 2, `consolidar(E, TEMPLATE_OUTLIER_COSINE, TEMPLATE_MIN_PHOTOS)`: las usadas quedan `aceptada`, las descartadas `inconsistente` (`NO_COINCIDE`); si el conjunto es ambiguo, TODAS las candidatas quedan `inconsistente` con `CONJUNTO_AMBIGUO`. Una sola candidata queda `aceptada` sin coseno.
+
+```json
+{
+  "total": 5, "aceptadas": 4, "minimo": 3, "maximo": 8,
+  "suficiente": true, "consistente": false, "ambiguo": false,
+  "umbral_coseno": 0.35, "coseno_min": 0.512, "coseno_medio": 0.744, "coseno_max_par": 0.931,
+  "advertencias": [],
+  "fotos": [
+    { "indice": 0, "estado": "aceptada", "rostros": 1, "un_solo_rostro": true,
+      "calidad": { "brillo": 120.5, "nitidez": 88.2, "tamano_rostro_px": 210, "frontal": true },
+      "motivo_rechazo": null, "motivo_codigo": null, "coseno_resto": 0.812 }
+  ]
+}
+```
+
+- `fotos[i].estado`: `aceptada | calidad | inconsistente | ilegible`. `indice` es la posición en el envío desde 0. `calidad` es `null` solo en `ilegible` (`motivo_codigo` `IMAGEN_INVALIDA`).
+- `suficiente` = `aceptadas >= minimo`. `consistente` = `null` con menos de 2 candidatas, `false` si alguna salió `inconsistente` o el conjunto es ambiguo, `true` en otro caso. `coseno_min`, `coseno_medio` y `coseno_max_par` se calculan solo sobre las aceptadas (`null` si no hay).
+- `advertencias` admite `DIVERSIDAD_BAJA` (con 2 o más aceptadas y menos grupos de fotos casi idénticas, por enlace simple a `TEMPLATE_DUP_COSINE`, que `minimo`).
+- Los cosenos van truncados a 3 decimales.
+
+#### `POST /v1/index/build` (cambios aditivos)
+
+- `EntryIn` admite una tercera forma, `objetos_foto: list[str]` (de 2 a 8 elementos de 1 a 512 caracteres; se valida con pydantic, 422 ANTES de tomar el candado). Exactamente una de `{ keep: true }`, `{ objeto_foto }`, `{ objetos_foto }`; mezclar formas es 422. Las dos primeras se comportan idéntico a antes.
+- Entrada `objetos_foto`: se leen y embeben todas. **Constructor defensivo** (el registro es el filtro estricto; el constructor solo se defiende de fotos corruptas o ajenas de verdad): se descarta una foto (no es error) si el objeto no existe (`no_encontrada`), no decodifica (`ilegible`), no tiene exactamente un rostro (`sin_rostro` | `varios_rostros`) o la elimina `consolidar` con `TEMPLATE_BUILD_OUTLIER_COSINE`, enlace `min(0.20, TEMPLATE_LINK_COSINE)` y mínimo 1 (`inconsistente`, con su `coseno_resto`). Un `StorageError` transitorio NO es descarte: la entrada falla con "No se pudo leer la foto." como hoy. Si NINGUNA foto es utilizable: error de entrada `{ id_plantilla, motivo: "Ninguna de las N fotos es utilizable.", codigo: "SIN_MUESTRAS_UTILIZABLES" }` (todo o nada: no se escribe el índice). Si el conjunto es ambiguo se indexa la primera foto utilizable sola (comportamiento heredado) y el resto se informa descartado con motivo `ambigua`. En otro caso el vector es el centroide de las usadas. No exige mínimo: con 1 o más fotos utilizables indexa el centroide y lo informa como `degradada`. Así ninguna plantilla bloquea el índice ni las revocaciones por un cambio de entorno, de umbrales o por una foto ausente.
+- Las filas `keep` NO se renormalizan (re-normalizar un centroide ya normalizado cambia bits y la suma en `float32` depende del orden): solo se normalizan las filas NUEVAS, y las `keep` quedan idénticas a la base, byte a byte.
+- Respuesta: se mantienen `version`, `objeto_indice`, `dimension`, `ntotal`, `mapeo` y `errores` (cada error puede traer `codigo`). Clave NUEVA `muestras` (también cuando hay errores; `[]` si no hay entradas `objetos_foto`), solo con escalares:
+
+```json
+"muestras": [
+  { "id_plantilla": 41, "total": 5, "usadas": 5,
+    "descartadas": [ { "indice": 2, "motivo": "inconsistente", "coseno_resto": 0.21 } ],
+    "coseno_min": 0.512, "coseno_medio": 0.744, "degradada": false }
+]
+```
+
+`degradada = usadas < total`. El vector del centroide no sale. Los logs solo llevan contadores ("plantillas multi: N, fotos descartadas: K"), sin PII ni vectores.
+
+La plantilla multifoto exige `EMBEDDER=insightface`: con `fake`, `/check-set` responde 200 como siempre pero una foto real de webcam no tiene marco magenta (`SIN_ROSTRO`) y una reconstrucción COMPLETA falla con fotos reales. Una reconstrucción completa cuesta N veces más (embebe todas las fotos de todas las plantillas); la incremental con `keep` no se afecta.
+
+### 4.3 Rutas web (Route Handlers)
+
+Todo Route Handler: autenticar, autorizar (`administrador`), validar (zod) y ejecutar; sin cambios en el esquema de autorización.
+
+**Límites** (`lib/server/storage.js`): `MAX_FOTOS_PLANTILLA = 8` (techo duro compartido con SQL) y `MAX_PLANTILLA_BYTES_TOTAL = 9 MiB`; cada foto <= 5 MiB. El proxy de Next buferiza como máximo 10 MB por petición y TRUNCA en silencio (`proxyClientMaxBodySize`); las dos rutas pasan `maxMultipartBytes = 9 MiB + 64 KiB`, de modo que cualquier cuerpo mayor da 413 limpio y nunca un `formData` truncado. La web solo conoce el techo 8 (`DEMASIADOS_ARCHIVOS`) y deriva `FOTOS_INSUFICIENTES` del `minimo` que devuelve el servicio.
+
+**`handle()`** (`lib/server/route.js`) soporta varios archivos con el mismo nombre. Spec en `archivos`: `{ campo, maxBytes, tipos, requerido?, multiple?: true, maxArchivos?, maxBytesTotal? }`. Con `multiple`, `form.archivos[campo]` es `[]` o un arreglo de `{ bytes, tipo, ext, contentType, size }` en orden de llegada. Sin `multiple`, dos o más archivos con ese nombre dan 422 `VALIDACION` ("Solo se admite un archivo en este campo."). Más de `maxArchivos`: 422 `DEMASIADOS_ARCHIVOS` (`details`: `campo`, `maximo`, `recibidos`); suma de bytes mayor que `maxBytesTotal`: 413 `ARCHIVO_DEMASIADO_GRANDE` (`details.campo`). Los errores por archivo (415 `TIPO_NO_PERMITIDO`, 422 `ARCHIVO_INVALIDO`, 413 `ARCHIVO_DEMASIADO_GRANDE`, archivo vacío 422) llevan `details: { campo, indice }` en campos `multiple`.
+
+#### `POST /api/plantilla/verificar` (multipart)
+
+Campos de texto (zod `verificarFotosCampos`): `id_alumno` e `id_consent`, enteros positivos. Archivos: `foto` (JPEG, heredado, opcional) XOR `fotos` (JPEG, repetido, 1 a 8). Ninguno o ambos: 422 `VALIDACION` (`details.campos` con `{ campo: 'fotos', mensaje }`).
+
+- Con `foto`: respuesta idéntica a la anterior `{ rostros, un_solo_rostro, calidad: { brillo, nitidez, tamano_rostro_px, tamano_rostro, frontal }, motivo_rechazo }` más `motivo_codigo` (aditivo). No exige `id_alumno`.
+- Con `fotos`: exige `id_alumno` e `id_consent` (422 `VALIDACION` si faltan) y llama primero a `exigirConsentimientoVigente` (el mismo helper del alta: `api_consentimientos_alumno`, `RN_13_CONSENTIMIENTO_AJENO` / `RN_13_CONSENTIMIENTO_NO_VIGENTE` 409), porque ahora se calculan embeddings y cosenos de identidad. Calcula el `sha256` de cada foto; las copias exactas NO se envían al servicio (este ve solo fotos únicas). Devuelve el JSON de `check-set` mapeado a las posiciones originales: `total` = fotos enviadas; cada `fotos[i]` lleva `calidad` con el alias `tamano_rostro` (si no es `null`) y `duplicada_de` (`null` o índice de la primera foto idéntica). Las copias salen `{ indice, estado: 'duplicada', rostros: null, un_solo_rostro: null, calidad: null, motivo_rechazo: 'Es igual a otra foto del envío.', motivo_codigo: 'DUPLICADA', coseno_resto: null, duplicada_de: <indice> }`. `aceptadas`, `suficiente`, `consistente`, `ambiguo`, `coseno_*`, `advertencias` y `umbral_coseno` son los del servicio (conjunto sin copias). No guarda nada.
+
+#### `POST /api/alumnos/{id}/plantilla` (multipart, `maxDuration` 300)
+
+Campos: `id_consent` (zod `plantillaCampos`, sin cambios) más `foto` XOR `fotos` repetido (1 a 8).
+
+1. `exigirConsentimientoVigente` ANTES de procesar nada.
+2. **n = 1** (`foto`, o `fotos` con un solo archivo): CAMINO HEREDADO sin cambios: calidad individual con 422 `FOTO_RECHAZADA` (su `details` añade `motivo_codigo`), subida y `api_plantilla_registrar` con los argumentos `{ p_id_alumno, p_id_consent, p_objeto_foto, p_ip }`, sin `p_fotos`. Es la salida para las personas que no superan el filtro estricto (la pantalla lo ofrece como "Registrar solo con esta foto (menos precisa)"). Esta ruta usa el criterio de frontal heredado, más estricto que el de conjunto: una toma aceptada en pantalla podría salir `FOTO_RECHAZADA` aquí con su motivo.
+3. **n >= 2**: fotos de bytes idénticos (`sha256`): 422 `FOTOS_DUPLICADAS` (`details.duplicadas: [{ indice, de }]`). Luego `verificarFotosServicio` y validación de forma (`fotos.length === n` y `fotos[i].indice === i`, si no 502 `SERVICIO_RECONOCIMIENTO_ERROR` sin subir nada). Si alguna `fotos[i].estado != 'aceptada'`: 422 `FOTOS_RECHAZADAS` con `details { minimo, maximo, total, aceptadas, umbral_coseno, consistente, ambiguo, fotos: [{ indice, estado, motivo_codigo, motivo_rechazo, coseno_resto }] }`. Si todas son aceptadas pero `suficiente` es `false`: 422 `FOTOS_INSUFICIENTES` (`details { minimo: conjunto.minimo, recibidas: n }`). **El rechazo es estricto**: descartar en silencio ocultaría un error de captura (con 2 de 5 fotos ajenas el *outlier* sería la correcta). No se sube nada en ningún rechazo.
+4. Subida: una ruta de servidor por foto (`rutaObjeto.registro(idAlumno)`, `uuid` distinto), `subirObjeto` en serie guardando las subidas; `api_plantilla_registrar` con `{ idAlumno, idConsent, objetoFoto: rutas[0], fotos: rutas.map((ruta, i) => ({ objeto_foto: ruta, calidad, coseno_resto })), ip }` (sin la clave `tamano_rostro` en `calidad`; `calidad` y `coseno_resto` se omiten si son `null`). **Transaccionalidad**: si falla cualquier subida o la RPC, se borran TODAS las ya subidas (`Promise.allSettled` sobre `eliminarObjetoSilencioso`) y se relanza el error original; solo quedarían huérfanos si el proceso muere entre subir y registrar (igual que con una foto).
+5. `reconstruirSinFallar`: la plantilla ya registrada nunca se revierte por un fallo del índice; en ese caso `indice = { estado: 'pendiente', version: null, error: { code } }`.
+
+Respuesta 201 (claves anteriores intactas más):
+
+```json
+{
+  "id_plantilla": 41, "id_alumno": 17, "id_consent": 9, "activa": true, "indexada": false,
+  "plantilla_archivada": 33, "fecha_registro": "2026-09-14T09:12:41-06:00",
+  "requiere_reconstruccion": true, "n_fotos": 5,
+  "indice": { "estado": "activada", "version": "v004", "total_vectores": 76 },
+  "version": "v004",
+  "muestra": { "total": 5, "usadas": 5, "descartadas": [ { "indice": 2, "motivo": "inconsistente", "coseno_resto": 0.21 } ],
+               "coseno_min": 0.51, "coseno_medio": 0.74, "degradada": false }
+}
+```
+
+`muestra` sale del elemento de `muestras` del build con ese `id_plantilla` (`null` si el índice no se reconstruyó o fue el camino heredado); el arreglo completo de `muestras` NO viaja al cliente.
+
+| Código | Status | Cuándo |
+|---|---|---|
+| `FOTO_RECHAZADA` | 422 | n = 1 con calidad insuficiente (camino heredado) |
+| `FOTOS_RECHAZADAS` | 422 | n >= 2 con alguna toma no aceptada |
+| `FOTOS_INSUFICIENTES` | 422 | Todas aceptadas pero menos que el mínimo del servicio |
+| `FOTOS_DUPLICADAS` | 422 | Fotos de bytes idénticos |
+| `DEMASIADOS_ARCHIVOS` | 422 | Más de 8 fotos |
+| `ARCHIVO_DEMASIADO_GRANDE` | 413 | Foto > 5 MiB, suma > 9 MiB o cuerpo mayor que `maxMultipartBytes` |
+| `TIPO_NO_PERMITIDO` | 415 | Que no sea JPEG |
+| `ARCHIVO_INVALIDO` | 422 | Archivo vacío o ilegible |
+| `RN_13_CONSENTIMIENTO_AJENO` / `RN_13_CONSENTIMIENTO_NO_VIGENTE` | 409 | Consentimiento de otro alumno o no vigente |
+| `SERVICIO_RECONOCIMIENTO_NO_DISPONIBLE` | 503 | El servicio no responde (el código de la ruta es este, no `RECONOCIMIENTO_NO_DISPONIBLE`) |
+| `SERVICIO_RECONOCIMIENTO_ERROR` | 502 | Respuesta del servicio con forma inválida |
+
+Los códigos de ruta se crean con status explícito y no se registran en `STATUS_POR_CODIGO` (como `FOTO_RECHAZADA`); no hay códigos SQL nuevos (`lib/api/errors.js` no cambia). Un 503 o un 502 no suben nada.
+
+#### `GET /api/documentos/plantilla_foto/[id]`
+
+Administrador. Igual que el de `plantilla` con `urlDeDocumento('plantilla_foto')`; la RPC asienta la consulta (RF-19) antes de firmar; URL de <= 300 s. Respuesta `{ tipo: 'plantilla_foto', id_registro, id_alumno, url, expira_en, vigencia_seg }`. La carpeta se llama exactamente `plantilla_foto`.
+
+#### `lib/server`
+
+- `recognition.js`: `verificarFotosServicio(blobs)` hace `POST /v1/photo/check-set` con `images` repetido (`timeoutMs` 30 000, 1 reintento) y valida la respuesta con zod (`esquemaConjunto`); `esquemaCalidadFoto` gana `motivo_codigo` (opcional, `null` por defecto); `esquemaBuild` gana `muestras` (opcional, `[]`) y `errores[].codigo`; `construirIndice` acepta entradas `{ objetos_foto }`.
+- `indice.js`: `entradasDeBuild` emite `keep` si `en_base`; `{ objetos_foto }` solo si hay más de una; con una foto emite `{ objeto_foto }` como antes. `reconstruirIndice` devuelve también `muestras` en `activada`; `reconstruirSinFallar` las propaga (`{ estado, version, total_vectores, muestras }`). Un build con errores (por ejemplo `SIN_MUESTRAS_UTILIZABLES`) cae en `INDICE_CONSTRUCCION_FALLIDA` con `details.errores` (`id_plantilla`, `motivo`, `codigo`).
+- El servidor NO quita metadatos EXIF (re-escribir un JPEG con orientación EXIF rompería el `exif_transpose` del servicio): la pantalla re-codifica cada foto (sin EXIF) y las subidas por API directa pueden conservarlo en el bucket privado.
+
+### 4.4 Archivado y borrado de fotos (lo que dice el código)
+
+- "Archivar" = `plantilla_facial.activa = false`, y solo ocurre en `api_plantilla_registrar` (reemplazo) y en `api_consentimiento_revocar`. `app.vencer_consentimientos` NO archiva: la plantilla de un consentimiento vencido sigue activa y `svc_indice_plan` la sigue incluyendo con sus fotos.
+- Ninguna ruta borra fotos del bucket al archivar (§3.4: la foto anterior NO se borra); la purga RNF-05 solo cubre recortes; todas las FK son `RESTRICT`. El único borrado es la compensación `eliminarObjetoSilencioso` cuando falla el registro.
+- Las fotos extra siguen exactamente esa semántica: no tienen bandera propia, su estado es el de la plantilla padre; al archivar o revocar permanecen en la tabla y en el bucket; `svc_indice_plan` solo entrega fotos de plantillas ACTIVAS; la compensación borra TODAS las fotos subidas del intento.
+- **Brecha de retención** (preexistente, multiplicada por N con varias fotos): consulta de fotos de plantillas archivadas: `SELECT pf.objeto_foto FROM plantilla_foto pf JOIN plantilla_facial p USING (id_plantilla) WHERE NOT p.activa` (y, para consentimientos revocados o vencidos, `JOIN` con `consentimiento` por estatus). Seguimiento comprometido: un job `svc_job_purgar_fotos_archivadas` (listar, borrar objetos, marcar) con parámetro de retención; no se implementa aquí para no cambiar la semántica de archivado (RN-12). Ver `docs/DECISIONS.md` y `docs/RUNBOOK.md`.
+
+### 4.5 Compatibilidad y orden de despliegue
+
+- **Orden obligatorio: SQL, servicio, web.** Un servicio viejo rechaza con 422 las entradas `objetos_foto` (solo si ya existen plantillas multifoto). `scripts/db-up.sh` aplica `0235` una sola vez; es inocuo con el web y el servicio viejos (4 argumentos y una sola foto siguen funcionando). En modo local, el adaptador cachea el catálogo de funciones 60 s: tras migrar, reinicia el Next o espera más de 60 s, o la llamada con `p_fotos` falla con `PGRST202`.
+- **Plantillas existentes de una foto**: sin migración manual. El *backfill* y el trigger les dan su fila `orden = 1`; siguen en `keep` con su `faiss_id`; una reconstrucción completa las trata como entrada de una foto (sin promedio). Para pasar a 5 fotos se registra de nuevo (la anterior se archiva por RN-12); el panel lo sugiere.
+- Otros contratos intactos: `api_consentimiento_revocar`, `svc_indice_registrar`/`activar`/`revertir`/`en_uso`, `api_indice_estado`, `svc_job_reconstruir_indice`, `api_alumno_obtener` y `api_detecciones_caso` (`objeto_foto_registro` es la foto principal de la plantilla activa).

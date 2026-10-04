@@ -13,6 +13,9 @@ class DetectedFace:
     det_score: float
     embedding: np.ndarray  # float32 (D,), norma 1; NUNCA se serializa hacia fuera del servicio
     frontal: bool = True
+    # Razon de giro compensada por inclinacion de la cabeza (ver insight._razon_giro); None si el embedder no la mide.
+    # El modo de conjunto (plantilla de varias fotos) la usa en lugar del booleano heredado `frontal`.
+    yaw_ratio: float | None = None
 
 
 class Embedder(ABC):

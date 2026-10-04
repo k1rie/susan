@@ -58,14 +58,15 @@ Determinista (hash de `(alumno, sesión)`, sin `random()` ni `now()`), datos fic
 |---|---|
 | `0001_esquemas` | Esquema `app`; privilegios por omisión cerrados; extensiones; **reloj único** (`app.now/tz/hoy/instante_clase/reloj_simulado`) |
 | `0002_tipos` | Los 13 ENUM de la spec + `tipo_camara` (`ip` \| `navegador`); `estatus_sesion` incluye `suspendida` |
-| `0003`-`0006` | Las 19 tablas (A académico, D seguridad, B operación, C biometría): 19 PK, 25 FK `ON DELETE RESTRICT` (salvo `horario_grupo`→`grupo` CASCADE), 20 UNIQUE, 30 CHECK (29 de la spec + `ck_camara_ip`) |
+| `0003`-`0006` | Las 19 tablas de la spec (A académico, D seguridad, B operación, C biometría): 19 PK, 25 FK `ON DELETE RESTRICT` (salvo `horario_grupo`→`grupo` CASCADE), 20 UNIQUE, 30 CHECK (29 de la spec + `ck_camara_ip`). Con `0235` son **20 tablas** (26 FK, 21 UNIQUE) |
 | `0007_indices` | `ux_plantilla_facial_activa`, `ux_indice_faiss_en_uso` (parciales) e índices de apoyo `ix_*` |
 | `0010_app_helpers` | Identidad, visibilidad, errores, consentimiento, IP, cuenta de servicio y bitácora (abajo) |
 | `0020_triggers` | `trg_asistencia_rn01`, `trg_asistencia_ciclo`, `trg_captura_rn06`, `trg_plantilla_rn13`, `trg_bitacora_sin_cambios`, `trg_bitacora_sin_truncate` |
-| `0030_rls_grants` | RLS en las 19 tablas, `REVOKE` y `GRANT SELECT` solo respaldado por política |
+| `0030_rls_grants` | RLS en las 19 tablas de la spec (`plantilla_foto` la activa en `0235`), `REVOKE` y `GRANT SELECT` solo respaldado por política |
 | `0040_parametros` | 12 parámetros, `app.parametro_meta`, `app.validar_parametro`, cuenta de servicio |
 | `0050_api_plataforma` | `api_yo`, `api_ahora`, `api_parametros_publicos` |
 | `0090_storage_policies` | Bucket `susan-private` y política RESTRICTIVE (guardada con `to_regclass('storage.objects')`) |
+| `0235_plantilla_fotos` | 20.ª tabla `plantilla_foto` (extensión 17): una plantilla de 3 a 8 fotos con UN vector (el servicio promedia los embeddings; la BD guarda solo rutas, 4 medidas de calidad y `coseno_resto`). La principal es `orden = 1` y la mantiene `trg_plantilla_foto_principal`; backfill idempotente; RLS solo administrador; `app.calidad_foto_valida` (lista blanca + CHECK). `api_plantilla_registrar` gana `p_fotos`; cambian `api_plantilla_alumno`, `api_documento_url_autorizar` (`plantilla_foto`) y `svc_indice_plan` (`objetos_foto`). Tras aplicarla en Supabase real: `NOTIFY pgrst, 'reload schema'` |
 
 Los `DEFAULT` de fechas usan `app.now()`/`app.hoy()` (equivalentes a `now()` salvo reloj simulado).
 
