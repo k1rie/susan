@@ -1,0 +1,175 @@
+{
+  "estilo": "lorelei",
+  "licencia": "CC0 1.0",
+  "paquete": "@dicebear/collection",
+  "avatares": [
+    {
+      "id": "01",
+      "iniciales": "XR",
+      "nombre": "Ximena Rios",
+      "archivo": "avatar-01-xr.svg",
+      "fondo": "#cfe0ff"
+    },
+    {
+      "id": "02",
+      "iniciales": "MG",
+      "nombre": "Mateo Garcia",
+      "archivo": "avatar-02-mg.svg",
+      "fondo": "#ffd9e8"
+    },
+    {
+      "id": "03",
+      "iniciales": "VS",
+      "nombre": "Valeria Soto",
+      "archivo": "avatar-03-vs.svg",
+      "fondo": "#e4d8ff"
+    },
+    {
+      "id": "04",
+      "iniciales": "DH",
+      "nombre": "Diego Herrera",
+      "archivo": "avatar-04-dh.svg",
+      "fondo": "#d3efdc"
+    },
+    {
+      "id": "05",
+      "iniciales": "CV",
+      "nombre": "Camila Vega",
+      "archivo": "avatar-05-cv.svg",
+      "fondo": "#ffe0c4"
+    },
+    {
+      "id": "06",
+      "iniciales": "ET",
+      "nombre": "Emiliano Torres",
+      "archivo": "avatar-06-et.svg",
+      "fondo": "#f6e7b8"
+    },
+    {
+      "id": "07",
+      "iniciales": "RM",
+      "nombre": "Regina Mora",
+      "archivo": "avatar-07-rm.svg",
+      "fondo": "#cde8f5"
+    },
+    {
+      "id": "08",
+      "iniciales": "SC",
+      "nombre": "Sebastian Cruz",
+      "archivo": "avatar-08-sc.svg",
+      "fondo": "#f0d9f0"
+    },
+    {
+      "id": "09",
+      "iniciales": "AG",
+      "nombre": "Ana Garcia",
+      "archivo": "avatar-09-ag.svg",
+      "fondo": "#cfe0ff"
+    },
+    {
+      "id": "10",
+      "iniciales": "HM",
+      "nombre": "Hector Mendoza",
+      "archivo": "avatar-10-hm.svg",
+      "fondo": "#ffd9e8"
+    },
+    {
+      "id": "11",
+      "iniciales": "XT",
+      "nombre": "Ximena Torres",
+      "archivo": "avatar-11-xt.svg",
+      "fondo": "#e4d8ff"
+    },
+    {
+      "id": "12",
+      "iniciales": "MH",
+      "nombre": "Mateo Hernandez",
+      "archivo": "avatar-12-mh.svg",
+      "fondo": "#d3efdc"
+    },
+    {
+      "id": "13",
+      "iniciales": "VN",
+      "nombre": "Valeria Nunez",
+      "archivo": "avatar-13-vn.svg",
+      "fondo": "#ffe0c4"
+    },
+    {
+      "id": "14",
+      "iniciales": "DR",
+      "nombre": "Diego Ramirez",
+      "archivo": "avatar-14-dr.svg",
+      "fondo": "#f6e7b8"
+    },
+    {
+      "id": "15",
+      "iniciales": "CR",
+      "nombre": "Camila Reyes",
+      "archivo": "avatar-15-cr.svg",
+      "fondo": "#cde8f5"
+    },
+    {
+      "id": "16",
+      "iniciales": "PO",
+      "nombre": "Patricia Ortega",
+      "archivo": "avatar-16-po.svg",
+      "fondo": "#f0d9f0"
+    },
+    {
+      "id": "17",
+      "iniciales": "LB",
+      "nombre": "Luis Barrios",
+      "archivo": "avatar-17-lb.svg",
+      "fondo": "#cfe0ff"
+    },
+    {
+      "id": "18",
+      "iniciales": "SG",
+      "nombre": "Sofia Gomez",
+      "archivo": "avatar-18-sg.svg",
+      "fondo": "#ffd9e8"
+    },
+    {
+      "id": "19",
+      "iniciales": "AL",
+      "nombre": "Andres Lopez",
+      "archivo": "avatar-19-al.svg",
+      "fondo": "#e4d8ff"
+    },
+    {
+      "id": "20",
+      "iniciales": "DM",
+      "nombre": "Daniela Molina",
+      "archivo": "avatar-20-dm.svg",
+      "fondo": "#d3efdc"
+    },
+    {
+      "id": "21",
+      "iniciales": "JP",
+      "nombre": "Jorge Pineda",
+      "archivo": "avatar-21-jp.svg",
+      "fondo": "#ffe0c4"
+    },
+    {
+      "id": "22",
+      "iniciales": "FA",
+      "nombre": "Fernanda Aguilar",
+      "archivo": "avatar-22-fa.svg",
+      "fondo": "#f6e7b8"
+    },
+    {
+      "id": "23",
+      "iniciales": "IC",
+      "nombre": "Itzel Castro",
+      "archivo": "avatar-23-ic.svg",
+      "fondo": "#cde8f5"
+    },
+    {
+      "id": "24",
+      "iniciales": "BS",
+      "nombre": "Bruno Salas",
+      "archivo": "avatar-24-bs.svg",
+      "fondo": "#f0d9f0"
+    }
+  ]
+}
