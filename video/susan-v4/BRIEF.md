@@ -33,6 +33,9 @@ voz» (guion con tiempos amarrados a cada escena).
   híbrido — la app real se captura como fuente de verdad visual y las piezas que se animan se reconstruyen en HTML
   con sus tokens y estructura reales.
 - Sin logo de SUSAN todavía: wordmark tipográfico «SUSAN».
+- SIN CURSOR (indicación de la persona dueña, 2026-10-05: «lo del cursor no es necesario»). Ningún puntero de mouse
+  ni mano que haga clic; las interacciones se cuentan con la propia interfaz (estados que cambian, resaltados,
+  pulsos en el botón, cámara que se acerca) en lugar de un cursor visible.
 - Sonido: solo efectos por ahora (diseño sonoro tipo reel: whooshes, clics, tecleo, destellos). Sin música. La voz
   (ElevenLabs) y una posible música se deciden después.
 - Revisión: plan en chat → hoja de bocetos → construcción → vista final antes del render.
@@ -41,8 +44,8 @@ voz» (guion con tiempos amarrados a cada escena).
 
 - Lenguaje de la referencia a trasladar: enfoques con desenfoque (rack focus), tarjetas con inclinación 3D suave,
   fondos de cielo/pastel y tarjeta holográfica, gráfica de líneas entrelazadas con cursor-guía y tooltip en píldora,
-  gráfica de barras finas con bloque resaltado y tooltip inclinado, panel tipo teléfono con lista de movimientos y
-  cursor que hace clic, cifras grandes con variación porcentual.
+  gráfica de barras finas con bloque resaltado y tooltip inclinado, panel tipo teléfono con lista de movimientos,
+  cifras grandes con variación porcentual. (El cursor de la referencia NO se traslada.)
 - Reglas del repo: iconos Lucide, sin emojis, sin rostros reales (avatares abstractos), textos en español (México),
   datos de demostración coherentes.
 - La v3 (`video/susan-presentacion`, 56 s, efectos + voz «Antonio») se conserva intacta.
