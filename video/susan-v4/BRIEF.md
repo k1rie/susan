@@ -24,6 +24,12 @@ voz» (guion con tiempos amarrados a cada escena).
 - referencia/ref-01…05 — capturas del reel de Instagram de referencia (levii.motion, «POV: After Effects is getting
   easier»): UI fintech animada en After Effects. Los paneles de Premiere/After Effects que se ven son del editor, NO
   forman parte del estilo.
+- referencia/ref2-01…07 — segunda referencia que también le gustó a la persona dueña (levii.motion, «POV: You do your
+  cardio and after effects»): UI tipo app de running sobre lienzo blanco roto casi vacío — tarjetas de «Recent
+  Activity» que entran escalonadas, una cifra gigante «9.12» y una rejilla de datos que ruedan con desenfoque de
+  movimiento direccional, mapa desenfocado con botón circular verde «START», un selector «1 Hr. 30 Min.» que cambia a
+  «2 Hr.» y se compacta en una píldora con lápiz (morph de componente), y un cierre con el icono de la app que cae
+  con desenfoque de movimiento. El cursor de mano que aparece NO se traslada.
 - assets/ (fonts, avatars, icons, sfx, brand) — copiados de la v3 (`video/susan-presentacion`).
 - capture/app-real/ — capturas de la app real de SUSAN en modo demostración (pantallas, DOM, tokens).
 
