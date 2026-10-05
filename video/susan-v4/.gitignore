@@ -1,0 +1,15 @@
+# Salidas regenerables del video (los MP4 pesan decenas de MB: se conservan en disco, no en git)
+renders/
+snapshots/
+.hyperframes/frame-packets/
+.media/
+node_modules/
+
+# capturas de revisión por cuadro (regenerables)
+revision/
+
+# caché de la locución (audio en base64 de ElevenLabs; se regenera)
+voz-cache/
+
+# capturas del reel de referencia (contenido de terceros, solo uso local; el análisis vive en plan/REFERENCIA.md)
+referencia/

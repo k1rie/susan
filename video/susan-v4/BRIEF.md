@@ -1,0 +1,48 @@
+---
+workflow: product-launch-video
+flow: automation
+storyboard: yes
+message: "Pasa lista en segundos y entiende la asistencia de tus grupos"
+destination: youtube
+aspect: 1920x1080
+language: es
+audience: "docentes de la UNACH FCA C-I (producto, tono de lanzamiento)"
+length: 55s
+angle: "Del pase de lista que roba clase al análisis que detecta el ausentismo a tiempo, contado con el lenguaje de motion graphics de un reel de UI hecho en After Effects"
+---
+
+## Intent
+
+Versión 4 del video de SUSAN (2026-10-05). Video de motion graphics 16:9, de 50 a 60 s, con look profesional:
+transiciones suaves, ritmo, dinámico en general y animaciones con buen timing y con sentido respecto de lo que se
+muestra (palabras de la persona dueña). Es un video de producto para docentes: el problema del pase de lista, la app
+en acción y el beneficio. La locución de ElevenLabs se conecta al final; primero el video, construido ya «listo para
+voz» (guion con tiempos amarrados a cada escena).
+
+## Assets
+
+- referencia/ref-01…05 — capturas del reel de Instagram de referencia (levii.motion, «POV: After Effects is getting
+  easier»): UI fintech animada en After Effects. Los paneles de Premiere/After Effects que se ven son del editor, NO
+  forman parte del estilo.
+- assets/ (fonts, avatars, icons, sfx, brand) — copiados de la v3 (`video/susan-presentacion`).
+- capture/app-real/ — capturas de la app real de SUSAN en modo demostración (pantallas, DOM, tokens).
+
+## Customizations
+
+- Pantallas: recreaciones o capturas reales, la que se vea mejor (la persona dueña lo deja a criterio). Decisión:
+  híbrido — la app real se captura como fuente de verdad visual y las piezas que se animan se reconstruyen en HTML
+  con sus tokens y estructura reales.
+- Sin logo de SUSAN todavía: wordmark tipográfico «SUSAN».
+- Sonido: solo efectos por ahora (diseño sonoro tipo reel: whooshes, clics, tecleo, destellos). Sin música. La voz
+  (ElevenLabs) y una posible música se deciden después.
+- Revisión: plan en chat → hoja de bocetos → construcción → vista final antes del render.
+
+## Notes
+
+- Lenguaje de la referencia a trasladar: enfoques con desenfoque (rack focus), tarjetas con inclinación 3D suave,
+  fondos de cielo/pastel y tarjeta holográfica, gráfica de líneas entrelazadas con cursor-guía y tooltip en píldora,
+  gráfica de barras finas con bloque resaltado y tooltip inclinado, panel tipo teléfono con lista de movimientos y
+  cursor que hace clic, cifras grandes con variación porcentual.
+- Reglas del repo: iconos Lucide, sin emojis, sin rostros reales (avatares abstractos), textos en español (México),
+  datos de demostración coherentes.
+- La v3 (`video/susan-presentacion`, 56 s, efectos + voz «Antonio») se conserva intacta.
