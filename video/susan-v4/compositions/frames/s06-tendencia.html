@@ -71,8 +71,11 @@
 .s06-tendencia-hint{left:200px;top:640px;height:32px;display:flex;align-items:center;gap:8px;font-size:24px;font-weight:500;color:#B3261E;white-space:nowrap}
 .s06-tendencia-hint svg{display:block;flex:none}
 
-/* ---------- tooltip de tinta -> pildora «9 alumnos en riesgo»: superficie en su caja FINAL (620 x 112, centro 960,470) ---------- */
-.s06-tendencia-pildora{left:650px;top:414px;width:620px;height:112px;background:#1E1919;color:#FFFFFF;border-radius:56px}
+/* ---------- tooltip de tinta -> pildora «9 alumnos en riesgo»: superficie en su caja FINAL (620 x 112, centro 960,470) ----------
+   El envoltorio lleva el viaje del morph y la estela; la superficie interior, el recorte (el clip de un elemento se aplica
+   despues de su propio filtro y cortaria la estela) */
+.s06-tendencia-pil-caja{left:650px;top:414px;width:620px;height:112px}
+.s06-tendencia-pildora{position:absolute;left:0;top:0;width:620px;height:112px;background:#1E1919;color:#FFFFFF;border-radius:56px}
 .s06-tendencia-tip{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:500;white-space:nowrap}
 .s06-tendencia-riesgo{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
 .s06-tendencia-fila{display:flex;align-items:baseline;gap:20px;white-space:nowrap}
@@ -167,8 +170,10 @@
     </div>
     </div>
 
-    <!-- tooltip recto de tinta que se vuelve la pildora de personas (fuera del latigo: es el heroe del handoff) -->
-    <div id="s06-tendencia-pildora" class="s06-tendencia-abs s06-tendencia-pildora">
+    <!-- tooltip recto de tinta que se vuelve la pildora de personas (fuera del latigo: es el heroe del handoff).
+         Envoltorio externo = viaje del morph + estela horizontal; superficie interior = recorte, escala del salto y tic -->
+    <div id="s06-tendencia-pil-mov" class="s06-tendencia-abs s06-tendencia-pil-caja">
+    <div id="s06-tendencia-pildora" class="s06-tendencia-pildora">
       <div id="s06-tendencia-tip" class="s06-tendencia-tip">Semana 15 · 24.8 %</div>
       <div class="s06-tendencia-riesgo">
         <div class="s06-tendencia-fila">
@@ -176,6 +181,7 @@
           <span id="s06-tendencia-alumnos" class="s06-tendencia-alumnos">alumnos en riesgo</span>
         </div>
       </div>
+    </div>
     </div>
   </div>
 
@@ -189,6 +195,10 @@
     </filter>
     <filter id="s06-tendencia-mb-latigo" x="-6%" y="-1%" width="112%" height="102%" color-interpolation-filters="sRGB">
       <feGaussianBlur id="s06-tendencia-mb-latigo-g" stdDeviation="0 0" />
+    </filter>
+    <!-- caja de la pildora 620 x 112: 62 px de margen en x (3 sigma del tope 12 = 36 px) -->
+    <filter id="s06-tendencia-mb-pil" x="-10%" y="-4%" width="120%" height="108%" color-interpolation-filters="sRGB">
+      <feGaussianBlur id="s06-tendencia-mb-pil-g" stdDeviation="0 0" />
     </filter>
   </svg>
 </div>
@@ -314,8 +324,9 @@
 
         // PageHeader y selector vuelven con opacidad (0.45-0.75)
         tl.fromTo($('cabecera'), { opacity: 0 }, { opacity: 1, duration: 0.30, ease: 'power1.out' }, 0.45);
-        // despues del 60 %: titulo, leyenda, marcas y cuadricula (trazada de izquierda a derecha)
-        tl.fromTo($('titulo'), { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.40, ease: 'power3.out' }, 0.47);
+        // despues del 60 %: titulo, leyenda, marcas y cuadricula (trazada de izquierda a derecha). El titulo (x = 200) espera a
+        // que el borde del recorte lo rebase (e >= 0.9 a 0.52): antes, «Au» asomaba sobre el crema fuera de la tarjeta
+        tl.fromTo($('titulo'), { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.40, ease: 'power3.out' }, 0.53);
         tl.fromTo([$('ley-1'), $('ley-2'), $('ley-3'), $('ley-4')], { opacity: 0, y: 10 },
             { opacity: 1, y: 0, duration: 0.35, ease: 'power3.out', stagger: 0.05 }, 0.50);
         tl.fromTo([$('rej-60'), $('rej-40'), $('rej-20'), $('rej-0')], { scaleX: 0, transformOrigin: '0% 50%' },
@@ -409,9 +420,28 @@
         var TIP_W = 292, TIP_H = 56;
         var tipCx = 1684 - TIP_W / 2;
         var tipCy = Math.round(Y(ajuste(15)) - 52);   // en px enteros: el texto del tooltip no queda a medio pixel
-        var pil = $('pildora');
-        var clipTip = 'inset(' + (112 - TIP_H) / 2 + 'px ' + (620 - TIP_W) / 2 + 'px ' + (112 - TIP_H) / 2 + 'px ' + (620 - TIP_W) / 2 + 'px round 28px)';
-        gsap.set(pil, { x: tipCx - 960, y: tipCy - 470, clipPath: clipTip });
+        var pil = $('pildora'), pilMov = $('pil-mov'), mbPil = $('mb-pil-g');
+        // el viaje (envoltorio) y el recorte (superficie) son funciones puras de UN driver del morph (escena 4); aqui solo se
+        // escribe su pose de arranque, la del tooltip junto a la guia: translate(578, 90) entero, el texto no queda a medio pixel
+        var DX_TIP = tipCx - 960, DY_TIP = tipCy - 470;
+        var CLIP_Y = (112 - TIP_H) / 2, CLIP_X = (620 - TIP_W) / 2;
+        // el borde izquierdo visible (el que va delante) recorre el viaje mas lo que se abre el recorte: 578 + 164 = 742 px
+        var DX_BORDE = Math.abs(DX_TIP) + CLIP_X;
+        var T_PIL = 4.85, D_PIL = 0.80;
+        var easePil = gsap.parseEase('power3.inOut');
+        var mp = { p: 0 };
+        function aplicarPil() {
+            var p = mp.p, e = easePil(p);
+            pilMov.style.transform = 'translate(' + px(DX_TIP * (1 - e)) + ',' + px(DY_TIP * (1 - e)) + ')';
+            var iy = px(CLIP_Y * (1 - e)), ix = px(CLIP_X * (1 - e));
+            pil.style.clipPath = 'inset(' + iy + ' ' + ix + ' ' + iy + ' ' + ix + ' round ' + px(28 + 28 * e) + ')';
+            // estela horizontal = velocidad del borde que va delante (DINAMISMO 2.0.4); tope 12 por ser una pieza; en reposo none
+            var v = (p <= 1e-4 || p >= 1 - 1e-4) ? 0 : DX_BORDE * velocidad(easePil, p, D_PIL);
+            var sg = Math.min(12, 0.29 * v * OBT);
+            mbPil.setAttribute('stdDeviation', sg.toFixed(2) + ' 0');
+            pilMov.style.filter = sg < 0.3 ? 'none' : 'url(#' + ID + '-mb-pil)';
+        }
+        aplicarPil();
         tl.fromTo(pil, { opacity: 0 }, { opacity: 1, duration: 0.10, ease: 'power1.out' }, 3.20);
         tl.fromTo(pil, { scale: 0.6 }, { scale: 1, duration: 0.35, ease: 'back.out(1.4)' }, 3.20);
 
@@ -476,9 +506,10 @@
 
         // el halo cruza de violeta a rosa mientras el tooltip viaja
         tl.fromTo($('halo-rosa'), { opacity: 0 }, { opacity: 1, duration: 0.80, ease: 'power1.inOut' }, 4.85);
-        // el tooltip se despega y crece como pintura hasta la pildora 620 x 112 (radio 56) en el centro
-        tl.fromTo(pil, { x: tipCx - 960, y: tipCy - 470, clipPath: clipTip },
-            { x: 0, y: 0, clipPath: 'inset(0px 0px 0px 0px round 56px)', duration: 0.80, ease: 'power3.inOut', immediateRender: false }, 4.85);
+        // el tooltip se despega y crece como pintura hasta la pildora 620 x 112 (radio 56) en el centro, con estela horizontal
+        // en el envoltorio (pico 5.25, junto al de la grafica: un solo whoosh); «alumnos en riesgo» (5.40) entra con sigma < 5
+        // y desde 5.55 la estela vale 0
+        tl.fromTo(mp, { p: 0 }, { p: 1, duration: D_PIL, ease: 'none', onUpdate: aplicarPil, immediateRender: false }, T_PIL);
         tl.fromTo($('tip'), { opacity: 1 }, { opacity: 0, duration: 0.26, ease: 'power1.in', immediateRender: false }, 4.85);
         tl.fromTo($('alumnos'), { opacity: 0, x: 36 }, { opacity: 1, x: 0, duration: 0.30, ease: 'power3.out' }, 5.40);
 
