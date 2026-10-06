@@ -190,6 +190,10 @@
             presion: 4.95,      // tap
             estado: 5.00,       // click-soft2
             camara: 5.30,       // morph a la cámara (whoosh-m en su pico, 5.60)
+            despegue: 2.20,     // la tarjeta sube a su lugar tras «susan»
+            acercar: 3.55,      // la cámara se acerca al botón con «Abres la sesión con un solo botón»
+            DESPEGUE: 8,
+            ACERCA: 1.04,
             D: 6.05
         };
 
@@ -219,7 +223,11 @@
         // card-morph-anchor con constantes: viaje (960, 500) -> (1340, 592) y círculo 168 -> rectángulo 632 x 96 r 16, sin escala.
         var MORPH = { duration: 0.6, ease: 'power3.inOut' };
         var boton = $('boton');
+        var rig = $('rig');
         tl.fromTo(boton, { x: -380, y: -92 }, { x: 0, y: 0, duration: MORPH.duration, ease: MORPH.ease }, T.ficha);
+        // El objeto flotante se posa 8 px por debajo de su lugar (la sombra no baja con él) y despega a su sitio
+        // cuando la voz ya dijo el nombre (Escena 2): un solo gesto finito, sin vuelta.
+        tl.fromTo(rig, { y: 0 }, { y: T.DESPEGUE, duration: MORPH.duration, ease: MORPH.ease }, T.ficha);
         tl.fromTo($('sup'), { clipPath: 'inset(0px 232px 0px 232px round 84px)' },
             { clipPath: 'inset(36px 0px 36px 0px round 16px)', duration: MORPH.duration, ease: MORPH.ease }, T.ficha);
         // El anillo blanco sigue la forma 15 px por fuera mientras se apaga.
@@ -257,9 +265,14 @@
             desenfoque(letras[i], at, 0.5, 12, 'power4.out');
         }
         tl.fromTo($('trazo'), { attr: { 'stroke-dashoffset': 100 } }, { attr: { 'stroke-dashoffset': 0 }, duration: 0.8, ease: 'power4.out' }, T.subrayado);
+        // Presentación del producto: con el nombre ya dicho, la tarjeta despega 8 px a su lugar (power3.out, 0.45 s).
+        tl.fromTo(rig, { y: T.DESPEGUE }, { y: 0, duration: 0.45, ease: 'power3.out', immediateRender: false }, T.despegue);
 
         // ---------- Escena 3 (2.8-4.9 s): brillo, pulso de la cámara y halo de foco ----------
         tl.fromTo($('brillo'), { xPercent: -120 }, { xPercent: 120, duration: 0.7, ease: 'power2.inOut' }, T.brillo);
+        // «...con un solo botón»: la cámara se acerca al botón (escala 1 -> 1.04 con origen en su centro, sin hold largo:
+        // termina en la compresión y vuelve a 1 dentro del morph a la cámara). BRIEF: el toque se cuenta con «cámara que se acerca».
+        tl.fromTo(rig, { scale: 1 }, { scale: T.ACERCA, duration: T.presion - T.acercar, ease: 'power2.inOut' }, T.acercar);
         [['pulso-1', 0], ['pulso-2', 0.10]].forEach(function (p) {
             var c = $(p[0]);
             tl.fromTo(c, { attr: { r: 8 } }, { attr: { r: 22 }, duration: 0.45, ease: 'power2.out' }, T.pulso + p[1]);
@@ -288,6 +301,7 @@
             { clipPath: inset(CAMARA, 28), backgroundColor: '#1E1919', duration: VIAJE.duration, ease: VIAJE.ease, immediateRender: false }, T.camara);
         tl.fromTo($('sup-fondo'), { clipPath: inset(mas(TARJETA, 2), 26), backgroundColor: '#FFFFFF' },
             { clipPath: inset(mas(CAMARA, 2), 26), backgroundColor: '#1E1919', duration: VIAJE.duration, ease: VIAJE.ease, immediateRender: false }, T.camara);
+        tl.fromTo(rig, { scale: T.ACERCA }, { scale: 1, duration: VIAJE.duration, ease: VIAJE.ease, immediateRender: false }, T.camara);
         tl.fromTo($('tarjeta'), { opacity: 1 }, { opacity: 0, duration: 0.24, ease: 'power1.in' }, T.camara);
         tl.fromTo(boton, { opacity: 1 }, { opacity: 0, duration: 0.24, ease: 'power1.in' }, T.camara);
         tl.fromTo([$('reconociendo'), $('frente')], { opacity: 0 }, { opacity: 1, duration: 0.24, ease: 'power1.out' }, T.camara + 0.36);

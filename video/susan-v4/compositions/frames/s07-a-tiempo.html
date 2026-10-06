@@ -14,7 +14,7 @@
 
 /* ---- ranking «Mayor riesgo»: maquetado en su caja final 1400 × 700 (centro 960, 520); la píldora es un recorte ---- */
 #s07-a-tiempo-rig{position:absolute;inset:0;transform-origin:960px 520px}
-#s07-a-tiempo-ranking{position:absolute;left:260px;top:170px;width:1400px;height:700px;border-radius:28px;background:#FFFFFF;
+#s07-a-tiempo-ranking{position:absolute;left:260px;top:170px;width:1400px;height:700px;border-radius:28px;background:#1E1919;
  box-shadow:inset 0 0 0 2px #E7E2DC;clip-path:inset(244px 390px 344px 390px round 56px)}
 #s07-a-tiempo-pildora{position:absolute;left:390px;top:244px;width:620px;height:112px;display:flex;align-items:center;justify-content:center;color:#FFFFFF}
 .s07-a-tiempo-pildora-linea{display:flex;align-items:baseline;gap:20px;white-space:nowrap;line-height:1}
@@ -175,7 +175,7 @@
             <div id="s07-a-tiempo-divisor"></div>
 
             <div id="s07-a-tiempo-rot-restantes" class="s07-a-tiempo-rotulo">Faltas restantes</div>
-            <div id="s07-a-tiempo-odo"><span id="s07-a-tiempo-odo-tira"><span>&#8199;</span><span>2</span></span></div>
+            <div id="s07-a-tiempo-odo" data-layout-allow-overflow><span id="s07-a-tiempo-odo-tira" data-layout-allow-overflow><span>&#8199;</span><span>2</span></span></div>
 
             <div id="s07-a-tiempo-rot-faltas" class="s07-a-tiempo-rotulo">Faltas</div>
             <div id="s07-a-tiempo-valor"><span class="s07-a-tiempo-valor-n">7</span><span class="s07-a-tiempo-valor-p">(14.9&nbsp;%)</span></div>
@@ -274,9 +274,11 @@
         // ---------- Escena 1 (0.0–1.05): la píldora se abre en «Mayor riesgo» y las filas barren ----------
         var ranking = $('ranking');
         // Recorte de radio fijo de la caja de la píldora (650–1270 × 414–526) a la caja final (260–1660 × 170–870); tinta → blanco.
-        tl.fromTo(ranking,
-            { clipPath: 'inset(244px 390px 344px 390px round 56px)', backgroundColor: '#1E1919' },
-            { clipPath: 'inset(0px 0px 0px 0px round 28px)', backgroundColor: '#FFFFFF', duration: 0.5, ease: 'power3.inOut' }, T.morph);
+        tl.fromTo(ranking, { clipPath: 'inset(244px 390px 344px 390px round 56px)' },
+            { clipPath: 'inset(0px 0px 0px 0px round 28px)', duration: 0.5, ease: 'power3.inOut' }, T.morph);
+        // La pintura (tinta → blanco) usa la misma curva pero termina a 0.40 s: las filas, que arrancan a 0.20 s,
+        // ya no se leen sobre un gris a medio camino.
+        tl.fromTo(ranking, { backgroundColor: '#1E1919' }, { backgroundColor: '#FFFFFF', duration: 0.35, ease: 'power3.inOut', immediateRender: false }, T.morph);
         // Contenido viejo fuera antes del 40 % del morph; el nuevo después del 60 %.
         tl.fromTo($('pildora'), { opacity: 1 }, { opacity: 0, duration: 0.2, ease: 'power1.in' }, T.morph);
         tl.fromTo([$('titulo'), $('subtitulo')], { opacity: 0, y: 10 },
