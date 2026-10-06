@@ -11,7 +11,6 @@ const mono = Geist_Mono({ subsets: ['latin'], variable: '--font-geist-mono' });
 export const metadata = {
     title: { default: 'SUSAN', template: '%s · SUSAN' },
     description: 'Sistema centralizado de registro digital de asistencia académica y análisis numérico del ausentismo.',
-    icons: { icon: '/brand/unach-escudo.png' },
 };
 
 // viewportFit:'cover' habilita env(safe-area-inset-*) en teléfonos con notch.

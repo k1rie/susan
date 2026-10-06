@@ -284,7 +284,7 @@ Además: `GET /health`, `GET /v1/index`, `POST /v1/photo/check`, `POST /v1/photo
 Resumen técnico; identidad, componentes firma, tipografía y armazón en [`docs/design/SISTEMA.md`](design/SISTEMA.md), referencias medidas en [`docs/design/REFERENCIAS.md`](design/REFERENCIAS.md)
 y registro de módulos en [`docs/design/MODULOS.md`](design/MODULOS.md).
 
-- **Tokens**: `web/src/app/globals.css` define el vocabulario de shadcn/ui (`--background`, `--card`, `--primary`, `--muted`, `--accent`, `--destructive`, `--border`, `--ring`, `--link`…), la marca UNACH, las
+- **Tokens**: `web/src/app/globals.css` define el vocabulario de shadcn/ui (`--background`, `--card`, `--primary`, `--muted`, `--accent`, `--destructive`, `--border`, `--ring`, `--link`…), la marca SUSAN, las
   portadas pastel (`--tono-*`), los estados de asistencia y una paleta `.dark` (sin interruptor aún). `@theme inline` los expone a Tailwind 4. Fuentes con `next/font`: Hanken Grotesk (interfaz), EB Garamond
   (`font-display`, solo saludo/titulares de acceso) y Geist Mono.
 - **Capas de componentes**: `components/shadcn/` = primitivas vendorizadas (CLI `shadcn`); `components/ui/` = API estable de SUSAN que usan las pantallas (Button, Card, Tabs, Pills, TarjetaPortada, TarjetaFila,

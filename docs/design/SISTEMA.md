@@ -22,7 +22,7 @@ reglas de movimiento en `web/src/components/motion/README.md`; plan y avance en 
 | Acción primaria | **Tinta casi negra** (`--primary` = `#1E1919`, texto blanco), como «Create Stack» de Dash; píldora activa también en tinta |
 | Enlaces y foco | Azul `#0061FE` (`--link`, `--ring`) |
 | Superficies de apoyo | `--muted` `#F0EDE8` (píldoras inactivas, campos deshabilitados), `--accent` `#EFECE7` (hover y activo) |
-| Marca UNACH | Escudo + «SUSAN»; dorado `#A8842C` solo como acento (subrayado del saludo, listas de «qué incluirá») |
+| Marca SUSAN | Solo «SUSAN» (sin escudos ni logotipos de terceros); dorado `#A8842C` solo como acento (subrayado del saludo, listas de «qué incluirá») |
 | Portadas pastel | `--tono-azul/dorado/verde/violeta/rosa` (+ `-fg` para el trazo del icono); degradado arcoíris para el módulo destacado |
 | Estados de asistencia | `presente / retardo / ausente / pendiente / justificado` con su fondo `-bg` (siempre texto + color) |
 | Radios | sm 6 · **md 8 (botones, campos)** · lg 10 · **xl 14 (tarjetas)** · 2xl 18 (panel, diálogos) · píldora para chips y filtros |

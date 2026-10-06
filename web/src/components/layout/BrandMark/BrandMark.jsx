@@ -1,21 +1,12 @@
 import clsx from 'clsx';
-import Image from 'next/image';
 
-// Marca: escudo UNACH + «SUSAN» en la grotesca de la interfaz (peso 600, como «Dash»); en "full" añade subtítulo y el escudo de la
-// FCA. width/height fijos reservan el espacio y evitan saltos de layout.
-export default function BrandMark({ variant = 'full', showFca, className }) {
+// Marca: «SUSAN» en la grotesca de la interfaz (peso 600, como «Dash»); en "full" añade el subtítulo.
+export default function BrandMark({ variant = 'full', className }) {
     const completo = variant === 'full';
-    const mostrarFca = showFca ?? completo;
     return (
-        <div className={clsx('flex items-center gap-2.5', className)}>
-            <Image src="/brand/unach-escudo.png" alt="Escudo de la UNACH" width={40} height={40} className="h-8 w-8 object-contain" />
-            <div className="leading-none">
-                <p className="text-[22px] font-semibold tracking-tight">SUSAN</p>
-                {completo && <p className="mt-1 text-xs text-muted-foreground">Registro de asistencia</p>}
-            </div>
-            {mostrarFca && (
-                <Image src="/brand/fca-escudo.png" alt="Escudo de la FCA C-I" width={40} height={40} className="h-8 w-8 object-contain" />
-            )}
+        <div className={clsx('leading-none', className)}>
+            <p className="text-[22px] font-semibold tracking-tight">SUSAN</p>
+            {completo && <p className="mt-1 text-xs text-muted-foreground">Registro de asistencia</p>}
         </div>
     );
 }
