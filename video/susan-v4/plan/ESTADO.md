@@ -120,3 +120,7 @@ Entregar el video final 1080p60 MÁS DINÁMICO (ver BRIEF.md, indicación del 20
   sobre el MP4 de 60 fps, miniaturas de 480×270 con `drawtext` y `tile=4x7:padding=16:margin=16`. No uses `-ss` + `fps=2` para
   etiquetar fotogramas: `revision/qa-voz-r1/audio/tile.sh` lo hace y el fotograma etiquetado 18.0 s muestra el de ≈ 18.2 s.
 - Pendiente: mandar `renders/susan-v4-voz.mp4` (o la vista ligera) a la persona dueña y que decida sobre los menores 1, 3, 4 y 5.
+- 16:05 UTC (ronda 3, cierre): se retiró la línea «Última captura: 23 rostros · 22 válidos» de F3 (ningún contador de capturas en pantalla,
+  por la regla de la persona dueña) y se re-renderizó: renders/susan-v4-voz.mp4 (1080p60, 55 s, −15.3 LUFS, pico −1.6 dBTP, 63/63 SFX en
+  ±33 ms) + renders/susan-v4-voz-preview.mp4. Menores que quedan (opcionales): F7 47.3–49.7 s con ~2.4 s casi quietos antes del cierre;
+  F8 paso de cielo sutil; silencio total final de 1.05 s por el sheen del cierre. Pendiente: comentarios de la persona dueña.

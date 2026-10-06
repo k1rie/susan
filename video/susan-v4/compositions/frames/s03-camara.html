@@ -80,8 +80,6 @@
 .s03-camara-seg{display:block;height:24px;border-radius:999px;flex:none}
 .s03-camara-detalle{position:absolute;left:140px;top:566px;font-size:28px;font-weight:400;line-height:40px;color:#6F6A65;white-space:nowrap;letter-spacing:0}
 .s03-camara-pal{display:inline-block}
-.s03-camara-ultima{position:absolute;left:880px;top:730px;font-size:24px;font-weight:400;line-height:36px;color:#6F6A65;white-space:nowrap;letter-spacing:0}
-.s03-camara-ultima b{font-weight:600;color:#1E1919}
 /* ---- MedidorLiquido real a E = 1.6: tanque 134 × 269, radio 38, vidrio #F0EDE8, líquido #4A86F0, 5 marcas ---- */
 .s03-camara-tanque{position:absolute;left:140px;top:620px;width:134px;height:269px;border-radius:38px;background:#F0EDE8;overflow:hidden}
 .s03-camara-liquido{position:absolute;inset:0;background:#4A86F0;clip-path:polygon(0 100%,100% 100%,100% 100%,0 100%)}
@@ -111,7 +109,6 @@
       <div id="s03-camara-enc-chips" class="s03-camara-enc-chips"><span class="s03-camara-chip-md">Abierta</span><span class="s03-camara-chip-md">Automático</span></div>
     </div>
     <!-- columna «Asistencia ahora» (assets/sesion-resumen-0-de-24.png): DEBAJO de la vista, que la revela al volver a su caja -->
-    <div id="s03-camara-ultima" class="s03-camara-ultima">Última captura: <b>23</b> rostros · <b>22</b> válidos</div>
     <div id="s03-camara-rotulo" class="s03-camara-rotulo">Asistencia ahora</div>
     <div id="s03-camara-cifra" class="s03-camara-cifra">
       <div id="s03-camara-fila19" class="s03-camara-fila">
@@ -427,7 +424,6 @@
         tl.fromTo(blurTxt, { t: 0 }, { t: 0.40, duration: 0.40, ease: 'none', onUpdate: aplicarBlur, immediateRender: false }, 6.40);
         // 6.85–7.25 s: bajo la cámara, la línea real de la última captura (rostros de la toma, no lecturas por alumno), ya asentado el
         // renglón de detalle y antes del medidor (7.30).
-        tl.fromTo($('ultima'), { y: 16, opacity: 0 }, { y: 0, opacity: 1, duration: 0.40, ease: 'power3.out' }, 6.85);
         /* ---------- Escena 4 (7.3–8.5 s): el medidor sube a 88 % y el halo pasa a verde ---------- */
         tl.fromTo($('tanque'), { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: 0.40, ease: 'power4.out' }, 7.30);
         tl.fromTo([$('pct'), $('med-et'), $('med-desc')], { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: 0.40, ease: 'power4.out', stagger: 0.06 }, 7.30);
