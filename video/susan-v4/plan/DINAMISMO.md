@@ -2,7 +2,7 @@
 
 Director de la ronda de dinamismo, 2026-10-06. Este documento es la especificación de los cuatro flujos que editan los cuadros
 (`scripts/flujos/susan-v4-dinamizar.js`). Los workers editan el HTML actual de `compositions/frames/`, no empiezan de cero.
-`STORYBOARD.md` ya trae estos tiempos en sus `Scene`, `sfx_cues` y `handoff_*`. Si algo de aquí choca con el storyboard, gana el
+`STORYBOARD.md` ya trae estos tiempos en sus `Scene`, `sfx_cues` y `handoff_*`, con la revisión del crítico (§6) incorporada. Si algo de aquí choca con el storyboard, gana el
 storyboard; si choca con el BRIEF, gana el BRIEF.
 
 **La regla de la persona dueña (BRIEF, último bloque), en una línea.** Dinamismo = cambio de CONTENIDO, no movimiento de cámara, y
@@ -331,8 +331,8 @@ Activo: `assets/sesion-encabezado-abierta-automatico.png` (sin «Volver al panel
 - Ningún contador.
 
 **Vuelta (4.40–4.90, R3b).** Es el mismo tween al revés, con su desenfoque ≤ 4 px solo de 4.55 a 4.75: termina exacto en x
-880, y 200, 900 × 506, radio 28 y la sombra vuelve. Mientras tanto, la columna real se revela por debajo, no encima: entra desde la izquierda (x −60 → 0 y opacidad,
-`power3.out` 0.45 s, 4.55–5.00). La columna es «Asistencia ahora» con «0» y «de 24 presentes», más la pista vacía de la
+880, y 200, 900 × 506, radio 28 y la sombra vuelve. Mientras tanto, la columna real se revela por debajo, no encima: entra
+desde la izquierda (x −60 → 0 y opacidad, `power3.out` 0.45 s, 4.55–5.00, sin estela). La columna es «Asistencia ahora» con «0» y «de 24 presentes», más la pista vacía de la
 BarraSegmentada. Activo: `assets/sesion-resumen-0-de-24.png`.
 
 **Desde 4.90, as is.** El «0» se ve quieto unos 0.15 s antes de rodar; nunca hay un contador de lecturas. El handoff_in y el
@@ -452,8 +452,8 @@ en (1320, 451), alto 64, y «Vie» de 24 px en y = 725 sin levantar); el worker 
 
 **Lo que sigue en la toma.**
 - 5.55–5.85: «32 ausencias en 6 sesiones» (Hanken 400 30 px #6F6A65, centro y = 830) entra desde el desenfoque. Es el renglón
-  real de «Ver cifras por día» (DOM 21: «Viernes 21.8 % (32 ausencias en 6 sesiones, día crítico)»). En la construcción ya
-estaba, bajo «Vie» en la estación (5.20 s); ahora llega en la toma.
+  real de «Ver cifras por día» (DOM 21: «Viernes 21.8 % (32 ausencias en 6 sesiones, día crítico)»). En la
+  construcción ya estaba, bajo «Vie» en la estación (5.20 s); ahora llega en la toma.
 - 5.75–6.15: se traza el anillo real de la casilla, 6.4 px rgba(179,38,30,.7).
 - 6.15–6.35: la casilla late (scale 1 → 1.04 → 1, origen en su centro).
 
@@ -503,33 +503,41 @@ El tooltip se despega antes y hace su morph a la píldora como ahora; el halo pa
 |---|---|---|---|
 | 0.00–1.05 | píldora → ranking «Mayor riesgo» (as is) | R5 | — |
 | 1.05–2.40 | foco en Iván, la fila se despega y se abre en su tarjeta (as is) | R4 + R5 | «A Iván» 1.49 |
-| 2.40–3.80 | sección A: «Faltas restantes 2», barra a 14.9 % frente a «Límite 20 %», «7 (14.9 %)» (as is) | — | «dos» 3.21 |
-| 3.80–4.10 | sale la sección A hacia arriba | R2 | «…faltas…» |
-| 4.00–4.75 | sube la sección B: «Cruce estimado: semana 9» y la fila «Acción sugerida» | R2 | «…» |
+| 2.40–3.95 | sección A: «Faltas restantes 2», barra a 14.9 % frente a «Límite 20 %», «7 (14.9 %)» (as is) | — | «dos» 3.21, «faltas» |
+| 3.95–4.25 | sale la sección A hacia arriba, ya en la pausa «…» | R2 | «…» |
+| 4.15–4.90 | sube la sección B: «Cruce estimado: semana 9» y la fila «Acción sugerida» | R2 | «…» |
 | 5.20–5.60 | «Contactar al alumno esta semana» entra desde el desenfoque | — | «tiempo» 5.93 |
 | 6.45–6.65 | halo de foco en la fila de la acción (as is) | — | «de hablar con él» |
 | 6.65–7.60 | quieto 0.95 s, bajo la blur-crossfade | — | — |
 
-**Sección A sale (3.80–4.10, R2).** Las coordenadas son locales de la tarjeta (1200 × 600; en pantalla, tope en y = 240).
+**Corrección del crítico: la sección A sale a 3.95, no a 3.80.** «dos» empieza a 3.21 y la frase «dos faltas» termina hacia
+3.85; con 3.80 la barra se iba mientras la voz aún decía «faltas» y, con la holgura de ±0.3 s de las anclas, el «2» podía no
+cumplir su lectura de 0.3 s después de la palabra. A 3.95 el relevo cae en la pausa «…» (≈ 3.9–4.9). La sección B se recorre
++0.15 s y «Contactar al alumno esta semana» no se mueve.
+
+**Sección A sale (3.95–4.25, R2).** Las coordenadas son locales de la tarjeta (1200 × 600; en pantalla, tope en y = 240).
 - El cuerpo de la tarjeta, bajo el divisor (y local 162–600), se vuelve una caja recortada con desvanecido de 24 px arriba y
   abajo.
 - Fijos: el encabezado (avatar «CR», «Cruz Rojas Iván», «E260017 · 3A», «Alto · 64 / 100», «Al alza») y el divisor.
 - La sección A («Faltas restantes» + «2» + barra + «7 (14.9 %)») va de y 0 → −140 con `power2.in` 0.3 s, estela vertical ≤ 10
   y opacidad → 0 en el último 40 %.
-- El «2» estuvo quieto desde 2.85 hasta 3.80, así que «dos» (3.21) cae con él quieto.
+- El «2» está quieto desde 2.85 hasta 3.95 (1.1 s), así que «dos» (3.21) cae con él quieto y con margen.
 
-**Sección B sube (4.00–4.75, R2).**
-- 4.00–4.50: la píldora «Cruce estimado: semana 9» (calendar-days, fondo #F0EDE8) llega a y local 200 desde y +140, con
-  `power3.out` y estela ≤ 10.
-- 4.25–4.75: la fila «Acción sugerida» sube con la misma receta hasta y local 288–392 (x 48–1152, fondo #F7F5F2, radio 20). Lleva
+**Sección B sube (4.15–4.90, R2), centrada en el cuerpo.** Corrección del crítico: con la píldora en y local 200 y la fila en
+288–392, la tarjeta de 600 px quedaba con 208 px vacíos abajo (la construcción dejaba 48). La sección B mide ≈ 190 px (píldora
+≈ 54 + 32 de aire + fila 104) y se centra en el cuerpo (y local 162–600), con 124 px arriba y abajo:
+- 4.15–4.65: la píldora «Cruce estimado: semana 9» (calendar-days, fondo #F0EDE8, x local 48) llega a y local 286–340 desde y
+  +140, con `power3.out` y estela ≤ 10.
+- 4.40–4.90: la fila «Acción sugerida» sube con la misma receta hasta y local 372–476 (x 48–1152, fondo #F7F5F2, radio 20). Lleva
   la ficha `.su-ficha` a E = 2 con calendar-check y el rótulo «Acción sugerida» (24 px gris).
 - 5.20–5.60: «Contactar al alumno esta semana» (32 px 500 tinta) entra con BlurText.
 
 **Se quita.** El acercamiento 1 → 1.07 (3.45–4.35) y su regreso (5.00–5.90).
 
-**Handoffs.** El handoff_out cambia: la tarjeta queda con la sección B, por debajo de una blur-crossfade, así que F8 no cambia.
+**Handoffs.** El handoff_out cambia: la tarjeta queda con la sección B (píldora en y local 286, fila en 372–476), por debajo
+de una blur-crossfade, así que F8 no cambia.
 
-`sfx_cues`: `0.05 soft-in -3dB; 1.40 tap; 2.07 whoosh-s; 2.45 fill -6dB; 2.85 tick; 4.05 whoosh-s -6dB; 4.25 pop-2 -6dB; 5.20 soft-in -6dB`
+`sfx_cues`: `0.05 soft-in -3dB; 1.40 tap; 2.07 whoosh-s; 2.45 fill -6dB; 2.85 tick; 4.20 whoosh-s -6dB; 4.40 pop-2 -6dB; 5.20 soft-in -6dB`
 
 ### F8 · SUSAN (6.00 s): sin cambios
 
@@ -554,32 +562,43 @@ Es la firma: el lockup se sostiene a propósito.
 Un «cambio de contenido» es un elemento, una cifra o un estado nuevos, o una toma nueva; los latidos y los brillos no cuentan.
 «Sin cambio» es el tramo más largo entre que un cambio se asienta y empieza el siguiente.
 
-| Cuadro | Cambios de contenido | Tramo más largo sin cambio | Relevos de composición |
-|---|---|---|---|
-| F1 | 8 | 0.6 s (3.83–4.45) | barras → rejilla → ficha |
-| F2 | 6 | 1.15 s (3.80–4.95, con el brillo en medio) | tarjeta + marca → toma de cerca → cámara |
-| F3 | 12 | 1.45 s (2.95–4.40, con dos latidos) | encabezado → clase a pantalla completa → columna con conteo → medidor |
-| F4 | 7 | 0.70 s (5.10–5.80) | lista → tarjeta del caso → decisión → aviso |
-| F5 | 10 | 0.85 s (6.35–7.20, quietud final) | casillas → viernes resaltado → toma del viernes |
-| F6 | 10 | 0.95 s (6.50–7.45, quietud final) | casilla → gráfica → proyección → píldora |
-| F7 | 8 | 0.95 s (6.65–7.60, quietud final) | ranking → tarjeta (sección A) → sección B |
-| F8 | 6 | 1.35 s (3.10–4.45, con el paso del cielo) | ficha → lockup → lema |
+| Cuadro | Cambios de contenido | Tramo más largo sin cambio | Relevos de composición | Inicios de relevo (s locales) |
+|---|---|---|---|---|
+| F1 | 8 | 0.6 s (3.83–4.45) | barras → rejilla → ficha | 2.95 · 5.45 |
+| F2 | 6 | 1.15 s (3.80–4.95, con el brillo en medio) | tarjeta + marca → toma de cerca → cámara | 0.10 · 2.85 · 5.30 |
+| F3 | 12 | 1.45 s (2.95–4.40, con dos latidos) | encabezado → clase a pantalla completa → columna con conteo → medidor | 2.45 · 4.40 |
+| F4 | 7 | 0.70 s (5.10–5.80) | lista → tarjeta del caso → decisión → aviso | 0.00 (push) · 1.50 · 4.80 |
+| F5 | 10 | 0.85 s (6.35–7.20, quietud final) | casillas → viernes resaltado → toma del viernes | 0.00 (push) · 4.95 |
+| F6 | 10 | 0.95 s (6.50–7.45, quietud final) | casilla → gráfica → proyección → píldora | 0.05 · 4.85 |
+| F7 | 8 | 0.95 s (6.65–7.60, quietud final) | ranking → tarjeta (sección A) → sección B | 0.05 · 1.75 · 3.95 |
+| F8 | 6 | 1.35 s (3.10–4.45, con el paso del cielo) | ficha → lockup → lema | 0.60 (caída y revelado: un solo gesto de firma, as is) |
+
+Lectura de la última columna: ningún par de inicios está a menos de 1.5 s (el más corto, F7 0.05 → 1.75, 1.70 s), y del
+último relevo de un cuadro al primero del siguiente pasan ≥ 2 s. La entrada de las casillas de F5 (0.70) no es un relevo
+aparte: es el contenido que llega detrás de su contenedor, en la misma dirección que el push, y no reemplaza nada. Lo mismo
+el aviso de F4 (4.80), que es un R2 corto de una pieza chica.
 
 **Topes, revisados:**
 - Sobreimpulsos: 2 (botón de F2 y tooltip de F6).
-- Pose 3D: tarjeta del caso en F4 (entra con el látigo, plana a 2.15) y fila de Iván en F7; ninguna más.
-- Estelas a la vez: ≤ 3. Las tres casillas de F5 se solapan como mucho dos a la vez.
-- Desenfoques grandes: el rack de F1 y los atravesar de F2 y F5 (≤ 8 px, ≤ 0.6 s); nunca junto a un push-slide ni a la
-  blur-crossfade.
+- Pose 3D: tarjeta del caso en F4 (entra con el látigo, plana a 2.35) y fila de Iván en F7; ninguna más.
+- Estelas a la vez: ≤ 3. Las tres casillas de F5 son el tope (entran juntas, 0.70–1.40) y en ese tramo nada más lleva estela;
+  el látigo de F3 se retiró.
+- Desenfoques grandes: el rack de F1, los atravesar de F2 y F5 (≤ 8 px, ≤ 0.6 s) y la vista de F3 al abrirse y al volver (≤ 4 px,
+  0.2 s cada vez); uno a la vez y nunca junto a un push-slide ni a la blur-crossfade.
 - Cámara ≤ 1.3 y nunca sostenida.
 
 ---
 
 ## 5. Pedidos fuera de mi zona (para el orquestador)
 
+**Estado (crítico, 2026-10-06):** los pedidos 1 y 2 ya están hechos en los documentos (ver al final de cada uno); el 3 está
+verificado (los bordes cuadran al número en los dos lados del STORYBOARD); el 4 no pide nada.
+
 1. **`frame.md` §5.1, §5.6 y §5.8, y `plan/SINTESIS.md` regla 18.** Siguen diciendo «sin salidas salvo el último cuadro» y
    limitan la estela a «1–3 golpes». El BRIEF los sustituye para la v4. Conviene alinear esos textos con §2 de este documento
    para que los revisores no los citen. No los edité: no son de mi zona.
+   **Hecho (crítico):** `frame.md` §5.1, §5.6, §5.8 y §11.6 y `plan/SINTESIS.md` reglas 18 y 19 ya remiten a la regla de
+   dinamismo del BRIEF y a §2 de este documento.
 2. **`plan/CONTENIDO.md` §3.5.** Agregar como REAL (DOM `24-revision-pendientes.html`) las cuatro primeras filas de la lista
    de Revisión:
    - Ramírez Núñez Emilio, Aguilar Ramos Luis, Sánchez Herrera Daniel y Morales Montes Laura;
@@ -587,8 +606,41 @@ Un «cambio de contenido» es un elemento, una cifra o un estado nuevos, o una t
 
    Agregar también, en §3.7, el renglón real «Viernes 21.8 % (32 ausencias en 6 sesiones)» de «Ver cifras por día» (ya estaba
    como «32 en 6»).
+
+   **Hecho (crítico):** `plan/CONTENIDO.md` §3.4 (encabezado real de la sesión), §3.5 (lista de pendientes, con los colores de
+   avatar) y §3.7 (renglón de «Ver cifras por día»), y `frame.md` §10 con las mismas cifras y textos.
 3. **Bordes que cambian.** F5 → F6 (toma del viernes; F5 la entrega y F6 la recibe con números idénticos), el handoff_in de F4
    (lista bajo el push) y el handoff_out de F7 (sección B). Los flujos [s02, s05] y [s06, s01] corren en paralelo, así que el
    contrato es el handoff del storyboard al píxel.
 4. **frame-check.** Su regla `exit` solo marca la opacidad → 0 de capas ≥ 80 % del cuadro en el último 1.2 s, así que no choca
    con estos relevos. La «deriva lenta» solo avisa. No hace falta tocarlo.
+
+---
+
+## 6. Revisión del crítico (2026-10-06, tras el corte del director)
+
+El director dejó este documento y las `Scene`, `sfx_cues` y `handoff_*` del STORYBOARD completos para los 8 cuadros; faltaban
+los paquetes, el extracto de dirección y los pedidos de §5. El crítico los completó y contrastó el plan segundo a segundo contra
+la regla de la persona dueña (algo nuevo cada ~2–3 s, sin saturar, un relevo a la vez, zoom solo como transición). Cambios, ya
+reflejados arriba y en el STORYBOARD:
+
+| # | Dónde | Problema | Arreglo |
+|---|---|---|---|
+| 1 | F3 2.45–2.95 | El encabezado salía con látigo y estela mientras la vista se abría y se desenfocaba: dos movimientos grandes y dos superficies con filtro a la vez | El encabezado no viaja: la vista, por encima en z, lo tapa al crecer y se apaga ya cubierto. Regla nueva en §2.0.1 y §2.3 b |
+| 2 | F3 2.45 | scale 2.134 dejaba 1079.8 px de alto: un hilo crema abajo durante 1.45 s | scale 2.135 (1921.5 × 1080.3) |
+| 3 | F3 4.40–4.90 | La vuelta no decía su desenfoque | ≤ 4 px de 4.55 a 4.75, simétrico a la ida |
+| 4 | F4 1.30 | Látigo 0.15 s después de asentarse el foco, sobre «dudoso», y a 1.30 s del push (regla: ≥ 1.5 s) | Látigo a 1.50–1.85, tarjeta 1.75–2.35 (plana a 2.35), columnas 2.40–3.09 (cifras 2.75 y 2.84, antes de «Revisión»); sfx 1.80 y 2.40 |
+| 5 | F4 lista | Fila activa con #EFECE7 lleno, colores de avatar sin valor, alto 162 | Estilo real `border-foreground bg-accent/50` (≈ #F7F6F3), avatares RN #475569, AR y SH #A21CAF, MM #B4551A, chip a la derecha del nombre, 164 px (82 en la app) |
+| 6 | F5 0.70–2.20 | Tres látigos de entrada en 1.5 s encimados con los odómetros: algo nuevo cada 0.5 s y tres estelas a la vez justo tras el push (saturación) | Una sola entrada de la fila (0.70–1.40, escalonada 0.10 s); los rellenos siguen uno por uno, como el análisis que avanza |
+| 7 | F5 5.40 | En el corte del atravesar, la píldora saltaba 13 px hacia atrás y 13 % de tamaño y «Vie» 14 px | Regla nueva en §2.3 a: todo lo visible coincide en el corte; la píldora y «Vie» llegan en su propia capa desde su posición del empuje |
+| 8 | F2 3.30 | «SUSAN» desaparecía de golpe en el corte con su «N» todavía en pantalla | Opacidad 1 → 0 de 3.12 a 3.30 mientras viaja |
+| 9 | F7 3.80 | La sección A salía mientras la voz decía «faltas» y sin margen para la holgura de ±0.3 s de «dos» | Sale a 3.95, en la pausa «…»; sección B 4.15–4.90; sfx 4.20 y 4.40 |
+| 10 | F7 sección B | Arriba (y local 200–392) dejaba 208 px vacíos al pie de la tarjeta | Centrada en el cuerpo: píldora 286–340, fila 372–476 (124 px arriba y abajo); handoff_out actualizado |
+| 11 | §4 | Faltaba ver el ritmo de relevos | Columna de inicios de relevo por cuadro: ningún par a menos de 1.5 s |
+| 12 | §5 | Pedidos 1 y 2 sin hacer | `frame.md` §5.1, §5.6, §5.8, §10 y §11; `plan/SINTESIS.md` 18–19; `plan/CONTENIDO.md` §3.4, §3.5 y §3.7 |
+
+Se verificó y no cambia: duraciones (55.0 s), `voiceover` y `vo_anchor`; cada cifra nombrada quieta ≥ 0.3 s antes y después
+de su palabra; ningún zoom fuera de R3 (el rack de F1 es la apertura; el latido de F5 y las esquinas de F3 son latidos, no
+acercamientos); toda pieza nueva es UI real (DOM 24, encabezado de la sesión, «Ver cifras por día») con cifras de CONTENIDO §3;
+costuras 1→2, 2→3, 5→6 y 6→7 idénticas al número en los dos lados; ninguna composición igual más de ~3 s sin un cambio de
+contenido; ningún tramo quieto de 1.0 s.
