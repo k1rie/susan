@@ -26,8 +26,8 @@ Este video les dice a los docentes que **pasar lista ya no les cuesta la clase**
 **Firma visual**
 - **Escenarios:** lienzo crema con un halo del color de cada módulo (azul en la cámara, dorado en Revisión, violeta en Analítica, rosa en riesgo). El cielo sale solo en los cuadros 2 y 8, y el holograma solo en el barrido final.
 - **Costuras (3 familias):** 4 relevos con elemento compartido (ficha 1→2, marco de cámara 2→3, tarjeta de días 5→6, píldora 6→7), 2 empujes a la izquierda en los cambios de estación (3→4 y 4→5) y 1 fundido con desenfoque al cielo (7→8).
-- **Técnicas de los reels:** rack focus vivo (1 y 7) · objeto aislado en lienzo vacío y morph de componente (1) · superficie armada alrededor del botón (2) · toque sin cursor (2 y 4) · odómetros con estela (1, 3, 5, 6, 7) · barras que se vuelven líneas, guía y tooltip recto (6) · bloque resaltado (5) · inclinación 3D suave que se aplana (4 y 7) · caída del icono con squash (8).
-- **Topes:** 2 sobreimpulsos, 2 toques de oro (solo los subrayados de la marca), 2 poses 3D, sin cursor y ≈ 1 efecto de sonido por segundo.
+- **Técnicas de los reels:** rack focus vivo (1) · foco selectivo en el ranking (7) · objeto aislado en lienzo vacío y morph de componente (1) · superficie armada alrededor del botón (2) · toque sin cursor (2 y 4) · odómetros con estela (1, 3, 5, 6, 7) · barras que se vuelven líneas, guía y tooltip recto (6) · bloque resaltado (5) · inclinación 3D suave que se aplana (4 y 7) · caída del icono con squash (8).
+- **Topes:** 2 sobreimpulsos (el medidor y los odómetros no rebasan su valor), 2 toques de oro (solo los subrayados de la marca), 2 poses 3D, sin cursor, ninguna quietud de 1 s o más y ≈ 1 efecto de sonido por segundo.
 
 **Qué tomé de cada propuesta**
 - **B (base; ganó en historia y en factibilidad):** el arco y el orden de la analítica (día → tendencia → personas → Iván); «Pasar lista:», «Te presentamos a susan» y «lo decides tú»; el marco de cámara vacío que cruza el corte; las barras que se vuelven líneas y el tooltip que se vuelve «9 alumnos en riesgo».
