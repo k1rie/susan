@@ -156,7 +156,9 @@
             mie: 1.70, mieFin: 2.40,      // 2.40 tick-2
             vie: 2.20, vieFin: 2.90,      // 2.90 tick-3
             alza: 3.80, alzaFin: 4.25,    // bloque resaltado: Vie se levanta, Lun y Mié al 55 %
-            pild: 4.20, pildFin: 4.55,    // 4.55 pop-2 (fin de la entrada de la píldora)
+            // 4.55 pop-2 (fin de la entrada de la píldora). La entrada ocupa solo los últimos 0.20 s de la ventana 4.20–4.55:
+            // power3.out es cuártico en GSAP y en 0.35 s la píldora se veía llegada ~0.15 s antes del pop.
+            pild: 4.35, pildFin: 4.55,
             meta: 5.20,                   // «32 ausencias en 6 sesiones» desde el desenfoque
             anillo: 5.85, anilloFin: 6.25, // 5.85 draw (inicio del trazo); quieto desde 6.25 (handoff_out)
             D: 7.2
@@ -233,14 +235,17 @@
             tl.fromTo(st, { d: desde }, { d: 0, duration: dur, ease: curva, onUpdate: aplicar, immediateRender: false }, at);
         }
 
-        // Columna lenta del odómetro (un paso o pocos): sin estela, power3.out, sin sobreimpulso.
-        function rodar(el, pasos, at, dur) {
-            tl.fromTo(el, { y: 0 }, { y: -pasos * H, duration: dur, ease: 'power3.out', immediateRender: false }, at);
+        // Columna lenta del odómetro (un paso o pocos, del renglón `desde` al `hasta`): sin estela, power3.out, sin sobreimpulso.
+        function rodar(el, desde, hasta, at, dur) {
+            tl.fromTo(el, { y: -desde * H }, { y: -hasta * H, duration: dur, ease: 'power3.out', immediateRender: false }, at);
         }
 
         // Relleno que se tiñe como pintura: el color de la casilla brota desde la cifra (clip-path circular, excepción documentada
         // de las gráficas hechas a mano) y se asienta a opacidad plena; en reposo clip-path:none.
-        var RADIO = 176;   // distancia del centro de la cifra (140, 85) a la esquina más lejana de la casilla, + 1 px
+        // Radio = punto visible más lejano de la casilla redondeada desde (140, 85.5): centro del arco inferior (245, 155) a
+        // 125.9 px + radio 35 = 160.9, + 1 px. Con la esquina de la caja (176) el círculo ya cubría todo a la mitad del tramo y el
+        // relleno se veía asentado mucho antes que la cifra; así el tinte termina de llegar con ella.
+        var RADIO = 162;
         function pintar(el, at, dur) {
             var ease = gsap.parseEase('power3.out');
             var st = { p: 0 };
@@ -255,23 +260,40 @@
         }
 
         // ---- Scene 2 (1.20–3.80): las casillas se llenan una tras otra; cifra y relleno llegan juntos ----
+        // Cascada derecha -> izquierda: arrancan escalonadas 0.04 s y cada columna se fija antes que la de su izquierda; las
+        // decenas dan el último paso (PASO s, power3.out) y terminan exactamente en t1, con el tic. power3.out es cuártico en
+        // GSAP: un rodar largo que termina en t1 se ve asentado ~0.2 s antes, así que la llegada visible del número la pone
+        // ese paso corto final (lo último que se mueve, a <= 0.07 s del tic). `ini` es el retraso desde t0; `fin`, los
+        // segundos antes de t1 en que la columna se detiene.
+        var CASCADA = {
+            q: { ini: 0.00, fin: 0.30 },   // %
+            t: { ini: 0.00, fin: 0.20 },   // décimas, dos vueltas con estela
+            p: { ini: 0.04, fin: 0.16 },   // punto
+            u: { ini: 0.04, fin: 0.10 },   // unidades, una vuelta con estela
+            d: { ini: 0.08, fin: 0.30 }    // decenas antes del paso final (solo Vie: blanco -> 1, y el 1 -> 2 es el paso final)
+        };
+        var PASO = 0.20;
         DIAS.forEach(function (d) {
             var dur = d.t1 - d.t0;
+            function tramo(c) { return { at: d.t0 + CASCADA[c].ini, dur: dur - CASCADA[c].ini - CASCADA[c].fin }; }
             pintar($(d.k + '-tinte'), d.t0, dur);
             // el guion de «sin dato» sube y sale de su ventana mientras entra la cifra (mismo sentido que el odómetro)
-            rodar($(d.k + '-g'), 1, d.t0, 0.32);
-            // derecha -> izquierda, escalonado 0.04 s; todas se asientan juntas en t1 (un solo tic)
+            rodar($(d.k + '-g'), 0, 1, d.t0, 0.32);
             var tiraT = $(d.k + '-t');
             var tiraU = $(d.k + '-u');
             var pasosT = d.cols.t.length - 1;
             var pasosU = d.cols.u.length - 1;
-            conRastro({ el: tiraT, nodo: $('mb-' + d.k + '-t-g'), at: d.t0, dur: dur, curva: 'power3.out', dist: pasosT * H, eje: 'y', max: 16,
+            var pasosD = d.cols.d.length - 1;
+            var q = tramo('q'), t = tramo('t'), p = tramo('p'), u = tramo('u'), dd = tramo('d');
+            rodar($(d.k + '-q'), 0, 1, q.at, q.dur);
+            conRastro({ el: tiraT, nodo: $('mb-' + d.k + '-t-g'), at: t.at, dur: t.dur, curva: 'power3.out', dist: pasosT * H, eje: 'y', max: 16,
                 pos: function (e) { tiraT.style.transform = 'translateY(' + (-pasosT * H * e).toFixed(2) + 'px)'; } });
-            rodar($(d.k + '-q'), 1, d.t0, dur);
-            rodar($(d.k + '-p'), 1, d.t0 + 0.04, dur - 0.04);
-            conRastro({ el: tiraU, nodo: $('mb-' + d.k + '-u-g'), at: d.t0 + 0.04, dur: dur - 0.04, curva: 'power3.out', dist: pasosU * H, eje: 'y', max: 16,
+            rodar($(d.k + '-p'), 0, 1, p.at, p.dur);
+            conRastro({ el: tiraU, nodo: $('mb-' + d.k + '-u-g'), at: u.at, dur: u.dur, curva: 'power3.out', dist: pasosU * H, eje: 'y', max: 16,
                 pos: function (e) { tiraU.style.transform = 'translateY(' + (-pasosU * H * e).toFixed(2) + 'px)'; } });
-            rodar($(d.k + '-d'), d.cols.d.length - 1, d.t0 + 0.08, dur - 0.08);
+            // decenas: los pasos previos (si los hay) dentro de su tramo; el último, el más corto, cierra en t1
+            if (pasosD > 1) { rodar($(d.k + '-d'), 0, pasosD - 1, dd.at, dd.dur); }
+            rodar($(d.k + '-d'), pasosD - 1, pasosD, d.t1 - PASO, PASO);
         });
         readMark(tl, T.vieFin, 'Lun 17.7 · Mié 16.4 · Vie 21.8 %');
 
@@ -280,7 +302,7 @@
         tl.fromTo($('vie'), { scale: 1 }, { scale: 1.06, duration: T.alzaFin - T.alza, ease: 'power3.out' }, T.alza);
         tl.fromTo([$('lun'), $('mie'), $('lun-dia'), $('mie-dia')], { opacity: 1 },
             { opacity: 0.55, duration: T.alzaFin - T.alza, ease: 'power3.out' }, T.alza);
-        // píldora de tinta recta: 14 px desde abajo, sin sobreimpulso
+        // píldora de tinta recta: 14 px desde abajo, sin sobreimpulso; un golpe corto que termina de llegar con el pop
         tl.fromTo($('pildora'), { y: 14, opacity: 0 }, { y: 0, opacity: 1, duration: T.pildFin - T.pild, ease: 'power3.out' }, T.pild);
         readMark(tl, T.pildFin, 'Día crítico: Viernes');
         // meta real bajo «Vie»: BlurText por palabra (blur 10 -> 0, y -.5em -> 0), nítida al asentarse

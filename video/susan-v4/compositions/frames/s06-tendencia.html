@@ -8,9 +8,9 @@
 
 /* ---------- E3 «lienzo de datos» con halo de modulo: violeta (analitica, heredado del cuadro 5) y rosa (riesgo) ---------- */
 .s06-tendencia-capa{position:absolute;inset:0}
-.s06-tendencia-violeta{background:radial-gradient(55% 60% at 59.9% 46.3%,#EEE9F7 0%,rgba(247,245,242,0) 72%),
+.s06-tendencia-violeta{background:radial-gradient(55% 60% at 59.896% 46.296%,#EEE9F7 0%,rgba(247,245,242,0) 72%),
  radial-gradient(120% 90% at 50% 40%,#F7F5F2 55%,#F3F1ED 100%)}
-.s06-tendencia-rosa{background:radial-gradient(55% 60% at 50% 46.3%,#FBE6E2 0%,rgba(247,245,242,0) 72%),
+.s06-tendencia-rosa{background:radial-gradient(55% 60% at 50% 46.296%,#FBE6E2 0%,rgba(247,245,242,0) 72%),
  radial-gradient(120% 90% at 50% 40%,#F7F5F2 55%,#F3F1ED 100%)}
 .s06-tendencia-grano{position:absolute;inset:0;pointer-events:none;mix-blend-mode:multiply;opacity:.04;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
 
@@ -19,9 +19,12 @@
 
 /* ---------- PageHeader y selector de grupo (heredados del cuadro 5) ---------- */
 .s06-tendencia-h1{left:140px;top:128px;height:64px;line-height:64px;font-size:52px;font-weight:500;letter-spacing:-0.025em;white-space:nowrap}
-.s06-tendencia-selector{right:140px;top:124px;height:72px;display:flex;align-items:center;gap:14px;padding:0 24px 0 30px;
- background:#FFFFFF;border:2px solid #D8D2CA;border-radius:999px;font-size:28px;font-weight:500;white-space:nowrap}
-.s06-tendencia-selector svg{display:block;color:#6F6A65;flex:none}
+/* selector escrito como en el cuadro 5 (px de la app con zoom 2) para que el corte sea invisible */
+.s06-tendencia-selector{right:140px;top:120px;height:80px;display:flex;align-items:center}
+.s06-tendencia-ui{zoom:2;position:relative}
+.s06-tendencia-sel{display:inline-flex;align-items:center;gap:8px;height:40px;box-sizing:border-box;padding:0 12px 0 18px;border:1px solid #D8D2CA;
+ border-radius:999px;background:#FFFFFF;font-size:14px;font-weight:500;line-height:1;white-space:nowrap}
+.s06-tendencia-sel svg{display:block;width:16px;height:16px;color:#6F6A65;flex:none}
 
 /* ---------- tarjeta: superficie maquetada en su caja FINAL (x 140-1780, y 210-900); el morph es solo clip-path ---------- */
 .s06-tendencia-caja{left:140px;top:210px;width:1640px;height:690px}
@@ -32,12 +35,18 @@
 .s06-tendencia-dias-t{left:300px;top:340px;height:40px;line-height:40px;font-size:32px;font-weight:600;letter-spacing:-0.025em;white-space:nowrap}
 .s06-tendencia-cas{top:495px;width:280px;height:190px}
 .s06-tendencia-cas-fondo{position:absolute;inset:0;border-radius:35px}
-.s06-tendencia-cas-cifra{position:absolute;left:0;right:0;top:55px;height:60px;line-height:60px;text-align:center;font-size:44px;font-weight:600;letter-spacing:-0.02em}
-.s06-tendencia-cas-cifra small{font-size:0.7em;font-weight:500;letter-spacing:0}
+/* cifra como en el cuadro 5: una columna por caracter, centro en y=580, el % al 0.7em con 3 px de aire */
+.s06-tendencia-cas-cifra{position:absolute;left:0;right:0;top:58px;height:54px;display:flex;justify-content:center;font-size:44px;font-weight:600;line-height:54px;letter-spacing:0}
+.s06-tendencia-cas-col{display:block;height:54px;overflow:hidden}
+.s06-tendencia-cas-col>span{display:block}
+.s06-tendencia-cas-col>span>span{display:block;height:54px;line-height:54px;text-align:center;white-space:pre}
+.s06-tendencia-cas-cifra .s06-tendencia-cas-pct{padding-left:3px}
+.s06-tendencia-cas-cifra .s06-tendencia-u{font-size:.7em;font-weight:500}
 .s06-tendencia-dia{top:710px;width:160px;height:30px;line-height:30px;text-align:center;font-size:24px;font-weight:500;color:#6F6A65}
-.s06-tendencia-meta{left:1120px;top:755px;width:400px;height:30px;line-height:30px;text-align:center;font-size:24px;font-weight:400;color:#6F6A65}
-.s06-tendencia-critico{left:1172px;top:423px;width:296px;height:64px;border-radius:32px;background:#1E1919;color:#FFFFFF;
- font-size:28px;font-weight:500;line-height:64px;text-align:center;white-space:nowrap}
+.s06-tendencia-meta{left:920px;top:755px;width:800px;height:30px;display:flex;justify-content:center;column-gap:6px;line-height:30px;font-size:24px;font-weight:400;color:#6F6A65;white-space:nowrap}
+.s06-tendencia-meta span{display:inline-block}
+.s06-tendencia-critico-caja{left:1020px;top:423px;width:600px;height:64px;display:flex;justify-content:center}
+.s06-tendencia-critico{height:64px;padding:0 28px;border-radius:999px;background:#1E1919;color:#FFFFFF;font-size:28px;font-weight:500;line-height:64px;white-space:nowrap}
 
 /* contenido nuevo: TarjetaGrafica «Ausentismo semanal» (GraficaLinea a E 2) */
 .s06-tendencia-titulo{left:200px;top:242px;height:40px;line-height:40px;font-size:32px;font-weight:600;letter-spacing:-0.025em;white-space:nowrap}
@@ -73,7 +82,7 @@
 .s06-tendencia-tip{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:500;white-space:nowrap}
 .s06-tendencia-riesgo{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
 .s06-tendencia-fila{display:flex;align-items:baseline;gap:20px;white-space:nowrap}
-.s06-tendencia-nueve{position:relative;display:inline-block;height:88px;line-height:88px;font-size:72px;font-weight:600;letter-spacing:-0.025em}
+.s06-tendencia-nueve{position:relative;display:inline-block;height:88px;line-height:88px;font-size:72px;font-weight:600}
 .s06-tendencia-col{position:absolute;left:-6px;right:-6px;top:0;height:88px;overflow:hidden;text-align:center;
  -webkit-mask-image:linear-gradient(180deg,transparent 0%,#000 16%,#000 84%,transparent 100%);mask-image:linear-gradient(180deg,transparent 0%,#000 16%,#000 84%,transparent 100%)}
 .s06-tendencia-col-tira{display:block}
@@ -94,7 +103,7 @@
     <!-- cabecera de la pantalla Analitica (se apaga en el relevo final) -->
     <div id="s06-tendencia-cabecera" class="s06-tendencia-capa">
       <div class="s06-tendencia-abs s06-tendencia-h1">Analítica de ausentismo</div>
-      <div class="s06-tendencia-abs s06-tendencia-selector">Administración Financiera (3A)<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" data-lucide="chevrons-up-down" aria-hidden="true"><path d="m7 15 5 5 5-5"/><path d="m7 9 5-5 5 5"/></svg></div>
+      <div class="s06-tendencia-abs s06-tendencia-selector"><div class="s06-tendencia-ui"><div class="s06-tendencia-sel">Administración Financiera (3A)<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" data-lucide="chevrons-up-down" aria-hidden="true"><path d="m7 15 5 5 5-5"/><path d="m7 9 5-5 5 5"/></svg></div></div></div>
     </div>
 
     <!-- la tarjeta y todo lo que vive en ella (se apaga en el relevo final) -->
@@ -105,22 +114,22 @@
       <!-- contenido viejo: dias de la semana -->
       <div id="s06-tendencia-dias-t" class="s06-tendencia-abs s06-tendencia-dias-t">Ausentismo por día de la semana</div>
       <div class="s06-tendencia-abs s06-tendencia-cas" style="left:460px;opacity:.55">
-        <div id="s06-tendencia-cas-lun" class="s06-tendencia-cas-fondo" style="background:#EEA094"></div>
-        <div id="s06-tendencia-cif-lun" class="s06-tendencia-cas-cifra">17.7<small> %</small></div>
+        <div id="s06-tendencia-cas-lun" class="s06-tendencia-cas-fondo" style="background:color-mix(in oklab,#DE4D44 51%,#F0EDE8)"></div>
+        <div id="s06-tendencia-cif-lun" class="s06-tendencia-cas-cifra"><span class="s06-tendencia-cas-col"><span><span>1</span><span> </span></span></span><span class="s06-tendencia-cas-col"><span><span>7</span><span> </span></span></span><span class="s06-tendencia-cas-col"><span><span>.</span><span> </span></span></span><span class="s06-tendencia-cas-col"><span><span>7</span><span> </span></span></span><span class="s06-tendencia-cas-col s06-tendencia-cas-pct"><span><span><span class="s06-tendencia-u">%</span></span><span> </span></span></span></div>
       </div>
       <div class="s06-tendencia-abs s06-tendencia-cas" style="left:820px;opacity:.55">
-        <div id="s06-tendencia-cas-mie" class="s06-tendencia-cas-fondo" style="background:#EFA69B"></div>
-        <div id="s06-tendencia-cif-mie" class="s06-tendencia-cas-cifra">16.4<small> %</small></div>
+        <div id="s06-tendencia-cas-mie" class="s06-tendencia-cas-fondo" style="background:color-mix(in oklab,#DE4D44 47%,#F0EDE8)"></div>
+        <div id="s06-tendencia-cif-mie" class="s06-tendencia-cas-cifra"><span class="s06-tendencia-cas-col"><span><span>1</span><span> </span></span></span><span class="s06-tendencia-cas-col"><span><span>6</span><span> </span></span></span><span class="s06-tendencia-cas-col"><span><span>.</span><span> </span></span></span><span class="s06-tendencia-cas-col"><span><span>4</span><span> </span></span></span><span class="s06-tendencia-cas-col s06-tendencia-cas-pct"><span><span><span class="s06-tendencia-u">%</span></span><span> </span></span></span></div>
       </div>
       <!-- Vie: escala 1.06 fija (CSS) sobre la caja; GSAP solo mueve a sus hijos -->
       <div class="s06-tendencia-abs s06-tendencia-cas" style="left:1180px;transform:scale(1.06)">
-        <div id="s06-tendencia-cas-vie" class="s06-tendencia-cas-fondo" style="background:#EB8D81;box-shadow:inset 0 0 0 4px rgba(179,38,30,.7)"></div>
-        <div id="s06-tendencia-cif-vie" class="s06-tendencia-cas-cifra">21.8<small> %</small></div>
+        <div id="s06-tendencia-cas-vie" class="s06-tendencia-cas-fondo" style="background:color-mix(in oklab,#DE4D44 63%,#F0EDE8);box-shadow:0 0 0 4px rgba(179,38,30,.7)"></div>
+        <div id="s06-tendencia-cif-vie" class="s06-tendencia-cas-cifra"><span class="s06-tendencia-cas-col"><span><span>2</span><span> </span></span></span><span class="s06-tendencia-cas-col"><span><span>1</span><span> </span></span></span><span class="s06-tendencia-cas-col"><span><span>.</span><span> </span></span></span><span class="s06-tendencia-cas-col"><span><span>8</span><span> </span></span></span><span class="s06-tendencia-cas-col s06-tendencia-cas-pct"><span><span><span class="s06-tendencia-u">%</span></span><span> </span></span></span></div>
       </div>
       <div id="s06-tendencia-dia-lun" class="s06-tendencia-abs s06-tendencia-dia" style="left:520px;opacity:.55">Lun</div>
       <div id="s06-tendencia-dia-mie" class="s06-tendencia-abs s06-tendencia-dia" style="left:880px;opacity:.55">Mié</div>
       <div id="s06-tendencia-dia-vie" class="s06-tendencia-abs s06-tendencia-dia" style="left:1240px">Vie</div>
-      <div id="s06-tendencia-meta" class="s06-tendencia-abs s06-tendencia-meta">32 ausencias en 6 sesiones</div>
+      <div id="s06-tendencia-meta" class="s06-tendencia-abs s06-tendencia-meta"><span>32</span><span>ausencias</span><span>en</span><span>6</span><span>sesiones</span></div>
 
       <!-- contenido nuevo: Ausentismo semanal -->
       <div id="s06-tendencia-titulo" class="s06-tendencia-abs s06-tendencia-titulo">Ausentismo semanal</div>
@@ -170,7 +179,7 @@
       <div id="s06-tendencia-hint" class="s06-tendencia-abs s06-tendencia-hint"><svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" data-lucide="trending-up" aria-hidden="true"><path d="M16 7h6v6"/><path d="m22 7-8.5 8.5-5-5L2 17"/></svg>+4.2 pp vs. semana previa</div>
 
       <!-- la pildora «Dia critico: Viernes» se condensa en el punto de tinta que sera la cabeza de la guia -->
-      <div id="s06-tendencia-critico" class="s06-tendencia-abs s06-tendencia-critico"><span id="s06-tendencia-critico-t">Día crítico: Viernes</span></div>
+      <div class="s06-tendencia-abs s06-tendencia-critico-caja"><div id="s06-tendencia-critico" class="s06-tendencia-critico"><span id="s06-tendencia-critico-t">Día crítico: Viernes</span></div></div>
     </div>
 
     <!-- tooltip recto de tinta que se vuelve la pildora de personas (no se apaga: es el heroe del handoff) -->
@@ -224,18 +233,12 @@
         }
         $('ejex').innerHTML = htmlX;
 
-        // series: ajuste S1-S6, proyeccion S7-S15 (recta, discontinua), banda del 95 % por semana (recortada en 0 %)
+        // series: ajuste S1-S6 y proyeccion S7-S15 (rectas; la proyeccion discontinua); la banda se arma en la escena 3
         var dAjuste = 'M' + X(1) + ' ' + Y(ajuste(1)) + ' L' + X(6) + ' ' + Y(ajuste(6));
         var dProy = 'M' + X(7) + ' ' + Y(ajuste(7)) + ' L' + X(15) + ' ' + Y(ajuste(15));
         $('ajuste').setAttribute('d', dAjuste);
         $('proy').setAttribute('d', dProy);
         $('proy-trazo').setAttribute('d', dProy);
-        var arriba = [], abajo = [];
-        for (var w = 7; w <= 15; w++) {
-            arriba.push(X(w).toFixed(1) + ',' + Y(Math.min(60, ajuste(w) + semi(w))).toFixed(1));
-            abajo.unshift(X(w).toFixed(1) + ',' + Y(Math.max(0, ajuste(w) - semi(w))).toFixed(1));
-        }
-        $('banda').setAttribute('points', arriba.concat(abajo).join(' '));
 
         // puntos observados: tinta r 8 con aro blanco de 4 (circulo r 10, trazo 4); encendido: r 9 con aro de 5
         var puntos = [];
@@ -270,62 +273,56 @@
         var tl = gsap.timeline({ paused: true });
 
         // ================= Escena 1 (0.00-0.85): relevo barras -> lineas con constantes =================
-        // las casillas colapsan a su linea de cima
-        ['lun', 'mie', 'vie'].forEach(function (d) {
-            tl.fromTo($('cas-' + d), { scaleY: 1, transformOrigin: '50% 0%' }, { scaleY: 0.02, duration: 0.30, ease: 'power2.in' }, 0);
-            tl.fromTo($('cif-' + d), { opacity: 1, y: 0 }, { opacity: 0, y: -14, duration: 0.18, ease: 'power1.in' }, 0);
-            tl.fromTo($('dia-' + d), { opacity: d === 'vie' ? 1 : 0.55 }, { opacity: 0, duration: 0.25, ease: 'power1.in' }, 0);
-            tl.set($('cas-' + d), { opacity: 0 }, 0.30);
-        });
-        tl.fromTo($('meta'), { opacity: 1 }, { opacity: 0, duration: 0.25, ease: 'power1.in' }, 0);
-        tl.fromTo($('dias-t'), { opacity: 1 }, { opacity: 0, duration: 0.25, ease: 'power1.in' }, 0.05);
+        var fondosCas = [$('cas-lun'), $('cas-mie'), $('cas-vie')];
+        // las casillas colapsan a su linea de cima (Vie conserva su escala 1.06 en la caja exterior)
+        tl.fromTo(fondosCas, { scaleY: 1, transformOrigin: '50% 0%' }, { scaleY: 0.02, duration: 0.30, ease: 'power2.in' }, 0);
+        tl.fromTo([$('cif-lun'), $('cif-mie'), $('cif-vie')], { opacity: 1, y: 0 }, { opacity: 0, y: -14, duration: 0.18, ease: 'power1.in' }, 0);
+        // la meta, las etiquetas de dia y el titulo viejo se desvanecen con el colapso (antes del 40 % del morph)
+        tl.to([$('dia-lun'), $('dia-mie'), $('dia-vie'), $('meta'), $('dias-t')], { opacity: 0, duration: 0.25, ease: 'power1.in' }, 0.02);
+        tl.set(fondosCas, { opacity: 0 }, 0.30);
 
         // ...y esas lineas se estiran hasta ser la cuadricula de 60 / 40 / 20 % (constantes del relevo)
         var REJ = [
-            { id: 'rej-60', x: 600 - 1180, y: 496.9 - 344, sx: 280 / 1080, sy: 1.9, c: 'rgba(238,160,148,0.55)' },
-            { id: 'rej-40', x: 960 - 1180, y: 496.9 - 496, sx: 280 / 1080, sy: 1.9, c: 'rgba(239,166,155,0.55)' },
-            { id: 'rej-20', x: 1320 - 1180, y: 491.3 - 648, sx: 296.8 / 1080, sy: 2.015, c: 'rgba(235,141,129,1)' }
+            { x: 600 - 1180, y: 496.9 - 344, sx: 280 / 1080, sy: 1.9, c: 'rgba(238,160,148,0.55)' },
+            { x: 960 - 1180, y: 496.9 - 496, sx: 280 / 1080, sy: 1.9, c: 'rgba(239,166,155,0.55)' },
+            { x: 1320 - 1180, y: 491.3 - 648, sx: 296.8 / 1080, sy: 2.015, c: 'rgba(235,141,129,1)' }
         ];
-        REJ.forEach(function (r) {
-            var el = $(r.id);
-            tl.fromTo(el, { x: r.x, y: r.y, scaleX: r.sx, scaleY: r.sy, backgroundColor: r.c },
-                { x: 0, y: 0, scaleX: 1, scaleY: 1, backgroundColor: 'rgba(231,226,220,0.8)', duration: 0.50, ease: 'power3.inOut' }, 0.25);
-            gsap.set(el, { opacity: 0 });
-            tl.set(el, { opacity: 1 }, 0.30);
-        });
+        var rejillas = [$('rej-60'), $('rej-40'), $('rej-20')];
+        function deRej(k) { return function (i) { return REJ[i][k]; }; }
+        gsap.set(rejillas, { opacity: 0 });
+        tl.fromTo(rejillas, { x: deRej('x'), y: deRej('y'), scaleX: deRej('sx'), scaleY: deRej('sy'), backgroundColor: deRej('c') },
+            { x: 0, y: 0, scaleX: 1, scaleY: 1, backgroundColor: 'rgba(231,226,220,0.8)', duration: 0.50, ease: 'power3.inOut' }, 0.25);
+        tl.set(rejillas, { opacity: 1 }, 0.30);
 
-        // la tarjeta crece en su sitio: superficie maquetada en la caja final, recorte de radio fijo (sin escala: aspectos distintos)
-        tl.fromTo($('borde'), { clipPath: 'inset(90px 100px 80px 100px round 28px)' },
-            { clipPath: 'inset(0px 0px 0px 0px round 28px)', duration: 0.70, ease: 'power3.inOut' }, 0.05);
-        tl.fromTo($('sup'), { clipPath: 'inset(92px 102px 82px 102px round 26px)' },
-            { clipPath: 'inset(2px 2px 2px 2px round 26px)', duration: 0.70, ease: 'power3.inOut' }, 0.05);
+        // la tarjeta crece en su sitio: superficie maquetada en la caja final y recorte de radio fijo (sin escala: aspectos
+        // distintos); el borde de 2 px es la capa de abajo con el mismo recorte, 2 px mas grande
+        var RECORTE = [['inset(90px 100px 80px 100px round 28px)', 'inset(0px 0px 0px 0px round 28px)'],
+            ['inset(92px 102px 82px 102px round 26px)', 'inset(2px 2px 2px 2px round 26px)']];
+        tl.fromTo([$('borde'), $('sup')], { clipPath: function (i) { return RECORTE[i][0]; } },
+            { clipPath: function (i) { return RECORTE[i][1]; }, duration: 0.70, ease: 'power3.inOut' }, 0.05);
 
-        // la pildora «Dia critico» suelta su texto antes del 40 % y se condensa en el punto r 7 sobre S1
+        // la pildora «Dia critico» suelta su texto antes del 40 % y se condensa en el punto r 7 que sera la cabeza de la guia (S1)
         tl.fromTo($('critico-t'), { opacity: 1 }, { opacity: 0, duration: 0.20, ease: 'power1.in' }, 0.05);
-        tl.fromTo($('critico'), { x: 0, y: 0, clipPath: 'inset(0px 0px 0px 0px round 32px)' },
-            { x: X(1) - 1320, y: Y(OBS[0]) - 455, clipPath: 'inset(25px 141px 25px 141px round 7px)', duration: 0.70, ease: 'power3.inOut' }, 0.05);
+        // (recorte en %: la pildora mide lo que su texto, ~293 px, como en el cuadro 5; queda un punto de 14 x 14)
+        tl.fromTo($('critico'), { x: 0, y: 0, clipPath: 'inset(0% 0% 0% 0% round 32px)' },
+            { x: X(1) - 1320, y: Y(OBS[0]) - 455, clipPath: 'inset(39.0625% 47.614% 39.0625% 47.614% round 7px)', duration: 0.70, ease: 'power3.inOut' }, 0.05);
         tl.set($('critico'), { opacity: 0 }, 0.75);
         tl.set($('cabeza'), { opacity: 1 }, 0.75);
 
         // despues del 60 %: titulo, leyenda, marcas y la linea de 0 %
         tl.fromTo($('titulo'), { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.40, ease: 'power3.out' }, 0.47);
-        for (var l = 1; l <= 4; l++) {
-            tl.fromTo($('ley-' + l), { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.35, ease: 'power3.out' }, 0.50 + 0.05 * (l - 1));
-        }
-        ['60', '40', '20', '0'].forEach(function (n, j) {
-            tl.fromTo($('ey-' + n), { opacity: 0, x: 10 }, { opacity: 1, x: 0, duration: 0.30, ease: 'power3.out' }, 0.52 + 0.03 * j);
-        });
-        for (var e = 1; e <= 15; e += 2) {
-            tl.fromTo($('ex-' + e), { opacity: 0, y: -8 }, { opacity: 1, y: 0, duration: 0.30, ease: 'power3.out' }, 0.52 + 0.02 * ((e - 1) / 2));
-        }
+        tl.fromTo([$('ley-1'), $('ley-2'), $('ley-3'), $('ley-4')], { opacity: 0, y: 10 },
+            { opacity: 1, y: 0, duration: 0.35, ease: 'power3.out', stagger: 0.05 }, 0.50);
+        tl.fromTo([$('ey-60'), $('ey-40'), $('ey-20'), $('ey-0')], { opacity: 0, x: 10 },
+            { opacity: 1, x: 0, duration: 0.30, ease: 'power3.out', stagger: 0.03 }, 0.52);
+        tl.fromTo($('ejex').children, { opacity: 0, y: -8 }, { opacity: 1, y: 0, duration: 0.30, ease: 'power3.out', stagger: 0.02 }, 0.52);
         tl.fromTo($('rej-0'), { opacity: 0 }, { opacity: 1, duration: 0.30, ease: 'power1.out' }, 0.50);
 
         // ================= Escena 2 (0.65-2.90): puntos, ajuste, guia S1 -> S6 y lectura por indice =================
-        puntos.forEach(function (p, j) {
-            var org = X(j + 1).toFixed(2) + ' ' + Y(OBS[j]).toFixed(2);
-            tl.fromTo(p, { scale: 0.3, opacity: 0, svgOrigin: org },
-                { scale: 1, opacity: 1, svgOrigin: org, duration: 0.25, ease: 'power3.out' }, 0.65 + 0.04 * j);
-        });
+        // los puntos brotan en ola (scale .3 -> 1) desde su propio centro
+        tl.fromTo(puntos, { scale: 0.3, opacity: 0, svgOrigin: function (i) { return X(i + 1).toFixed(2) + ' ' + Y(OBS[i]).toFixed(2); } },
+            { scale: 1, opacity: 1, duration: 0.25, ease: 'power3.out', stagger: 0.04 }, 0.65);
+        // la recta de ajuste se dibuja S1 -> S6 antes de que la guia la recorra
         tl.fromTo($('ajuste'), { strokeDashoffset: largoAj + 6 }, { strokeDashoffset: 0, duration: 0.75, ease: 'power2.out' }, 0.75);
 
         // la lectura entra cuando la cabeza ya esta sobre S1
@@ -368,7 +365,8 @@
         var T_A = 1.15, D_A = 1.40;
         tl.fromTo(gA, { p: 0 }, { p: 1, duration: D_A, ease: 'power1.inOut', onUpdate: aplicarGuia, immediateRender: false }, T_A);
 
-        // cifra heroe: rueda un renglon por cambio de indice; los pasos caen donde el indice mas cercano cambia (misma curva del driver)
+        // cifra heroe: rueda un renglon por cambio de indice; cada paso cae donde el indice mas cercano cambia (misma curva del
+        // driver) y los pasos se suman como en vertical-spring-ticker, pero con power3.out (sin el back.out de la receta)
         var easeA = gsap.parseEase('power1.inOut');
         function invertir(f, yv) { var lo = 0, hi = 1; for (var it = 0; it < 40; it++) { var m = (lo + hi) / 2; if (f(m) < yv) { lo = m; } else { hi = m; } } return (lo + hi) / 2; }
         var PASOS = [0.1, 0.3, 0.5, 0.7, 0.9].map(function (yv) { return T_A + D_A * invertir(easeA, yv); });
@@ -379,7 +377,7 @@
         var tk = { t: PASOS[0] };
         function aplicarLectura() {
             var t = tk.t;
-            tira.style.transform = 'translate3d(0,' + (-sumaPasos(t) * H_LECT).toFixed(2) + 'px,0)';
+            tira.style.transform = 'translate(0px,' + (-sumaPasos(t) * H_LECT).toFixed(2) + 'px)';
             var v = Math.abs(sumaPasos(t + 0.002) - sumaPasos(t - 0.002)) / 0.004 * H_LECT;
             var sg = Math.min(12, 0.29 * v * OBT);
             mbLect.setAttribute('stdDeviation', '0 ' + sg.toFixed(2));
@@ -390,33 +388,47 @@
         tl.fromTo(tk, { t: PASOS[0] }, { t: T_TK1, duration: T_TK1 - PASOS[0], ease: 'none', onUpdate: aplicarLectura, immediateRender: false }, PASOS[0]);
 
         // 2.60-2.90: el rotulo cambia en su sitio a «Ausentismo actual» y entra el hint real
-        tl.fromTo(rot, { opacity: 1, y: 0 }, { opacity: 0, y: -10, duration: 0.18, ease: 'power1.in', immediateRender: false }, 2.60);
-        tl.fromTo($('rot-actual'), { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.26, ease: 'power3.out' }, 2.64);
+        tl.fromTo(rot, { opacity: 1, y: 0 }, { opacity: 0, y: -10, duration: 0.12, ease: 'power1.in', immediateRender: false }, 2.60);
+        tl.fromTo($('rot-actual'), { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.20, ease: 'power3.out' }, 2.70);
         tl.fromTo($('hint'), { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.30, ease: 'power3.out' }, 2.60);
 
-        // ================= Escena 3 (2.55-4.85): proyeccion a S15, banda, guia S6 -> S15 y tooltip recto =================
+        // ================= Escena 3 (2.55-4.85): proyeccion a S15, guia S6 -> S15, tooltip recto y banda del 95 % =================
         tl.fromTo($('proy-trazo'), { strokeDashoffset: largoPr }, { strokeDashoffset: 0, duration: 0.55, ease: 'power2.out' }, 2.55);
-        tl.fromTo($('banda'), { opacity: 0 }, { opacity: 1, duration: 0.80, ease: 'power1.out' }, 2.60);
         // la guia viaja siempre detras de la punta del trazo (power2.out adelante, power1.inOut detras)
         tl.fromTo(gB, { p: 0 }, { p: 1, duration: 0.60, ease: 'power1.inOut', onUpdate: aplicarGuia, immediateRender: false }, 2.60);
 
         // tooltip: superficie en la caja final de la pildora, recortada al tamano del tooltip y llevada junto a la guia
         var TIP_W = 292, TIP_H = 56;
         var tipCx = 1684 - TIP_W / 2;
-        var tipCy = Y(ajuste(15)) - 52;
+        var tipCy = Math.round(Y(ajuste(15)) - 52);   // en px enteros: el texto del tooltip no queda a medio pixel
         var pil = $('pildora');
         var clipTip = 'inset(' + (112 - TIP_H) / 2 + 'px ' + (620 - TIP_W) / 2 + 'px ' + (112 - TIP_H) / 2 + 'px ' + (620 - TIP_W) / 2 + 'px round 28px)';
         gsap.set(pil, { x: tipCx - 960, y: tipCy - 470, clipPath: clipTip });
         tl.fromTo(pil, { opacity: 0 }, { opacity: 1, duration: 0.10, ease: 'power1.out' }, 3.20);
         tl.fromTo(pil, { scale: 0.6 }, { scale: 1, duration: 0.35, ease: 'back.out(1.4)' }, 3.20);
 
+        // la banda del intervalo del 95 % se abre (opacidad y abanico desde la recta proyectada) despues de «semestre»,
+        // mientras «24.8 %» y «20.8 %» se leen quietos
+        var banda = $('banda');
+        var bA = { p: 0 };
+        function aplicarBanda() {
+            var arriba = [], abajo = [];
+            for (var w = 7; w <= 15; w++) {
+                var m = ajuste(w), h = semi(w) * bA.p;
+                arriba.push(X(w).toFixed(1) + ',' + Y(Math.min(60, m + h)).toFixed(1));
+                abajo.unshift(X(w).toFixed(1) + ',' + Y(Math.max(0, m - h)).toFixed(1));
+            }
+            banda.setAttribute('points', arriba.concat(abajo).join(' '));
+        }
+        aplicarBanda();
+        tl.fromTo(banda, { opacity: 0 }, { opacity: 1, duration: 0.30, ease: 'power1.out' }, 3.80);
+        tl.fromTo(bA, { p: 0 }, { p: 1, duration: 0.65, ease: 'power2.inOut', onUpdate: aplicarBanda, immediateRender: false }, 3.80);
+
         // 4.15-4.55: el subtitulo real entra desde el desenfoque, palabra por palabra (BlurText)
         var palabras = $('sub').children;
-        for (var b = 0; b < palabras.length; b++) {
-            tl.fromTo(palabras[b], { opacity: 0, y: -12, filter: 'blur(10px)' },
-                { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.28, ease: 'power3.out' }, 4.15 + 0.02 * b);
-            tl.set(palabras[b], { filter: 'none' }, 4.15 + 0.02 * b + 0.28);
-        }
+        tl.fromTo(palabras, { opacity: 0, y: -12, filter: 'blur(10px)' },
+            { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.28, ease: 'power3.out', stagger: 0.02 }, 4.15);
+        tl.set(palabras, { filter: 'none' }, 4.56);
 
         // ================= Escena 4 (4.85-7.45): relevo de la cifra a las personas =================
         tl.fromTo([$('tarjeta'), $('cabecera')], { opacity: 1 }, { opacity: 0, duration: 0.60, ease: 'power1.inOut', immediateRender: false }, 4.85);
@@ -434,7 +446,7 @@
         var rueda = { p: 0 };
         function aplicarNueve() {
             var p = rueda.p;
-            colTira.style.transform = 'translate3d(0,' + (-DIST9 * easeRueda(p)).toFixed(2) + 'px,0)';
+            colTira.style.transform = 'translate(0px,' + (-DIST9 * easeRueda(p)).toFixed(2) + 'px)';
             var v = (p <= 0 || p >= 1) ? 0 : (easeRueda(Math.min(1, p + 0.002)) - easeRueda(Math.max(0, p - 0.002))) / 0.004 / 0.50 * DIST9;
             var sg = Math.min(16, 0.29 * v * OBT);
             mbNueve.setAttribute('stdDeviation', '0 ' + sg.toFixed(2));
@@ -443,12 +455,15 @@
         aplicarNueve();
         tl.fromTo($('nueve'), { opacity: 0 }, { opacity: 1, duration: 0.20, ease: 'power1.out' }, 5.85);
         tl.fromTo(rueda, { p: 0 }, { p: 1, duration: 0.50, ease: 'none', onUpdate: aplicarNueve, immediateRender: false }, 6.00);
+        // el tic: la pildora acusa el peso de la cifra (4 px, sin rebote: baja y vuelve a 0 justo en 6.50) y queda quieta
+        tl.fromTo(pil, { y: 0 }, { y: 4, duration: 0.06, ease: 'power2.out', immediateRender: false }, 6.40);
+        tl.fromTo(pil, { y: 4 }, { y: 0, duration: 0.04, ease: 'power2.in', immediateRender: false }, 6.46);
 
         // duracion exacta del cuadro (quieto desde 6.50: handoff)
         tl.set({}, {}, D);
 
         window.__timelines = window.__timelines || {};
-        window.__timelines[ID] = tl;
+        window.__timelines['s06-tendencia'] = tl;
     })();
 </script>
 </template>
