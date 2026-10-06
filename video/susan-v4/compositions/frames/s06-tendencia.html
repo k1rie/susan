@@ -378,13 +378,16 @@
         function aplicarLectura() {
             var t = tk.t;
             tira.style.transform = 'translate(0px,' + (-sumaPasos(t) * H_LECT).toFixed(2) + 'px)';
-            var v = Math.abs(sumaPasos(t + 0.002) - sumaPasos(t - 0.002)) / 0.004 * H_LECT;
+            // fuera del tramo que rueda la velocidad es 0: la diferencia central en PASOS[0] mira el arranque del paso 1 (pendiente
+            // maxima de power3.out) y dejaria «13.3» corrido mientras se lee quieto (frame.md 5.6: estela solo mientras gira).
+            // Holgura de 1e-4 s: GSAP redondea tk.t a 6 decimales y, al volver hacia atras, lo deja apenas por encima de PASOS[0]
+            var v = (t <= PASOS[0] + 1e-4 || t >= T_TK1 - 1e-4) ? 0 : Math.abs(sumaPasos(t + 0.002) - sumaPasos(t - 0.002)) / 0.004 * H_LECT;
             var sg = Math.min(12, 0.29 * v * OBT);
             mbLect.setAttribute('stdDeviation', '0 ' + sg.toFixed(2));
             tira.style.filter = sg < 0.3 ? 'none' : 'url(#' + ID + '-mb-lect)';
         }
-        aplicarLectura();
         var T_TK1 = PASOS[PASOS.length - 1] + D_PASO;
+        aplicarLectura();
         tl.fromTo(tk, { t: PASOS[0] }, { t: T_TK1, duration: T_TK1 - PASOS[0], ease: 'none', onUpdate: aplicarLectura, immediateRender: false }, PASOS[0]);
 
         // 2.60-2.90: el rotulo cambia en su sitio a «Ausentismo actual» y entra el hint real
@@ -453,11 +456,14 @@
             colTira.style.filter = sg < 0.3 ? 'none' : 'url(#' + ID + '-mb-nueve)';
         }
         aplicarNueve();
-        tl.fromTo($('nueve'), { opacity: 0 }, { opacity: 1, duration: 0.20, ease: 'power1.out' }, 5.85);
+        // la columna aparece CON el giro (no antes): ningun «0 alumnos» quieto se llega a leer; al primer fotograma visible ya
+        // rueda con estela
+        tl.fromTo($('nueve'), { opacity: 0 }, { opacity: 1, duration: 0.10, ease: 'power1.out' }, 6.00);
         tl.fromTo(rueda, { p: 0 }, { p: 1, duration: 0.50, ease: 'none', onUpdate: aplicarNueve, immediateRender: false }, 6.00);
-        // el tic: la pildora acusa el peso de la cifra (4 px, sin rebote: baja y vuelve a 0 justo en 6.50) y queda quieta
-        tl.fromTo(pil, { y: 0 }, { y: 4, duration: 0.06, ease: 'power2.out', immediateRender: false }, 6.40);
-        tl.fromTo(pil, { y: 4 }, { y: 0, duration: 0.04, ease: 'power2.in', immediateRender: false }, 6.46);
+        // el tic: la pildora acusa el peso de la cifra (4 px, sin rebote): baja con el golpe y vuelve con inOut, asi llega a la
+        // pose del relevo con velocidad 0 en 6.50 (sin tope seco) y queda quieta
+        tl.fromTo(pil, { y: 0 }, { y: 4, duration: 0.05, ease: 'power2.out', immediateRender: false }, 6.40);
+        tl.fromTo(pil, { y: 4 }, { y: 0, duration: 0.05, ease: 'power2.inOut', immediateRender: false }, 6.45);
 
         // duracion exacta del cuadro (quieto desde 6.50: handoff)
         tl.set({}, {}, D);

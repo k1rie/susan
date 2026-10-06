@@ -165,7 +165,8 @@
         };
 
         // ---- tiras del odómetro: se generan UNA vez, antes de registrar el timeline ----
-        // Cada columna arranca en blanco y rueda hacia arriba hasta su cifra; décimas con dos vueltas, unidades con una, decenas sin vuelta.
+        // Cada columna arranca en blanco y rueda hacia arriba hasta su cifra; décimas y unidades con dos vueltas (las unidades
+        // necesitan ese recorrido para seguir rodando hasta que asoman las decenas), decenas sin vuelta.
         function digitos(desde, vueltas, hasta) {
             var out = [''];
             for (var v = 0; v < vueltas; v++) { for (var d = 0; d <= 9; d++) { out.push(String(d)); } }
@@ -186,7 +187,7 @@
             var dec = Number(d.v.charAt(0)), uni = Number(d.v.charAt(1)), dcm = Number(d.v.charAt(3));
             d.cols = {
                 d: digitos(1, 0, dec),   // decenas sin cero a la izquierda: blanco -> 1 (-> 2)
-                u: digitos(0, 1, uni),
+                u: digitos(0, 2, uni),
                 p: ['', '.'],
                 t: digitos(0, 2, dcm),
                 q: ['', '<span class="' + ID + '-u">%</span>']
@@ -270,7 +271,7 @@
             q: { ini: 0.00, fin: 0.30 },   // %
             t: { ini: 0.00, fin: 0.16 },   // décimas, dos vueltas con estela
             p: { ini: 0.04, fin: 0.12 },   // punto
-            u: { ini: 0.04, fin: 0.00 },   // unidades, una vuelta con estela
+            u: { ini: 0.04, fin: 0.00 },   // unidades, dos vueltas con estela
             d: { ini: 0.08, fin: 0.30 }    // decenas antes del paso final (solo Vie: blanco -> 1, y el 1 -> 2 es el paso final)
         };
         var PASO = 0.20;
