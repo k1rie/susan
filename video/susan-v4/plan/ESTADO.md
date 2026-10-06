@@ -6,10 +6,10 @@ Actualizado por el orquestador. Rama: `feat/video-v4`. Proyecto: `video/susan-v4
 Entregar el video final 1080p60 MÁS DINÁMICO (ver BRIEF.md, indicación del 2026-10-06 tras el borrador completo).
 
 ## Etapas
-1. [en curso] Ensamblado v1 (flujo `scripts/flujos/susan-v4-ensamblar.js`, run wf_f4d126e8-031): cambios del dueño
+1. [hecho, 05:36] Ensamblado v1 (flujo `scripts/flujos/susan-v4-ensamblar.js`, run wf_f4d126e8-031): cambios del dueño
    (sin subrayado, gancho recentrado, energía del cuadro 5, sombra del 7) + índice + transiciones + SFX + costuras.
    El paso de render/QA de ese flujo se cancela: lo sustituye la ronda de dinamismo.
-2. [pendiente] Ronda de dinamismo (DINAMISMO = CAMBIO DE CONTENIDO: salir con estela y entrar otro elemento, zooms solo como transición; ver BRIEF): director (plan/DINAMISMO.md con la gramática de cámara y el plan por cuadro) →
+2. [en curso] Ronda de dinamismo (DINAMISMO = CAMBIO DE CONTENIDO: salir con estela y entrar otro elemento, zooms solo como transición; ver BRIEF): director (plan/DINAMISMO.md con la gramática de cámara y el plan por cuadro) →
    4 flujos paralelos de 2 cuadros (dinamizar → revisar → corregir) → re-ensamblado → render 60 fps → QA → corrección
    (máx. 2 vueltas) → render final `renders/susan-v4.mp4` + vista ligera `renders/susan-v4-preview.mp4`.
 3. [pendiente] Entrega: commit + push, mandar el MP4 a la persona dueña, desactivar la rutina de reanudación.
@@ -20,3 +20,10 @@ Entregar el video final 1080p60 MÁS DINÁMICO (ver BRIEF.md, indicación del 20
   relánzalo: los cuadros ya escritos en `compositions/frames/` son el punto de partida.
 - Orden del pipeline de ensamblado: `scripts/README.md` §1 (assemble-index → localizar-gsap → transitions inject UNA vez →
   verify → mount-sfx → verify-sfx → check → snapshot → render).
+
+## Flujos de la ronda de dinamismo (scripts/flujos/)
+- `susan-v4-director.js` → plan/DINAMISMO.md + STORYBOARD.md actualizado (único escritor).
+- `susan-v4-dinamizar.js` ×4 en paralelo (args.frames con 2 cuadros cada uno; mismo reparto que la construcción:
+  [s03,s08] [s07,s04] [s06,s01] [s02,s05]); sus informes se juntan en plan/INFORMES-DINAMISMO.md.
+- `susan-v4-final.js` (args.informesPath = plan/INFORMES-DINAMISMO.md) → integra, ensambla, render 60 fps, QA (≤3
+  vueltas), render final renders/susan-v4.mp4 + preview.
