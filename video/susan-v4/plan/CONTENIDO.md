@@ -16,6 +16,11 @@ Marcas usadas en todo el documento:
 - **[CÁLCULO]**: aritmética sobre datos reales (se muestra la operación).
 - **[ESTIMACIÓN · spec]**: la propia spec la presenta como estimación; en pantalla debe decir «estimación» o «unas».
 - **[INVENTADO]**: no existe en la semilla; lo propongo para el video, plausible y coherente con las reglas.
+- **[RETIRADO DEL VIDEO · 2026-10-06]**: dato real que la persona dueña sacó del video al aprobar el plan: cuántas
+  lecturas, capturas o muestras usa la cámara para confirmar a un alumno («3 lecturas», «Lecturas 1/3 → 3/3»,
+  «Lecturas válidas: 2/3», cualquier x/3; «eso aún lo decidiré», BRIEF). Se conserva como referencia de la app, pero no
+  va ni en la voz ni en pantalla. La confirmación se cuenta sin número: el marco se vuelve verde y el alumno queda
+  presente.
 
 ---
 
@@ -43,7 +48,7 @@ entiende la asistencia de tus grupos.» [REAL · `dom/10-docente-home.html`; tam
 | Límite de faltas | Más del **20 %** de faltas equivalentes → **sin derecho a examen** | [REAL · RN-11, RF-14] |
 | Retardos | **3 retardos = 1 falta** | [REAL · RN-10, RF-13] |
 | Ejemplo de la spec | Con 48 sesiones: 9 faltas (18.75 %) conservan el derecho; **la 10.ª (20.83 %) lo quita** | [REAL · RF-14, l. 574–575] |
-| Cuánto tarda SUSAN en confirmar | 3 lecturas válidas en capturas distintas, una captura cada 15 s → la 3.ª llega ~30 s después de la 1.ª; con rostro real se midió **≈ 45 s** | [REAL · RF-03/RF-07; `DEMO.md` §9.1 paso 7] |
+| Cuánto tarda SUSAN en confirmar | 3 lecturas válidas en capturas distintas, una captura cada 15 s → la 3.ª llega ~30 s después de la 1.ª; con rostro real se midió **≈ 45 s** | [REAL · RF-03/RF-07; `DEMO.md` §9.1 paso 7] **[RETIRADO DEL VIDEO · 2026-10-06]** |
 | Esfuerzo del docente | Un botón («Abrir y pasar lista»); resolver un caso dudoso en **≤ 3 interacciones** | [REAL · `modulos.js`/PasarListaHero; RNF-11] |
 
 Lectura honesta de «en segundos»: el docente no nombra a nadie; la cámara confirma a cada alumno en menos de un minuto
@@ -67,14 +72,15 @@ entre paréntesis (son los que usa la app).
   «Última captura: 23 rostros · 22 válidos · +1 registro · hace 4 s»; tarjetas «Inscritos / Presentes / Retardos /
   Sin registro» (`Users`, `CircleCheck`, `Clock`, `UserX`); medidor «Presentes ahora» «88 %» «21 de 24 inscritos»;
   «Ventana de tolerancia · Minuto 12.0 · Retardo»; tabla «Estado · Lecturas · Mejor score · Origen · Hora»;
-  estados «Pendiente» → «Presente»; lecturas «1/3 → 2/3 → 3/3»; botones «Cerrar pase de lista» (deshabilitado hasta el
-  minuto 20) y «Registrar manualmente».
+  estados «Pendiente» → «Presente»; lecturas «1/3 → 2/3 → 3/3» **[RETIRADO DEL VIDEO · 2026-10-06]**; botones
+  «Cerrar pase de lista» (deshabilitado hasta el minuto 20) y «Registrar manualmente».
   Guía real de 3 pasos («Así se pasa lista»): «Sesión abierta · La clase ya está en curso.» → «Apunta la cámara al
   grupo · Que se vean los rostros; el sistema reconoce solo.» → «Revisa y cierra · Al terminar la tolerancia, cierra el
   pase de lista.»
-- **Movimiento (5–7 s):** vista de cámara con avatares abstractos; marcos de detección que se fijan en oleadas (una
-  captura = una oleada, no rostro a rostro); en la fila de cada alumno las lecturas suben 1/3 → 2/3 → 3/3 y el chip pasa
-  de «Pendiente» a «Presente»; la cifra «N de 24 presentes» rueda (rodillo de dígitos) y el medidor líquido sube a 88 %.
+- **Movimiento (5–7 s):** vista de cámara con avatares abstractos; marcos de detección que se fijan en ola (toda la
+  toma a la vez, no rostro a rostro); las esquinas se vuelven verdes y el chip pasa de «Pendiente» a «Presente», sin
+  contador de lecturas ni capturas numeradas (el «1/3 → 2/3 → 3/3» de la app quedó fuera del video el 2026-10-06); la
+  cifra «N de 24 presentes» rueda (rodillo de dígitos) y el medidor líquido sube a 88 %.
   Un rostro ajeno («Visita») queda sin marco válido: «23 rostros · 22 válidos» lo cuenta sin decirlo.
 - **Por qué le importa:** recupera los 5 minutos de cada clase y nadie contesta por otro; el estado (presente/retardo)
   lo decide la hora de la **primera** lectura, no la tardanza de la cámara (RN-03, spec l. 1265–1266).
@@ -132,14 +138,14 @@ entre paréntesis (son los que usa la app).
 - **Pantalla real:** P-05, `/docente/revision` (Lucide `ClipboardCheck`). Encabezado «Revisión · Casos por decidir de tus
   grupos»; pestañas «Pendientes (8) · Justificantes (4) · Correcciones (0)».
 - **Palabras reales (caso real de la semilla):** «Ramírez Núñez Emilio · E260003 · Administración Financiera · 3A ·
-  Pendiente · Sesión del 2026-09-12, 09:00 a 10:00 · **Quedan 2 h 48 min** · Lecturas válidas: **2/3**»; «Score por
-  lectura · 89 % · 93 %»; «Lectura 1 · 9:02:00 a.m. · Cámara frontal · Score 0.893 · Válida · min 2.0»; «Lectura 2 ·
-  9:08:00 a.m. · Score 0.927 · Válida · min 8.0»; botones «**Resolver como Presente** (Sugerido) · Resolver como Retardo ·
-  Resolver como Ausente». Recortes: siluetas/avatares, nunca fotos.
+  Pendiente · Sesión del 2026-09-12, 09:00 a 10:00 · **Quedan 2 h 48 min** · Lecturas válidas: **2/3**» (esta última,
+  **[RETIRADO DEL VIDEO · 2026-10-06]**); «Score por lectura · 89 % · 93 %»; «Lectura 1 · 9:02:00 a.m. · Cámara frontal
+  · Score 0.893 · Válida · min 2.0»; «Lectura 2 · 9:08:00 a.m. · Score 0.927 · Válida · min 8.0»; botones «**Resolver
+  como Presente** (Sugerido) · Resolver como Retardo · Resolver como Ausente». Recortes: siluetas/avatares, nunca fotos.
 - **Movimiento (3–4 s):** la tarjeta del caso entra con pose 3D; dos barras finas de score se llenan (89 %, 93 %); el
   botón sugerido pulsa y se presiona; el chip pasa de «Pendiente» a «Presente» y el contador de la pestaña rueda 8 → 7.
-- **Por qué le importa:** la cámara no decide sola con una lectura; lo dudoso lo decide el docente, con evidencia, en un
-  clic y con 48 h de plazo (RN-05, RN-08, RF-18, RNF-11).
+- **Por qué le importa:** la cámara no decide sola; lo dudoso lo decide el docente, con evidencia, en un clic y con 48 h
+  de plazo (RN-05, RN-08, RF-18, RNF-11).
 
 ### 2.6 Alertas de derecho a examen (3 s; se puede fundir con 2.3 o 2.4)
 
@@ -255,12 +261,12 @@ resolver; alertas «**3 sin derecho · 2 al límite**» (en 3A: 1 sin derecho, 2
 | Inscritos | 24 | [REAL] |
 | Presentes | **19** | [INVENTADO] |
 | Retardos | **2**: Carmen Jiménez Ibarra (1.ª lectura 07:11:10) y Andrés Martínez Velasco (07:10:25) | [INVENTADO; elegidos porque su patrón de semilla es «muchos retardos», k 22–23 de `03_historial.sql`] |
-| Por revisar (1–2 lecturas) | **1**: Renata Gómez Medina, Lecturas 2/3, «Pendiente» | [INVENTADO] |
+| Por revisar | **1**: Renata Gómez Medina, «Pendiente» | [INVENTADO]; su «Lecturas 2/3»: **[RETIRADO DEL VIDEO · 2026-10-06]** |
 | Sin registro | **2**: Paola Hernández Peña (patrón de semilla «falta los lunes») y Mauricio González Campos (ya sin derecho) | [INVENTADO, coherente con la semilla] |
 | Medidor «Presentes ahora» | **88 %** · «21 de 24 inscritos» | [CÁLCULO: (19+2)/24 = 87.5 → 88, misma regla de la app] |
 | Línea de la cifra | «19 de 24 presentes» · «2 con retardo · 2 sin registro · 1 por revisar» | [formato REAL · `ResumenPaseLista.jsx`] |
 | Última captura | «23 rostros · 22 válidos · +1 registro · hace 4 s» (22 = 21 presentes/retardos + Renata; el rostro 23 es una «Visita» que nadie reclama) | [INVENTADO; formato REAL] |
-| Lecturas de un presente | «3/3» · «Mejor score 0.94» · «Automático» · hora 07:02:15 | [INVENTADO; el formato del score es `toFixed(2)` y debe ser ≥ 0.85] |
+| Detalle de un presente | «Mejor score 0.94» · «Automático» · hora 07:02:15 | [INVENTADO; el formato del score es `toFixed(2)` y debe ser ≥ 0.85]; el «3/3» de la columna «Lecturas»: **[RETIRADO DEL VIDEO · 2026-10-06]** |
 | Ventana de tolerancia | «Minuto 12.0 · Retardo» (presente antes del min 10, retardo del 10 al 20) | [REAL · RN-03; texto de `VentanaTolerancia`] |
 | Cierre | «Cerrar pase de lista» deshabilitado hasta el minuto 20 | [REAL] |
 
@@ -274,7 +280,7 @@ eso la captura cuenta 23 rostros (22 alumnos + 1 visita) y 22 válidos.
 
 ### 3.5 Caso de revisión (P-05) — REAL de la semilla
 
-Emilio Ramírez Núñez · E260003 · 3A · clase de reposición sáb 12 sep 09:00–10:00 · «Lecturas válidas: 2/3» · lecturas
+Emilio Ramírez Núñez · E260003 · 3A · clase de reposición sáb 12 sep 09:00–10:00 · «Lecturas válidas: 2/3» (**[RETIRADO DEL VIDEO · 2026-10-06]**) · lecturas
 0.893 (min 2.0) y 0.927 (min 8.0), cámara frontal · «Quedan 2 h 48 min» (límite: 14 sep 2026, 10:00 a.m.) ·
 «Resolver como Presente (Sugerido)». Tras resolver: pestaña «Pendientes» 8 → 7. [REAL · `dom/25-revision-caso.html`;
 el 8 → 7 es CÁLCULO]
@@ -350,7 +356,7 @@ límite · Semana 16 · Estimada» · «Cambio de nivel a la alza desde la seman
    de Iván.
 5. **Lecturas de sesiones históricas.** Las sesiones cerradas de la semilla muestran «0/3 · -» en «Lecturas · Mejor
    score» (la carga masiva no crea detecciones; `dom/29-sesion-cerrada-18.html`). Para la tabla en vivo usen los valores
-   inventados de §3.4.
+   inventados de §3.4, sin la columna «Lecturas» (el x/3 no va en el video desde el 2026-10-06).
 6. **Tilde faltante en la app.** La fase «Presente (dentro del limite de puntualidad)» no lleva tilde en el código
    (`monitorSesion.utils.js` l. 89). En el video escribir «límite».
 7. **Iniciales.** La app forma las iniciales con los dos apellidos («CR» = Cruz Rojas Iván, «RN» = Ramírez Núñez Emilio,
@@ -359,9 +365,10 @@ límite · Semana 16 · Estimada» · «Cambio de nivel a la alza desde la seman
 
 ### 3.12 Parámetros que pueden aparecer (todos REAL, Tabla 4 de la spec y `DEMO-RELOJ.md`)
 
-Presente antes del minuto 10 · retardo del 10 al 20 · una captura cada 15 s (hasta 80 por cámara y sesión) · 3 lecturas
-válidas confirman · score mínimo 0.85 · 48 h para corregir desde el fin de la sesión · 3 retardos = 1 falta · límite
-20 % · recortes borrados a los 7 días · enlaces a imágenes de 5 min (300 s).
+Presente antes del minuto 10 · retardo del 10 al 20 · una captura cada 15 s (hasta 80 por cámara y sesión) ·
+~~3 lecturas válidas confirman~~ **[RETIRADO DEL VIDEO · 2026-10-06]** · score mínimo 0.85 · 48 h para corregir desde el fin
+de la sesión · 3 retardos = 1 falta · límite 20 % · recortes borrados a los 7 días · enlaces a imágenes de 5
+min (300 s).
 
 ---
 
@@ -375,7 +382,7 @@ válidas confirman · score mínimo 0.85 · 48 h para corregir desde el fin de l
 | «Los recortes de rostro se borran solos a los 7 días.» | RNF-05 |
 | «Cada consulta queda registrada en la bitácora.» | RF-19, RNF-08 (bitácora de solo inserción) |
 | «Tú ves solo tus grupos; cada alumno, solo su asistencia.» | RF-19, RF-20, RF-21 |
-| «Una sola lectura no decide: hacen falta tres, y lo dudoso lo decides tú.» | RN-05, RF-18 |
+| ~~«Una sola lectura no decide: hacen falta tres, y lo dudoso lo decides tú.»~~ **[RETIRADO DEL VIDEO · 2026-10-06]**; en su lugar: «La cámara no decide sola: lo dudoso lo decides tú.» | RN-05, RF-18 |
 | «Sin cámara, el pase de lista manual sigue funcionando.» | RF-09, RNF-07 |
 
 Recomendación para el beat de confianza (3 s): una línea principal + dos chips cortos, p. ej. «Sin consentimiento, no
@@ -402,8 +409,8 @@ mayúsculas ElevenLabs la deletrea; lección de la v3). En la v3 el STT detectó
 | B1 Gancho | 0.8–5.0 s | «Cada clase empieza igual: nombrar a cada alumno, uno por uno.» | 11 | lista de nombres que se repite / ninguna cifra |
 | B2 Costo | 5.3–10.5 s | «Cinco minutos por sesión. [Con cinco grupos, unas veinte horas al semestre.]» | 12 | «5 min × 3 × 16 = 4 h por grupo» · «unas 20 h al semestre (estimación)» |
 | B3 Nombre | 11.0–12.8 s | «Te presentamos a susan.» | 4 | wordmark «SUSAN» |
-| B4 Pasar lista | 13.5–21.5 s | «Abres la sesión y la cámara del aula pasa lista mientras das tu clase. Tres lecturas, y el alumno queda presente.» | 21 | «Abrir y pasar lista» → «19 de 24 presentes», «3/3», «Presente» |
-| B5 Revisión | 22.3–27.0 s | «¿Algún caso dudoso? Te espera en Revisión y lo resuelves con un clic.» | 13 | «Lecturas válidas: 2/3» · «Resolver como Presente (Sugerido)» |
+| B4 Pasar lista | 13.5–21.5 s | «Abres la sesión y la cámara del aula pasa lista mientras das tu clase. ~~Tres lecturas,~~ y el alumno queda presente.» (**[RETIRADO DEL VIDEO · 2026-10-06]**: la v4 dice «La cámara del aula pasa lista por ti mientras das tu clase… y cada alumno queda presente.») | 21 | «Abrir y pasar lista» → «19 de 24 presentes», ~~«3/3»~~, «Presente» |
+| B5 Revisión | 22.3–27.0 s | «¿Algún caso dudoso? Te espera en Revisión y lo resuelves con un clic.» | 13 | ~~«Lecturas válidas: 2/3»~~ (**[RETIRADO DEL VIDEO · 2026-10-06]**) · «Resolver como Presente (Sugerido)» |
 | B6 Analítica | 28.0–36.5 s | «Con cada sesión, susan analiza a tu grupo: qué día faltan más, hacia dónde va la tendencia y quién se acerca al límite.» | 23 | «Día crítico: Viernes» · «+4.2 pp» · «Proyección al cierre 24.8 %» |
 | B7 A tiempo | 37.2–42.2 s | «A Iván le quedan dos faltas. Todavía estás a tiempo de hablar con él.» | 14 | «Alto · 64 / 100» · «Cruce estimado: semana 9» · acción sugerida |
 | B8 Alumno + reportes | 42.8–47.8 s | «[Él también lo ve en su portal,] y tus reportes salen listos para entregar.» | 14 | «Te quedan 2 faltas antes del límite.» · «Exportar CSV» |
@@ -428,8 +435,8 @@ etiqueta) y no repite la frase hablada.
 |---|---|---|
 | F2 «10 min por clase × 3 grupos × 5 días = 2 h 30 / semana» | La spec dice ~5 min por sesión y 3 sesiones por semana por grupo | «5 min × 3 × 16 semanas = 4 h por grupo al semestre»; «unas 20 h con 5 grupos (estimación)» |
 | F3 Héctor Mendoza «6 % → 21.6 %», «Sin derecho» | En 3A Héctor está en 19.1 % «En el límite» | Mauricio González 29.8 % «Sin derecho» o Iván Cruz 14.9 % con margen |
-| F5 chips «98 %» y «listo en 6 s» | La app muestra score 0.85–1.00 con dos decimales y lecturas «3/3»; confirmar toma ~30–45 s | «Mejor score 0.94», «Lecturas 3/3»; sin cronómetro |
-| F7 «similitud 71 % · 2 lecturas», «Confirmar presente / Rechazar», «Pendientes 3 → 2» | 71 % no sería una lectura válida (umbral 0.850); los botones reales son otros; la cola real tiene 8 | «Score 0.893 / 0.927 · 2/3», «Resolver como Presente (Sugerido)», 8 → 7 |
+| F5 chips «98 %» y «listo en 6 s» | La app muestra score 0.85–1.00 con dos decimales y lecturas «3/3»; confirmar toma ~30–45 s | «Mejor score 0.94»; sin cronómetro (el «Lecturas 3/3» de esta fila: **[RETIRADO DEL VIDEO · 2026-10-06]**) |
+| F7 «similitud 71 % · 2 lecturas», «Confirmar presente / Rechazar», «Pendientes 3 → 2» | 71 % no sería una lectura válida (umbral 0.850); los botones reales son otros; la cola real tiene 8 | «Score 0.893 / 0.927» (el «2/3»: **[RETIRADO DEL VIDEO · 2026-10-06]**), «Resolver como Presente (Sugerido)», 8 → 7 |
 | F9 serie S1–S8 de 8 a 17 %, «Cruza el límite en S11», «Proyección al cierre 24.6 %» | Hay 6 semanas observadas; en 3A el acumulado «No cruza»; proyección real 24.8 % (S15) | Datos de §3.7, o 5C (§3.10) si se quiere el cruce (semana 16) |
 | F10 «88 % · Racha de 7» del alumno | Inventado | Iván: 7 faltas, 14.9 %, «Te quedan 2 faltas antes del límite.» |
 | F6 «Sesión en curso» (chip verde) | Los chips reales son «Abierta» y «Automático» | Usar los reales |

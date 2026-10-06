@@ -26,10 +26,10 @@
 ## Line 3 — La cámara pasa lista (Frame 3)
 
 **Time:** 0.40 – 7.54s
-**Anchor:** «cámara» @ 0.63s · «tres» @ 4.70s · «presente» @ 6.96s
-**Delivery:** Descriptiva y tranquila, con asombro contenido: «mientras das tu clase» es la promesa, se dice cercana. Pausa en los «…» (ahí cae la tercera captura). «tres lecturas» marcado, coma breve, y «queda presente» resuelto, cerrando hacia abajo. Video: 12.85 – 19.99 s.
+**Anchor:** «cámara» @ 0.63s · «alumno» @ 6.00s · «presente» @ 6.96s
+**Delivery:** Descriptiva y tranquila, con asombro contenido: «pasa lista por ti mientras das tu clase» es la promesa, se dice cercana, con el peso en «por ti». Pausa en los «…» (ahí los marcos se vuelven verdes). «y cada alumno queda presente» llano y resuelto, cerrando hacia abajo en «presente». No se cuenta nada: ni lecturas ni capturas (decisión de la persona dueña, 2026-10-06). Video: 12.85 – 19.99 s.
 
-    La cámara del aula pasa lista mientras das tu clase… tres lecturas, y el alumno queda presente.
+    La cámara del aula pasa lista por ti mientras das tu clase… y cada alumno queda presente.
 
 ## Line 4 — Lo dudoso lo decides tú (Frame 4)
 

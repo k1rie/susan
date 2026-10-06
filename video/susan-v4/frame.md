@@ -217,24 +217,28 @@ fundidos y desenfoques en hojas o en un envoltorio exterior.
 (primario a `#3A3433`, flecha +2 px) → cambio de estado +0.04 s → efecto +0.1–0.2 s. SFX `click-soft2` o `tap`. Aro de oro
 (`scale 1→1.7`, opacidad .6→0, 0.6 s) **una sola vez**, en «Abrir y pasar lista» o el botón central.
 
-**5.6 Desenfoque y estela.** Una superficie grande desenfocada a la vez, ≤ 24 px, ≤ 1.2 s. Rack focus de apertura o
-cambio de mundo con **placa pre-desenfocada** (snapshot o `assets/pantalla-*` + `ffmpeg -vf gblur=sigma=18`) fundida sobre
-la capa nítida, 0.8–1.0 s `expo.out`. Fondos 8–14 px; **texto que se lee: 0 px** y ningún texto aterriza desenfocado.
+**5.6 Desenfoque y estela.** Una superficie grande desenfocada a la vez, ≤ 24 px, ≤ 1.2 s. Rack focus de apertura con
+**blur vivo ≤ 20 px durante ≤ 0.9 s** (driver `desenfoque` de PILOTO §3a: blur en la `.escena`, escala de cámara en el
+`.mundo`, `power2.out`, `filter: none` en reposo; nada se lee hasta que baja de 1 px). La **placa pre-desenfocada** (snapshot
+o `assets/pantalla-*` + `ffmpeg -vf gblur=sigma=18`) es opcional: solo para un fondo desenfocado que se queda más de ~1 s
+detrás del héroe (aprobado con el plan, 2026-10-06; el piloto midió que la placa a mitad del fundido se ve como doble
+exposición). Fondos 8–14 px; **texto que se lee: 0 px** y ningún texto aterriza desenfocado.
 Estela direccional (feGaussianBlur en un eje, ligada a la velocidad, `filter:none` en reposo) en 1–3 golpes y ≤ 3 objetos
 por escena. No sumar un blur interno pesado a un `blur-crossfade`/`zoom-through` simultáneo.
 
 **5.7 Gramática de datos.**
 - **Cifras**: odómetro (columna enmascarada de 1.2 × cuerpo, rueda derecha→izquierda 0.9–1.2 s `power3.out`, escalonado
-  0.04 s), sin reescribir texto por fotograma; un tic por columna o un solo `blip`. Un estado (8 → 7, 1/3 → 2/3) rueda un
-  renglón.
+  0.04 s), sin reescribir texto por fotograma; un tic por columna o un solo `blip`. Un estado (8 → 7) rueda un renglón.
 - **Líneas**: rectas entre puntos (nunca suavizadas); se dibujan **antes** de que la guía las recorra (trazo 1.2 s
   `power4.out`, banda .8 s a +.3, puntos `scale .3→1` 0.45 s en ola `.2 + .8·x`). Guía = cabezal con un solo driver
   (`power1.inOut`, 1.6–2.2 s); el tooltip cambia de texto solo al cambiar de índice, ancho fijo, se voltea cerca del borde;
   quieta ≥ 0.8 s al final.
 - **Barras**: `clip-path` izquierda→derecha 0.85 s `power4.out`, +60 ms por fila; la cifra 0.4 s a +350 ms, **nunca antes que
   su barra**. **Anillo**: `stroke-dasharray 0→largo` 0.9 s, +0.09 s por arco; vivo 0.5 s. **TiraSemana**: opacidad +
-  `scale .92→1` 0.5 s, +70 ms. **Medidor**: `nivel(t)=N·(1−e^(−t/0.35)·cos(2πt/0.9))`, `desnivel(t)=A·e^(−t/0.5)·sin(2πt/0.6)`
-  (A ≈ 6 % del ancho) en el `onUpdate` de un tween `ease:"none"`.
+  `scale .92→1` 0.5 s, +70 ms. **Medidor**: el nivel sube y **se asienta sin sobreimpulso**, monótono y nunca por encima
+  de N: `nivel(p)=N·(1−(1−p)³)` (`power3.out` sobre el tramo, p de 0 a 1); la vida la pone solo la inclinación de la
+  superficie, `desnivel(t)=A·e^(−t/0.5)·sin(2πt/0.6)` (A ≈ 6 % del ancho), que se apaga sola. Las dos en el `onUpdate` de
+  un tween `ease:"none"`. (La fórmula oscilante anterior pasaba un 28 % sobre la marca: era un sobreimpulso más.)
 
 **5.8 Bordes de cuadro.** Relevo con elemento compartido (`cut` + `handoff` con números idénticos, pieza plana y quieta),
 `push-slide LEFT` 0.45–0.5 s (una sola dirección), `blur-crossfade` 0.5 s solo al cambiar de mundo, `zoom-through` ≤ 1 vez;
@@ -334,7 +338,9 @@ escala con el icono. App → video: 14→28 chips · 16→32 StatCard, flechas �
 
 Sin logo: wordmark **«SUSAN»** = el BrandMark de la app ampliado, sin escudo. Hanken 600, 200 px (176 con lema), −0.025em,
 lh 1, tinta (~640–660 px de ancho; medir en snapshot). Subrayado dorado = trazo `Resaltado` bajo toda la palabra: alto 64,
-a −24 px de la línea base, `#A8842C` .8, 14 px, `vector-effect:non-scaling-stroke`, dibujo 0.9 s `power4.out` 0.15 s
+a −24 px de la línea base, `#A8842C` .8, 14 px, remates redondos, con la receta de PILOTO §3d: SVG con `viewBox` en px del
+tamaño real (p. ej. 440 × 40), `pathLength="100"`, `stroke-dasharray="100"` y `stroke-dashoffset` 100 → 0, **sin
+`vector-effect`** (con `non-scaling-stroke` el trazo se ve punteado antes de dibujarse); dibujo 0.9 s `power4.out` 0.15 s
 después de posarse la palabra (`sheen` suave); es el oro del cuadro. **Lema** debajo: «Pasa lista en segundos y entiende la
 asistencia de tus grupos», Hanken 500 40 px `#6F6A65`, una línea, 40 px bajo el subrayado. **Llegada decidida**: la ficha
 redonda de tinta del botón central (círculo 168, `scan-face` blanco 72 trazo 1.75, anillo blanco 15, sombra
@@ -355,24 +361,27 @@ su `--cap-accent` pasa a tinta.
 ## 10. Cifras canónicas (de `plan/CONTENIDO.md` §3; nada fuera de aquí)
 
 Lun 14-sep-2026 07:12, semana 7 · Patricia Ortega («PO» `#1F7A47`) · **3A · Administración Financiera** · Aula A-12 ·
-07:00 - 08:00 · 24 alumnos · 47 sesiones · 9 faltas permitidas. Panel: 8 pendientes · 4 justificantes · «3 sin derecho · 2 al
-límite». En vivo: «**19** de 24 presentes» · «2 con retardo · 2 sin registro · 1 por revisar» · «Presentes ahora **88 %** ·
-21 de 24 inscritos» · «Última captura: 23 rostros · 22 válidos · +1 registro · hace 4 s» · «Minuto 12.0 · Retardo» ·
-presente tipo «3/3 · 0.94 · Automático · 07:02:15»; no se muestra el cierre. Revisión: Ramírez Núñez Emilio · E260003 · 2/3 ·
-0.893/0.927 (89 %/93 %) · «Quedan 2 h 48 min» · «Resolver como Presente (Sugerido)» · Pendientes 8 → 7. Analítica 3A: «20.8 %
-· +4.2 pp vs. semana previa» · S1–S6 13.3 · 20.0 · 22.0 · 15.3 · 16.7 · 20.8 % · «Proyección al cierre 24.8 % · Semana 15» ·
-«+0.59 pp por semana» · «Día crítico: Viernes» Lun 17.7 · Mié 16.4 · Vie 21.8 % · «9 alumnos en riesgo» (Alto 3 · Medio 6 ·
-Bajo 16). Iván Cruz Rojas · E260017 · 7 faltas · 14.9 % · quedan 2 · Alto 64 / 100 · Al alza · cruce estimado semana 9 ·
-«Contactar al alumno esta semana y acordar un plan de asistencia» · «Te quedan 2 faltas antes del límite.».
-**Trampas**: solo nombres del 3A; «19.1 %» (no 19.2); «9» sin «de 25»; «Límite 20 %» nunca junto a la tasa semanal 20.8 %
-(va en faltas acumuladas, barras por alumno o la fila de Iván); «límite» con tilde; ningún cronómetro; «unas 20 h» solo
-como estimación.
+07:00 - 08:00 · 24 alumnos · 47 sesiones · 9 faltas permitidas. Panel: 8 pendientes · 4 justificantes · «3 sin derecho ·
+2 al límite». En vivo: «**19** de 24 presentes» · «2 con retardo · 2 sin registro · 1 por revisar» · «Presentes ahora
+**88 %** · 21 de 24 inscritos» · «Última captura: 23 rostros · 22 válidos · +1 registro · hace 4 s» · «Minuto 12.0 ·
+Retardo» · presente tipo «0.94 · Automático · 07:02:15»; no se muestra el cierre. Revisión: Ramírez Núñez Emilio ·
+E260003 · 0.893/0.927 (89 %/93 %) · «Sesión del 2026-09-12, 09:00 a 10:00» · «Quedan 2 h 48 min» · «Resolver como
+Presente (Sugerido)» · Pendientes 8 → 7. Analítica 3A: «20.8 % · +4.2 pp vs. semana previa» · S1–S6 13.3 · 20.0 · 22.0 ·
+15.3 · 16.7 · 20.8 % · «Proyección al cierre 24.8 % · Semana 15» · «+0.59 pp por semana» · «Día crítico: Viernes» Lun
+17.7 · Mié 16.4 · Vie 21.8 % · «9 alumnos en riesgo» (Alto 3 · Medio 6 · Bajo 16). Iván Cruz Rojas · E260017 · 7 faltas
+· 14.9 % · quedan 2 · Alto 64 / 100 · Al alza · cruce estimado semana 9 · «Contactar al alumno esta semana y acordar un
+plan de asistencia» · «Te quedan 2 faltas antes del límite.».
+**Trampas**: ningún número de lecturas, capturas o muestras por alumno, ni en voz ni en pantalla («tres lecturas»,
+«Lecturas 1/3 → 3/3», «Lecturas válidas: 2/3» y cualquier x/3 quedan fuera: BRIEF, 2026-10-06); solo nombres del 3A;
+«19.1 %» (no 19.2); «9» sin «de 25»; «Límite 20 %» nunca junto a la tasa semanal 20.8 % (va en faltas acumuladas, barras
+por alumno o la fila de Iván); «límite» con tilde; ningún cronómetro; «unas 20 h» solo como estimación.
 
 ## 11. Autoauditoría antes de entregar
 
 1. ¿Un héroe por plano, legible a 0.5 s, cifra quieta ≥ 1.2 s mientras se nombra?
 2. ¿Tokens exactos, radios app × E, bordes 2 px, sin sombras internas, iconos de `assets/icons/`?
-3. ¿Un solo oro; estados con etiqueta; ningún «Límite 20 %» junto a 20.8 %; cifras solo de §10?
+3. ¿Un solo oro; estados con etiqueta; ningún «Límite 20 %» junto a 20.8 %; cifras solo de §10; ningún número de
+   lecturas, capturas o muestras por alumno?
 4. ¿Tilt solo en el objeto completo, 0° al leer y en ambos bordes; `handoff` con números idénticos; ≤ 2 sobreimpulsos?
 5. ¿GSAP y fuentes locales; `zoom` solo en `.ui` y posiciones en el rig; sin `filter`/opacidad en ancestros 3D?
 6. ¿Desenfoque en presupuesto y nada borroso al leerse; sin cursor, sin UI de desarrollo, sin salidas antes del final?
