@@ -9,7 +9,7 @@ Entregar el video final 1080p60 MÁS DINÁMICO (ver BRIEF.md, indicación del 20
 1. [hecho, 05:36] Ensamblado v1 (flujo `scripts/flujos/susan-v4-ensamblar.js`, run wf_f4d126e8-031): cambios del dueño
    (sin subrayado, gancho recentrado, energía del cuadro 5, sombra del 7) + índice + transiciones + SFX + costuras.
    El paso de render/QA de ese flujo se cancela: lo sustituye la ronda de dinamismo.
-2. [en curso] Ronda de dinamismo (DINAMISMO = CAMBIO DE CONTENIDO: salir con estela y entrar otro elemento, zooms solo como transición; ver BRIEF): director (plan/DINAMISMO.md con la gramática de cámara y el plan por cuadro) →
+2. [cuadros listos; falta integrar/render/QA] Ronda de dinamismo (DINAMISMO = CAMBIO DE CONTENIDO: salir con estela y entrar otro elemento, zooms solo como transición; ver BRIEF): director (plan/DINAMISMO.md con la gramática de cámara y el plan por cuadro) →
    4 flujos paralelos de 2 cuadros (dinamizar → revisar → corregir) → re-ensamblado → render 60 fps → QA → corrección
    (máx. 2 vueltas) → render final `renders/susan-v4.mp4` + vista ligera `renders/susan-v4-preview.mp4`.
 3. [pendiente] Entrega: commit + push, mandar el MP4 a la persona dueña, desactivar la rutina de reanudación.
@@ -36,3 +36,4 @@ Entregar el video final 1080p60 MÁS DINÁMICO (ver BRIEF.md, indicación del 20
   [s03,s08] wf_bf618df1-df0 · [s07,s04] wf_5535526d-523 · [s06,s01] wf_2e623188-150 · [s02,s05] wf_c97556cb-004.
   Al terminar: juntar sus informes en plan/INFORMES-DINAMISMO.md y lanzar `susan-v4-final.js`
   con args {"informesPath": "/home/user/susan/video/susan-v4/plan/INFORMES-DINAMISMO.md"}.
+- 07:23 UTC: los 4 flujos de dinamizar terminaron; informes en plan/INFORMES-DINAMISMO.md; se lanza susan-v4-final.js.
