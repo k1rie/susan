@@ -366,11 +366,11 @@
 
         // ---------- Cámara de lectura (debajo de las escenas 3 y 4) ----------
         // Tres viajes cortos power3.inOut que siguen la voz y vuelven a la identidad antes del handoff:
-        // empuje hacia el margen («…solo dos faltas»), encuadre de la acción antes de que llegue («Todavía…»),
+        // empuje hacia la fila «Faltas» («…solo dos faltas»), encuadre del pie antes de que llegue la acción («Todavía…»),
         // y regreso a la tarjeta completa, centrada y a escala 1, a 6.65 s. Sin deriva: entre viajes la cámara está quieta.
         var cam = $('camara');
-        tl.fromTo(cam, { scale: 1, x: 0, y: 0 }, { scale: 1.06, x: 0, y: 1, duration: 0.8, ease: 'power3.inOut' }, T.empuje);
-        tl.fromTo(cam, { scale: 1.06, x: 0, y: 1 }, { scale: 1.04, x: 0, y: -40, duration: 0.8, ease: 'power3.inOut', immediateRender: false }, T.encuadre);
+        tl.fromTo(cam, { scale: 1, x: 0, y: 0 }, { scale: 1.06, x: 0, y: 0, duration: 0.8, ease: 'power3.inOut' }, T.empuje);
+        tl.fromTo(cam, { scale: 1.06, x: 0, y: 0 }, { scale: 1.04, x: 0, y: -40, duration: 0.8, ease: 'power3.inOut', immediateRender: false }, T.encuadre);
         tl.fromTo(cam, { scale: 1.04, x: 0, y: -40 }, { scale: 1, x: 0, y: 0, duration: 0.8, ease: 'power3.inOut', immediateRender: false }, T.regreso);
 
         // Cuadro quieto deliberado desde 6.65 s; la duración la fija este ancla.
