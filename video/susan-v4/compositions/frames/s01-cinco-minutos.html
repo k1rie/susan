@@ -156,8 +156,8 @@
         var PASO = 85.2;                   // avance de cifra tabular a 160 px con -0.03em
         var C = { x: 960, y: 500 };        // centro de la ficha (handoff_out)
         // Tiempos que comparten el cuadro y sfx_cues (contrato: el tween nombrado empieza o termina ahi).
-        var T = { foco: 0.10, giro: 0.70, tic5: 1.65, relleno: 1.75, filas: 2.00, pliegue: 2.95, cuenta: 3.00, ola: 3.25, unidad: 3.45,
-            tic4h: 3.65, igual: 4.45, junta: 5.45, disco: 5.74, ficha: 6.05, quieta: 6.20 };
+        var T = { foco: 0.10, giro: 0.40, tic5: 1.65, relleno: 1.75, filas: 2.00, pliegue: 2.95, cuenta: 3.00, ola: 3.25, unidad: 3.55,
+            tic4h: 3.75, igual: 4.45, junta: 5.45, disco: 5.74, ficha: 6.05, quieta: 6.20 };
         function $(s) { return document.getElementById(ID + '-' + s); }
         function clamp01(v) { return v < 0 ? 0 : v > 1 ? 1 : v; }
         function lerp(a, b, e) { return a + (b - a) * e; }
@@ -165,10 +165,16 @@
         // ---- odometro: tiras generadas una vez (U+2007 = espacio de cifra) ----
         var FIG = ' ';
         function tira(el, items) { var h = ''; for (var i = 0; i < items.length; i++) { h += '<span data-layout-allow-overlap>' + items[i] + '</span>'; } el.innerHTML = h; }
-        // centenas: vacio -> 5 (un renglon, escena 1) y luego 6..9, 0, 1, 2 (renglon 8, escena 3)
-        var t1 = [FIG, '5', '6', '7', '8', '9', '0', '1', '2'];
-        var t2 = [FIG]; for (var a = 1; a <= 14; a++) { t2.push(String(a % 10)); }    // decenas: una vuelta + 4
-        var t3 = [FIG]; for (var b = 1; b <= 20; b++) { t3.push(String(b % 10)); }    // unidades: dos vueltas -> 0
+        // centenas: vacio -> 1, 2, 3, 4, 5 (cinco renglones, escena 1) y luego 5 -> 2 en un solo renglon (escena 3: no gira, cambia);
+        // decenas: vacio -> 1, 2, 3, 4 (cuatro renglones); unidades: vacio y una sola vuelta 1..9, 0 (diez renglones).
+        // Menos giros = menos fragmentos de cifras intermedias (9·6, 128, 139...) en el tramo mas denso del cuadro
+        // CONTEO = renglones que rueda la columna hasta el 5 en la escena 1. Con uno solo (vacio -> 5) la cifra no puede entrar antes
+        // de ~0.7 s: su energia de movimiento se apaga hacia 1.0 s y queda un tramo quieto de 1.1 s (frame-check, SINTESIS 18).
+        // Con cinco, el odometro cuenta 1 -> 5 y el cuadro tiene movimiento oscuro continuo desde 0.4 s hasta ~1.2 s
+        var CONTEO = 5;
+        var t1 = [FIG]; for (var k5 = 6 - CONTEO; k5 <= 5; k5++) { t1.push(String(k5)); } t1.push('2');
+        var t2 = [FIG]; for (var a = 1; a <= 4; a++) { t2.push(String(a % 10)); }
+        var t3 = [FIG]; for (var b = 1; b <= 10; b++) { t3.push(String(b % 10)); }
         tira($('tira1'), t1); tira($('tira2'), t2); tira($('tira3'), t3);
 
         // ---- rejilla 16 x 3: casillas 0..2 (S1 de Lun, Mie y Vie) = las tres barras plegadas (pista + tinta); 3..47 se generan ----
@@ -256,11 +262,15 @@
         // pliegue. El rack tambien reencuadra (y -60 -> 0): la barra sola abre en el centro optico del cuadro y baja a su fila
         // mientras la cifra ocupa el espacio de arriba
         tl.fromTo([camara, cifraRig], { scale: 1.12, y: -60 }, { scale: 1, y: 0, duration: 1.2, ease: 'power3.out' }, T.foco);
-        // la columna de las centenas esta vacia (U+2007) y rueda UN renglon, de vacio a 5, con estela solo mientras va rapido:
-        // arranca a 0.70 s con el 5 todavia bajo la mascara, que asoma hacia 0.80 s, cuando el rack ya bajo de 1 px; se asienta
-        // con el tic de 1.65 s, 0.3 s antes de «cinco». «5» es la unica cifra que aparece en la escena.
-        conRastro({ el: tira1, nodo: $('mb1-g'), at: T.giro, dur: T.tic5 - T.giro, curva: 'power3.out', dist: H, max: 16,
-            pos: function (e) { gsap.set(tira1, { y: -H * e }); } });
+        // la cifra esta en el mismo plano que la barra: entra con el mismo desenfoque del rack (misma curva), no mas nitida que ella
+        desenfoque($('cifra'), T.foco, 0.85, 20, 'power2.out');
+        // la columna de las centenas esta vacia (U+2007) y cuenta 1, 2, 3, 4, 5 (cinco renglones) con estela solo mientras va
+        // rapido: arranca a 0.40 s y la primera cifra asoma bajo la mascara hacia 0.45 s (la apertura ya no queda casi vacia);
+        // cada cifra se lee ~0.1 s y el 5 se asienta (la rampa power3.out termina) con el tic de 1.65 s, antes de «cinco»
+        // (~2.08 s con la voz real). Los renglones 1 a 4 son solo la mecanica del odometro (no son datos): la cifra que se
+        // queda y la que nombra la voz es «5».
+        conRastro({ el: tira1, nodo: $('mb1-g'), at: T.giro, dur: T.tic5 - T.giro, curva: 'power3.out', dist: CONTEO * H, max: 16,
+            pos: function (e) { gsap.set(tira1, { y: -CONTEO * H * e }); } });
 
         // ================= Escena 2 (1.15-2.95): «5 min», el primer tramo de tinta y «cada clase» =================
         tl.fromTo($('min'), { opacity: 0, y: 36 }, { opacity: 1, y: 0, duration: 0.25, ease: 'power3.out' }, T.tic5 - 0.25);
@@ -292,6 +302,10 @@
         }
         recorte();
         tl.fromTo(est, { relleno: 0 }, { relleno: 1, duration: 0.4, ease: 'power4.out', onUpdate: recorte, immediateRender: false }, T.relleno);
+        // apertura con contraste: la pista abre en el token de campo (#D8D2CA, frame.md) durante el rack focus y vuelve al token
+        // de borde (#E7E2DC) mientras se pinta la tinta (misma ventana que el relleno); asi la barra se lee desde el primer
+        // segundo y la tinta gana contraste al pintarse. Las pistas de Mie y Vie salen a 2.00 s ya casi en el color final
+        tl.fromTo(pistas, { backgroundColor: '#D8D2CA' }, { backgroundColor: '#E7E2DC', duration: 0.4, ease: 'power2.out' }, T.relleno);
         // «cada clase»: las barras de Mie y Vie salen de debajo de la de Lun (3 clases por semana, frame.md 10) y sus dias
         // aparecen a la izquierda; la cifra no se mueve
         // escondidas hasta que salen: bajo la barra de Lun, su tinta asomaba por el borde suavizado de la pista
@@ -309,13 +323,15 @@
         tl.fromTo(est, { pliegue: 0 }, { pliegue: 1, duration: 0.6, ease: 'none', onUpdate: recorte, immediateRender: false }, T.pliegue);
         tl.fromTo([$('h07'), $('h08')], { opacity: 1 }, { opacity: 0, duration: 0.2, ease: 'power2.out' }, T.pliegue);
 
-        // odometro 5 -> 240: derecha -> izquierda, 0.02 s de desfase, todo asentado a 3.50 (expo.out, sin back.out)
-        conRastro({ el: tira3, nodo: $('mb3-g'), at: T.cuenta, dur: 0.50, curva: 'expo.out', dist: 20 * H, max: 16,
-            pos: function (e) { gsap.set(tira3, { y: -20 * H * e }); } });
-        conRastro({ el: tira2, nodo: $('mb2-g'), at: T.cuenta + 0.02, dur: 0.48, curva: 'expo.out', dist: 14 * H, max: 16,
-            pos: function (e) { gsap.set(tira2, { y: -14 * H * e }); } });
-        conRastro({ el: tira1, nodo: $('mb1-g'), at: T.cuenta + 0.04, dur: 0.46, curva: 'expo.out', dist: 7 * H, max: 16,
-            pos: function (e) { gsap.set(tira1, { y: -H - 7 * H * e }); } });
+        // odometro 5 -> 240: derecha -> izquierda, 0.02 s de desfase (expo.out, sin back.out). Giros cortos: unidades una vuelta
+        // (10 renglones), decenas 4 y centenas un solo renglon (5 -> 2). Todo se lee limpio hacia 3.30 s y «240 min» se queda
+        // quieto hasta 3.55 s, cuando empieza el cambio a «4 h» (~0.35 s con la cifra legible, antes ~0.2 s)
+        conRastro({ el: tira3, nodo: $('mb3-g'), at: T.cuenta, dur: 0.40, curva: 'expo.out', dist: 10 * H, max: 16,
+            pos: function (e) { gsap.set(tira3, { y: -10 * H * e }); } });
+        conRastro({ el: tira2, nodo: $('mb2-g'), at: T.cuenta + 0.02, dur: 0.38, curva: 'expo.out', dist: 4 * H, max: 16,
+            pos: function (e) { gsap.set(tira2, { y: -4 * H * e }); } });
+        conRastro({ el: tira1, nodo: $('mb1-g'), at: T.cuenta + 0.04, dur: 0.36, curva: 'expo.out', dist: H, max: 16,
+            pos: function (e) { gsap.set(tira1, { y: -CONTEO * H - H * e }); } });
         // «min» se aparta rapido y las columnas nuevas aparecen detras de el: la unidad nunca se encima con la cifra que gira
         tl.fromTo($('min'), { x: 0 }, { x: 2 * PASO, duration: 0.25, ease: 'expo.out', immediateRender: false }, T.cuenta);
         tl.fromTo([$('col2'), $('col3')], { opacity: 0 }, { opacity: 1, duration: 0.12, ease: 'power1.in' }, T.cuenta + 0.02);

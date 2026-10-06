@@ -392,8 +392,13 @@
 
         // Apertura anclada con recorte (fila → tarjeta 1200 × 600, radio 36), sobre todo hacia abajo; un solo tween.
         tl.fromTo(ivan,
-            { clipPath: 'inset(190px 0px 354px 0px round 36px)', backgroundColor: '#EFECE7', z: 40, scale: 1.04 },
-            { clipPath: 'inset(0px 64px 0px 64px round 36px)', backgroundColor: '#FFFFFF', z: 0, scale: 1, duration: 0.65, ease: 'power3.inOut', immediateRender: false }, T.abre);
+            { clipPath: 'inset(190px 0px 354px 0px round 36px)', z: 40, scale: 1.04 },
+            { clipPath: 'inset(0px 64px 0px 64px round 36px)', z: 0, scale: 1, duration: 0.65, ease: 'power3.inOut', immediateRender: false }, T.abre);
+        // El resaltado #EFECE7 de la fila se aclara a blanco en el primer 30 % de la apertura (1.75 → 1.90 s, antes de 1.90): lo que
+        // crece es ya la tarjeta blanca. Antes el tinte beige duraba toda la mitad del crecimiento (1.75 → ~2.15 s) y la losa, con solo
+        // el nombre, se leía un instante como un marcador de posición gris (QA, menor 1). Va aparte del recorte para fijar su propio
+        // tiempo; la fila se ve ya blanca y flotante sobre su sombra de fila (todavía al 75 %), así que el borde sigue definido.
+        tl.fromTo(ivan, { backgroundColor: '#EFECE7' }, { backgroundColor: '#FFFFFF', duration: 0.15, ease: 'power1.inOut', immediateRender: false }, T.abre);
         // Pose 0 → pico (rotX 4°, rotY −6° hacia 2.05 s) → 0 (plana a 2.40 s).
         tl.fromTo(ivan, { rotationX: 0, rotationY: 0 }, { rotationX: 4, rotationY: -6, duration: 0.30, ease: 'sine.inOut', immediateRender: false }, T.abre);
         tl.fromTo(ivan, { rotationX: 4, rotationY: -6 }, { rotationX: 0, rotationY: 0, duration: 0.35, ease: 'sine.inOut', immediateRender: false }, 2.05);

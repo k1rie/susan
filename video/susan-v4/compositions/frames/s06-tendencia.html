@@ -311,13 +311,23 @@
         tl.fromTo([$('v-dia'), $('v-meta')], { opacity: 1, y: 0 }, { opacity: 0, y: 8, duration: 0.25, ease: 'power1.in' }, T_M);
 
         // la pildora «Dia critico» suelta su texto antes del 40 % y se condensa en el punto r 7 que sera la cabeza de la guia (S1).
+        // Se vuelve CIRCULO antes del 40 % de su viaje (a 0.34 s el viaje va en ~29 %): antes cruzaba la tarjeta aun vacia como una
+        // raya negra que solo se encogia y no se leia como nada. Sigue siendo una pildora (radio = medio alto) que se adelgaza y
+        // cuyo largo se cierra sobre su alto (largo = diametro + lo que le falta a la pildora); desde ahi es un punto que se
+        // achica (~37 -> 14 px de diametro) mientras viaja. El largo no se cierra hasta que el texto ya se fue (0.14 s): si no,
+        // el recorte lo mordia por los lados. Mismo estado final (inset 34 px / 50 % - 7 px, radio 7) que antes.
         // El recorte va en calc(): no depende del ancho de la pildora (su texto a 36 px)
-        tl.fromTo($('critico-t'), { opacity: 1 }, { opacity: 0, duration: 0.20, ease: 'power1.in' }, T_M);
+        tl.fromTo($('critico-t'), { opacity: 1 }, { opacity: 0, duration: 0.12, ease: 'power1.out' }, T_M);
         var critico = $('critico');
         var cond = { p: 0 };
+        var T_CI0 = 0.09, D_CI = 0.20;                       // s desde T_M: el largo se cierra de 0.14 a 0.34 s (local)
+        var easeAncho = gsap.parseEase('power2.inOut');
+        var easeAlto = gsap.parseEase('power2.out');
         function aplicarCond() {
-            var e = easeM(cond.p);
-            critico.style.clipPath = 'inset(' + px(34 * e) + ' calc(' + e.toFixed(4) + ' * (50% - 7px)) round ' + px(41 - 34 * e) + ')';
+            var sw = easeAncho(lim((cond.p * D_M - T_CI0) / D_CI, 0, 1));    // 0 = pildora entera, 1 = largo igual al alto
+            var d = 82 - 68 * easeAlto(cond.p);                              // alto = diametro del punto (82 -> 14)
+            var vx = 'calc(' + (50 * sw).toFixed(3) + '% + ' + (41 * (1 - sw) - d / 2).toFixed(2) + 'px)';
+            critico.style.clipPath = 'inset(' + px((82 - d) / 2) + ' ' + vx + ' round ' + px(d / 2) + ')';
         }
         aplicarCond();
         tl.fromTo(cond, { p: 0 }, { p: 1, duration: D_M, ease: 'none', onUpdate: aplicarCond, immediateRender: false }, T_M);

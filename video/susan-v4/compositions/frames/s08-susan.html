@@ -9,8 +9,10 @@
 #s08-susan-cielo{position:absolute;inset:0;overflow:hidden;
  background:linear-gradient(180deg,#D2E0F9 0%,#E6EEFC 30%,#EFF2F7 52%,#F7F5F2 70%,#F7F5F2 100%)}
 .s08-susan-capa{position:absolute;inset:0}
-/* paso del cielo hacia la crema: prepara el fundido final (capa nueva que sube encima de la vieja, nunca al revés) */
-#s08-susan-cielo-claro{opacity:0;background:linear-gradient(180deg,#E6EEFC 0%,#EFF2F7 28%,#F7F5F2 56%,#F7F5F2 100%)}
+/* paso del cielo hacia la crema: prepara el fundido final (capa nueva que sube encima de la vieja, nunca al revés).
+   El azul se va casi por completo (queda un asomo frío arriba, #F2F4F9) y la crema llega a la mitad del cuadro: la diferencia con el
+   cielo de partida es de ΔE ≈ 13 arriba y ≈ 8 a la altura de la ficha (el paso anterior, de ΔE ≈ 8 y 5, no se percibía en 1.8 s quietos) */
+#s08-susan-cielo-claro{opacity:0;background:linear-gradient(180deg,#F2F4F9 0%,#F5F5F5 26%,#F7F5F2 48%,#F7F5F2 100%)}
 .s08-susan-nube{position:absolute;border-radius:50%}
 .s08-susan-nube-fria{background:radial-gradient(closest-side,rgba(255,255,255,.9),rgba(255,255,255,0))}
 /* grano estático al 10 % (imagen, nunca un <filter> vivo sobre el cuadro) */
@@ -103,11 +105,15 @@
         // Tiempos locales; los de sfx_cues son contrato: whoosh-s 0.98 dentro de la caída, thud 1.00 = contacto,
         // soft-in 2.50 = inicio del lema, sheen 4.45 = inicio del barrido (la banda arranca fuera de la «S» y su borde la toca
         // hacia 4.60, en el cuerpo del sheen, que crece hasta su pico entre 0.12 y 0.19 s).
-        // Tramos quietos (frame-check): 1.8–2.5, 2.7–3.4, 3.8–4.6 y 4.9–5.6 s; ninguno llega a 1.0 s.
+        // Tramos quietos (frame-check): 1.8–2.6, 2.7–3.5, 3.9–4.7 y 4.9–5.7 s; ninguno llega a 1.0 s (el paso del cielo, 3.25–4.05,
+        // parte en dos lo que antes era un tramo de 1.8 s sin cambio perceptible entre el lema asentado y el barrido).
+        // Voz real (datos/voz-alineacion.json, línea 08, montada por anclas con inicio en 2.007 s del cuadro): «segundos» suena de
+        // 3.78 a 4.34 s; por eso el barrido NO se adelanta (el sheen 4.45 queda 0.11 s después de la última «s»; adelantarlo 0.1 s
+        // lo pondría sobre la cola de la voz y solo quitaría 0.1 s de quietud).
         var T = {
             cae: 0.60, contacto: 1.00, squashFin: 1.06,
             desliza: 1.45, marca: 1.45,
-            lema: 2.50, aclara: 3.30,
+            lema: 2.50, aclara: 3.25, aclaraDur: 0.80,
             barrido: 4.45, fundido: 5.70, fin: 6.0
         };
         var DESDE = -640;        // la ficha entra desde 640 px más arriba (fuera de cuadro)
@@ -191,11 +197,12 @@
         tl.addLabel('read:lema#1', T.lema + 0.60);
 
         // Mientras la voz dice «…lista en segundos», el cielo da un paso hacia la crema (capa nueva encima, un solo paso
-        // de 0.7 s, sin deriva ni vuelta atrás): es el «fondo E1 aclarado a crema» de frame.md §8 y prepara el fundido
-        // final. El lockup y el lema no se mueven.
-        tl.fromTo($('cielo-claro'), { opacity: 0 }, { opacity: 1, duration: 0.70, ease: 'power1.inOut' }, T.aclara);
+        // de 0.8 s de 3.25 a 4.05 s, sin deriva ni vuelta atrás): es el «fondo E1 aclarado a crema» de frame.md §8 y prepara el
+        // fundido final. El lockup y el lema no se mueven. Es lo que rompe el tramo quieto que dejaban el lema asentado (~2.8 s)
+        // y el barrido (4.45 s): el paso se nota (el azul de arriba se va) y termina 0.4 s antes de que arranque el barrido.
+        tl.fromTo($('cielo-claro'), { opacity: 0 }, { opacity: 1, duration: T.aclaraDur, ease: 'power1.inOut' }, T.aclara);
 
-        // ---- Escena 4 (3.8–6.0 s): barrido holográfico de una sola pasada, ya en silencio (la voz acaba en 4.37 s), y fundido.
+        // ---- Escena 4 (3.8–6.0 s): barrido holográfico de una sola pasada, ya en silencio (la voz acaba en 4.34 s), y fundido.
         //      El porcentaje va al revés del viaje: 93 % → 7 % se lee de izquierda a derecha. La banda (40–60 % de un fondo de
         //      300 %) ARRANCA FUERA de las letras: en 93 % su borde azul transparente queda ~20 px antes de la tinta de la «S», así
         //      el color no se enciende de golpe en el primer fotograma del cue (QA r1: en 86 % media «S» pasaba a azul en un solo
