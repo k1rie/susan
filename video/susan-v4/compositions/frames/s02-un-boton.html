@@ -186,7 +186,8 @@
             despegue: 1.95,     // la tarjeta sube a su lugar mientras la voz dice «susan» (el hueco que dejó el subrayado)
             brillo: 2.80,       // sheen-s: primer fotograma visible del brillo
             pulso: 3.50,
-            acercar: 4.15,      // la cámara se acerca al botón (gesto de 0.8 s que termina en la compresión)
+            acercar: 3.65,      // la cámara se acerca al botón con «la sesión con un solo…» (gesto de 0.8 s)
+            ACERCAR_D: 0.8,     // se asienta 0.33 s antes del halo de foco y de «botón»
             foco: 4.78,
             presion: 4.95,      // tap
             estado: 5.00,       // click-soft2
@@ -275,10 +276,11 @@
         tl.set($('brillo'), { opacity: 0 }, 0);
         tl.set($('brillo'), { opacity: 1 }, T.brillo);
         tl.fromTo($('brillo'), { xPercent: -52 }, { xPercent: 120, duration: 0.5, ease: 'power2.inOut' }, T.brillo);
-        // «...con un solo botón»: la cámara se acerca al botón (escala 1 -> 1.04 con origen en su centro) en un gesto decidido que
-        // termina en la compresión y vuelve a 1 dentro del morph a la cámara. BRIEF: el toque se cuenta con «cámara que se acerca».
+        // «Abres la sesión con un solo botón…»: la cámara se acerca al botón (escala 1 -> 1.04 con origen en su centro) en un gesto
+        // decidido de 0.8 s que parte en dos la espera entre el brillo y el toque (ninguna quietud llega a 1.0 s), se asienta antes
+        // de «botón» y vuelve a 1 dentro del morph a la cámara. BRIEF: el toque se cuenta con «cámara que se acerca».
         // Las sombras escalan con el mismo origen para que la tarjeta no se despegue de su sombra.
-        tl.fromTo([rig, sombras], { scale: 1 }, { scale: T.ACERCA, duration: T.presion - T.acercar, ease: 'power3.inOut' }, T.acercar);
+        tl.fromTo([rig, sombras], { scale: 1 }, { scale: T.ACERCA, duration: T.ACERCAR_D, ease: 'power3.inOut' }, T.acercar);
         [['pulso-1', 0], ['pulso-2', 0.10]].forEach(function (p) {
             var c = $(p[0]);
             tl.fromTo(c, { attr: { r: 8 } }, { attr: { r: 22 }, duration: 0.45, ease: 'power2.out' }, T.pulso + p[1]);
