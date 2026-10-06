@@ -7,11 +7,12 @@ import { callRpc } from '@/lib/api/client';
 import { getAdminBackend } from '@/lib/backend';
 import { handle } from './route.js';
 import { eliminarObjetos, validarRutaObjeto } from './storage.js';
-import { reconstruirIndice } from './indice.js';
+import { CLAVE_BLOQUEO_INDICE, reconstruirIndice } from './indice.js';
+import { purgarFotosRegistro } from './fotosRegistro.js';
 import { recalcularCuerpo } from './schemas.js';
 
 export const NOMBRES_JOB = Object.freeze([
-    'cerrar-sesiones', 'resolver-pendientes', 'purgar-recortes', 'reconstruir-indice', 'recalcular',
+    'cerrar-sesiones', 'resolver-pendientes', 'purgar-recortes', 'purgar-fotos-registro', 'reconstruir-indice', 'recalcular',
 ]);
 
 const LOTE_PURGA = 500; // filas por vuelta (svc_job_purgar_recortes_listar admite hasta 2000)
@@ -82,6 +83,16 @@ async function purgarRecortes(svc, admin) {
     });
 }
 
+/**
+ * Barrido de fotos de registro (extensión 18). Cada reconstrucción ya purga las que acaba de indexar; este job reintenta
+ * borrados que fallaron y limpia las de plantillas archivadas o anteriores a la extensión.
+ * Toma el bloqueo del ÍNDICE (no uno propio): mientras se reconstruye o revierte no corre, porque una reversión puede
+ * devolver una plantilla a «pendiente» y entonces su foto vuelve a ser la única copia de su vector.
+ */
+async function purgarFotos(svc, admin) {
+    return conBloqueoJob(svc, CLAVE_BLOQUEO_INDICE, async () => ({ estado: 'ok', ...(await purgarFotosRegistro({ svc, admin })) }));
+}
+
 /** Diagnóstico + reconstrucción del índice si hace falta. */
 async function jobReconstruirIndice(svc, admin) {
     const diagnostico = await svc('svc_job_reconstruir_indice');
@@ -120,6 +131,9 @@ export async function ejecutarJob(nombre, { admin, body = {} } = {}) {
             break;
         case 'purgar-recortes':
             resultado = await purgarRecortes(svc, cliente);
+            break;
+        case 'purgar-fotos-registro':
+            resultado = await purgarFotos(svc, cliente);
             break;
         case 'reconstruir-indice':
             resultado = await jobReconstruirIndice(svc, cliente);

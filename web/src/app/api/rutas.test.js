@@ -20,6 +20,7 @@ const RUTAS = {
     'indice/revertir': ['POST'],
     'indice/sincronizar': ['POST'],
     'jobs/cerrar-sesiones': ['GET', 'POST'],
+    'jobs/purgar-fotos-registro': ['GET', 'POST'],
     'jobs/purgar-recortes': ['GET', 'POST'],
     'jobs/recalcular': ['GET', 'POST'],
     'jobs/reconstruir-indice': ['GET', 'POST'],
