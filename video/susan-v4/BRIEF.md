@@ -78,9 +78,19 @@ voz» (guion con tiempos amarrados a cada escena).
 - Indicación tras ver el borrador completo (2026-10-06, la persona dueña se fue a dormir; modo autónomo hasta la entrega):
   «el video está bien en sí, solo que hazlo más dinámico, muchas veces solo se queda estático con la misma escena varios
   segundos; me gustaría que fuera más dinámico sin perder el efecto smooth y blur (recuerda que hoy en día casi no hay
-  retención)». Esto SUSTITUYE las reglas anteriores que pedían lecturas quietas largas y prohibían la deriva de cámara: ahora
-  ninguna escena se queda igual más de ~0.6 s; la cámara siempre viaja (empujes, paneos, punch-ins a la cifra, rack focus
-  con desenfoque y estela en los movimientos rápidos), cada cuadro se parte en 2-3 planos y el ritmo se sostiene hasta el
-  final. Se conservan: duración (55 s), anclas de voz, datos, decisiones previas (sin cursor, sin número de muestras, sin
-  subrayado, tooltip recto, inclinación suave plana al leer) y suavidad (eases largas, sin saltos ni parpadeos).
-
+  retención)». Y aclaró: «no me refiero a zooms innecesarios, sino que se muestre algo diferente, por ejemplo que lo que
+  está apareciendo se vaya con motion blur a otro lado y aparezca otro elemento, zooms que sean transiciones, etc.».
+  Regla resultante (SUSTITUYE las reglas anteriores de lecturas quietas largas):
+  - DINAMISMO = CAMBIO DE CONTENIDO, no movimiento de cámara. Cada ~1–1.5 s aparece algo nuevo en pantalla (otro elemento
+    de la UI real, otra cifra, otro estado); ninguna composición se queda igual más de ~1.5 s.
+  - El relevo típico: el elemento actual SALE con estela de movimiento direccional (motion blur) hacia un lado o hacia
+    arriba/abajo, y el siguiente ENTRA desde el lado opuesto, también con estela, asentándose suave. Las salidas dentro de
+    un cuadro ya están permitidas.
+  - Los zooms solo como TRANSICIÓN: entrar (zoom-through) en un elemento que se convierte en la escena siguiente, o salir
+    de él para revelar el contexto. Prohibidos los zooms lentos de adorno o la deriva de cámara sobre contenido quieto.
+  - Se conserva el efecto smooth + blur: eases largas (expo/power3), rack focus y estela solo en lo rápido; nada de cortes
+    secos ni parpadeos.
+  - Se conservan: duración (55 s), anclas de voz (la cifra que la voz nombra sigue en pantalla mientras se nombra, aunque
+    algo más cambie alrededor), datos de CONTENIDO §3 (no inventar cifras para tener «más contenido»: usar más piezas
+    reales de la app), y las decisiones previas (sin cursor, sin número de muestras, sin subrayado, tooltip recto,
+    inclinación suave plana al leer).
