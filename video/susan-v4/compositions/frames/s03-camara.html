@@ -1,0 +1,383 @@
+<template>
+<style>
+@font-face{font-family:"Hanken Grotesk";font-weight:100 900;font-style:normal;font-display:block;src:url("assets/fonts/HankenGrotesk-var.woff2") format("woff2");}
+/* will-change en la raíz: antialias gris uniforme (PILOTO §3b); nada que cambie de escala lo lleva. */
+#root{position:absolute;inset:0;overflow:hidden;will-change:transform;font-family:"Hanken Grotesk",system-ui,sans-serif;color:#1E1919;
+ font-variant-numeric:tabular-nums;letter-spacing:-0.003em;-webkit-font-smoothing:antialiased}
+.s03-camara-capa{position:absolute;left:0;top:0;width:1920px;height:1080px}
+.s03-camara-capa *{box-sizing:border-box}
+/* E3 «lienzo de datos» con el halo del módulo centrado en la cámara (x 1330, y 450) */
+.s03-camara-e3{position:absolute;inset:0;background:radial-gradient(55% 60% at 1330px 450px,var(--halo) 0%,rgba(247,245,242,0) 72%),
+ radial-gradient(120% 90% at 50% 40%,#F7F5F2 55%,#F3F1ED 100%)}
+.s03-camara-grano{position:absolute;inset:0;pointer-events:none;mix-blend-mode:multiply;opacity:.04;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
+.s03-camara-abs{position:absolute}
+
+/* ---- VistaCamara (objeto de escena): marco de tinta 900 × 506, radio 28; sombra de tinta en capa aparte ---- */
+.s03-camara-sombra{position:absolute;left:880px;top:200px;width:900px;height:506px;border-radius:28px;box-shadow:0 40px 120px rgba(30,25,25,.14)}
+.s03-camara-vista{position:absolute;left:880px;top:200px;width:900px;height:506px;border-radius:28px;background:#1E1919;overflow:hidden}
+.s03-camara-cara{position:absolute;width:84px;height:84px}
+.s03-camara-cara-mov{position:absolute;inset:0}
+.s03-camara-av{display:block;width:84px;height:84px;border-radius:50%}
+.s03-camara-marco{position:absolute;width:92px;height:92px}
+.s03-camara-me{position:absolute;inset:0}
+.s03-camara-velo{position:absolute;inset:2px;border-radius:8px;opacity:0}
+.s03-camara-velo-verde{background:rgba(39,160,106,.25)}
+.s03-camara-velo-ambar{background:rgba(201,129,0,.25)}
+.s03-camara-velo-gris{background:rgba(143,138,130,.25)}
+/* esquinas de detección: 4 px (2 de la app × E), radio 8, en L */
+.s03-camara-esq{position:absolute;inset:0}
+.s03-camara-esq i{position:absolute;width:20px;height:20px;border:0 solid currentColor}
+.s03-camara-esq-blanca{color:#FFFFFF}
+.s03-camara-esq-verde{color:#27A06A;opacity:0}
+.s03-camara-esq-ambar{color:#C98100;opacity:0}
+.s03-camara-esq .s03-camara-tl{left:0;top:0;border-top-width:4px;border-left-width:4px;border-top-left-radius:8px}
+.s03-camara-esq .s03-camara-tr{right:0;top:0;border-top-width:4px;border-right-width:4px;border-top-right-radius:8px}
+.s03-camara-esq .s03-camara-bl{left:0;bottom:0;border-bottom-width:4px;border-left-width:4px;border-bottom-left-radius:8px}
+.s03-camara-esq .s03-camara-br{right:0;bottom:0;border-bottom-width:4px;border-right-width:4px;border-bottom-right-radius:8px}
+/* StatusChip sm × 2: 24/500, padding 4 16, punto de 12, separación 12; centrado bajo su marco sin transform */
+.s03-camara-chip-pos{position:absolute;left:50%;top:calc(100% + 2px);width:0;display:flex;justify-content:center}
+.s03-camara-chip-pila{display:grid;justify-items:center}
+.s03-camara-chip-pila > *{grid-area:1 / 1}
+.s03-camara-chip{display:inline-flex;align-items:center;gap:12px;height:40px;padding:0 16px;border-radius:999px;font-size:24px;font-weight:500;line-height:32px;white-space:nowrap;letter-spacing:0}
+.s03-camara-chip::before{content:"";width:12px;height:12px;border-radius:50%;background:currentColor;flex:none}
+.s03-camara-chip-presente{background:#E3F4EA;color:#1F7A47}
+.s03-camara-chip-retardo{background:#FBEFD2;color:#9A6408}
+.s03-camara-chip-pendiente{background:#EEEBE6;color:#5B5651}
+/* chips oscuros de la cámara (handoff: alto 44, texto e icono de 24) */
+.s03-camara-camchip{position:absolute;left:24px;top:24px;height:44px;display:inline-flex;align-items:center;gap:12px;padding:0 20px;border-radius:999px;
+ background:rgba(30,25,25,.8);color:#FFFFFF;font-size:24px;font-weight:500;line-height:32px;white-space:nowrap;letter-spacing:0}
+.s03-camara-ico{display:block;width:24px;height:24px;flex:none}
+.s03-camara-frente{position:absolute;right:24px;top:24px;height:44px;display:flex;align-items:center;color:#FFFFFF;font-size:24px;font-weight:500;line-height:32px;white-space:nowrap;letter-spacing:0}
+
+/* ---- columna izquierda: ventana de la cifra (ResumenPaseLista a escala de héroe) ---- */
+.s03-camara-rotulo{position:absolute;left:140px;top:236px;font-size:32px;font-weight:500;line-height:40px;color:#6F6A65;white-space:nowrap}
+.s03-camara-cifra{position:absolute;left:140px;top:300px;height:176px;width:720px}
+.s03-camara-fila{display:flex;align-items:flex-start;white-space:nowrap}
+/* columna del odómetro: ventana de 176 px (1.1 × 160) con máscara de desvanecido; el dígito en reposo no se toca */
+.s03-camara-col{display:block;flex:none;overflow:hidden;-webkit-mask-image:linear-gradient(180deg,transparent 0%,#000 16%,#000 84%,transparent 100%);mask-image:linear-gradient(180deg,transparent 0%,#000 16%,#000 84%,transparent 100%)}
+.s03-camara-col-19{width:84.8px;height:176px;font-size:160px;font-weight:600;letter-spacing:-0.03em}
+.s03-camara-tira{display:block}
+.s03-camara-col-19 .s03-camara-tira span{display:block;height:176px;line-height:176px}
+/* «de 24 presentes» 48 px gris en la línea base de la cifra (base a 144 px del tope de la ventana) */
+.s03-camara-suf19{margin-left:28px;margin-top:103.2px;font-size:48px;font-weight:400;line-height:48px;color:#6F6A65;letter-spacing:0}
+.s03-camara-barra{position:absolute;left:140px;top:516px;width:680px;height:24px;border-radius:999px;background:#F0EDE8}
+.s03-camara-segs{display:flex;gap:4px;height:24px}
+.s03-camara-seg{display:block;height:24px;border-radius:999px;flex:none}
+.s03-camara-detalle{position:absolute;left:140px;top:566px;font-size:28px;font-weight:400;line-height:40px;color:#6F6A65;white-space:nowrap;letter-spacing:0}
+.s03-camara-pal{display:inline-block}
+.s03-camara-ultima{position:absolute;left:880px;top:730px;font-size:24px;font-weight:400;line-height:36px;color:#6F6A65;white-space:nowrap;letter-spacing:0}
+.s03-camara-ultima b{font-weight:600;color:#1E1919}
+
+/* ---- MedidorLiquido real a E = 1.6: tanque 134 × 269, radio 38, vidrio #F0EDE8, líquido #4A86F0, 5 marcas ---- */
+.s03-camara-tanque{position:absolute;left:140px;top:620px;width:134px;height:269px;border-radius:38px;background:#F0EDE8;overflow:hidden}
+.s03-camara-liquido{position:absolute;inset:0;background:#4A86F0;clip-path:polygon(0 100%,100% 100%,100% 100%,0 100%)}
+.s03-camara-marcas{position:absolute;right:0;bottom:0;width:22%;height:100%;background-image:linear-gradient(to top,rgba(30,25,25,.22) 0 2px,transparent 2px);
+ background-size:100% 20%;background-repeat:repeat-y;background-position:bottom}
+.s03-camara-medtxt{position:absolute;left:306px;top:664px;width:440px}
+.s03-camara-pct{height:80px}
+.s03-camara-col-88{width:38.52px;height:80px;font-size:72px;font-weight:600;letter-spacing:-0.025em}
+.s03-camara-col-88 .s03-camara-tira span{display:block;height:80px;line-height:80px}
+.s03-camara-suf88{font-size:72px;font-weight:600;line-height:80px;letter-spacing:-0.025em}
+.s03-camara-med-et{margin-top:12px;font-size:28px;font-weight:500;line-height:40px;white-space:nowrap;letter-spacing:0}
+.s03-camara-med-desc{margin-top:8px;font-size:28px;font-weight:400;line-height:40px;color:#6F6A65;white-space:nowrap;letter-spacing:0}
+</style>
+<div id="root" data-composition-id="s03-camara" data-start="0" data-duration="8.5" data-width="1920" data-height="1080">
+  <!-- fondo E3 a sangre: halo azul (cámara) y, encima, la capa con halo verde que sube al confirmar; grano estático al 4 % -->
+  <div id="s03-camara-fondo" class="clip s03-camara-capa" data-start="0" data-duration="8.5" data-track-index="0">
+    <div class="s03-camara-e3" style="--halo:#E6EEFC"></div>
+    <div id="s03-camara-halo-verde" class="s03-camara-e3" style="--halo:#E5F3EE"></div>
+    <div class="s03-camara-grano"></div>
+  </div>
+
+  <div id="s03-camara-escena" class="clip s03-camara-capa" data-start="0" data-duration="8.5" data-track-index="1">
+    <div id="s03-camara-sombra" class="s03-camara-sombra"></div>
+    <div id="s03-camara-vista" class="s03-camara-vista">
+      <div class="s03-camara-cara" style="left:26px;top:84px"><div id="s03-camara-mov-0" class="s03-camara-cara-mov"><img id="s03-camara-av-0" class="s03-camara-av" src="assets/avatars/avatar-01-xr.svg" alt="" /></div></div>
+      <div class="s03-camara-cara" style="left:133px;top:86px"><div id="s03-camara-mov-1" class="s03-camara-cara-mov"><img id="s03-camara-av-1" class="s03-camara-av" src="assets/avatars/avatar-02-mg.svg" alt="" /></div></div>
+      <div class="s03-camara-cara" style="left:232px;top:88px"><div id="s03-camara-mov-2" class="s03-camara-cara-mov"><img id="s03-camara-av-2" class="s03-camara-av" src="assets/avatars/avatar-11-xt.svg" alt="" /></div></div>
+      <div class="s03-camara-cara" style="left:341px;top:85px"><div id="s03-camara-mov-3" class="s03-camara-cara-mov"><img id="s03-camara-av-3" class="s03-camara-av" src="assets/avatars/avatar-04-dh.svg" alt="" /></div></div>
+      <div class="s03-camara-cara" style="left:439px;top:87px"><div id="s03-camara-mov-4" class="s03-camara-cara-mov"><img id="s03-camara-av-4" class="s03-camara-av" src="assets/avatars/avatar-13-vn.svg" alt="" /></div></div>
+      <div class="s03-camara-cara" style="left:547px;top:86px"><div id="s03-camara-mov-5" class="s03-camara-cara-mov"><img id="s03-camara-av-5" class="s03-camara-av" src="assets/avatars/avatar-06-et.svg" alt="" /></div></div>
+      <div class="s03-camara-cara" style="left:647px;top:88px"><div id="s03-camara-mov-6" class="s03-camara-cara-mov"><img id="s03-camara-av-6" class="s03-camara-av" src="assets/avatars/avatar-15-cr.svg" alt="" /></div></div>
+      <div class="s03-camara-cara" style="left:756px;top:85px"><div id="s03-camara-mov-7" class="s03-camara-cara-mov"><img id="s03-camara-av-7" class="s03-camara-av" src="assets/avatars/avatar-08-sc.svg" alt="" /></div></div>
+      <div class="s03-camara-cara" style="left:64px;top:234px"><div id="s03-camara-mov-8" class="s03-camara-cara-mov"><img id="s03-camara-av-8" class="s03-camara-av" src="assets/avatars/avatar-21-jp.svg" alt="" /></div></div>
+      <div class="s03-camara-cara" style="left:163px;top:233px"><div id="s03-camara-mov-9" class="s03-camara-cara-mov"><img id="s03-camara-av-9" class="s03-camara-av" src="assets/avatars/avatar-22-fa.svg" alt="" /></div></div>
+      <div class="s03-camara-cara" style="left:273px;top:231px"><div id="s03-camara-mov-10" class="s03-camara-cara-mov"><img id="s03-camara-av-10" class="s03-camara-av" src="assets/avatars/avatar-07-rm.svg" alt="" /></div></div>
+      <div class="s03-camara-cara" style="left:376px;top:232px"><div id="s03-camara-mov-11" class="s03-camara-cara-mov"><img id="s03-camara-av-11" class="s03-camara-av" src="assets/avatars/avatar-24-bs.svg" alt="" /></div></div>
+      <div class="s03-camara-cara" style="left:476px;top:234px"><div id="s03-camara-mov-12" class="s03-camara-cara-mov"><img id="s03-camara-av-12" class="s03-camara-av" src="assets/avatars/avatar-09-ag.svg" alt="" /></div></div>
+      <div class="s03-camara-cara" style="left:585px;top:232px"><div id="s03-camara-mov-13" class="s03-camara-cara-mov"><img id="s03-camara-av-13" class="s03-camara-av" src="assets/avatars/avatar-10-hm.svg" alt="" /></div></div>
+      <div class="s03-camara-cara" style="left:685px;top:232px"><div id="s03-camara-mov-14" class="s03-camara-cara-mov"><img id="s03-camara-av-14" class="s03-camara-av" src="assets/avatars/avatar-03-vs.svg" alt="" /></div></div>
+      <div class="s03-camara-cara" style="left:792px;top:230px"><div id="s03-camara-mov-15" class="s03-camara-cara-mov"><img id="s03-camara-av-15" class="s03-camara-av" src="assets/avatars/avatar-12-mh.svg" alt="" /></div></div>
+      <div class="s03-camara-cara" style="left:94px;top:379px"><div id="s03-camara-mov-16" class="s03-camara-cara-mov"><img id="s03-camara-av-16" class="s03-camara-av" src="assets/avatars/avatar-18-sg.svg" alt="" /></div></div>
+      <div class="s03-camara-cara" style="left:203px;top:381px"><div id="s03-camara-mov-17" class="s03-camara-cara-mov"><img id="s03-camara-av-17" class="s03-camara-av" src="assets/avatars/avatar-19-al.svg" alt="" /></div></div>
+      <div class="s03-camara-cara" style="left:301px;top:382px"><div id="s03-camara-mov-18" class="s03-camara-cara-mov"><img id="s03-camara-av-18" class="s03-camara-av" src="assets/avatars/avatar-20-dm.svg" alt="" /></div></div>
+      <div class="s03-camara-cara" style="left:408px;top:381px"><div id="s03-camara-mov-19" class="s03-camara-cara-mov"><img id="s03-camara-av-19" class="s03-camara-av" src="assets/avatars/avatar-05-cv.svg" alt="" /></div></div>
+      <div class="s03-camara-cara" style="left:514px;top:378px"><div id="s03-camara-mov-20" class="s03-camara-cara-mov"><img id="s03-camara-av-20" class="s03-camara-av" src="assets/avatars/avatar-14-dr.svg" alt="" /></div></div>
+      <div class="s03-camara-cara" style="left:613px;top:382px"><div id="s03-camara-mov-21" class="s03-camara-cara-mov"><img id="s03-camara-av-21" class="s03-camara-av" src="assets/avatars/avatar-23-ic.svg" alt="" /></div></div>
+      <div class="s03-camara-cara" style="left:721px;top:381px"><div id="s03-camara-mov-22" class="s03-camara-cara-mov"><img id="s03-camara-av-22" class="s03-camara-av" src="assets/avatars/avatar-17-lb.svg" alt="" /></div></div>
+      <div id="s03-camara-marco-0" class="s03-camara-marco" style="left:22px;top:80px"><div id="s03-camara-me-0" class="s03-camara-me"><div id="s03-camara-velo-0" class="s03-camara-velo s03-camara-velo-verde"></div><div id="s03-camara-eb-0" class="s03-camara-esq s03-camara-esq-blanca"><i class="s03-camara-tl"></i><i class="s03-camara-tr"></i><i class="s03-camara-bl"></i><i class="s03-camara-br"></i></div><div id="s03-camara-ec-0" class="s03-camara-esq s03-camara-esq-verde"><i class="s03-camara-tl"></i><i class="s03-camara-tr"></i><i class="s03-camara-bl"></i><i class="s03-camara-br"></i></div></div></div>
+      <div id="s03-camara-marco-1" class="s03-camara-marco" style="left:129px;top:82px"><div id="s03-camara-me-1" class="s03-camara-me"><div id="s03-camara-velo-1" class="s03-camara-velo s03-camara-velo-ambar"></div><div id="s03-camara-eb-1" class="s03-camara-esq s03-camara-esq-blanca"><i class="s03-camara-tl"></i><i class="s03-camara-tr"></i><i class="s03-camara-bl"></i><i class="s03-camara-br"></i></div><div id="s03-camara-ec-1" class="s03-camara-esq s03-camara-esq-ambar"><i class="s03-camara-tl"></i><i class="s03-camara-tr"></i><i class="s03-camara-bl"></i><i class="s03-camara-br"></i></div></div><div class="s03-camara-chip-pos"><span id="s03-camara-chip-1" class="s03-camara-chip s03-camara-chip-retardo">Retardo</span></div></div>
+      <div id="s03-camara-marco-2" class="s03-camara-marco" style="left:228px;top:84px"><div id="s03-camara-me-2" class="s03-camara-me"><div id="s03-camara-velo-2" class="s03-camara-velo s03-camara-velo-verde"></div><div id="s03-camara-eb-2" class="s03-camara-esq s03-camara-esq-blanca"><i class="s03-camara-tl"></i><i class="s03-camara-tr"></i><i class="s03-camara-bl"></i><i class="s03-camara-br"></i></div><div id="s03-camara-ec-2" class="s03-camara-esq s03-camara-esq-verde"><i class="s03-camara-tl"></i><i class="s03-camara-tr"></i><i class="s03-camara-bl"></i><i class="s03-camara-br"></i></div></div></div>
+      <div id="s03-camara-marco-3" class="s03-camara-marco" style="left:337px;top:81px"><div id="s03-camara-me-3" class="s03-camara-me"><div id="s03-camara-velo-3" class="s03-camara-velo s03-camara-velo-verde"></div><div id="s03-camara-eb-3" class="s03-camara-esq s03-camara-esq-blanca"><i class="s03-camara-tl"></i><i class="s03-camara-tr"></i><i class="s03-camara-bl"></i><i class="s03-camara-br"></i></div><div id="s03-camara-ec-3" class="s03-camara-esq s03-camara-esq-verde"><i class="s03-camara-tl"></i><i class="s03-camara-tr"></i><i class="s03-camara-bl"></i><i class="s03-camara-br"></i></div></div></div>
+      <div id="s03-camara-marco-4" class="s03-camara-marco" style="left:435px;top:83px"><div id="s03-camara-me-4" class="s03-camara-me"><div id="s03-camara-velo-4" class="s03-camara-velo s03-camara-velo-verde"></div><div id="s03-camara-eb-4" class="s03-camara-esq s03-camara-esq-blanca"><i class="s03-camara-tl"></i><i class="s03-camara-tr"></i><i class="s03-camara-bl"></i><i class="s03-camara-br"></i></div><div id="s03-camara-ec-4" class="s03-camara-esq s03-camara-esq-verde"><i class="s03-camara-tl"></i><i class="s03-camara-tr"></i><i class="s03-camara-bl"></i><i class="s03-camara-br"></i></div></div></div>
+      <div id="s03-camara-marco-5" class="s03-camara-marco" style="left:543px;top:82px"><div id="s03-camara-me-5" class="s03-camara-me"><div id="s03-camara-velo-5" class="s03-camara-velo s03-camara-velo-gris"></div><div id="s03-camara-eb-5" class="s03-camara-esq s03-camara-esq-blanca"><i class="s03-camara-tl"></i><i class="s03-camara-tr"></i><i class="s03-camara-bl"></i><i class="s03-camara-br"></i></div></div><div class="s03-camara-chip-pos"><span id="s03-camara-chip-5" class="s03-camara-chip s03-camara-chip-pendiente">Pendiente</span></div></div>
+      <div id="s03-camara-marco-6" class="s03-camara-marco" style="left:643px;top:84px"><div id="s03-camara-me-6" class="s03-camara-me"><div id="s03-camara-velo-6" class="s03-camara-velo s03-camara-velo-verde"></div><div id="s03-camara-eb-6" class="s03-camara-esq s03-camara-esq-blanca"><i class="s03-camara-tl"></i><i class="s03-camara-tr"></i><i class="s03-camara-bl"></i><i class="s03-camara-br"></i></div><div id="s03-camara-ec-6" class="s03-camara-esq s03-camara-esq-verde"><i class="s03-camara-tl"></i><i class="s03-camara-tr"></i><i class="s03-camara-bl"></i><i class="s03-camara-br"></i></div></div></div>
+      <div id="s03-camara-marco-7" class="s03-camara-marco" style="left:752px;top:81px"><div id="s03-camara-me-7" class="s03-camara-me"><div id="s03-camara-velo-7" class="s03-camara-velo s03-camara-velo-verde"></div><div id="s03-camara-eb-7" class="s03-camara-esq s03-camara-esq-blanca"><i class="s03-camara-tl"></i><i class="s03-camara-tr"></i><i class="s03-camara-bl"></i><i class="s03-camara-br"></i></div><div id="s03-camara-ec-7" class="s03-camara-esq s03-camara-esq-verde"><i class="s03-camara-tl"></i><i class="s03-camara-tr"></i><i class="s03-camara-bl"></i><i class="s03-camara-br"></i></div></div></div>
+      <div id="s03-camara-marco-8" class="s03-camara-marco" style="left:60px;top:230px"><div id="s03-camara-me-8" class="s03-camara-me"><div id="s03-camara-velo-8" class="s03-camara-velo s03-camara-velo-verde"></div><div id="s03-camara-eb-8" class="s03-camara-esq s03-camara-esq-blanca"><i class="s03-camara-tl"></i><i class="s03-camara-tr"></i><i class="s03-camara-bl"></i><i class="s03-camara-br"></i></div><div id="s03-camara-ec-8" class="s03-camara-esq s03-camara-esq-verde"><i class="s03-camara-tl"></i><i class="s03-camara-tr"></i><i class="s03-camara-bl"></i><i class="s03-camara-br"></i></div></div></div>
+      <div id="s03-camara-marco-9" class="s03-camara-marco" style="left:159px;top:229px"><div id="s03-camara-me-9" class="s03-camara-me"><div id="s03-camara-velo-9" class="s03-camara-velo s03-camara-velo-verde"></div><div id="s03-camara-eb-9" class="s03-camara-esq s03-camara-esq-blanca"><i class="s03-camara-tl"></i><i class="s03-camara-tr"></i><i class="s03-camara-bl"></i><i class="s03-camara-br"></i></div><div id="s03-camara-ec-9" class="s03-camara-esq s03-camara-esq-verde"><i class="s03-camara-tl"></i><i class="s03-camara-tr"></i><i class="s03-camara-bl"></i><i class="s03-camara-br"></i></div></div></div>
+      <div id="s03-camara-marco-10" class="s03-camara-marco" style="left:269px;top:227px"><div id="s03-camara-me-10" class="s03-camara-me"><div id="s03-camara-velo-10" class="s03-camara-velo s03-camara-velo-verde"></div><div id="s03-camara-eb-10" class="s03-camara-esq s03-camara-esq-blanca"><i class="s03-camara-tl"></i><i class="s03-camara-tr"></i><i class="s03-camara-bl"></i><i class="s03-camara-br"></i></div><div id="s03-camara-ec-10" class="s03-camara-esq s03-camara-esq-verde"><i class="s03-camara-tl"></i><i class="s03-camara-tr"></i><i class="s03-camara-bl"></i><i class="s03-camara-br"></i></div></div></div>
+      <div id="s03-camara-marco-11" class="s03-camara-marco" style="left:372px;top:228px"><div id="s03-camara-me-11" class="s03-camara-me"><div id="s03-camara-velo-11" class="s03-camara-velo s03-camara-velo-verde"></div><div id="s03-camara-eb-11" class="s03-camara-esq s03-camara-esq-blanca"><i class="s03-camara-tl"></i><i class="s03-camara-tr"></i><i class="s03-camara-bl"></i><i class="s03-camara-br"></i></div><div id="s03-camara-ec-11" class="s03-camara-esq s03-camara-esq-verde"><i class="s03-camara-tl"></i><i class="s03-camara-tr"></i><i class="s03-camara-bl"></i><i class="s03-camara-br"></i></div></div><div class="s03-camara-chip-pos"><div id="s03-camara-chip-central" class="s03-camara-chip-pila"><span id="s03-camara-chip-c-pen" class="s03-camara-chip s03-camara-chip-pendiente">Pendiente</span><span id="s03-camara-chip-c-pre" class="s03-camara-chip s03-camara-chip-presente">Presente</span></div></div></div>
+      <div id="s03-camara-marco-12" class="s03-camara-marco" style="left:472px;top:230px"><div id="s03-camara-me-12" class="s03-camara-me"><div id="s03-camara-velo-12" class="s03-camara-velo s03-camara-velo-verde"></div><div id="s03-camara-eb-12" class="s03-camara-esq s03-camara-esq-blanca"><i class="s03-camara-tl"></i><i class="s03-camara-tr"></i><i class="s03-camara-bl"></i><i class="s03-camara-br"></i></div><div id="s03-camara-ec-12" class="s03-camara-esq s03-camara-esq-verde"><i class="s03-camara-tl"></i><i class="s03-camara-tr"></i><i class="s03-camara-bl"></i><i class="s03-camara-br"></i></div></div></div>
+      <div id="s03-camara-marco-13" class="s03-camara-marco" style="left:581px;top:228px"><div id="s03-camara-me-13" class="s03-camara-me"><div id="s03-camara-velo-13" class="s03-camara-velo s03-camara-velo-verde"></div><div id="s03-camara-eb-13" class="s03-camara-esq s03-camara-esq-blanca"><i class="s03-camara-tl"></i><i class="s03-camara-tr"></i><i class="s03-camara-bl"></i><i class="s03-camara-br"></i></div><div id="s03-camara-ec-13" class="s03-camara-esq s03-camara-esq-verde"><i class="s03-camara-tl"></i><i class="s03-camara-tr"></i><i class="s03-camara-bl"></i><i class="s03-camara-br"></i></div></div></div>
+      <div id="s03-camara-marco-14" class="s03-camara-marco" style="left:681px;top:228px"><div id="s03-camara-me-14" class="s03-camara-me"><div id="s03-camara-velo-14" class="s03-camara-velo s03-camara-velo-ambar"></div><div id="s03-camara-eb-14" class="s03-camara-esq s03-camara-esq-blanca"><i class="s03-camara-tl"></i><i class="s03-camara-tr"></i><i class="s03-camara-bl"></i><i class="s03-camara-br"></i></div><div id="s03-camara-ec-14" class="s03-camara-esq s03-camara-esq-ambar"><i class="s03-camara-tl"></i><i class="s03-camara-tr"></i><i class="s03-camara-bl"></i><i class="s03-camara-br"></i></div></div><div class="s03-camara-chip-pos"><span id="s03-camara-chip-14" class="s03-camara-chip s03-camara-chip-retardo">Retardo</span></div></div>
+      <div id="s03-camara-marco-15" class="s03-camara-marco" style="left:788px;top:226px"><div id="s03-camara-me-15" class="s03-camara-me"><div id="s03-camara-velo-15" class="s03-camara-velo s03-camara-velo-verde"></div><div id="s03-camara-eb-15" class="s03-camara-esq s03-camara-esq-blanca"><i class="s03-camara-tl"></i><i class="s03-camara-tr"></i><i class="s03-camara-bl"></i><i class="s03-camara-br"></i></div><div id="s03-camara-ec-15" class="s03-camara-esq s03-camara-esq-verde"><i class="s03-camara-tl"></i><i class="s03-camara-tr"></i><i class="s03-camara-bl"></i><i class="s03-camara-br"></i></div></div></div>
+      <div id="s03-camara-marco-16" class="s03-camara-marco" style="left:90px;top:375px"><div id="s03-camara-me-16" class="s03-camara-me"><div id="s03-camara-velo-16" class="s03-camara-velo s03-camara-velo-verde"></div><div id="s03-camara-eb-16" class="s03-camara-esq s03-camara-esq-blanca"><i class="s03-camara-tl"></i><i class="s03-camara-tr"></i><i class="s03-camara-bl"></i><i class="s03-camara-br"></i></div><div id="s03-camara-ec-16" class="s03-camara-esq s03-camara-esq-verde"><i class="s03-camara-tl"></i><i class="s03-camara-tr"></i><i class="s03-camara-bl"></i><i class="s03-camara-br"></i></div></div></div>
+      <div id="s03-camara-marco-17" class="s03-camara-marco" style="left:199px;top:377px"><div id="s03-camara-me-17" class="s03-camara-me"><div id="s03-camara-velo-17" class="s03-camara-velo s03-camara-velo-verde"></div><div id="s03-camara-eb-17" class="s03-camara-esq s03-camara-esq-blanca"><i class="s03-camara-tl"></i><i class="s03-camara-tr"></i><i class="s03-camara-bl"></i><i class="s03-camara-br"></i></div><div id="s03-camara-ec-17" class="s03-camara-esq s03-camara-esq-verde"><i class="s03-camara-tl"></i><i class="s03-camara-tr"></i><i class="s03-camara-bl"></i><i class="s03-camara-br"></i></div></div></div>
+      <div id="s03-camara-marco-18" class="s03-camara-marco" style="left:297px;top:378px"><div id="s03-camara-me-18" class="s03-camara-me"><div id="s03-camara-velo-18" class="s03-camara-velo s03-camara-velo-verde"></div><div id="s03-camara-eb-18" class="s03-camara-esq s03-camara-esq-blanca"><i class="s03-camara-tl"></i><i class="s03-camara-tr"></i><i class="s03-camara-bl"></i><i class="s03-camara-br"></i></div><div id="s03-camara-ec-18" class="s03-camara-esq s03-camara-esq-verde"><i class="s03-camara-tl"></i><i class="s03-camara-tr"></i><i class="s03-camara-bl"></i><i class="s03-camara-br"></i></div></div></div>
+      <div id="s03-camara-marco-19" class="s03-camara-marco" style="left:404px;top:377px"><div id="s03-camara-me-19" class="s03-camara-me"><div id="s03-camara-velo-19" class="s03-camara-velo s03-camara-velo-verde"></div><div id="s03-camara-eb-19" class="s03-camara-esq s03-camara-esq-blanca"><i class="s03-camara-tl"></i><i class="s03-camara-tr"></i><i class="s03-camara-bl"></i><i class="s03-camara-br"></i></div><div id="s03-camara-ec-19" class="s03-camara-esq s03-camara-esq-verde"><i class="s03-camara-tl"></i><i class="s03-camara-tr"></i><i class="s03-camara-bl"></i><i class="s03-camara-br"></i></div></div></div>
+      <div id="s03-camara-marco-20" class="s03-camara-marco" style="left:510px;top:374px"><div id="s03-camara-me-20" class="s03-camara-me"><div id="s03-camara-velo-20" class="s03-camara-velo s03-camara-velo-verde"></div><div id="s03-camara-eb-20" class="s03-camara-esq s03-camara-esq-blanca"><i class="s03-camara-tl"></i><i class="s03-camara-tr"></i><i class="s03-camara-bl"></i><i class="s03-camara-br"></i></div><div id="s03-camara-ec-20" class="s03-camara-esq s03-camara-esq-verde"><i class="s03-camara-tl"></i><i class="s03-camara-tr"></i><i class="s03-camara-bl"></i><i class="s03-camara-br"></i></div></div></div>
+      <div id="s03-camara-marco-21" class="s03-camara-marco" style="left:609px;top:378px"><div id="s03-camara-me-21" class="s03-camara-me"><div id="s03-camara-velo-21" class="s03-camara-velo s03-camara-velo-verde"></div><div id="s03-camara-eb-21" class="s03-camara-esq s03-camara-esq-blanca"><i class="s03-camara-tl"></i><i class="s03-camara-tr"></i><i class="s03-camara-bl"></i><i class="s03-camara-br"></i></div><div id="s03-camara-ec-21" class="s03-camara-esq s03-camara-esq-verde"><i class="s03-camara-tl"></i><i class="s03-camara-tr"></i><i class="s03-camara-bl"></i><i class="s03-camara-br"></i></div></div></div>
+      <div id="s03-camara-marco-22" class="s03-camara-marco" style="left:717px;top:377px"><div id="s03-camara-me-22" class="s03-camara-me"><div id="s03-camara-eb-22" class="s03-camara-esq s03-camara-esq-blanca"><i class="s03-camara-tl"></i><i class="s03-camara-tr"></i><i class="s03-camara-bl"></i><i class="s03-camara-br"></i></div></div></div>
+      <div id="s03-camara-reconociendo" class="s03-camara-camchip"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" data-lucide="scan-face" id="s03-camara-ico-scan" class="s03-camara-ico" aria-hidden="true"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><path d="M9 9h.01"/><path d="M15 9h.01"/></svg><span>Reconociendo</span></div>
+      <div id="s03-camara-frente" class="s03-camara-frente">Cámara frente</div>
+    </div>
+    <div id="s03-camara-ultima" class="s03-camara-ultima">Última captura: <b>23</b> rostros · <b>22</b> válidos</div>
+
+    <div id="s03-camara-rotulo" class="s03-camara-rotulo">Asistencia ahora</div>
+    <div id="s03-camara-cifra" class="s03-camara-cifra">
+      <div id="s03-camara-fila19" class="s03-camara-fila">
+        <span class="s03-camara-col s03-camara-col-19"><span id="s03-camara-tira-d19" class="s03-camara-tira"><span> </span><span>1</span></span></span><span class="s03-camara-col s03-camara-col-19"><span id="s03-camara-tira-u19" class="s03-camara-tira"><span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span></span></span>
+        <span class="s03-camara-suf19">de 24 presentes</span>
+      </div>
+    </div>
+    <div id="s03-camara-barra" class="s03-camara-barra"><div class="s03-camara-segs"><span id="s03-camara-seg-p" class="s03-camara-seg" style="width:528.83px;background:#27A06A"></span><span id="s03-camara-seg-r" class="s03-camara-seg" style="width:55.67px;background:#C98100"></span><span id="s03-camara-seg-s" class="s03-camara-seg" style="width:55.67px;background:#DE4D44"></span><span id="s03-camara-seg-pe" class="s03-camara-seg" style="width:27.83px;background:#8F8A82"></span></div></div>
+    <div id="s03-camara-detalle" class="s03-camara-detalle"><span id="s03-camara-pal-0" class="s03-camara-pal">2</span> <span id="s03-camara-pal-1" class="s03-camara-pal">con</span> <span id="s03-camara-pal-2" class="s03-camara-pal">retardo</span> <span id="s03-camara-pal-3" class="s03-camara-pal">·</span> <span id="s03-camara-pal-4" class="s03-camara-pal">2</span> <span id="s03-camara-pal-5" class="s03-camara-pal">sin</span> <span id="s03-camara-pal-6" class="s03-camara-pal">registro</span> <span id="s03-camara-pal-7" class="s03-camara-pal">·</span> <span id="s03-camara-pal-8" class="s03-camara-pal">1</span> <span id="s03-camara-pal-9" class="s03-camara-pal">por</span> <span id="s03-camara-pal-10" class="s03-camara-pal">revisar</span></div>
+
+    <div id="s03-camara-tanque" class="s03-camara-tanque">
+      <div id="s03-camara-liquido" class="s03-camara-liquido"></div>
+      <div class="s03-camara-marcas"></div>
+    </div>
+    <div class="s03-camara-medtxt">
+      <div id="s03-camara-pct" class="s03-camara-pct">
+        <div id="s03-camara-fila88" class="s03-camara-fila">
+          <span class="s03-camara-col s03-camara-col-88"><span id="s03-camara-tira-d88" class="s03-camara-tira"><span> </span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span></span></span><span class="s03-camara-col s03-camara-col-88"><span id="s03-camara-tira-u88" class="s03-camara-tira"><span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span></span></span><span class="s03-camara-suf88">&nbsp;%</span>
+        </div>
+      </div>
+      <div id="s03-camara-med-et" class="s03-camara-med-et">Presentes ahora</div>
+      <div id="s03-camara-med-desc" class="s03-camara-med-desc">21 de 24 inscritos</div>
+    </div>
+  </div>
+
+  <!-- estela vertical de los odómetros: un filtro por columna, región ajustada al eje (PILOTO §3c) -->
+  <svg width="0" height="0" aria-hidden="true" style="position:absolute">
+    <filter id="s03-camara-mb-d19" x="-10%" y="-6%" width="120%" height="112%" color-interpolation-filters="sRGB"><feGaussianBlur id="s03-camara-mb-d19-g" stdDeviation="0 0" /></filter>
+    <filter id="s03-camara-mb-u19" x="-10%" y="-6%" width="120%" height="112%" color-interpolation-filters="sRGB"><feGaussianBlur id="s03-camara-mb-u19-g" stdDeviation="0 0" /></filter>
+    <filter id="s03-camara-mb-d88" x="-10%" y="-6%" width="120%" height="112%" color-interpolation-filters="sRGB"><feGaussianBlur id="s03-camara-mb-d88-g" stdDeviation="0 0" /></filter>
+    <filter id="s03-camara-mb-u88" x="-10%" y="-6%" width="120%" height="112%" color-interpolation-filters="sRGB"><feGaussianBlur id="s03-camara-mb-u88-g" stdDeviation="0 0" /></filter>
+  </svg>
+</div>
+<!-- GSAP local: el CDN responde 403 en esta máquina (frame.md §1) -->
+<script src="assets/vendor/gsap.min.js"></script>
+<script>
+    (function () {
+        var ID = 's03-camara';
+        function $(s) { return document.getElementById(ID + '-' + s); }
+        var DOS_PI = Math.PI * 2;
+        // Obturador en segundos: la estela mide lo mismo a 30 y a 60 fps (PILOTO §3c).
+        var OBT = 1 / 60;
+
+        // Rostros: k, estado (p presente · r retardo · pe pendiente · v visita), central, retraso de la ola y x en el lienzo.
+        var CARAS = [{"k":0,"e":"p","c":0,"d":0.37,"x":948},{"k":1,"e":"r","c":0,"d":0.27,"x":1055},{"k":2,"e":"p","c":0,"d":0.2,"x":1154},{"k":3,"e":"p","c":0,"d":0.15,"x":1263},{"k":4,"e":"p","c":0,"d":0.15,"x":1361},{"k":5,"e":"pe","c":0,"d":0.22,"x":1469},{"k":6,"e":"p","c":0,"d":0.3,"x":1569},{"k":7,"e":"p","c":0,"d":0.39,"x":1678},{"k":8,"e":"p","c":0,"d":0.3,"x":986},{"k":9,"e":"p","c":0,"d":0.2,"x":1085},{"k":10,"e":"p","c":0,"d":0.1,"x":1195},{"k":11,"e":"p","c":1,"d":0,"x":1298},{"k":12,"e":"p","c":0,"d":0.1,"x":1398},{"k":13,"e":"p","c":0,"d":0.2,"x":1507},{"k":14,"e":"r","c":0,"d":0.3,"x":1607},{"k":15,"e":"p","c":0,"d":0.4,"x":1714},{"k":16,"e":"p","c":0,"d":0.31,"x":1016},{"k":17,"e":"p","c":0,"d":0.22,"x":1125},{"k":18,"e":"p","c":0,"d":0.16,"x":1223},{"k":19,"e":"p","c":0,"d":0.15,"x":1330},{"k":20,"e":"p","c":0,"d":0.19,"x":1436},{"k":21,"e":"p","c":0,"d":0.27,"x":1535},{"k":22,"e":"v","c":0,"d":0,"x":1643}];
+        var N = CARAS.length;
+        var cara = [], marco = [], me = [], velo = [], eb = [], ec = [], av = [];
+        for (var i = 0; i < N; i++) {
+            cara.push($('mov-' + i)); marco.push($('marco-' + i)); me.push($('me-' + i));
+            velo.push($('velo-' + i)); eb.push($('eb-' + i)); ec.push($('ec-' + i)); av.push($('av-' + i));
+        }
+        function alumnos(filtro) { return CARAS.filter(function (c) { return c.e !== 'v' && (!filtro || filtro(c)); }); }
+        var visita = CARAS.filter(function (c) { return c.e === 'v'; })[0];
+        var central = CARAS.filter(function (c) { return c.c; })[0];
+        var ambar = alumnos(function (c) { return c.e === 'r'; });
+
+        var tl = gsap.timeline({ paused: true });
+
+        /* ===== bloque canónico v4 (scripts/frame-helpers.snippet.js): solo se usa readMark ===== */
+        window.SFXN = window.SFXN || 0;
+        function readMark(tl, t, frase) {
+            tl.addLabel('read:' + frase + '#' + (window.SFXN++), t);
+            return t;
+        }
+
+        function sstep(x) { x = Math.max(0, Math.min(1, x)); return x * x * (3 - 2 * x); }
+        function cubOut(x) { x = Math.max(0, Math.min(1, x)); return 1 - Math.pow(1 - x, 3); }
+
+        // Velocidad de la curva en fracción por segundo (diferencia central: función pura de t).
+        function velocidad(ease, p, dur) {
+            var h = 0.002, a = Math.max(0, p - h), b = Math.min(1, p + h);
+            return (ease(b) - ease(a)) / (b - a) / dur;
+        }
+        // Columna de odómetro con estela vertical ligada a la velocidad (σ = 0.29 · v · OBT, filter none en reposo).
+        function conRastro(o) {
+            var ease = gsap.parseEase(o.curva);
+            var st = { p: 0 };
+            var filtro = 'url(#' + o.nodo.parentNode.id + ')';
+            function aplicar() {
+                var p = st.p, e = ease(p);
+                gsap.set(o.el, { y: -o.dist * e });
+                var v = (p <= 0 || p >= 1) ? 0 : o.dist * velocidad(ease, p, o.dur);
+                var s = Math.min(o.max, 0.29 * v * OBT);
+                o.nodo.setAttribute('stdDeviation', '0 ' + s.toFixed(2));
+                o.el.style.filter = s < 0.3 ? 'none' : filtro;
+            }
+            aplicar();
+            tl.fromTo(st, { p: 0 }, { p: 1, duration: o.dur, ease: 'none', onUpdate: aplicar, immediateRender: false }, o.at);
+        }
+
+        /* ---------- Escena 1 (0.0–1.3 s): el marco vacío se puebla y entra la columna izquierda ---------- */
+        // 23 avatares en tres filas (8, 8, 7): opacidad y escala 0.92 → 1, escalonado por índice entre 0.10 y 0.50 s.
+        tl.fromTo(av, { opacity: 0, scale: 0.92 }, { opacity: 1, scale: 1, duration: 0.20, ease: 'power3.out', stagger: { each: 0.20 / (N - 1) } }, 0.10);
+        // Columna izquierda con los tiempos de la app (StaggerList: y 14 → 0 de la app × E, +60 ms).
+        tl.fromTo([$('rotulo'), $('cifra'), $('barra')], { y: 28, opacity: 0 }, { y: 0, opacity: 1, duration: 0.38, ease: 'power4.out', stagger: 0.06 }, 0.45);
+        // La cifra muestra «0» alineada a x = 140: la columna de decenas (vacía) queda a la izquierda hasta que rueda.
+        tl.fromTo($('fila19'), { x: -84.8 }, { x: 0, duration: 0.56, ease: 'expo.out' }, 5.05);
+
+        /* La clase sigue: un solo driver mueve cada rostro (seno lento con fase propia) y DERIVA su marco del rostro en el mismo
+           onUpdate (ai-tracking-box: el marco nunca tiene tween de posición propio). Envolvente: entra de 0.6 a 1.4 s y se apaga
+           de 6.8 a 8.3 s, así todo queda quieto desde 8.30 s (handoff_out). */
+        var FX = [], FY = [], PX = [], PY = [], AX = [];
+        for (var k = 0; k < N; k++) {
+            var a = (k * 0.6180339) % 1, b = (k * 0.3819660 + 0.27) % 1, c2 = (k * 0.7372 + 0.11) % 1;
+            FX.push(0.42 + 0.24 * a); FY.push((0.42 + 0.24 * a) * 1.37); PX.push(DOS_PI * b); PY.push(DOS_PI * c2); AX.push(4 + (k % 3));
+        }
+        var MOV0 = 0.6, MOV1 = 8.3;
+        function envolvente(t) { return Math.min(sstep((t - MOV0) / 0.8), 1 - sstep((t - 6.8) / (MOV1 - 6.8))); }
+        var mov = { t: MOV0 };
+        function aplicarMov() {
+            var t = mov.t, e = envolvente(t), tt = t - MOV0;
+            for (var k = 0; k < N; k++) {
+                var dx = e * AX[k] * Math.sin(DOS_PI * FX[k] * tt + PX[k]);
+                var dy = e * 1.5 * Math.sin(DOS_PI * FY[k] * tt + PY[k]);
+                cara[k].style.transform = 'translate(' + dx.toFixed(2) + 'px,' + dy.toFixed(2) + 'px)';
+                // reajuste del marco: ±3 px fuera de fase (multiplicador no entero) para que se lea vivo, no como captura fija
+                var w = 92 + e * 3 * Math.sin(DOS_PI * FX[k] * 1.9 * tt + PY[k]);
+                var h = 92 + e * 3 * Math.sin(DOS_PI * FX[k] * 1.9 * tt + PY[k] + Math.PI / 2);
+                marco[k].style.width = w.toFixed(2) + 'px';
+                marco[k].style.height = h.toFixed(2) + 'px';
+                marco[k].style.transform = 'translate(' + (dx - (w - 92) / 2).toFixed(2) + 'px,' + (dy - (h - 92) / 2).toFixed(2) + 'px)';
+            }
+        }
+        aplicarMov();
+        tl.fromTo(mov, { t: MOV0 }, { t: MOV1, duration: MOV1 - MOV0, ease: 'none', onUpdate: aplicarMov, immediateRender: false }, MOV0);
+
+        /* ---------- Escena 2 (1.3–4.9 s): detección, traba y seguimiento ---------- */
+        // 1.30 s (shutter): las esquinas se traban en 22 rostros en un barrido de izquierda a derecha; todas trabadas a 1.90 s.
+        var porX = alumnos().slice().sort(function (p, q) { return p.x - q.x; }).map(function (c) { return me[c.k]; });
+        tl.fromTo(porX, { scale: 1.22, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.30, ease: 'power3.out', stagger: { each: 0.30 / (porX.length - 1) } }, 1.30);
+        // La visita: su marco queda al 30 %, sin marco válido y sin decirlo.
+        tl.fromTo(me[visita.k], { scale: 1.22, opacity: 0 }, { scale: 1, opacity: 0.3, duration: 0.30, ease: 'power3.out' }, 1.60);
+        // 1.60–1.90 s: StatusChip sm «Pendiente» bajo el rostro más centrado (estado de partida).
+        tl.fromTo($('chip-central'), { y: 8, opacity: 0 }, { y: 0, opacity: 1, duration: 0.30, ease: 'power3.out' }, 1.60);
+        // 2.75–3.00 s: las esquinas laten una vez (1 → 1.06 → 1) mientras siguen a los rostros.
+        var todosMe = alumnos().map(function (c) { return me[c.k]; });
+        tl.fromTo(todosMe, { scale: 1 }, { scale: 1.06, duration: 0.08, ease: 'power2.out', immediateRender: false }, 2.75);
+        tl.fromTo(todosMe, { scale: 1.06 }, { scale: 1, duration: 0.17, ease: 'power2.inOut', immediateRender: false }, 2.83);
+        // 3.85–4.15 s: el icono scan-face del chip «Reconociendo» late una vez (pulso de escala + opacidad, como animate-pulse).
+        var ico = $('ico-scan');
+        var pulso = { p: 0 };
+        function aplicarPulso() {
+            var s = Math.sin(Math.PI * pulso.p);
+            ico.style.transform = 'scale(' + (1 + 0.22 * s).toFixed(4) + ')';
+            ico.style.opacity = (1 - 0.45 * s).toFixed(4);
+        }
+        aplicarPulso();
+        tl.fromTo(pulso, { p: 0 }, { p: 1, duration: 0.30, ease: 'none', onUpdate: aplicarPulso, immediateRender: false }, 3.85);
+
+        /* ---------- Escena 3 (4.9–7.3 s): la ola confirma sin número ---------- */
+        // Ola desde el rostro central hacia los bordes (frente de 4.90 a 5.30 s): velo del estado 0 → 1 → 0 en 0.3 s por marco y las
+        // esquinas pasan de blanco a su color (verde 19, ámbar 2; la pendiente sigue blanca).
+        var OLA = 4.90, VELO = 0.30;
+        var ola = { t: OLA };
+        function aplicarOla() {
+            for (var j = 0; j < N; j++) {
+                var c = CARAS[j];
+                if (c.e === 'v') continue;
+                var u = (ola.t - OLA - c.d) / VELO;
+                velo[j].style.opacity = (u <= 0 || u >= 1) ? '0' : Math.sin(Math.PI * u).toFixed(4);
+                if (c.e === 'p' || c.e === 'r') {
+                    var cc = sstep((u - 0.3) / 0.4);
+                    ec[j].style.opacity = cc.toFixed(4);
+                    eb[j].style.opacity = (1 - cc).toFixed(4);
+                }
+            }
+        }
+        aplicarOla();
+        tl.fromTo(ola, { t: OLA }, { t: OLA + 0.40 + VELO, duration: 0.40 + VELO, ease: 'none', onUpdate: aplicarOla, immediateRender: false }, OLA);
+        // 4.90–5.00 s: el chip central pasa de «Pendiente» a «Presente» (el nuevo entra encima por opacidad, el viejo se apaga).
+        tl.fromTo($('chip-c-pre'), { opacity: 0 }, { opacity: 1, duration: 0.10, ease: 'power2.out' }, 4.90);
+        tl.fromTo($('chip-c-pen'), { opacity: 1 }, { opacity: 0, duration: 0.10, ease: 'power2.in' }, 4.90);
+        // Cada estado con su etiqueta: «Retardo» ×2 y «Pendiente» ×1 entran cuando la ola cruza su marco.
+        CARAS.forEach(function (c) {
+            if (c.c || (c.e !== 'r' && c.e !== 'pe')) return;
+            tl.fromTo($('chip-' + c.k), { y: 8, opacity: 0 }, { y: 0, opacity: 1, duration: 0.25, ease: 'power3.out' }, OLA + c.d + 0.12);
+        });
+        // 5.05–5.65 s: la cifra rueda de 0 a 19 (decenas asentadas a 5.61 s, unidades a 5.65 s), quieta desde 5.65 s.
+        var H19 = 176;
+        conRastro({ el: $('tira-d19'), nodo: $('mb-d19-g'), at: 5.05, dur: 0.56, curva: 'expo.out', dist: H19, max: 16 });
+        conRastro({ el: $('tira-u19'), nodo: $('mb-u19-g'), at: 5.09, dur: 0.56, curva: 'expo.out', dist: 19 * H19, max: 16 });
+        readMark(tl, 5.65, '19 de 24 presentes');
+        // 5.35–6.15 s: la BarraSegmentada real se llena por segmentos de izquierda a derecha (clip-path, +80 ms por segmento).
+        tl.fromTo([$('seg-p'), $('seg-r'), $('seg-s'), $('seg-pe')], { clipPath: 'inset(0% 100% 0% 0% round 999px)' },
+            { clipPath: 'inset(0% 0% 0% 0% round 999px)', duration: 0.56, ease: 'power4.out', stagger: 0.08 }, 5.35);
+        // 6.05–6.45 s: «2 con retardo · 2 sin registro · 1 por revisar» entra desde el desenfoque (BlurText por palabra).
+        var pals = Array.prototype.slice.call(document.querySelectorAll('#' + ID + '-detalle .s03-camara-pal'));
+        var blurTxt = { t: 0 };
+        function aplicarBlur() {
+            for (var j = 0; j < pals.length; j++) {
+                var e = cubOut((blurTxt.t - j * 0.016) / 0.24);
+                var bl = 10 * (1 - e);
+                pals[j].style.opacity = e.toFixed(4);
+                pals[j].style.transform = 'translateY(' + (-14 * (1 - e)).toFixed(2) + 'px)';
+                pals[j].style.filter = bl < 0.05 ? 'none' : 'blur(' + bl.toFixed(2) + 'px)';
+            }
+        }
+        aplicarBlur();
+        tl.fromTo(blurTxt, { t: 0 }, { t: 0.40, duration: 0.40, ease: 'none', onUpdate: aplicarBlur, immediateRender: false }, 6.05);
+        // 6.35–6.75 s: bajo la cámara, la línea real de la última captura (rostros de la toma, no lecturas por alumno).
+        tl.fromTo($('ultima'), { y: 16, opacity: 0 }, { y: 0, opacity: 1, duration: 0.40, ease: 'power3.out' }, 6.35);
+
+        /* ---------- Escena 4 (7.3–8.5 s): el medidor sube a 88 % y el halo pasa a verde ---------- */
+        tl.fromTo($('tanque'), { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: 0.40, ease: 'power4.out' }, 7.30);
+        tl.fromTo([$('pct'), $('med-et'), $('med-desc')], { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: 0.40, ease: 'power4.out', stagger: 0.06 }, 7.30);
+        // Física apta para seek (frame.md §5.7): nivel monótono power3.out que se asienta en 88 % sin sobreimpulso (7.30–7.85 s)
+        // y desnivel de la superficie A·e^(−t/0.5)·sin(2πt/0.6) que se apaga solo; afinado a 0 exacto en 8.30 s.
+        var liquido = $('liquido');
+        var TANQUE_H = 269, TANQUE_W = 134, NIVEL = 0.88, A_DESNIVEL = 0.06 * TANQUE_W;
+        var med = { t: 0 };
+        function aplicarMedidor() {
+            var t = med.t;
+            var nivel = NIVEL * cubOut(t / 0.55);
+            var afinado = 1 - sstep((t - 0.6) / 0.4);
+            var d = t <= 0 ? 0 : A_DESNIVEL * Math.exp(-t / 0.5) * Math.sin(DOS_PI * t / 0.6) * afinado;
+            var y = TANQUE_H * (1 - nivel);
+            liquido.style.clipPath = 'polygon(0px ' + (y + d).toFixed(2) + 'px, 100% ' + (y - d).toFixed(2) + 'px, 100% 100%, 0px 100%)';
+        }
+        aplicarMedidor();
+        tl.fromTo(med, { t: 0 }, { t: 1.0, duration: 1.0, ease: 'none', onUpdate: aplicarMedidor, immediateRender: false }, 7.30);
+        // «88 %» rueda a la derecha del tanque con la misma curva del nivel (decenas 7.30–7.81, unidades 7.34–7.85).
+        var H88 = 80;
+        tl.fromTo($('fila88'), { x: -38.52 }, { x: 0, duration: 0.51, ease: 'power3.out' }, 7.30);
+        conRastro({ el: $('tira-d88'), nodo: $('mb-d88-g'), at: 7.30, dur: 0.51, curva: 'power3.out', dist: 8 * H88, max: 10 });
+        conRastro({ el: $('tira-u88'), nodo: $('mb-u88-g'), at: 7.34, dur: 0.51, curva: 'power3.out', dist: 18 * H88, max: 10 });
+        // 7.40–8.10 s: el halo pasa de azul a verde (la capa nueva sube encima; ninguna capa baja a 0).
+        tl.fromTo($('halo-verde'), { opacity: 0 }, { opacity: 1, duration: 0.70, ease: 'power2.inOut' }, 7.40);
+        // 7.85 s: al asentarse, los dos marcos ámbar «Retardo» laten una vez (el medidor cuenta presentes más retardos).
+        var meAmbar = ambar.map(function (c) { return me[c.k]; });
+        tl.fromTo(meAmbar, { scale: 1 }, { scale: 1.06, duration: 0.08, ease: 'power2.out', immediateRender: false }, 7.85);
+        tl.fromTo(meAmbar, { scale: 1.06 }, { scale: 1, duration: 0.17, ease: 'power2.inOut', immediateRender: false }, 7.93);
+
+        tl.set({}, {}, 8.5);
+        window.__timelines = window.__timelines || {};
+        window.__timelines[ID] = tl;
+    })();
+</script>
+</template>
