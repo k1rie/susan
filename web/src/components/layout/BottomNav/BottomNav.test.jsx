@@ -31,13 +31,38 @@ const ADMIN = [
 const orden = (contenedor) => [...contenedor.querySelectorAll('a, button')].map((e) => e.getAttribute('aria-label') ?? e.textContent.trim());
 
 describe('BottomNav', () => {
-    it('con menos de dos destinos no se muestra (no aporta)', () => {
+    it('con menos de dos destinos y sin «Más» no se muestra (no aporta)', () => {
         const { container, rerender } = render(<BottomNav items={[DOCENTE[0]]} pathname="/docente" onBuscar={() => {}} />);
         expect(container).toBeEmptyDOMElement();
         rerender(<BottomNav items={[]} pathname="/" />);
         expect(container).toBeEmptyDOMElement();
         rerender(<BottomNav pathname="/" />);
         expect(container).toBeEmptyDOMElement();
+        // aunque haya «Más», sin ningún destino no hay nada que mostrar
+        rerender(<BottomNav items={[]} pathname="/" onMas={() => {}} onBuscar={() => {}} />);
+        expect(container).toBeEmptyDOMElement();
+    });
+
+    it('con un solo destino y «Más» sí se muestra: «Más» es la única puerta al cajón (cuenta, búsqueda, salir)', () => {
+        const onMas = vi.fn();
+        render(<BottomNav items={[DOCENTE[0]]} pathname="/docente" onMas={onMas} onBuscar={() => {}} />);
+        expect(orden(screen.getByRole('navigation'))).toEqual(['Panel', 'Buscar o ir a', 'Más']);
+        fireEvent.click(screen.getByRole('button', { name: 'Más' }));
+        expect(onMas).toHaveBeenCalledTimes(1);
+    });
+
+    it('con «Más» los destinos se recortan a 3 aunque quepan 4: «Más» siempre cierra la derecha', () => {
+        render(<BottomNav items={DOCENTE} pathname="/docente" onMas={() => {}} onBuscar={() => {}} />);
+        expect(orden(screen.getByRole('navigation'))).toEqual(['Panel', 'Revisión', 'Buscar o ir a', 'Reportes', 'Más']);
+        expect(screen.queryByRole('link', { name: 'Analítica' })).toBeNull();
+    });
+
+    it('docente real (Pasar lista al centro): 2 destinos, el centro, 1 destino y «Más»; «Analítica» pasa al cajón y enciende «Más»', () => {
+        const { rerender } = render(<BottomNav items={DOCENTE_CON_PASAR_LISTA} pathname="/docente" onMas={() => {}} accionCentral={PASAR_LISTA} />);
+        expect(orden(screen.getByRole('navigation'))).toEqual(['Panel', 'Revisión', 'Pasar lista', 'Reportes', 'Más']);
+        expect(screen.getByRole('button', { name: 'Más' })).not.toHaveClass('bg-accent');
+        rerender(<BottomNav items={DOCENTE_CON_PASAR_LISTA} pathname="/analitica" onMas={() => {}} accionCentral={PASAR_LISTA} />);
+        expect(screen.getByRole('button', { name: 'Más' })).toHaveClass('bg-accent');
     });
 
     it('es una navegación con nombre, flotante y solo para teléfono (oculta desde lg)', () => {

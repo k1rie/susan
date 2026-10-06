@@ -43,7 +43,7 @@ reglas de movimiento en `web/src/components/motion/README.md`; plan y avance en 
 - **Riel**: marca arriba · «Inicio» y «Buscar ⌘ K» (abre la paleta) · secciones con título gris (`Catálogos`, `Asistencia`, `Análisis`… definidas por `grupo` en `navItems.js`) ·
   «Próximamente» (módulos de la hoja de ruta con ficha de color y candado) · abajo «Módulos» y la **cuenta** (avatar de color + nombre + rol; el menú abre hacia arriba: ver bienvenida, cambiar contraseña, salir).
   Ítem activo: fondo gris suave y peso 500. Iconos de 20 px.
-- **Teléfono/tableta (< 1024 px)**: barra superior fija (menú, marca, buscar, avatar), el riel se convierte en cajón, barra inferior con 4–5 destinos (+ «Más»), el panel ocupa todo el ancho.
+- **Teléfono/tableta (< 1024 px)**: **sin barra superior**. Solo la barra inferior flotante: hasta 3 destinos + el botón central (la acción del rol o «Buscar») + «Más», que siempre está y abre el riel convertido en cajón a todo lo alto (marca, «Buscar», navegación, «Módulos» y la cuenta con «Salir»). El panel ocupa todo el ancho.
 - **Paleta de comandos** `⌘K / Ctrl+K`: combobox/listbox sobre páginas, módulos próximos y acciones de cuenta.
 
 ## Componentes firma

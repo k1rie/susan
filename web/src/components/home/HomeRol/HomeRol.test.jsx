@@ -22,7 +22,7 @@ describe('HomeRol', () => {
         expect(screen.getByRole('link', { name: /Pasar lista/ })).toHaveAttribute('href', '/docente/pasar-lista');
     });
 
-    it('docente: en teléfono se oculta el campo de búsqueda grande (la barra superior ya busca) para que «Pasar lista» no baje del pliegue', () => {
+    it('docente: en teléfono se oculta el campo de búsqueda grande (el buscador está en «Más» y «Pasar lista» es el botón central) para que «Pasar lista» no baje del pliegue', () => {
         conShell({ nombre: 'Patricia Ortega', rol: 'docente' });
         const campo = screen.getByRole('button', { name: 'Buscar o ir a' });
         expect(campo.parentElement).toHaveClass('hidden', 'sm:block');

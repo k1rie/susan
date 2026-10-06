@@ -9,7 +9,7 @@ import { usePreferenciasPerfil } from '@/lib/perfil';
 import { rolEtiqueta } from '../Sidebar/navItems.js';
 
 // Menú de cuenta. `variante="fila"`: fila completa al pie del riel (avatar + nombre + rol; el menú se abre hacia arriba, como
-// «Account» en Dash). `variante="avatar"`: solo el avatar (barra superior móvil; el menú se abre hacia abajo). Esc o clic fuera cierran.
+// «Account» en Dash). `variante="avatar"`: solo el avatar (hoy sin uso; el menú se abre hacia abajo). Esc o clic fuera cierran.
 export default function MenuCuenta({ me, onSalir, variante = 'fila', onNavegar }) {
     const [abierto, setAbierto] = useState(false);
     const raiz = useRef(null);
