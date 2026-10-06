@@ -69,3 +69,9 @@ Entregar el video final 1080p60 MÁS DINÁMICO (ver BRIEF.md, indicación del 20
 - 09:10 UTC: entrega preparada: `renders/susan-v4.mp4` (= r2), `renders/susan-v4-preview.mp4` y `plan/entrega-contacto.jpg`;
   commit `feat(video): render final de la v4 dinámica` + push. Falta enviarlo a la persona dueña.
 - 09:10 UTC: ENTREGADO. renders/susan-v4.mp4 (1080p60, 55 s, 25.2 MB) y renders/susan-v4-preview.mp4 enviados a la persona dueña; rutina «Reanudar video SUSAN v4» desactivada. Pendiente al despertar: sus comentarios, los 7 menores opcionales del QA r2 y la voz de ElevenLabs (scripts/generar-voz.mjs → mount-voz.mjs).
+
+## Ronda 3: menores del QA + voz de ElevenLabs (la persona dueña subió la voz; commit ac49d20)
+- Orden de la persona dueña: «corrige los menores y monta la voz».
+- Flujo: `scripts/flujos/susan-v4-menores-voz.js` (menores F1/F3/F6/F7/F8 con revisor → integración con mount-voz →
+  QA con voz hasta 3 renders → entrega). Salida: renders/susan-v4-voz.mp4 (+ preview), plan/VOZ-MONTAJE.md.
+- La versión sin voz (renders/susan-v4.mp4, entregada) no se toca.
