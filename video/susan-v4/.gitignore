@@ -13,3 +13,12 @@ voz-cache/
 
 # capturas del reel de referencia (contenido de terceros, solo uso local; el análisis vive en plan/REFERENCIA.md)
 referencia/
+
+# temporales de grabación de la captura
+capture/app-real/video/_tmp/
+
+# capturas de la app real (~170 MB; se regeneran con scripts/capture-app.mjs). Se versionan INVENTORY.md, manifest.json,
+# crops/*.json y tokens/.
+capture/app-real/**/*.png
+capture/app-real/**/*.webm
+capture/app-real/dom/

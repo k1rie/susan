@@ -1,0 +1,134 @@
+{
+  "pantalla": "27-revision-justificante",
+  "ruta": "/docente/revision?pestana=justificantes",
+  "cuenta": "docente1",
+  "sistemaDeCoordenadas": "px CSS de la página completa (en escritorio, con el panel blanco desenrollado); multiplicar por el deviceScaleFactor (2 escritorio, 3 móvil) para px del .full.png",
+  "componentes": [
+    {
+      "componente": "PageHeader",
+      "instancia": 1,
+      "archivo": "crops/27-revision-justificante--PageHeader.png",
+      "caja": {
+        "x": 576,
+        "y": 119,
+        "width": 992,
+        "height": 57
+      },
+      "raicesDom": 1,
+      "etiqueta": "header",
+      "clases": "mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between"
+    },
+    {
+      "componente": "Tabs",
+      "instancia": 1,
+      "archivo": "crops/27-revision-justificante--Tabs.png",
+      "caja": {
+        "x": 576,
+        "y": 200,
+        "width": 992,
+        "height": 45
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "flex max-w-full gap-6 overflow-x-auto border-b border-border mb-4"
+    },
+    {
+      "componente": "StatusChip",
+      "instancia": 1,
+      "archivo": "crops/27-revision-justificante--StatusChip.png",
+      "caja": {
+        "x": 809,
+        "y": 274,
+        "width": 74,
+        "height": 20
+      },
+      "raicesDom": 1,
+      "etiqueta": "span",
+      "clases": "inline-flex items-center gap-1.5 whitespace-nowrap rounded-full font-medium px-2 py-0.5 text-xs text-ausente bg-ausente-bg"
+    },
+    {
+      "componente": "StatusChip",
+      "instancia": 2,
+      "archivo": "crops/27-revision-justificante--StatusChip-2.png",
+      "caja": {
+        "x": 809,
+        "y": 364,
+        "width": 74,
+        "height": 20
+      },
+      "raicesDom": 1,
+      "etiqueta": "span",
+      "clases": "inline-flex items-center gap-1.5 whitespace-nowrap rounded-full font-medium px-2 py-0.5 text-xs text-ausente bg-ausente-bg"
+    },
+    {
+      "componente": "StatusChip",
+      "instancia": 3,
+      "archivo": "crops/27-revision-justificante--StatusChip-3.png",
+      "caja": {
+        "x": 809,
+        "y": 454,
+        "width": 74,
+        "height": 20
+      },
+      "raicesDom": 1,
+      "etiqueta": "span",
+      "clases": "inline-flex items-center gap-1.5 whitespace-nowrap rounded-full font-medium px-2 py-0.5 text-xs text-ausente bg-ausente-bg"
+    },
+    {
+      "componente": "StatusChip",
+      "instancia": 4,
+      "archivo": "crops/27-revision-justificante--StatusChip-4.png",
+      "caja": {
+        "x": 810,
+        "y": 544,
+        "width": 73,
+        "height": 20
+      },
+      "raicesDom": 1,
+      "etiqueta": "span",
+      "clases": "inline-flex items-center gap-1.5 whitespace-nowrap rounded-full font-medium px-2 py-0.5 text-xs text-retardo bg-retardo-bg"
+    },
+    {
+      "componente": "JustificanteCard",
+      "instancia": 1,
+      "archivo": "crops/27-revision-justificante--JustificanteCard.png",
+      "caja": {
+        "x": 912,
+        "y": 261,
+        "width": 656,
+        "height": 431
+      },
+      "raicesDom": 1,
+      "etiqueta": "article",
+      "clases": "flex flex-col gap-4 rounded-xl border border-border bg-card p-5"
+    },
+    {
+      "componente": "StatusChip",
+      "instancia": 5,
+      "archivo": "crops/27-revision-justificante--StatusChip-5.png",
+      "caja": {
+        "x": 1361,
+        "y": 289,
+        "width": 96,
+        "height": 28
+      },
+      "raicesDom": 1,
+      "etiqueta": "span",
+      "clases": "inline-flex items-center gap-1.5 whitespace-nowrap rounded-full font-medium px-2.5 py-1 text-sm text-pendiente bg-pendiente-bg"
+    },
+    {
+      "componente": "StatusChip",
+      "instancia": 6,
+      "archivo": "crops/27-revision-justificante--StatusChip-6.png",
+      "caja": {
+        "x": 1462,
+        "y": 289,
+        "width": 85,
+        "height": 28
+      },
+      "raicesDom": 1,
+      "etiqueta": "span",
+      "clases": "inline-flex items-center gap-1.5 whitespace-nowrap rounded-full font-medium px-2.5 py-1 text-sm text-ausente bg-ausente-bg"
+    }
+  ]
+}

@@ -1,0 +1,414 @@
+{
+  "pantalla": "40-docente2-home",
+  "ruta": "/docente",
+  "cuenta": "docente2",
+  "sistemaDeCoordenadas": "px CSS de la página completa (en escritorio, con el panel blanco desenrollado); multiplicar por el deviceScaleFactor (2 escritorio, 3 móvil) para px del .full.png",
+  "componentes": [
+    {
+      "componente": "Resaltado",
+      "instancia": 1,
+      "archivo": "crops/40-docente2-home--Resaltado.png",
+      "caja": {
+        "x": 829,
+        "y": 151,
+        "width": 151,
+        "height": 55
+      },
+      "raicesDom": 1,
+      "etiqueta": "span",
+      "clases": "relative inline-block"
+    },
+    {
+      "componente": "CampoComando",
+      "instancia": 1,
+      "archivo": "crops/40-docente2-home--CampoComando.png",
+      "caja": {
+        "x": 576,
+        "y": 262,
+        "width": 448,
+        "height": 44
+      },
+      "raicesDom": 1,
+      "etiqueta": "button",
+      "clases": "flex h-11 w-full max-w-md items-center gap-2.5 rounded-md border border-input bg-card px-3 text-left transition-[border-color,box-shadow] duration-150 hover:border-foreground/30 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/30"
+    },
+    {
+      "componente": "PasarListaHero",
+      "instancia": 1,
+      "archivo": "crops/40-docente2-home--PasarListaHero.png",
+      "caja": {
+        "x": 576,
+        "y": 406,
+        "width": 992,
+        "height": 145
+      },
+      "raicesDom": 1,
+      "etiqueta": "section",
+      "clases": "rounded-xl border border-border bg-card p-5 sm:p-6"
+    },
+    {
+      "componente": "IndicadoresPendientes",
+      "instancia": 1,
+      "archivo": "crops/40-docente2-home--IndicadoresPendientes.png",
+      "caja": {
+        "x": 576,
+        "y": 567,
+        "width": 992,
+        "height": 133
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "grid grid-cols-1 gap-3 sm:grid-cols-2"
+    },
+    {
+      "componente": "StatCard",
+      "instancia": 1,
+      "archivo": "crops/40-docente2-home--StatCard.png",
+      "caja": {
+        "x": 576,
+        "y": 567,
+        "width": 490,
+        "height": 133
+      },
+      "raicesDom": 1,
+      "etiqueta": "a",
+      "clases": "group/stat flex min-h-[7.5rem] flex-col rounded-xl border border-border bg-card p-4 transition-colors duration-150 hover:border-input hover:bg-accent/40 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/30"
+    },
+    {
+      "componente": "StatCard",
+      "instancia": 2,
+      "archivo": "crops/40-docente2-home--StatCard-2.png",
+      "caja": {
+        "x": 1078,
+        "y": 567,
+        "width": 490,
+        "height": 133
+      },
+      "raicesDom": 1,
+      "etiqueta": "a",
+      "clases": "group/stat flex min-h-[7.5rem] flex-col rounded-xl border border-border bg-card p-4 transition-colors duration-150 hover:border-input hover:bg-accent/40 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/30"
+    },
+    {
+      "componente": "SesionesHoy",
+      "instancia": 1,
+      "archivo": "crops/40-docente2-home--SesionesHoy.png",
+      "caja": {
+        "x": 576,
+        "y": 715,
+        "width": 992,
+        "height": 173
+      },
+      "raicesDom": 1,
+      "etiqueta": "section",
+      "clases": "scroll-mt-20 lg:scroll-mt-4"
+    },
+    {
+      "componente": "EmptyState",
+      "instancia": 1,
+      "archivo": "crops/40-docente2-home--EmptyState.png",
+      "caja": {
+        "x": 576,
+        "y": 759,
+        "width": 992,
+        "height": 129
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "flex flex-col items-center gap-2 px-4 py-10 text-center"
+    },
+    {
+      "componente": "AlertasAsistencia",
+      "instancia": 1,
+      "archivo": "crops/40-docente2-home--AlertasAsistencia.png",
+      "caja": {
+        "x": 576,
+        "y": 904,
+        "width": 488,
+        "height": 182
+      },
+      "raicesDom": 1,
+      "etiqueta": "section",
+      "clases": ""
+    },
+    {
+      "componente": "TarjetaFila",
+      "instancia": 1,
+      "archivo": "crops/40-docente2-home--TarjetaFila.png",
+      "caja": {
+        "x": 576,
+        "y": 972,
+        "width": 488,
+        "height": 114
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "flex min-h-[4.5rem] items-center gap-4 rounded-xl border border-border bg-card p-4 text-left items-start"
+    },
+    {
+      "componente": "GraficaAlertas",
+      "instancia": 1,
+      "archivo": "crops/40-docente2-home--GraficaAlertas.png",
+      "caja": {
+        "x": 1080,
+        "y": 904,
+        "width": 488,
+        "height": 161
+      },
+      "raicesDom": 1,
+      "etiqueta": "figure",
+      "clases": "m-0 flex flex-col rounded-xl border border-border bg-card p-5"
+    },
+    {
+      "componente": "TarjetaGrafica",
+      "instancia": 1,
+      "archivo": "crops/40-docente2-home--TarjetaGrafica.png",
+      "caja": {
+        "x": 1080,
+        "y": 904,
+        "width": 488,
+        "height": 161
+      },
+      "raicesDom": 1,
+      "etiqueta": "figure",
+      "clases": "m-0 flex flex-col rounded-xl border border-border bg-card p-5"
+    },
+    {
+      "componente": "BarrasPildora",
+      "instancia": 1,
+      "archivo": "crops/40-docente2-home--BarrasPildora.png",
+      "caja": {
+        "x": 1101,
+        "y": 987,
+        "width": 446,
+        "height": 57
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": ""
+    },
+    {
+      "componente": "MisGrupos",
+      "instancia": 1,
+      "archivo": "crops/40-docente2-home--MisGrupos.png",
+      "caja": {
+        "x": 1080,
+        "y": 1081,
+        "width": 488,
+        "height": 118
+      },
+      "raicesDom": 1,
+      "etiqueta": "section",
+      "clases": ""
+    },
+    {
+      "componente": "TarjetaFila",
+      "instancia": 2,
+      "archivo": "crops/40-docente2-home--TarjetaFila-2.png",
+      "caja": {
+        "x": 1080,
+        "y": 1125,
+        "width": 488,
+        "height": 74
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "flex min-h-[4.5rem] items-center gap-4 rounded-xl border border-border bg-card p-4 text-left"
+    },
+    {
+      "componente": "FilaModulos",
+      "instancia": 1,
+      "archivo": "crops/40-docente2-home--FilaModulos.png",
+      "caja": {
+        "x": 576,
+        "y": 1239,
+        "width": 992,
+        "height": 265
+      },
+      "raicesDom": 1,
+      "etiqueta": "section",
+      "clases": ""
+    },
+    {
+      "componente": "ModuloCard",
+      "instancia": 1,
+      "archivo": "crops/40-docente2-home--ModuloCard.png",
+      "caja": {
+        "x": 576,
+        "y": 1305,
+        "width": 186,
+        "height": 199
+      },
+      "raicesDom": 1,
+      "etiqueta": "a",
+      "clases": "group/tarjeta flex h-full min-h-[12.25rem] w-full flex-col overflow-hidden rounded-xl border border-border bg-card text-left transition-[border-color,background-color] duration-150 hover:border-input hover:bg-accent/30 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/30"
+    },
+    {
+      "componente": "TarjetaPortada",
+      "instancia": 1,
+      "archivo": "crops/40-docente2-home--TarjetaPortada.png",
+      "caja": {
+        "x": 576,
+        "y": 1305,
+        "width": 186,
+        "height": 199
+      },
+      "raicesDom": 1,
+      "etiqueta": "a",
+      "clases": "group/tarjeta flex h-full min-h-[12.25rem] w-full flex-col overflow-hidden rounded-xl border border-border bg-card text-left transition-[border-color,background-color] duration-150 hover:border-input hover:bg-accent/30 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/30"
+    },
+    {
+      "componente": "ModuloCard",
+      "instancia": 2,
+      "archivo": "crops/40-docente2-home--ModuloCard-2.png",
+      "caja": {
+        "x": 778,
+        "y": 1305,
+        "width": 186,
+        "height": 199
+      },
+      "raicesDom": 1,
+      "etiqueta": "a",
+      "clases": "group/tarjeta flex h-full min-h-[12.25rem] w-full flex-col overflow-hidden rounded-xl border border-border bg-card text-left transition-[border-color,background-color] duration-150 hover:border-input hover:bg-accent/30 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/30"
+    },
+    {
+      "componente": "TarjetaPortada",
+      "instancia": 2,
+      "archivo": "crops/40-docente2-home--TarjetaPortada-2.png",
+      "caja": {
+        "x": 778,
+        "y": 1305,
+        "width": 186,
+        "height": 199
+      },
+      "raicesDom": 1,
+      "etiqueta": "a",
+      "clases": "group/tarjeta flex h-full min-h-[12.25rem] w-full flex-col overflow-hidden rounded-xl border border-border bg-card text-left transition-[border-color,background-color] duration-150 hover:border-input hover:bg-accent/30 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/30"
+    },
+    {
+      "componente": "ModuloCard",
+      "instancia": 3,
+      "archivo": "crops/40-docente2-home--ModuloCard-3.png",
+      "caja": {
+        "x": 979,
+        "y": 1305,
+        "width": 186,
+        "height": 199
+      },
+      "raicesDom": 1,
+      "etiqueta": "a",
+      "clases": "group/tarjeta flex h-full min-h-[12.25rem] w-full flex-col overflow-hidden rounded-xl border border-border bg-card text-left transition-[border-color,background-color] duration-150 hover:border-input hover:bg-accent/30 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/30"
+    },
+    {
+      "componente": "TarjetaPortada",
+      "instancia": 3,
+      "archivo": "crops/40-docente2-home--TarjetaPortada-3.png",
+      "caja": {
+        "x": 979,
+        "y": 1305,
+        "width": 186,
+        "height": 199
+      },
+      "raicesDom": 1,
+      "etiqueta": "a",
+      "clases": "group/tarjeta flex h-full min-h-[12.25rem] w-full flex-col overflow-hidden rounded-xl border border-border bg-card text-left transition-[border-color,background-color] duration-150 hover:border-input hover:bg-accent/30 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/30"
+    },
+    {
+      "componente": "ModuloCard",
+      "instancia": 4,
+      "archivo": "crops/40-docente2-home--ModuloCard-4.png",
+      "caja": {
+        "x": 1181,
+        "y": 1305,
+        "width": 186,
+        "height": 199
+      },
+      "raicesDom": 1,
+      "etiqueta": "a",
+      "clases": "group/tarjeta flex h-full min-h-[12.25rem] w-full flex-col overflow-hidden rounded-xl border border-border bg-card text-left transition-[border-color,background-color] duration-150 hover:border-input hover:bg-accent/30 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/30"
+    },
+    {
+      "componente": "TarjetaPortada",
+      "instancia": 4,
+      "archivo": "crops/40-docente2-home--TarjetaPortada-4.png",
+      "caja": {
+        "x": 1181,
+        "y": 1305,
+        "width": 186,
+        "height": 199
+      },
+      "raicesDom": 1,
+      "etiqueta": "a",
+      "clases": "group/tarjeta flex h-full min-h-[12.25rem] w-full flex-col overflow-hidden rounded-xl border border-border bg-card text-left transition-[border-color,background-color] duration-150 hover:border-input hover:bg-accent/30 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/30"
+    },
+    {
+      "componente": "ModuloCard",
+      "instancia": 5,
+      "archivo": "crops/40-docente2-home--ModuloCard-5.png",
+      "caja": {
+        "x": 1382,
+        "y": 1305,
+        "width": 186,
+        "height": 199
+      },
+      "raicesDom": 1,
+      "etiqueta": "a",
+      "clases": "group/tarjeta flex h-full min-h-[12.25rem] w-full flex-col overflow-hidden rounded-xl border border-border bg-card text-left transition-[border-color,background-color] duration-150 hover:border-input hover:bg-accent/30 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/30"
+    },
+    {
+      "componente": "TarjetaPortada",
+      "instancia": 5,
+      "archivo": "crops/40-docente2-home--TarjetaPortada-5.png",
+      "caja": {
+        "x": 1382,
+        "y": 1305,
+        "width": 186,
+        "height": 199
+      },
+      "raicesDom": 1,
+      "etiqueta": "a",
+      "clases": "group/tarjeta flex h-full min-h-[12.25rem] w-full flex-col overflow-hidden rounded-xl border border-border bg-card text-left transition-[border-color,background-color] duration-150 hover:border-input hover:bg-accent/30 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/30"
+    },
+    {
+      "componente": "FilaModulos",
+      "instancia": 2,
+      "archivo": "crops/40-docente2-home--FilaModulos-2.png",
+      "caja": {
+        "x": 576,
+        "y": 1544,
+        "width": 992,
+        "height": 262
+      },
+      "raicesDom": 1,
+      "etiqueta": "section",
+      "clases": ""
+    },
+    {
+      "componente": "ModuloCard",
+      "instancia": 6,
+      "archivo": "crops/40-docente2-home--ModuloCard-6.png",
+      "caja": {
+        "x": 576,
+        "y": 1610,
+        "width": 186,
+        "height": 196
+      },
+      "raicesDom": 1,
+      "etiqueta": "a",
+      "clases": "group/tarjeta flex h-full min-h-[12.25rem] w-full flex-col overflow-hidden rounded-xl border border-border bg-card text-left transition-[border-color,background-color] duration-150 hover:border-input hover:bg-accent/30 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/30"
+    },
+    {
+      "componente": "TarjetaPortada",
+      "instancia": 6,
+      "archivo": "crops/40-docente2-home--TarjetaPortada-6.png",
+      "caja": {
+        "x": 576,
+        "y": 1610,
+        "width": 186,
+        "height": 196
+      },
+      "raicesDom": 1,
+      "etiqueta": "a",
+      "clases": "group/tarjeta flex h-full min-h-[12.25rem] w-full flex-col overflow-hidden rounded-xl border border-border bg-card text-left transition-[border-color,background-color] duration-150 hover:border-input hover:bg-accent/30 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/30"
+    }
+  ]
+}

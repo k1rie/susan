@@ -1,0 +1,134 @@
+{
+  "pantalla": "64-admin-grupo-3a-horario",
+  "ruta": "/admin/grupos/1",
+  "cuenta": "admin",
+  "sistemaDeCoordenadas": "px CSS de la página completa (en escritorio, con el panel blanco desenrollado); multiplicar por el deviceScaleFactor (2 escritorio, 3 móvil) para px del .full.png",
+  "componentes": [
+    {
+      "componente": "GrupoDetalle",
+      "instancia": 1,
+      "archivo": "crops/64-admin-grupo-3a-horario--GrupoDetalle.png",
+      "caja": {
+        "x": 576,
+        "y": 119,
+        "width": 992,
+        "height": 1074
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "flex flex-col gap-4"
+    },
+    {
+      "componente": "PageHeader",
+      "instancia": 1,
+      "archivo": "crops/64-admin-grupo-3a-horario--PageHeader.png",
+      "caja": {
+        "x": 576,
+        "y": 119,
+        "width": 992,
+        "height": 85
+      },
+      "raicesDom": 1,
+      "etiqueta": "header",
+      "clases": "mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between"
+    },
+    {
+      "componente": "StatCard",
+      "instancia": 1,
+      "archivo": "crops/64-admin-grupo-3a-horario--StatCard.png",
+      "caja": {
+        "x": 576,
+        "y": 244,
+        "width": 239,
+        "height": 133
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "group/stat flex min-h-[7.5rem] flex-col rounded-xl border border-border bg-card p-4"
+    },
+    {
+      "componente": "StatCard",
+      "instancia": 2,
+      "archivo": "crops/64-admin-grupo-3a-horario--StatCard-2.png",
+      "caja": {
+        "x": 827,
+        "y": 244,
+        "width": 239,
+        "height": 133
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "group/stat flex min-h-[7.5rem] flex-col rounded-xl border border-border bg-card p-4"
+    },
+    {
+      "componente": "StatCard",
+      "instancia": 3,
+      "archivo": "crops/64-admin-grupo-3a-horario--StatCard-3.png",
+      "caja": {
+        "x": 1078,
+        "y": 244,
+        "width": 239,
+        "height": 133
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "group/stat flex min-h-[7.5rem] flex-col rounded-xl border border-border bg-card p-4"
+    },
+    {
+      "componente": "StatCard",
+      "instancia": 4,
+      "archivo": "crops/64-admin-grupo-3a-horario--StatCard-4.png",
+      "caja": {
+        "x": 1329,
+        "y": 244,
+        "width": 239,
+        "height": 133
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "group/stat flex min-h-[7.5rem] flex-col rounded-xl border border-border bg-card p-4"
+    },
+    {
+      "componente": "Tabs",
+      "instancia": 1,
+      "archivo": "crops/64-admin-grupo-3a-horario--Tabs.png",
+      "caja": {
+        "x": 576,
+        "y": 392,
+        "width": 992,
+        "height": 45
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "flex max-w-full gap-6 overflow-x-auto border-b border-border"
+    },
+    {
+      "componente": "HorarioEditor",
+      "instancia": 1,
+      "archivo": "crops/64-admin-grupo-3a-horario--HorarioEditor.png",
+      "caja": {
+        "x": 597,
+        "y": 506,
+        "width": 950,
+        "height": 346
+      },
+      "raicesDom": 1,
+      "etiqueta": "form",
+      "clases": "grid gap-3"
+    },
+    {
+      "componente": "GenerarSesiones",
+      "instancia": 1,
+      "archivo": "crops/64-admin-grupo-3a-horario--GenerarSesiones.png",
+      "caja": {
+        "x": 597,
+        "y": 942,
+        "width": 950,
+        "height": 230
+      },
+      "raicesDom": 1,
+      "etiqueta": "form",
+      "clases": "grid gap-3"
+    }
+  ]
+}

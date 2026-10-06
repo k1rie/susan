@@ -1,0 +1,204 @@
+{
+  "pantalla": "14-modulos",
+  "ruta": "/modulos",
+  "cuenta": "docente1",
+  "sistemaDeCoordenadas": "px CSS de la página completa (en escritorio, con el panel blanco desenrollado); multiplicar por el deviceScaleFactor (2 escritorio, 3 móvil) para px del .full.png",
+  "componentes": [
+    {
+      "componente": "CatalogoModulos",
+      "instancia": 1,
+      "archivo": "crops/14-modulos--CatalogoModulos.png",
+      "caja": {
+        "x": 576,
+        "y": 200,
+        "width": 992,
+        "height": 471
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "flex flex-col gap-6"
+    },
+    {
+      "componente": "Pills",
+      "instancia": 1,
+      "archivo": "crops/14-modulos--Pills.png",
+      "caja": {
+        "x": 576,
+        "y": 200,
+        "width": 992,
+        "height": 36
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "flex flex-wrap gap-2"
+    },
+    {
+      "componente": "ModuloCard",
+      "instancia": 1,
+      "archivo": "crops/14-modulos--ModuloCard.png",
+      "caja": {
+        "x": 576,
+        "y": 260,
+        "width": 186,
+        "height": 199
+      },
+      "raicesDom": 1,
+      "etiqueta": "a",
+      "clases": "group/tarjeta flex h-full min-h-[12.25rem] w-full flex-col overflow-hidden rounded-xl border border-border bg-card text-left transition-[border-color,background-color] duration-150 hover:border-input hover:bg-accent/30 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/30"
+    },
+    {
+      "componente": "TarjetaPortada",
+      "instancia": 1,
+      "archivo": "crops/14-modulos--TarjetaPortada.png",
+      "caja": {
+        "x": 576,
+        "y": 260,
+        "width": 186,
+        "height": 199
+      },
+      "raicesDom": 1,
+      "etiqueta": "a",
+      "clases": "group/tarjeta flex h-full min-h-[12.25rem] w-full flex-col overflow-hidden rounded-xl border border-border bg-card text-left transition-[border-color,background-color] duration-150 hover:border-input hover:bg-accent/30 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/30"
+    },
+    {
+      "componente": "ModuloCard",
+      "instancia": 2,
+      "archivo": "crops/14-modulos--ModuloCard-2.png",
+      "caja": {
+        "x": 778,
+        "y": 260,
+        "width": 186,
+        "height": 199
+      },
+      "raicesDom": 1,
+      "etiqueta": "a",
+      "clases": "group/tarjeta flex h-full min-h-[12.25rem] w-full flex-col overflow-hidden rounded-xl border border-border bg-card text-left transition-[border-color,background-color] duration-150 hover:border-input hover:bg-accent/30 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/30"
+    },
+    {
+      "componente": "TarjetaPortada",
+      "instancia": 2,
+      "archivo": "crops/14-modulos--TarjetaPortada-2.png",
+      "caja": {
+        "x": 778,
+        "y": 260,
+        "width": 186,
+        "height": 199
+      },
+      "raicesDom": 1,
+      "etiqueta": "a",
+      "clases": "group/tarjeta flex h-full min-h-[12.25rem] w-full flex-col overflow-hidden rounded-xl border border-border bg-card text-left transition-[border-color,background-color] duration-150 hover:border-input hover:bg-accent/30 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/30"
+    },
+    {
+      "componente": "ModuloCard",
+      "instancia": 3,
+      "archivo": "crops/14-modulos--ModuloCard-3.png",
+      "caja": {
+        "x": 979,
+        "y": 260,
+        "width": 186,
+        "height": 199
+      },
+      "raicesDom": 1,
+      "etiqueta": "a",
+      "clases": "group/tarjeta flex h-full min-h-[12.25rem] w-full flex-col overflow-hidden rounded-xl border border-border bg-card text-left transition-[border-color,background-color] duration-150 hover:border-input hover:bg-accent/30 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/30"
+    },
+    {
+      "componente": "TarjetaPortada",
+      "instancia": 3,
+      "archivo": "crops/14-modulos--TarjetaPortada-3.png",
+      "caja": {
+        "x": 979,
+        "y": 260,
+        "width": 186,
+        "height": 199
+      },
+      "raicesDom": 1,
+      "etiqueta": "a",
+      "clases": "group/tarjeta flex h-full min-h-[12.25rem] w-full flex-col overflow-hidden rounded-xl border border-border bg-card text-left transition-[border-color,background-color] duration-150 hover:border-input hover:bg-accent/30 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/30"
+    },
+    {
+      "componente": "ModuloCard",
+      "instancia": 4,
+      "archivo": "crops/14-modulos--ModuloCard-4.png",
+      "caja": {
+        "x": 1181,
+        "y": 260,
+        "width": 186,
+        "height": 199
+      },
+      "raicesDom": 1,
+      "etiqueta": "a",
+      "clases": "group/tarjeta flex h-full min-h-[12.25rem] w-full flex-col overflow-hidden rounded-xl border border-border bg-card text-left transition-[border-color,background-color] duration-150 hover:border-input hover:bg-accent/30 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/30"
+    },
+    {
+      "componente": "TarjetaPortada",
+      "instancia": 4,
+      "archivo": "crops/14-modulos--TarjetaPortada-4.png",
+      "caja": {
+        "x": 1181,
+        "y": 260,
+        "width": 186,
+        "height": 199
+      },
+      "raicesDom": 1,
+      "etiqueta": "a",
+      "clases": "group/tarjeta flex h-full min-h-[12.25rem] w-full flex-col overflow-hidden rounded-xl border border-border bg-card text-left transition-[border-color,background-color] duration-150 hover:border-input hover:bg-accent/30 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/30"
+    },
+    {
+      "componente": "ModuloCard",
+      "instancia": 5,
+      "archivo": "crops/14-modulos--ModuloCard-5.png",
+      "caja": {
+        "x": 1382,
+        "y": 260,
+        "width": 186,
+        "height": 199
+      },
+      "raicesDom": 1,
+      "etiqueta": "a",
+      "clases": "group/tarjeta flex h-full min-h-[12.25rem] w-full flex-col overflow-hidden rounded-xl border border-border bg-card text-left transition-[border-color,background-color] duration-150 hover:border-input hover:bg-accent/30 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/30"
+    },
+    {
+      "componente": "TarjetaPortada",
+      "instancia": 5,
+      "archivo": "crops/14-modulos--TarjetaPortada-5.png",
+      "caja": {
+        "x": 1382,
+        "y": 260,
+        "width": 186,
+        "height": 199
+      },
+      "raicesDom": 1,
+      "etiqueta": "a",
+      "clases": "group/tarjeta flex h-full min-h-[12.25rem] w-full flex-col overflow-hidden rounded-xl border border-border bg-card text-left transition-[border-color,background-color] duration-150 hover:border-input hover:bg-accent/30 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/30"
+    },
+    {
+      "componente": "ModuloCard",
+      "instancia": 6,
+      "archivo": "crops/14-modulos--ModuloCard-6.png",
+      "caja": {
+        "x": 576,
+        "y": 475,
+        "width": 186,
+        "height": 196
+      },
+      "raicesDom": 1,
+      "etiqueta": "a",
+      "clases": "group/tarjeta flex h-full min-h-[12.25rem] w-full flex-col overflow-hidden rounded-xl border border-border bg-card text-left transition-[border-color,background-color] duration-150 hover:border-input hover:bg-accent/30 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/30"
+    },
+    {
+      "componente": "TarjetaPortada",
+      "instancia": 6,
+      "archivo": "crops/14-modulos--TarjetaPortada-6.png",
+      "caja": {
+        "x": 576,
+        "y": 475,
+        "width": 186,
+        "height": 196
+      },
+      "raicesDom": 1,
+      "etiqueta": "a",
+      "clases": "group/tarjeta flex h-full min-h-[12.25rem] w-full flex-col overflow-hidden rounded-xl border border-border bg-card text-left transition-[border-color,background-color] duration-150 hover:border-input hover:bg-accent/30 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/30"
+    }
+  ]
+}

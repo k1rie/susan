@@ -1,0 +1,134 @@
+{
+  "pantalla": "65-admin-alumnos",
+  "ruta": "/admin/alumnos",
+  "cuenta": "admin",
+  "sistemaDeCoordenadas": "px CSS de la página completa (en escritorio, con el panel blanco desenrollado); multiplicar por el deviceScaleFactor (2 escritorio, 3 móvil) para px del .full.png",
+  "componentes": [
+    {
+      "componente": "ListadoAlumnos",
+      "instancia": 1,
+      "archivo": "crops/65-admin-alumnos--ListadoAlumnos.png",
+      "caja": {
+        "x": 576,
+        "y": 119,
+        "width": 992,
+        "height": 1457
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "flex flex-col gap-4"
+    },
+    {
+      "componente": "PageHeader",
+      "instancia": 1,
+      "archivo": "crops/65-admin-alumnos--PageHeader.png",
+      "caja": {
+        "x": 576,
+        "y": 119,
+        "width": 992,
+        "height": 57
+      },
+      "raicesDom": 1,
+      "etiqueta": "header",
+      "clases": "mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between"
+    },
+    {
+      "componente": "Table",
+      "instancia": 1,
+      "archivo": "crops/65-admin-alumnos--Table.png",
+      "caja": {
+        "x": 576,
+        "y": 296,
+        "width": 992,
+        "height": 1228
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "overflow-x-auto rounded-xl border border-border bg-card"
+    },
+    {
+      "componente": "IndicadorEstado",
+      "instancia": 1,
+      "archivo": "crops/65-admin-alumnos--IndicadorEstado.png",
+      "caja": {
+        "x": 1202,
+        "y": 387,
+        "width": 62,
+        "height": 20
+      },
+      "raicesDom": 1,
+      "etiqueta": "span",
+      "clases": "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium text-presente bg-presente-bg"
+    },
+    {
+      "componente": "IndicadorEstado",
+      "instancia": 2,
+      "archivo": "crops/65-admin-alumnos--IndicadorEstado-2.png",
+      "caja": {
+        "x": 1404,
+        "y": 387,
+        "width": 55,
+        "height": 20
+      },
+      "raicesDom": 1,
+      "etiqueta": "span",
+      "clases": "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium text-presente bg-presente-bg"
+    },
+    {
+      "componente": "IndicadorEstado",
+      "instancia": 3,
+      "archivo": "crops/65-admin-alumnos--IndicadorEstado-3.png",
+      "caja": {
+        "x": 1202,
+        "y": 433,
+        "width": 62,
+        "height": 20
+      },
+      "raicesDom": 1,
+      "etiqueta": "span",
+      "clases": "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium text-presente bg-presente-bg"
+    },
+    {
+      "componente": "IndicadorEstado",
+      "instancia": 4,
+      "archivo": "crops/65-admin-alumnos--IndicadorEstado-4.png",
+      "caja": {
+        "x": 1404,
+        "y": 433,
+        "width": 55,
+        "height": 20
+      },
+      "raicesDom": 1,
+      "etiqueta": "span",
+      "clases": "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium text-presente bg-presente-bg"
+    },
+    {
+      "componente": "IndicadorEstado",
+      "instancia": 5,
+      "archivo": "crops/65-admin-alumnos--IndicadorEstado-5.png",
+      "caja": {
+        "x": 1202,
+        "y": 479,
+        "width": 62,
+        "height": 20
+      },
+      "raicesDom": 1,
+      "etiqueta": "span",
+      "clases": "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium text-presente bg-presente-bg"
+    },
+    {
+      "componente": "IndicadorEstado",
+      "instancia": 6,
+      "archivo": "crops/65-admin-alumnos--IndicadorEstado-6.png",
+      "caja": {
+        "x": 1404,
+        "y": 479,
+        "width": 55,
+        "height": 20
+      },
+      "raicesDom": 1,
+      "etiqueta": "span",
+      "clases": "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium text-presente bg-presente-bg"
+    }
+  ]
+}

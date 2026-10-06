@@ -1,0 +1,218 @@
+{
+  "pantalla": "81-tecnico-parametros",
+  "ruta": "/tecnico",
+  "cuenta": "tecnico",
+  "sistemaDeCoordenadas": "px CSS de la página completa (en escritorio, con el panel blanco desenrollado); multiplicar por el deviceScaleFactor (2 escritorio, 3 móvil) para px del .full.png",
+  "componentes": [
+    {
+      "componente": "CampoComando",
+      "instancia": 1,
+      "archivo": "crops/81-tecnico-parametros--CampoComando.png",
+      "caja": {
+        "x": 576,
+        "y": 262,
+        "width": 448,
+        "height": 44
+      },
+      "raicesDom": 1,
+      "etiqueta": "button",
+      "clases": "flex h-11 w-full max-w-md items-center gap-2.5 rounded-md border border-input bg-card px-3 text-left transition-[border-color,box-shadow] duration-150 hover:border-foreground/30 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/30"
+    },
+    {
+      "componente": "Tabs",
+      "instancia": 1,
+      "archivo": "crops/81-tecnico-parametros--Tabs.png",
+      "caja": {
+        "x": 576,
+        "y": 346,
+        "width": 992,
+        "height": 45
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "flex max-w-full gap-6 overflow-x-auto border-b border-border"
+    },
+    {
+      "componente": "ParametrosEditor",
+      "instancia": 1,
+      "archivo": "crops/81-tecnico-parametros--ParametrosEditor.png",
+      "caja": {
+        "x": 576,
+        "y": 407,
+        "width": 992,
+        "height": 1040
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "flex flex-col gap-3"
+    },
+    {
+      "componente": "ParametroFila",
+      "instancia": 1,
+      "archivo": "crops/81-tecnico-parametros--ParametroFila.png",
+      "caja": {
+        "x": 576,
+        "y": 439,
+        "width": 490,
+        "height": 152
+      },
+      "raicesDom": 1,
+      "etiqueta": "li",
+      "clases": "rounded-xl border border-border bg-card p-4"
+    },
+    {
+      "componente": "ParametroFila",
+      "instancia": 2,
+      "archivo": "crops/81-tecnico-parametros--ParametroFila-2.png",
+      "caja": {
+        "x": 1078,
+        "y": 439,
+        "width": 490,
+        "height": 152
+      },
+      "raicesDom": 1,
+      "etiqueta": "li",
+      "clases": "rounded-xl border border-border bg-card p-4"
+    },
+    {
+      "componente": "ParametroFila",
+      "instancia": 3,
+      "archivo": "crops/81-tecnico-parametros--ParametroFila-3.png",
+      "caja": {
+        "x": 576,
+        "y": 602,
+        "width": 490,
+        "height": 152
+      },
+      "raicesDom": 1,
+      "etiqueta": "li",
+      "clases": "rounded-xl border border-border bg-card p-4"
+    },
+    {
+      "componente": "ParametroFila",
+      "instancia": 4,
+      "archivo": "crops/81-tecnico-parametros--ParametroFila-4.png",
+      "caja": {
+        "x": 1078,
+        "y": 602,
+        "width": 490,
+        "height": 152
+      },
+      "raicesDom": 1,
+      "etiqueta": "li",
+      "clases": "rounded-xl border border-border bg-card p-4"
+    },
+    {
+      "componente": "ParametroFila",
+      "instancia": 5,
+      "archivo": "crops/81-tecnico-parametros--ParametroFila-5.png",
+      "caja": {
+        "x": 576,
+        "y": 766,
+        "width": 490,
+        "height": 152
+      },
+      "raicesDom": 1,
+      "etiqueta": "li",
+      "clases": "rounded-xl border border-border bg-card p-4"
+    },
+    {
+      "componente": "ParametroFila",
+      "instancia": 6,
+      "archivo": "crops/81-tecnico-parametros--ParametroFila-6.png",
+      "caja": {
+        "x": 1078,
+        "y": 766,
+        "width": 490,
+        "height": 171
+      },
+      "raicesDom": 1,
+      "etiqueta": "li",
+      "clases": "rounded-xl border border-border bg-card p-4"
+    },
+    {
+      "componente": "FilaModulos",
+      "instancia": 1,
+      "archivo": "crops/81-tecnico-parametros--FilaModulos.png",
+      "caja": {
+        "x": 576,
+        "y": 1487,
+        "width": 992,
+        "height": 262
+      },
+      "raicesDom": 1,
+      "etiqueta": "section",
+      "clases": ""
+    },
+    {
+      "componente": "ModuloCard",
+      "instancia": 1,
+      "archivo": "crops/81-tecnico-parametros--ModuloCard.png",
+      "caja": {
+        "x": 576,
+        "y": 1553,
+        "width": 186,
+        "height": 196
+      },
+      "raicesDom": 1,
+      "etiqueta": "a",
+      "clases": "group/tarjeta flex h-full min-h-[12.25rem] w-full flex-col overflow-hidden rounded-xl border border-border bg-card text-left transition-[border-color,background-color] duration-150 hover:border-input hover:bg-accent/30 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/30"
+    },
+    {
+      "componente": "TarjetaPortada",
+      "instancia": 1,
+      "archivo": "crops/81-tecnico-parametros--TarjetaPortada.png",
+      "caja": {
+        "x": 576,
+        "y": 1553,
+        "width": 186,
+        "height": 196
+      },
+      "raicesDom": 1,
+      "etiqueta": "a",
+      "clases": "group/tarjeta flex h-full min-h-[12.25rem] w-full flex-col overflow-hidden rounded-xl border border-border bg-card text-left transition-[border-color,background-color] duration-150 hover:border-input hover:bg-accent/30 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/30"
+    },
+    {
+      "componente": "FilaModulos",
+      "instancia": 2,
+      "archivo": "crops/81-tecnico-parametros--FilaModulos-2.png",
+      "caja": {
+        "x": 576,
+        "y": 1789,
+        "width": 992,
+        "height": 262
+      },
+      "raicesDom": 1,
+      "etiqueta": "section",
+      "clases": ""
+    },
+    {
+      "componente": "ModuloCard",
+      "instancia": 2,
+      "archivo": "crops/81-tecnico-parametros--ModuloCard-2.png",
+      "caja": {
+        "x": 576,
+        "y": 1855,
+        "width": 186,
+        "height": 196
+      },
+      "raicesDom": 1,
+      "etiqueta": "a",
+      "clases": "group/tarjeta flex h-full min-h-[12.25rem] w-full flex-col overflow-hidden rounded-xl border border-border bg-card text-left transition-[border-color,background-color] duration-150 hover:border-input hover:bg-accent/30 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/30"
+    },
+    {
+      "componente": "TarjetaPortada",
+      "instancia": 2,
+      "archivo": "crops/81-tecnico-parametros--TarjetaPortada-2.png",
+      "caja": {
+        "x": 576,
+        "y": 1855,
+        "width": 186,
+        "height": 196
+      },
+      "raicesDom": 1,
+      "etiqueta": "a",
+      "clases": "group/tarjeta flex h-full min-h-[12.25rem] w-full flex-col overflow-hidden rounded-xl border border-border bg-card text-left transition-[border-color,background-color] duration-150 hover:border-input hover:bg-accent/30 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/30"
+    }
+  ]
+}

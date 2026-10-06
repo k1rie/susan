@@ -1,0 +1,386 @@
+{
+  "pantalla": "60-admin-resumen",
+  "ruta": "/admin",
+  "cuenta": "admin",
+  "sistemaDeCoordenadas": "px CSS de la página completa (en escritorio, con el panel blanco desenrollado); multiplicar por el deviceScaleFactor (2 escritorio, 3 móvil) para px del .full.png",
+  "componentes": [
+    {
+      "componente": "Sidebar",
+      "instancia": 1,
+      "archivo": "crops/60-admin-resumen--Sidebar.png",
+      "caja": {
+        "x": 0,
+        "y": 0,
+        "width": 232,
+        "height": 2078
+      },
+      "raicesDom": 1,
+      "etiqueta": "aside",
+      "clases": "bg-sidebar fixed bottom-0 left-0 top-14 z-[45] w-[17rem] flex-col lg:static lg:top-auto lg:z-auto lg:flex lg:h-dvh lg:w-[14.5rem] lg:shrink-0 hidden lg:flex"
+    },
+    {
+      "componente": "BrandMark",
+      "instancia": 1,
+      "archivo": "crops/60-admin-resumen--BrandMark.png",
+      "caja": {
+        "x": 20,
+        "y": 20,
+        "width": 192,
+        "height": 32
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "flex items-center gap-2.5"
+    },
+    {
+      "componente": "MenuCuenta",
+      "instancia": 1,
+      "archivo": "crops/60-admin-resumen--MenuCuenta.png",
+      "caja": {
+        "x": 12,
+        "y": 2026,
+        "width": 208,
+        "height": 40
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "relative min-w-0"
+    },
+    {
+      "componente": "RelojDemo",
+      "instancia": 1,
+      "archivo": "crops/60-admin-resumen--RelojDemo.png",
+      "caja": {
+        "x": 576,
+        "y": 21,
+        "width": 992,
+        "height": 58
+      },
+      "raicesDom": 1,
+      "etiqueta": "section",
+      "clases": "rounded-xl border border-warning/30 bg-retardo-bg px-3 py-2.5 text-foreground"
+    },
+    {
+      "componente": "CampoComando",
+      "instancia": 1,
+      "archivo": "crops/60-admin-resumen--CampoComando.png",
+      "caja": {
+        "x": 576,
+        "y": 262,
+        "width": 448,
+        "height": 44
+      },
+      "raicesDom": 1,
+      "etiqueta": "button",
+      "clases": "flex h-11 w-full max-w-md items-center gap-2.5 rounded-md border border-input bg-card px-3 text-left transition-[border-color,box-shadow] duration-150 hover:border-foreground/30 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/30"
+    },
+    {
+      "componente": "ResumenAdmin",
+      "instancia": 1,
+      "archivo": "crops/60-admin-resumen--ResumenAdmin.png",
+      "caja": {
+        "x": 576,
+        "y": 346,
+        "width": 992,
+        "height": 628
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "flex flex-col gap-4"
+    },
+    {
+      "componente": "StatCard",
+      "instancia": 1,
+      "archivo": "crops/60-admin-resumen--StatCard.png",
+      "caja": {
+        "x": 576,
+        "y": 378,
+        "width": 323,
+        "height": 120
+      },
+      "raicesDom": 1,
+      "etiqueta": "a",
+      "clases": "group/stat flex min-h-[7.5rem] flex-col rounded-xl border border-border bg-card p-4 transition-colors duration-150 hover:border-input hover:bg-accent/40 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/30"
+    },
+    {
+      "componente": "StatCard",
+      "instancia": 2,
+      "archivo": "crops/60-admin-resumen--StatCard-2.png",
+      "caja": {
+        "x": 911,
+        "y": 378,
+        "width": 323,
+        "height": 120
+      },
+      "raicesDom": 1,
+      "etiqueta": "a",
+      "clases": "group/stat flex min-h-[7.5rem] flex-col rounded-xl border border-border bg-card p-4 transition-colors duration-150 hover:border-input hover:bg-accent/40 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/30"
+    },
+    {
+      "componente": "StatCard",
+      "instancia": 3,
+      "archivo": "crops/60-admin-resumen--StatCard-3.png",
+      "caja": {
+        "x": 1245,
+        "y": 378,
+        "width": 323,
+        "height": 120
+      },
+      "raicesDom": 1,
+      "etiqueta": "a",
+      "clases": "group/stat flex min-h-[7.5rem] flex-col rounded-xl border border-border bg-card p-4 transition-colors duration-150 hover:border-input hover:bg-accent/40 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/30 col-span-2 min-[480px]:col-span-1"
+    },
+    {
+      "componente": "TarjetaGrafica",
+      "instancia": 1,
+      "archivo": "crops/60-admin-resumen--TarjetaGrafica.png",
+      "caja": {
+        "x": 576,
+        "y": 514,
+        "width": 490,
+        "height": 350
+      },
+      "raicesDom": 1,
+      "etiqueta": "figure",
+      "clases": "m-0 flex flex-col rounded-xl border border-border bg-card p-5"
+    },
+    {
+      "componente": "AnilloEstados",
+      "instancia": 1,
+      "archivo": "crops/60-admin-resumen--AnilloEstados.png",
+      "caja": {
+        "x": 597,
+        "y": 597,
+        "width": 448,
+        "height": 246
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "@container"
+    },
+    {
+      "componente": "TarjetaGrafica",
+      "instancia": 2,
+      "archivo": "crops/60-admin-resumen--TarjetaGrafica-2.png",
+      "caja": {
+        "x": 1078,
+        "y": 514,
+        "width": 490,
+        "height": 350
+      },
+      "raicesDom": 1,
+      "etiqueta": "figure",
+      "clases": "m-0 flex flex-col rounded-xl border border-border bg-card p-5"
+    },
+    {
+      "componente": "AnilloEstados",
+      "instancia": 2,
+      "archivo": "crops/60-admin-resumen--AnilloEstados-2.png",
+      "caja": {
+        "x": 1099,
+        "y": 597,
+        "width": 448,
+        "height": 216
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "@container"
+    },
+    {
+      "componente": "FilaModulos",
+      "instancia": 1,
+      "archivo": "crops/60-admin-resumen--FilaModulos.png",
+      "caja": {
+        "x": 576,
+        "y": 1014,
+        "width": 992,
+        "height": 477
+      },
+      "raicesDom": 1,
+      "etiqueta": "section",
+      "clases": ""
+    },
+    {
+      "componente": "ModuloCard",
+      "instancia": 1,
+      "archivo": "crops/60-admin-resumen--ModuloCard.png",
+      "caja": {
+        "x": 576,
+        "y": 1080,
+        "width": 186,
+        "height": 199
+      },
+      "raicesDom": 1,
+      "etiqueta": "a",
+      "clases": "group/tarjeta flex h-full min-h-[12.25rem] w-full flex-col overflow-hidden rounded-xl border border-border bg-card text-left transition-[border-color,background-color] duration-150 hover:border-input hover:bg-accent/30 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/30"
+    },
+    {
+      "componente": "TarjetaPortada",
+      "instancia": 1,
+      "archivo": "crops/60-admin-resumen--TarjetaPortada.png",
+      "caja": {
+        "x": 576,
+        "y": 1080,
+        "width": 186,
+        "height": 199
+      },
+      "raicesDom": 1,
+      "etiqueta": "a",
+      "clases": "group/tarjeta flex h-full min-h-[12.25rem] w-full flex-col overflow-hidden rounded-xl border border-border bg-card text-left transition-[border-color,background-color] duration-150 hover:border-input hover:bg-accent/30 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/30"
+    },
+    {
+      "componente": "ModuloCard",
+      "instancia": 2,
+      "archivo": "crops/60-admin-resumen--ModuloCard-2.png",
+      "caja": {
+        "x": 778,
+        "y": 1080,
+        "width": 186,
+        "height": 199
+      },
+      "raicesDom": 1,
+      "etiqueta": "a",
+      "clases": "group/tarjeta flex h-full min-h-[12.25rem] w-full flex-col overflow-hidden rounded-xl border border-border bg-card text-left transition-[border-color,background-color] duration-150 hover:border-input hover:bg-accent/30 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/30"
+    },
+    {
+      "componente": "TarjetaPortada",
+      "instancia": 2,
+      "archivo": "crops/60-admin-resumen--TarjetaPortada-2.png",
+      "caja": {
+        "x": 778,
+        "y": 1080,
+        "width": 186,
+        "height": 199
+      },
+      "raicesDom": 1,
+      "etiqueta": "a",
+      "clases": "group/tarjeta flex h-full min-h-[12.25rem] w-full flex-col overflow-hidden rounded-xl border border-border bg-card text-left transition-[border-color,background-color] duration-150 hover:border-input hover:bg-accent/30 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/30"
+    },
+    {
+      "componente": "ModuloCard",
+      "instancia": 3,
+      "archivo": "crops/60-admin-resumen--ModuloCard-3.png",
+      "caja": {
+        "x": 979,
+        "y": 1080,
+        "width": 186,
+        "height": 199
+      },
+      "raicesDom": 1,
+      "etiqueta": "a",
+      "clases": "group/tarjeta flex h-full min-h-[12.25rem] w-full flex-col overflow-hidden rounded-xl border border-border bg-card text-left transition-[border-color,background-color] duration-150 hover:border-input hover:bg-accent/30 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/30"
+    },
+    {
+      "componente": "TarjetaPortada",
+      "instancia": 3,
+      "archivo": "crops/60-admin-resumen--TarjetaPortada-3.png",
+      "caja": {
+        "x": 979,
+        "y": 1080,
+        "width": 186,
+        "height": 199
+      },
+      "raicesDom": 1,
+      "etiqueta": "a",
+      "clases": "group/tarjeta flex h-full min-h-[12.25rem] w-full flex-col overflow-hidden rounded-xl border border-border bg-card text-left transition-[border-color,background-color] duration-150 hover:border-input hover:bg-accent/30 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/30"
+    },
+    {
+      "componente": "ModuloCard",
+      "instancia": 4,
+      "archivo": "crops/60-admin-resumen--ModuloCard-4.png",
+      "caja": {
+        "x": 1181,
+        "y": 1080,
+        "width": 186,
+        "height": 199
+      },
+      "raicesDom": 1,
+      "etiqueta": "a",
+      "clases": "group/tarjeta flex h-full min-h-[12.25rem] w-full flex-col overflow-hidden rounded-xl border border-border bg-card text-left transition-[border-color,background-color] duration-150 hover:border-input hover:bg-accent/30 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/30"
+    },
+    {
+      "componente": "TarjetaPortada",
+      "instancia": 4,
+      "archivo": "crops/60-admin-resumen--TarjetaPortada-4.png",
+      "caja": {
+        "x": 1181,
+        "y": 1080,
+        "width": 186,
+        "height": 199
+      },
+      "raicesDom": 1,
+      "etiqueta": "a",
+      "clases": "group/tarjeta flex h-full min-h-[12.25rem] w-full flex-col overflow-hidden rounded-xl border border-border bg-card text-left transition-[border-color,background-color] duration-150 hover:border-input hover:bg-accent/30 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/30"
+    },
+    {
+      "componente": "ModuloCard",
+      "instancia": 5,
+      "archivo": "crops/60-admin-resumen--ModuloCard-5.png",
+      "caja": {
+        "x": 1382,
+        "y": 1080,
+        "width": 186,
+        "height": 199
+      },
+      "raicesDom": 1,
+      "etiqueta": "a",
+      "clases": "group/tarjeta flex h-full min-h-[12.25rem] w-full flex-col overflow-hidden rounded-xl border border-border bg-card text-left transition-[border-color,background-color] duration-150 hover:border-input hover:bg-accent/30 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/30"
+    },
+    {
+      "componente": "TarjetaPortada",
+      "instancia": 5,
+      "archivo": "crops/60-admin-resumen--TarjetaPortada-5.png",
+      "caja": {
+        "x": 1382,
+        "y": 1080,
+        "width": 186,
+        "height": 199
+      },
+      "raicesDom": 1,
+      "etiqueta": "a",
+      "clases": "group/tarjeta flex h-full min-h-[12.25rem] w-full flex-col overflow-hidden rounded-xl border border-border bg-card text-left transition-[border-color,background-color] duration-150 hover:border-input hover:bg-accent/30 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/30"
+    },
+    {
+      "componente": "ModuloCard",
+      "instancia": 6,
+      "archivo": "crops/60-admin-resumen--ModuloCard-6.png",
+      "caja": {
+        "x": 576,
+        "y": 1295,
+        "width": 186,
+        "height": 196
+      },
+      "raicesDom": 1,
+      "etiqueta": "a",
+      "clases": "group/tarjeta flex h-full min-h-[12.25rem] w-full flex-col overflow-hidden rounded-xl border border-border bg-card text-left transition-[border-color,background-color] duration-150 hover:border-input hover:bg-accent/30 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/30"
+    },
+    {
+      "componente": "TarjetaPortada",
+      "instancia": 6,
+      "archivo": "crops/60-admin-resumen--TarjetaPortada-6.png",
+      "caja": {
+        "x": 576,
+        "y": 1295,
+        "width": 186,
+        "height": 196
+      },
+      "raicesDom": 1,
+      "etiqueta": "a",
+      "clases": "group/tarjeta flex h-full min-h-[12.25rem] w-full flex-col overflow-hidden rounded-xl border border-border bg-card text-left transition-[border-color,background-color] duration-150 hover:border-input hover:bg-accent/30 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/30"
+    },
+    {
+      "componente": "FilaModulos",
+      "instancia": 2,
+      "archivo": "crops/60-admin-resumen--FilaModulos-2.png",
+      "caja": {
+        "x": 576,
+        "y": 1531,
+        "width": 992,
+        "height": 474
+      },
+      "raicesDom": 1,
+      "etiqueta": "section",
+      "clases": ""
+    }
+  ]
+}

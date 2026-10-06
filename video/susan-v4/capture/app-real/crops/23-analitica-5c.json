@@ -1,0 +1,400 @@
+{
+  "pantalla": "23-analitica-5c",
+  "ruta": "/analitica?grupo=3",
+  "cuenta": "docente1",
+  "sistemaDeCoordenadas": "px CSS de la página completa (en escritorio, con el panel blanco desenrollado); multiplicar por el deviceScaleFactor (2 escritorio, 3 móvil) para px del .full.png",
+  "componentes": [
+    {
+      "componente": "PageHeader",
+      "instancia": 1,
+      "archivo": "crops/23-analitica-5c--PageHeader.png",
+      "caja": {
+        "x": 576,
+        "y": 119,
+        "width": 992,
+        "height": 57
+      },
+      "raicesDom": 1,
+      "etiqueta": "header",
+      "clases": "mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between"
+    },
+    {
+      "componente": "SelectorGrupo",
+      "instancia": 1,
+      "archivo": "crops/23-analitica-5c--SelectorGrupo.png",
+      "caja": {
+        "x": 576,
+        "y": 216,
+        "width": 992,
+        "height": 64
+      },
+      "raicesDom": 1,
+      "etiqueta": "form",
+      "clases": "grid grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]"
+    },
+    {
+      "componente": "TarjetasAnalitica",
+      "instancia": 1,
+      "archivo": "crops/23-analitica-5c--TarjetasAnalitica.png",
+      "caja": {
+        "x": 576,
+        "y": 296,
+        "width": 992,
+        "height": 149
+      },
+      "raicesDom": 1,
+      "etiqueta": "section",
+      "clases": "grid grid-cols-1 gap-3 min-[480px]:grid-cols-2 xl:grid-cols-4"
+    },
+    {
+      "componente": "StatCard",
+      "instancia": 1,
+      "archivo": "crops/23-analitica-5c--StatCard.png",
+      "caja": {
+        "x": 576,
+        "y": 296,
+        "width": 239,
+        "height": 149
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "group/stat flex min-h-[7.5rem] flex-col rounded-xl border border-border bg-card p-4"
+    },
+    {
+      "componente": "Sparkline",
+      "instancia": 1,
+      "archivo": "crops/23-analitica-5c--Sparkline.png",
+      "caja": {
+        "x": 737,
+        "y": 406,
+        "width": 61,
+        "height": 21
+      },
+      "raicesDom": 1,
+      "etiqueta": "svg",
+      "clases": "block h-auto w-full"
+    },
+    {
+      "componente": "StatCard",
+      "instancia": 2,
+      "archivo": "crops/23-analitica-5c--StatCard-2.png",
+      "caja": {
+        "x": 827,
+        "y": 296,
+        "width": 239,
+        "height": 149
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "group/stat flex min-h-[7.5rem] flex-col rounded-xl border border-border bg-card p-4"
+    },
+    {
+      "componente": "StatCard",
+      "instancia": 3,
+      "archivo": "crops/23-analitica-5c--StatCard-3.png",
+      "caja": {
+        "x": 1078,
+        "y": 296,
+        "width": 239,
+        "height": 149
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "group/stat flex min-h-[7.5rem] flex-col rounded-xl border border-border bg-card p-4"
+    },
+    {
+      "componente": "Sparkline",
+      "instancia": 2,
+      "archivo": "crops/23-analitica-5c--Sparkline-2.png",
+      "caja": {
+        "x": 1238,
+        "y": 406,
+        "width": 62,
+        "height": 22
+      },
+      "raicesDom": 1,
+      "etiqueta": "svg",
+      "clases": "block h-auto w-full"
+    },
+    {
+      "componente": "StatCard",
+      "instancia": 4,
+      "archivo": "crops/23-analitica-5c--StatCard-4.png",
+      "caja": {
+        "x": 1329,
+        "y": 296,
+        "width": 239,
+        "height": 149
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "group/stat flex min-h-[7.5rem] flex-col rounded-xl border border-border bg-card p-4"
+    },
+    {
+      "componente": "AlertasAnalitica",
+      "instancia": 1,
+      "archivo": "crops/23-analitica-5c--AlertasAnalitica.png",
+      "caja": {
+        "x": 576,
+        "y": 461,
+        "width": 992,
+        "height": 224
+      },
+      "raicesDom": 1,
+      "etiqueta": "section",
+      "clases": "flex flex-col gap-2"
+    },
+    {
+      "componente": "Alert",
+      "instancia": 1,
+      "archivo": "crops/23-analitica-5c--Alert.png",
+      "caja": {
+        "x": 576,
+        "y": 461,
+        "width": 992,
+        "height": 50
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "flex items-start gap-3 rounded-xl border p-3.5 text-sm border-destructive/25 text-ausente bg-ausente-bg"
+    },
+    {
+      "componente": "Alert",
+      "instancia": 2,
+      "archivo": "crops/23-analitica-5c--Alert-2.png",
+      "caja": {
+        "x": 576,
+        "y": 519,
+        "width": 992,
+        "height": 50
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "flex items-start gap-3 rounded-xl border p-3.5 text-sm border-warning/30 text-retardo bg-retardo-bg"
+    },
+    {
+      "componente": "Alert",
+      "instancia": 3,
+      "archivo": "crops/23-analitica-5c--Alert-3.png",
+      "caja": {
+        "x": 576,
+        "y": 577,
+        "width": 992,
+        "height": 50
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "flex items-start gap-3 rounded-xl border p-3.5 text-sm border-warning/30 text-retardo bg-retardo-bg"
+    },
+    {
+      "componente": "GraficaSerie",
+      "instancia": 1,
+      "archivo": "crops/23-analitica-5c--GraficaSerie.png",
+      "caja": {
+        "x": 576,
+        "y": 701,
+        "width": 488,
+        "height": 514
+      },
+      "raicesDom": 1,
+      "etiqueta": "figure",
+      "clases": "m-0 flex flex-col rounded-xl border border-border bg-card p-5"
+    },
+    {
+      "componente": "TarjetaGrafica",
+      "instancia": 1,
+      "archivo": "crops/23-analitica-5c--TarjetaGrafica.png",
+      "caja": {
+        "x": 576,
+        "y": 701,
+        "width": 488,
+        "height": 514
+      },
+      "raicesDom": 1,
+      "etiqueta": "figure",
+      "clases": "m-0 flex flex-col rounded-xl border border-border bg-card p-5"
+    },
+    {
+      "componente": "GraficaLinea",
+      "instancia": 1,
+      "archivo": "crops/23-analitica-5c--GraficaLinea.png",
+      "caja": {
+        "x": 597,
+        "y": 804,
+        "width": 446,
+        "height": 334
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "w-full"
+    },
+    {
+      "componente": "GraficaAcumulado",
+      "instancia": 1,
+      "archivo": "crops/23-analitica-5c--GraficaAcumulado.png",
+      "caja": {
+        "x": 1080,
+        "y": 701,
+        "width": 488,
+        "height": 514
+      },
+      "raicesDom": 1,
+      "etiqueta": "figure",
+      "clases": "m-0 flex flex-col rounded-xl border border-border bg-card p-5"
+    },
+    {
+      "componente": "TarjetaGrafica",
+      "instancia": 2,
+      "archivo": "crops/23-analitica-5c--TarjetaGrafica-2.png",
+      "caja": {
+        "x": 1080,
+        "y": 701,
+        "width": 488,
+        "height": 514
+      },
+      "raicesDom": 1,
+      "etiqueta": "figure",
+      "clases": "m-0 flex flex-col rounded-xl border border-border bg-card p-5"
+    },
+    {
+      "componente": "GraficaLinea",
+      "instancia": 2,
+      "archivo": "crops/23-analitica-5c--GraficaLinea-2.png",
+      "caja": {
+        "x": 1101,
+        "y": 784,
+        "width": 446,
+        "height": 334
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "w-full"
+    },
+    {
+      "componente": "PatronSemanal",
+      "instancia": 1,
+      "archivo": "crops/23-analitica-5c--PatronSemanal.png",
+      "caja": {
+        "x": 576,
+        "y": 1231,
+        "width": 992,
+        "height": 236
+      },
+      "raicesDom": 1,
+      "etiqueta": "figure",
+      "clases": "m-0 flex flex-col rounded-xl border border-border bg-card p-5"
+    },
+    {
+      "componente": "TarjetaGrafica",
+      "instancia": 3,
+      "archivo": "crops/23-analitica-5c--TarjetaGrafica-3.png",
+      "caja": {
+        "x": 576,
+        "y": 1231,
+        "width": 992,
+        "height": 236
+      },
+      "raicesDom": 1,
+      "etiqueta": "figure",
+      "clases": "m-0 flex flex-col rounded-xl border border-border bg-card p-5"
+    },
+    {
+      "componente": "TiraSemana",
+      "instancia": 1,
+      "archivo": "crops/23-analitica-5c--TiraSemana.png",
+      "caja": {
+        "x": 904,
+        "y": 1314,
+        "width": 336,
+        "height": 72
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "@container mx-auto [&_li:nth-child(3)]:ring-2 [&_li:nth-child(3)]:ring-destructive/70"
+    },
+    {
+      "componente": "TablaRiesgo",
+      "instancia": 1,
+      "archivo": "crops/23-analitica-5c--TablaRiesgo.png",
+      "caja": {
+        "x": 576,
+        "y": 1483,
+        "width": 992,
+        "height": 515
+      },
+      "raicesDom": 1,
+      "etiqueta": "section",
+      "clases": "flex flex-col gap-4"
+    },
+    {
+      "componente": "TarjetaGrafica",
+      "instancia": 4,
+      "archivo": "crops/23-analitica-5c--TarjetaGrafica-4.png",
+      "caja": {
+        "x": 576,
+        "y": 1527,
+        "width": 390,
+        "height": 405
+      },
+      "raicesDom": 1,
+      "etiqueta": "figure",
+      "clases": "m-0 flex flex-col rounded-xl border border-border bg-card p-5"
+    },
+    {
+      "componente": "AnilloEstados",
+      "instancia": 1,
+      "archivo": "crops/23-analitica-5c--AnilloEstados.png",
+      "caja": {
+        "x": 597,
+        "y": 1610,
+        "width": 348,
+        "height": 276
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "@container"
+    },
+    {
+      "componente": "TarjetaGrafica",
+      "instancia": 5,
+      "archivo": "crops/23-analitica-5c--TarjetaGrafica-5.png",
+      "caja": {
+        "x": 982,
+        "y": 1527,
+        "width": 586,
+        "height": 405
+      },
+      "raicesDom": 1,
+      "etiqueta": "figure",
+      "clases": "m-0 flex flex-col rounded-xl border border-border bg-card p-5"
+    },
+    {
+      "componente": "BarrasPildora",
+      "instancia": 1,
+      "archivo": "crops/23-analitica-5c--BarrasPildora.png",
+      "caja": {
+        "x": 1003,
+        "y": 1610,
+        "width": 544,
+        "height": 301
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": ""
+    },
+    {
+      "componente": "PanelProcedimiento",
+      "instancia": 1,
+      "archivo": "crops/23-analitica-5c--PanelProcedimiento.png",
+      "caja": {
+        "x": 576,
+        "y": 2014,
+        "width": 992,
+        "height": 50
+      },
+      "raicesDom": 1,
+      "etiqueta": "section",
+      "clases": ""
+    }
+  ]
+}

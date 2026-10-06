@@ -1,0 +1,134 @@
+{
+  "pantalla": "66-admin-alumno-ficha",
+  "ruta": "/admin/alumnos/1",
+  "cuenta": "admin",
+  "sistemaDeCoordenadas": "px CSS de la página completa (en escritorio, con el panel blanco desenrollado); multiplicar por el deviceScaleFactor (2 escritorio, 3 móvil) para px del .full.png",
+  "componentes": [
+    {
+      "componente": "DetalleAlumno",
+      "instancia": 1,
+      "archivo": "crops/66-admin-alumno-ficha--DetalleAlumno.png",
+      "caja": {
+        "x": 576,
+        "y": 119,
+        "width": 992,
+        "height": 1754
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "flex flex-col gap-4"
+    },
+    {
+      "componente": "PageHeader",
+      "instancia": 1,
+      "archivo": "crops/66-admin-alumno-ficha--PageHeader.png",
+      "caja": {
+        "x": 576,
+        "y": 119,
+        "width": 992,
+        "height": 85
+      },
+      "raicesDom": 1,
+      "etiqueta": "header",
+      "clases": "mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between"
+    },
+    {
+      "componente": "AlumnoForm",
+      "instancia": 1,
+      "archivo": "crops/66-admin-alumno-ficha--AlumnoForm.png",
+      "caja": {
+        "x": 597,
+        "y": 297,
+        "width": 950,
+        "height": 300
+      },
+      "raicesDom": 1,
+      "etiqueta": "form",
+      "clases": "grid gap-4 sm:grid-cols-2"
+    },
+    {
+      "componente": "ConsentimientoPanel",
+      "instancia": 1,
+      "archivo": "crops/66-admin-alumno-ficha--ConsentimientoPanel.png",
+      "caja": {
+        "x": 576,
+        "y": 634,
+        "width": 992,
+        "height": 252
+      },
+      "raicesDom": 1,
+      "etiqueta": "section",
+      "clases": "rounded-xl border border-border bg-card text-card-foreground"
+    },
+    {
+      "componente": "PlantillaFacialPanel",
+      "instancia": 1,
+      "archivo": "crops/66-admin-alumno-ficha--PlantillaFacialPanel.png",
+      "caja": {
+        "x": 576,
+        "y": 902,
+        "width": 992,
+        "height": 861
+      },
+      "raicesDom": 1,
+      "etiqueta": "section",
+      "clases": "rounded-xl border border-border bg-card text-card-foreground"
+    },
+    {
+      "componente": "CapturaGuiadaPlantilla",
+      "instancia": 1,
+      "archivo": "crops/66-admin-alumno-ficha--CapturaGuiadaPlantilla.png",
+      "caja": {
+        "x": 597,
+        "y": 1237,
+        "width": 950,
+        "height": 393
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "flex flex-col gap-3"
+    },
+    {
+      "componente": "CameraCapture",
+      "instancia": 1,
+      "archivo": "crops/66-admin-alumno-ficha--CameraCapture.png",
+      "caja": {
+        "x": 597,
+        "y": 1269,
+        "width": 950,
+        "height": 112
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "flex flex-col gap-3"
+    },
+    {
+      "componente": "Alert",
+      "instancia": 1,
+      "archivo": "crops/66-admin-alumno-ficha--Alert.png",
+      "caja": {
+        "x": 597,
+        "y": 1269,
+        "width": 950,
+        "height": 112
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "flex items-start gap-3 rounded-xl border p-3.5 text-sm border-destructive/25 text-ausente bg-ausente-bg"
+    },
+    {
+      "componente": "GaleriaTomas",
+      "instancia": 1,
+      "archivo": "crops/66-admin-alumno-ficha--GaleriaTomas.png",
+      "caja": {
+        "x": 597,
+        "y": 1445,
+        "width": 950,
+        "height": 185
+      },
+      "raicesDom": 1,
+      "etiqueta": "ul",
+      "clases": "grid grid-cols-2 gap-2 min-[480px]:grid-cols-3 sm:grid-cols-5"
+    }
+  ]
+}

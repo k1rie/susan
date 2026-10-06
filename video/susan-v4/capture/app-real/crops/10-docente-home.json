@@ -1,0 +1,582 @@
+{
+  "pantalla": "10-docente-home",
+  "ruta": "/docente",
+  "cuenta": "docente1",
+  "sistemaDeCoordenadas": "px CSS de la página completa (en escritorio, con el panel blanco desenrollado); multiplicar por el deviceScaleFactor (2 escritorio, 3 móvil) para px del .full.png",
+  "componentes": [
+    {
+      "componente": "Sidebar",
+      "instancia": 1,
+      "archivo": "crops/10-docente-home--Sidebar.png",
+      "caja": {
+        "x": 0,
+        "y": 0,
+        "width": 232,
+        "height": 2331
+      },
+      "raicesDom": 1,
+      "etiqueta": "aside",
+      "clases": "bg-sidebar fixed bottom-0 left-0 top-14 z-[45] w-[17rem] flex-col lg:static lg:top-auto lg:z-auto lg:flex lg:h-dvh lg:w-[14.5rem] lg:shrink-0 hidden lg:flex"
+    },
+    {
+      "componente": "BrandMark",
+      "instancia": 1,
+      "archivo": "crops/10-docente-home--BrandMark.png",
+      "caja": {
+        "x": 20,
+        "y": 20,
+        "width": 192,
+        "height": 32
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "flex items-center gap-2.5"
+    },
+    {
+      "componente": "MenuCuenta",
+      "instancia": 1,
+      "archivo": "crops/10-docente-home--MenuCuenta.png",
+      "caja": {
+        "x": 12,
+        "y": 2279,
+        "width": 208,
+        "height": 40
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "relative min-w-0"
+    },
+    {
+      "componente": "RelojDemo",
+      "instancia": 1,
+      "archivo": "crops/10-docente-home--RelojDemo.png",
+      "caja": {
+        "x": 576,
+        "y": 21,
+        "width": 992,
+        "height": 58
+      },
+      "raicesDom": 1,
+      "etiqueta": "section",
+      "clases": "rounded-xl border border-warning/30 bg-retardo-bg px-3 py-2.5 text-foreground"
+    },
+    {
+      "componente": "Resaltado",
+      "instancia": 1,
+      "archivo": "crops/10-docente-home--Resaltado.png",
+      "caja": {
+        "x": 829,
+        "y": 151,
+        "width": 147,
+        "height": 55
+      },
+      "raicesDom": 1,
+      "etiqueta": "span",
+      "clases": "relative inline-block"
+    },
+    {
+      "componente": "CampoComando",
+      "instancia": 1,
+      "archivo": "crops/10-docente-home--CampoComando.png",
+      "caja": {
+        "x": 576,
+        "y": 262,
+        "width": 448,
+        "height": 44
+      },
+      "raicesDom": 1,
+      "etiqueta": "button",
+      "clases": "flex h-11 w-full max-w-md items-center gap-2.5 rounded-md border border-input bg-card px-3 text-left transition-[border-color,box-shadow] duration-150 hover:border-foreground/30 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/30"
+    },
+    {
+      "componente": "PasarListaHero",
+      "instancia": 1,
+      "archivo": "crops/10-docente-home--PasarListaHero.png",
+      "caja": {
+        "x": 576,
+        "y": 406,
+        "width": 992,
+        "height": 237
+      },
+      "raicesDom": 1,
+      "etiqueta": "section",
+      "clases": "rounded-xl border border-border bg-card p-5 sm:p-6"
+    },
+    {
+      "componente": "StatusChip",
+      "instancia": 1,
+      "archivo": "crops/10-docente-home--StatusChip.png",
+      "caja": {
+        "x": 1446,
+        "y": 439,
+        "width": 97,
+        "height": 20
+      },
+      "raicesDom": 1,
+      "etiqueta": "span",
+      "clases": "inline-flex items-center gap-1.5 whitespace-nowrap rounded-full font-medium px-2 py-0.5 text-xs text-pendiente bg-pendiente-bg"
+    },
+    {
+      "componente": "IndicadoresPendientes",
+      "instancia": 1,
+      "archivo": "crops/10-docente-home--IndicadoresPendientes.png",
+      "caja": {
+        "x": 576,
+        "y": 659,
+        "width": 992,
+        "height": 133
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "grid grid-cols-1 gap-3 sm:grid-cols-2"
+    },
+    {
+      "componente": "StatCard",
+      "instancia": 1,
+      "archivo": "crops/10-docente-home--StatCard.png",
+      "caja": {
+        "x": 576,
+        "y": 659,
+        "width": 490,
+        "height": 133
+      },
+      "raicesDom": 1,
+      "etiqueta": "a",
+      "clases": "group/stat flex min-h-[7.5rem] flex-col rounded-xl border border-border bg-card p-4 transition-colors duration-150 hover:border-input hover:bg-accent/40 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/30"
+    },
+    {
+      "componente": "StatCard",
+      "instancia": 2,
+      "archivo": "crops/10-docente-home--StatCard-2.png",
+      "caja": {
+        "x": 1078,
+        "y": 659,
+        "width": 490,
+        "height": 133
+      },
+      "raicesDom": 1,
+      "etiqueta": "a",
+      "clases": "group/stat flex min-h-[7.5rem] flex-col rounded-xl border border-border bg-card p-4 transition-colors duration-150 hover:border-input hover:bg-accent/40 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/30"
+    },
+    {
+      "componente": "SesionesHoy",
+      "instancia": 1,
+      "archivo": "crops/10-docente-home--SesionesHoy.png",
+      "caja": {
+        "x": 576,
+        "y": 807,
+        "width": 992,
+        "height": 144
+      },
+      "raicesDom": 1,
+      "etiqueta": "section",
+      "clases": "scroll-mt-20 lg:scroll-mt-4"
+    },
+    {
+      "componente": "TarjetaFila",
+      "instancia": 1,
+      "archivo": "crops/10-docente-home--TarjetaFila.png",
+      "caja": {
+        "x": 576,
+        "y": 851,
+        "width": 490,
+        "height": 100
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "flex min-h-[4.5rem] items-center gap-4 rounded-xl border border-border bg-card p-4 text-left h-full flex-wrap [&>span.flex-1]:min-w-[13rem] [&>span.shrink-0:last-child]:max-sm:ml-14"
+    },
+    {
+      "componente": "StatusChip",
+      "instancia": 2,
+      "archivo": "crops/10-docente-home--StatusChip-2.png",
+      "caja": {
+        "x": 649,
+        "y": 914,
+        "width": 97,
+        "height": 20
+      },
+      "raicesDom": 1,
+      "etiqueta": "span",
+      "clases": "inline-flex items-center gap-1.5 whitespace-nowrap rounded-full font-medium px-2 py-0.5 text-xs text-pendiente bg-pendiente-bg"
+    },
+    {
+      "componente": "StatusChip",
+      "instancia": 3,
+      "archivo": "crops/10-docente-home--StatusChip-3.png",
+      "caja": {
+        "x": 752,
+        "y": 914,
+        "width": 95,
+        "height": 20
+      },
+      "raicesDom": 1,
+      "etiqueta": "span",
+      "clases": "inline-flex items-center gap-1.5 whitespace-nowrap rounded-full font-medium px-2 py-0.5 text-xs text-justificado bg-justificado-bg"
+    },
+    {
+      "componente": "TarjetaFila",
+      "instancia": 2,
+      "archivo": "crops/10-docente-home--TarjetaFila-2.png",
+      "caja": {
+        "x": 1078,
+        "y": 851,
+        "width": 490,
+        "height": 100
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "flex min-h-[4.5rem] items-center gap-4 rounded-xl border border-border bg-card p-4 text-left h-full flex-wrap [&>span.flex-1]:min-w-[13rem] [&>span.shrink-0:last-child]:max-sm:ml-14"
+    },
+    {
+      "componente": "StatusChip",
+      "instancia": 4,
+      "archivo": "crops/10-docente-home--StatusChip-4.png",
+      "caja": {
+        "x": 1151,
+        "y": 914,
+        "width": 97,
+        "height": 20
+      },
+      "raicesDom": 1,
+      "etiqueta": "span",
+      "clases": "inline-flex items-center gap-1.5 whitespace-nowrap rounded-full font-medium px-2 py-0.5 text-xs text-pendiente bg-pendiente-bg"
+    },
+    {
+      "componente": "StatusChip",
+      "instancia": 5,
+      "archivo": "crops/10-docente-home--StatusChip-5.png",
+      "caja": {
+        "x": 1254,
+        "y": 914,
+        "width": 69,
+        "height": 20
+      },
+      "raicesDom": 1,
+      "etiqueta": "span",
+      "clases": "inline-flex items-center gap-1.5 whitespace-nowrap rounded-full font-medium px-2 py-0.5 text-xs text-pendiente bg-pendiente-bg"
+    },
+    {
+      "componente": "AlertasAsistencia",
+      "instancia": 1,
+      "archivo": "crops/10-docente-home--AlertasAsistencia.png",
+      "caja": {
+        "x": 576,
+        "y": 967,
+        "width": 488,
+        "height": 684
+      },
+      "raicesDom": 1,
+      "etiqueta": "section",
+      "clases": ""
+    },
+    {
+      "componente": "TarjetaFila",
+      "instancia": 3,
+      "archivo": "crops/10-docente-home--TarjetaFila-3.png",
+      "caja": {
+        "x": 576,
+        "y": 1035,
+        "width": 488,
+        "height": 114
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "flex min-h-[4.5rem] items-center gap-4 rounded-xl border border-border bg-card p-4 text-left items-start"
+    },
+    {
+      "componente": "TarjetaFila",
+      "instancia": 4,
+      "archivo": "crops/10-docente-home--TarjetaFila-4.png",
+      "caja": {
+        "x": 576,
+        "y": 1160,
+        "width": 488,
+        "height": 114
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "flex min-h-[4.5rem] items-center gap-4 rounded-xl border border-border bg-card p-4 text-left items-start"
+    },
+    {
+      "componente": "TarjetaFila",
+      "instancia": 5,
+      "archivo": "crops/10-docente-home--TarjetaFila-5.png",
+      "caja": {
+        "x": 576,
+        "y": 1286,
+        "width": 488,
+        "height": 114
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "flex min-h-[4.5rem] items-center gap-4 rounded-xl border border-border bg-card p-4 text-left items-start"
+    },
+    {
+      "componente": "TarjetaFila",
+      "instancia": 6,
+      "archivo": "crops/10-docente-home--TarjetaFila-6.png",
+      "caja": {
+        "x": 576,
+        "y": 1412,
+        "width": 488,
+        "height": 114
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "flex min-h-[4.5rem] items-center gap-4 rounded-xl border border-border bg-card p-4 text-left items-start"
+    },
+    {
+      "componente": "GraficaAlertas",
+      "instancia": 1,
+      "archivo": "crops/10-docente-home--GraficaAlertas.png",
+      "caja": {
+        "x": 1080,
+        "y": 967,
+        "width": 488,
+        "height": 326
+      },
+      "raicesDom": 1,
+      "etiqueta": "figure",
+      "clases": "m-0 flex flex-col rounded-xl border border-border bg-card p-5"
+    },
+    {
+      "componente": "TarjetaGrafica",
+      "instancia": 1,
+      "archivo": "crops/10-docente-home--TarjetaGrafica.png",
+      "caja": {
+        "x": 1080,
+        "y": 967,
+        "width": 488,
+        "height": 326
+      },
+      "raicesDom": 1,
+      "etiqueta": "figure",
+      "clases": "m-0 flex flex-col rounded-xl border border-border bg-card p-5"
+    },
+    {
+      "componente": "BarrasPildora",
+      "instancia": 1,
+      "archivo": "crops/10-docente-home--BarrasPildora.png",
+      "caja": {
+        "x": 1101,
+        "y": 1050,
+        "width": 446,
+        "height": 222
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": ""
+    },
+    {
+      "componente": "MisGrupos",
+      "instancia": 1,
+      "archivo": "crops/10-docente-home--MisGrupos.png",
+      "caja": {
+        "x": 1080,
+        "y": 1309,
+        "width": 488,
+        "height": 204
+      },
+      "raicesDom": 1,
+      "etiqueta": "section",
+      "clases": ""
+    },
+    {
+      "componente": "FilaModulos",
+      "instancia": 1,
+      "archivo": "crops/10-docente-home--FilaModulos.png",
+      "caja": {
+        "x": 576,
+        "y": 1691,
+        "width": 992,
+        "height": 265
+      },
+      "raicesDom": 1,
+      "etiqueta": "section",
+      "clases": ""
+    },
+    {
+      "componente": "ModuloCard",
+      "instancia": 1,
+      "archivo": "crops/10-docente-home--ModuloCard.png",
+      "caja": {
+        "x": 576,
+        "y": 1757,
+        "width": 186,
+        "height": 199
+      },
+      "raicesDom": 1,
+      "etiqueta": "a",
+      "clases": "group/tarjeta flex h-full min-h-[12.25rem] w-full flex-col overflow-hidden rounded-xl border border-border bg-card text-left transition-[border-color,background-color] duration-150 hover:border-input hover:bg-accent/30 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/30"
+    },
+    {
+      "componente": "TarjetaPortada",
+      "instancia": 1,
+      "archivo": "crops/10-docente-home--TarjetaPortada.png",
+      "caja": {
+        "x": 576,
+        "y": 1757,
+        "width": 186,
+        "height": 199
+      },
+      "raicesDom": 1,
+      "etiqueta": "a",
+      "clases": "group/tarjeta flex h-full min-h-[12.25rem] w-full flex-col overflow-hidden rounded-xl border border-border bg-card text-left transition-[border-color,background-color] duration-150 hover:border-input hover:bg-accent/30 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/30"
+    },
+    {
+      "componente": "ModuloCard",
+      "instancia": 2,
+      "archivo": "crops/10-docente-home--ModuloCard-2.png",
+      "caja": {
+        "x": 778,
+        "y": 1757,
+        "width": 186,
+        "height": 199
+      },
+      "raicesDom": 1,
+      "etiqueta": "a",
+      "clases": "group/tarjeta flex h-full min-h-[12.25rem] w-full flex-col overflow-hidden rounded-xl border border-border bg-card text-left transition-[border-color,background-color] duration-150 hover:border-input hover:bg-accent/30 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/30"
+    },
+    {
+      "componente": "TarjetaPortada",
+      "instancia": 2,
+      "archivo": "crops/10-docente-home--TarjetaPortada-2.png",
+      "caja": {
+        "x": 778,
+        "y": 1757,
+        "width": 186,
+        "height": 199
+      },
+      "raicesDom": 1,
+      "etiqueta": "a",
+      "clases": "group/tarjeta flex h-full min-h-[12.25rem] w-full flex-col overflow-hidden rounded-xl border border-border bg-card text-left transition-[border-color,background-color] duration-150 hover:border-input hover:bg-accent/30 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/30"
+    },
+    {
+      "componente": "ModuloCard",
+      "instancia": 3,
+      "archivo": "crops/10-docente-home--ModuloCard-3.png",
+      "caja": {
+        "x": 979,
+        "y": 1757,
+        "width": 186,
+        "height": 199
+      },
+      "raicesDom": 1,
+      "etiqueta": "a",
+      "clases": "group/tarjeta flex h-full min-h-[12.25rem] w-full flex-col overflow-hidden rounded-xl border border-border bg-card text-left transition-[border-color,background-color] duration-150 hover:border-input hover:bg-accent/30 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/30"
+    },
+    {
+      "componente": "TarjetaPortada",
+      "instancia": 3,
+      "archivo": "crops/10-docente-home--TarjetaPortada-3.png",
+      "caja": {
+        "x": 979,
+        "y": 1757,
+        "width": 186,
+        "height": 199
+      },
+      "raicesDom": 1,
+      "etiqueta": "a",
+      "clases": "group/tarjeta flex h-full min-h-[12.25rem] w-full flex-col overflow-hidden rounded-xl border border-border bg-card text-left transition-[border-color,background-color] duration-150 hover:border-input hover:bg-accent/30 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/30"
+    },
+    {
+      "componente": "ModuloCard",
+      "instancia": 4,
+      "archivo": "crops/10-docente-home--ModuloCard-4.png",
+      "caja": {
+        "x": 1181,
+        "y": 1757,
+        "width": 186,
+        "height": 199
+      },
+      "raicesDom": 1,
+      "etiqueta": "a",
+      "clases": "group/tarjeta flex h-full min-h-[12.25rem] w-full flex-col overflow-hidden rounded-xl border border-border bg-card text-left transition-[border-color,background-color] duration-150 hover:border-input hover:bg-accent/30 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/30"
+    },
+    {
+      "componente": "TarjetaPortada",
+      "instancia": 4,
+      "archivo": "crops/10-docente-home--TarjetaPortada-4.png",
+      "caja": {
+        "x": 1181,
+        "y": 1757,
+        "width": 186,
+        "height": 199
+      },
+      "raicesDom": 1,
+      "etiqueta": "a",
+      "clases": "group/tarjeta flex h-full min-h-[12.25rem] w-full flex-col overflow-hidden rounded-xl border border-border bg-card text-left transition-[border-color,background-color] duration-150 hover:border-input hover:bg-accent/30 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/30"
+    },
+    {
+      "componente": "ModuloCard",
+      "instancia": 5,
+      "archivo": "crops/10-docente-home--ModuloCard-5.png",
+      "caja": {
+        "x": 1382,
+        "y": 1757,
+        "width": 186,
+        "height": 199
+      },
+      "raicesDom": 1,
+      "etiqueta": "a",
+      "clases": "group/tarjeta flex h-full min-h-[12.25rem] w-full flex-col overflow-hidden rounded-xl border border-border bg-card text-left transition-[border-color,background-color] duration-150 hover:border-input hover:bg-accent/30 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/30"
+    },
+    {
+      "componente": "TarjetaPortada",
+      "instancia": 5,
+      "archivo": "crops/10-docente-home--TarjetaPortada-5.png",
+      "caja": {
+        "x": 1382,
+        "y": 1757,
+        "width": 186,
+        "height": 199
+      },
+      "raicesDom": 1,
+      "etiqueta": "a",
+      "clases": "group/tarjeta flex h-full min-h-[12.25rem] w-full flex-col overflow-hidden rounded-xl border border-border bg-card text-left transition-[border-color,background-color] duration-150 hover:border-input hover:bg-accent/30 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/30"
+    },
+    {
+      "componente": "FilaModulos",
+      "instancia": 2,
+      "archivo": "crops/10-docente-home--FilaModulos-2.png",
+      "caja": {
+        "x": 576,
+        "y": 1996,
+        "width": 992,
+        "height": 262
+      },
+      "raicesDom": 1,
+      "etiqueta": "section",
+      "clases": ""
+    },
+    {
+      "componente": "ModuloCard",
+      "instancia": 6,
+      "archivo": "crops/10-docente-home--ModuloCard-6.png",
+      "caja": {
+        "x": 576,
+        "y": 2062,
+        "width": 186,
+        "height": 196
+      },
+      "raicesDom": 1,
+      "etiqueta": "a",
+      "clases": "group/tarjeta flex h-full min-h-[12.25rem] w-full flex-col overflow-hidden rounded-xl border border-border bg-card text-left transition-[border-color,background-color] duration-150 hover:border-input hover:bg-accent/30 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/30"
+    },
+    {
+      "componente": "TarjetaPortada",
+      "instancia": 6,
+      "archivo": "crops/10-docente-home--TarjetaPortada-6.png",
+      "caja": {
+        "x": 576,
+        "y": 2062,
+        "width": 186,
+        "height": 196
+      },
+      "raicesDom": 1,
+      "etiqueta": "a",
+      "clases": "group/tarjeta flex h-full min-h-[12.25rem] w-full flex-col overflow-hidden rounded-xl border border-border bg-card text-left transition-[border-color,background-color] duration-150 hover:border-input hover:bg-accent/30 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/30"
+    }
+  ]
+}

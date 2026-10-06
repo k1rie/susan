@@ -1,0 +1,232 @@
+{
+  "pantalla": "19-reportes-grupo-3a",
+  "ruta": "/reportes?grupo=1",
+  "cuenta": "docente1",
+  "sistemaDeCoordenadas": "px CSS de la página completa (en escritorio, con el panel blanco desenrollado); multiplicar por el deviceScaleFactor (2 escritorio, 3 móvil) para px del .full.png",
+  "componentes": [
+    {
+      "componente": "PageHeader",
+      "instancia": 1,
+      "archivo": "crops/19-reportes-grupo-3a--PageHeader.png",
+      "caja": {
+        "x": 576,
+        "y": 119,
+        "width": 992,
+        "height": 57
+      },
+      "raicesDom": 1,
+      "etiqueta": "header",
+      "clases": "mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between"
+    },
+    {
+      "componente": "BotonesExportar",
+      "instancia": 1,
+      "archivo": "crops/19-reportes-grupo-3a--BotonesExportar.png",
+      "caja": {
+        "x": 1317,
+        "y": 134,
+        "width": 251,
+        "height": 40
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "print:hidden flex flex-wrap gap-2"
+    },
+    {
+      "componente": "FiltrosReporte",
+      "instancia": 1,
+      "archivo": "crops/19-reportes-grupo-3a--FiltrosReporte.png",
+      "caja": {
+        "x": 576,
+        "y": 200,
+        "width": 992,
+        "height": 64
+      },
+      "raicesDom": 1,
+      "etiqueta": "form",
+      "clases": "print:hidden grid grid-cols-1 gap-3 sm:grid-cols-3"
+    },
+    {
+      "componente": "PestanasReporte",
+      "instancia": 1,
+      "archivo": "crops/19-reportes-grupo-3a--PestanasReporte.png",
+      "caja": {
+        "x": 576,
+        "y": 316,
+        "width": 992,
+        "height": 765
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "flex flex-col gap-4"
+    },
+    {
+      "componente": "Tabs",
+      "instancia": 1,
+      "archivo": "crops/19-reportes-grupo-3a--Tabs.png",
+      "caja": {
+        "x": 576,
+        "y": 316,
+        "width": 992,
+        "height": 45
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "flex max-w-full gap-6 overflow-x-auto border-b border-border"
+    },
+    {
+      "componente": "ResumenGrupo",
+      "instancia": 1,
+      "archivo": "crops/19-reportes-grupo-3a--ResumenGrupo.png",
+      "caja": {
+        "x": 576,
+        "y": 377,
+        "width": 992,
+        "height": 133
+      },
+      "raicesDom": 3,
+      "etiqueta": "div",
+      "clases": "grid grid-cols-2 gap-3 lg:grid-cols-4"
+    },
+    {
+      "componente": "IndicadoresGrupo",
+      "instancia": 1,
+      "archivo": "crops/19-reportes-grupo-3a--IndicadoresGrupo.png",
+      "caja": {
+        "x": 576,
+        "y": 377,
+        "width": 992,
+        "height": 133
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "grid grid-cols-2 gap-3 lg:grid-cols-4"
+    },
+    {
+      "componente": "StatCard",
+      "instancia": 1,
+      "archivo": "crops/19-reportes-grupo-3a--StatCard.png",
+      "caja": {
+        "x": 576,
+        "y": 377,
+        "width": 239,
+        "height": 133
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "group/stat flex min-h-[7.5rem] flex-col rounded-xl border border-border bg-card p-4"
+    },
+    {
+      "componente": "StatCard",
+      "instancia": 2,
+      "archivo": "crops/19-reportes-grupo-3a--StatCard-2.png",
+      "caja": {
+        "x": 827,
+        "y": 377,
+        "width": 239,
+        "height": 133
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "group/stat flex min-h-[7.5rem] flex-col rounded-xl border border-border bg-card p-4"
+    },
+    {
+      "componente": "StatCard",
+      "instancia": 3,
+      "archivo": "crops/19-reportes-grupo-3a--StatCard-3.png",
+      "caja": {
+        "x": 1078,
+        "y": 377,
+        "width": 239,
+        "height": 133
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "group/stat flex min-h-[7.5rem] flex-col rounded-xl border border-border bg-card p-4"
+    },
+    {
+      "componente": "StatCard",
+      "instancia": 4,
+      "archivo": "crops/19-reportes-grupo-3a--StatCard-4.png",
+      "caja": {
+        "x": 1329,
+        "y": 377,
+        "width": 239,
+        "height": 133
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "group/stat flex min-h-[7.5rem] flex-col rounded-xl border border-border bg-card p-4"
+    },
+    {
+      "componente": "TarjetaGrafica",
+      "instancia": 1,
+      "archivo": "crops/19-reportes-grupo-3a--TarjetaGrafica.png",
+      "caja": {
+        "x": 576,
+        "y": 525,
+        "width": 387,
+        "height": 440
+      },
+      "raicesDom": 1,
+      "etiqueta": "figure",
+      "clases": "m-0 flex flex-col rounded-xl border border-border bg-card p-5 lg:col-span-2"
+    },
+    {
+      "componente": "AnilloEstados",
+      "instancia": 1,
+      "archivo": "crops/19-reportes-grupo-3a--AnilloEstados.png",
+      "caja": {
+        "x": 597,
+        "y": 608,
+        "width": 345,
+        "height": 336
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "@container"
+    },
+    {
+      "componente": "TarjetaGrafica",
+      "instancia": 2,
+      "archivo": "crops/19-reportes-grupo-3a--TarjetaGrafica-2.png",
+      "caja": {
+        "x": 979,
+        "y": 525,
+        "width": 589,
+        "height": 440
+      },
+      "raicesDom": 1,
+      "etiqueta": "figure",
+      "clases": "m-0 flex flex-col rounded-xl border border-border bg-card p-5 lg:col-span-3"
+    },
+    {
+      "componente": "BarrasPildora",
+      "instancia": 1,
+      "archivo": "crops/19-reportes-grupo-3a--BarrasPildora.png",
+      "caja": {
+        "x": 1000,
+        "y": 608,
+        "width": 547,
+        "height": 268
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": ""
+    },
+    {
+      "componente": "ImpactoTiempo",
+      "instancia": 1,
+      "archivo": "crops/19-reportes-grupo-3a--ImpactoTiempo.png",
+      "caja": {
+        "x": 576,
+        "y": 981,
+        "width": 992,
+        "height": 100
+      },
+      "raicesDom": 1,
+      "etiqueta": "section",
+      "clases": "rounded-xl border border-border bg-card p-5"
+    }
+  ]
+}

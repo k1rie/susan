@@ -1,0 +1,64 @@
+{
+  "pantalla": "70-admin-usuarios",
+  "ruta": "/admin/usuarios",
+  "cuenta": "admin",
+  "sistemaDeCoordenadas": "px CSS de la página completa (en escritorio, con el panel blanco desenrollado); multiplicar por el deviceScaleFactor (2 escritorio, 3 móvil) para px del .full.png",
+  "componentes": [
+    {
+      "componente": "UsuariosPanel",
+      "instancia": 1,
+      "archivo": "crops/70-admin-usuarios--UsuariosPanel.png",
+      "caja": {
+        "x": 576,
+        "y": 119,
+        "width": 992,
+        "height": 1732
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "flex flex-col gap-4"
+    },
+    {
+      "componente": "CatalogoTabla",
+      "instancia": 1,
+      "archivo": "crops/70-admin-usuarios--CatalogoTabla.png",
+      "caja": {
+        "x": 576,
+        "y": 119,
+        "width": 992,
+        "height": 1732
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "flex flex-col gap-4"
+    },
+    {
+      "componente": "PageHeader",
+      "instancia": 1,
+      "archivo": "crops/70-admin-usuarios--PageHeader.png",
+      "caja": {
+        "x": 576,
+        "y": 119,
+        "width": 992,
+        "height": 57
+      },
+      "raicesDom": 1,
+      "etiqueta": "header",
+      "clases": "mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between"
+    },
+    {
+      "componente": "Table",
+      "instancia": 1,
+      "archivo": "crops/70-admin-usuarios--Table.png",
+      "caja": {
+        "x": 576,
+        "y": 296,
+        "width": 992,
+        "height": 1503
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "overflow-x-auto rounded-xl border border-border bg-card"
+    }
+  ]
+}

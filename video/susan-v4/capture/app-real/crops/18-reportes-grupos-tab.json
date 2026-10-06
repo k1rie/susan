@@ -1,0 +1,92 @@
+{
+  "pantalla": "18-reportes-grupos-tab",
+  "ruta": "/reportes",
+  "cuenta": "docente1",
+  "sistemaDeCoordenadas": "px CSS de la página completa (en escritorio, con el panel blanco desenrollado); multiplicar por el deviceScaleFactor (2 escritorio, 3 móvil) para px del .full.png",
+  "componentes": [
+    {
+      "componente": "PageHeader",
+      "instancia": 1,
+      "archivo": "crops/18-reportes-grupos-tab--PageHeader.png",
+      "caja": {
+        "x": 576,
+        "y": 119,
+        "width": 992,
+        "height": 57
+      },
+      "raicesDom": 1,
+      "etiqueta": "header",
+      "clases": "mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between"
+    },
+    {
+      "componente": "BotonesExportar",
+      "instancia": 1,
+      "archivo": "crops/18-reportes-grupos-tab--BotonesExportar.png",
+      "caja": {
+        "x": 1317,
+        "y": 136,
+        "width": 251,
+        "height": 40
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "print:hidden flex flex-wrap gap-2"
+    },
+    {
+      "componente": "FiltrosReporte",
+      "instancia": 1,
+      "archivo": "crops/18-reportes-grupos-tab--FiltrosReporte.png",
+      "caja": {
+        "x": 576,
+        "y": 200,
+        "width": 992,
+        "height": 64
+      },
+      "raicesDom": 1,
+      "etiqueta": "form",
+      "clases": "print:hidden grid grid-cols-1 gap-3 sm:grid-cols-3"
+    },
+    {
+      "componente": "PestanasReporte",
+      "instancia": 1,
+      "archivo": "crops/18-reportes-grupos-tab--PestanasReporte.png",
+      "caja": {
+        "x": 576,
+        "y": 280,
+        "width": 992,
+        "height": 197
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "flex flex-col gap-4"
+    },
+    {
+      "componente": "Tabs",
+      "instancia": 1,
+      "archivo": "crops/18-reportes-grupos-tab--Tabs.png",
+      "caja": {
+        "x": 576,
+        "y": 280,
+        "width": 992,
+        "height": 45
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "flex max-w-full gap-6 overflow-x-auto border-b border-border"
+    },
+    {
+      "componente": "TablaPeriodo",
+      "instancia": 1,
+      "archivo": "crops/18-reportes-grupos-tab--TablaPeriodo.png",
+      "caja": {
+        "x": 576,
+        "y": 341,
+        "width": 992,
+        "height": 136
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "overflow-x-auto rounded-xl border border-border bg-card"
+    }
+  ]
+}
