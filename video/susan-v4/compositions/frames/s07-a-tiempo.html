@@ -17,6 +17,9 @@
 #s07-a-tiempo-rig{position:absolute;inset:0;transform-origin:960px 520px}
 #s07-a-tiempo-ranking{position:absolute;left:260px;top:170px;width:1400px;height:700px;border-radius:28px;background:#1E1919;
  box-shadow:inset 0 0 0 2px #E7E2DC;clip-path:inset(244px 390px 344px 390px round 56px)}
+/* Pintura blanca que se abre desde el centro de la píldora (700, 300 en la caja del ranking): reemplaza el aclarado global de
+   tinta a blanco, que pasaba por una losa gris con el texto fantasma (QA r1). Va debajo de todo el contenido del ranking. */
+#s07-a-tiempo-pintura{position:absolute;inset:0;border-radius:28px}
 #s07-a-tiempo-pildora{position:absolute;left:390px;top:244px;width:620px;height:112px;display:flex;align-items:center;justify-content:center;color:#FFFFFF}
 .s07-a-tiempo-pildora-linea{display:flex;align-items:baseline;gap:20px;white-space:nowrap;line-height:1}
 .s07-a-tiempo-pildora-n{font-size:72px;font-weight:600}
@@ -122,6 +125,7 @@
       <!-- ranking real «Mayor riesgo» (BarrasPildora, analítica 3A) que nace de la píldora heredada -->
       <div id="s07-a-tiempo-rig">
         <div id="s07-a-tiempo-ranking">
+          <div id="s07-a-tiempo-pintura"></div>
           <div id="s07-a-tiempo-pildora">
             <div class="s07-a-tiempo-pildora-linea"><span class="s07-a-tiempo-pildora-n">9</span><span class="s07-a-tiempo-pildora-t">alumnos en riesgo</span></div>
           </div>
@@ -180,9 +184,9 @@
         <div id="s07-a-tiempo-sombra-pose"><div id="s07-a-tiempo-sombra"></div></div>
         <div id="s07-a-tiempo-ivan">
           <div id="s07-a-tiempo-fila-copia" class="s07-a-tiempo-fila">
-            <div class="s07-a-tiempo-nombre">Cruz Rojas Iván</div>
-            <div class="s07-a-tiempo-pista"><div class="s07-a-tiempo-relleno alto" style="width:calc((100% - 4px) * .64)"></div></div>
-            <div class="s07-a-tiempo-cifra">64</div>
+            <div id="s07-a-tiempo-copia-nombre" class="s07-a-tiempo-nombre">Cruz Rojas Iván</div>
+            <div id="s07-a-tiempo-copia-pista" class="s07-a-tiempo-pista"><div class="s07-a-tiempo-relleno alto" style="width:calc((100% - 4px) * .64)"></div></div>
+            <div id="s07-a-tiempo-copia-cifra" class="s07-a-tiempo-cifra">64</div>
           </div>
           <div id="s07-a-tiempo-marco"></div>
           <div id="s07-a-tiempo-contenido">
@@ -263,6 +267,7 @@
         // Tiempos (locales). Los que llevan sonido coinciden con sfx_cues: el tween nombrado empieza o termina ahí.
         var T = {
             morph: 0.05,      // soft-in: la píldora se abre en la tarjeta «Mayor riesgo»
+            pinta: 0.11,      // la pintura blanca se abre desde el centro (0.14 s), ya sin el texto de la píldora (fuera a 0.11)
             filas: 0.20,      // barrido de las ocho filas
             foco: 1.05,       // foco selectivo vivo en la fila de Iván
             despegue: 1.40,   // tap: la fila se despega
@@ -274,9 +279,9 @@
             valor: 2.80,
             focoA: 3.00,      // R4: el encabezado se va a contexto y quedan nítidos el «2» y la barra, antes de «dos» (3.21)
             refocoA: 3.65,    // el desenfoque del encabezado vuelve a none (queda la atenuación); desenfoque total 0.90 s
-            salA: 3.95,       // R2: la sección A sube y sale (0.30 s), ya en la pausa «…»; whoosh-s 4.20 sobre el cambio
-            cruce: 4.15,      // R2: la píldora del cruce sube desde abajo (0.50 s)
-            accion: 4.40,     // pop-2: la fila de la acción sube con la misma receta (0.50 s)
+            salA: 3.95,       // R2: la sección A sube y sale (0.30 s), ya en la pausa «…»; whoosh-s 4.25 en el cambio
+            cruce: 4.25,      // R2: la píldora del cruce sube desde abajo (0.50 s) cuando la sección A ya está en 0: sin doble imagen
+            accion: 4.55,     // pop-2: la fila de la acción sube con la misma receta (0.50 s), con la píldora ya asentándose
             texto: 5.20,      // soft-in: «Contactar al alumno esta semana» entra desde el desenfoque (0.40 s), 0.33 s antes de «tiempo»
             latido: 5.50,     // la fila de la acción late al asentarse su texto (1 → 1.035 → 1 y 5 px; quieta desde 5.82, antes de «tiempo»)
             halo: 6.45,
@@ -324,11 +329,35 @@
         // Recorte de radio fijo de la caja de la píldora (650–1270 × 414–526) a la caja final (260–1660 × 170–870); tinta → blanco.
         tl.fromTo(ranking, { clipPath: 'inset(244px 390px 344px 390px round 56px)' },
             { clipPath: 'inset(0px 0px 0px 0px round 28px)', duration: 0.5, ease: 'power3.inOut' }, T.morph);
-        // La pintura (tinta → blanco) usa la misma curva pero termina a 0.40 s: las filas, que arrancan a 0.20 s,
-        // ya no se leen sobre un gris a medio camino.
-        tl.fromTo(ranking, { backgroundColor: '#1E1919' }, { backgroundColor: '#FFFFFF', duration: 0.35, ease: 'power3.inOut', immediateRender: false }, T.morph);
-        // Contenido viejo fuera antes del 40 % del morph; el nuevo después del 60 %.
-        tl.fromTo($('pildora'), { opacity: 1 }, { opacity: 0, duration: 0.2, ease: 'power1.in' }, T.morph);
+        // Tinta → blanco como pintura que se abre desde el centro de la píldora (QA r1: el aclarado con una opacidad global
+        // pasaba ~5 fotogramas por una losa gris sucia con el texto fantasma). Un disco blanco con borde suave de hasta 40 px (la
+        // estela del borde) crece de 0 a cubrir la caja visible del recorte en ese instante, de 0.11 a 0.25 s, antes de que
+        // las filas tomen opacidad. Driver puro del tiempo: en p = 1 la tarjeta queda blanca de verdad (fondo #FFFFFF y la
+        // pintura sin fondo, así vuelve a verse el filo interior #E7E2DC) y en p = 0 sigue de tinta sin pintura.
+        var pintura = $('pintura');
+        var PINTA = { dur: 0.14, borde: 40, cx: 700, cy: 300 };
+        var eMorph = gsap.parseEase('power3.inOut'), ePinta = gsap.parseEase('power1.inOut');
+        var pt = { p: 0 };
+        function pintar() {
+            var p = pt.p;
+            if (p >= 1 - 1e-4) { ranking.style.backgroundColor = '#FFFFFF'; pintura.style.background = 'none'; return; }
+            ranking.style.backgroundColor = '#1E1919';
+            if (p <= 1e-4) { pintura.style.background = 'none'; return; }
+            // Caja visible del recorte en este instante (misma curva y tiempos que el morph): semiancho 310 → 700, abajo 56 → 400.
+            var m = Math.min(1, Math.max(0, (T.pinta + p * PINTA.dur - T.morph) / 0.5));
+            var e = eMorph(m);
+            var esquina = Math.sqrt(Math.pow(310 + 390 * e, 2) + Math.pow(56 + 344 * e, 2));
+            // El borde suave crece con el disco (al nacer es un punto de pintura nítido, no un brillo) hasta 40 px,
+            // lo que avanza el borde en un fotograma a 60 fps en el tramo rápido.
+            var r = ePinta(p) * (esquina + PINTA.borde);
+            var lleno = Math.max(0, r - Math.min(PINTA.borde, 0.35 * r + 4));
+            pintura.style.background = 'radial-gradient(circle at ' + PINTA.cx + 'px ' + PINTA.cy + 'px, #FFFFFF ' + lleno.toFixed(1) +
+                'px, rgba(255,255,255,0) ' + r.toFixed(1) + 'px)';
+        }
+        pintar();
+        tl.fromTo(pt, { p: 0 }, { p: 1, duration: PINTA.dur, ease: 'none', onUpdate: pintar, immediateRender: false }, T.pinta);
+        // Contenido viejo fuera antes de que empiece la pintura (0.05 → 0.11, sobre la tinta todavía entera); el nuevo después del 60 %.
+        tl.fromTo($('pildora'), { opacity: 1 }, { opacity: 0, duration: 0.06, ease: 'power1.out' }, T.morph);
         tl.fromTo([$('titulo'), $('subtitulo')], { opacity: 0, y: 10 },
             { opacity: 1, y: 0, duration: 0.2, ease: 'power2.out', stagger: 0.03 }, 0.35);
 
@@ -380,8 +409,31 @@
             { scaleX: 1, scaleY: 1, duration: 0.65, ease: 'power3.inOut' }, T.abre);
         tl.fromTo($('sombra'), { opacity: 0 }, { opacity: 1, duration: 0.25, ease: 'power2.out' }, 2.15);
         tl.fromTo($('sombra-fila'), { opacity: 1 }, { opacity: 0, duration: 0.30, ease: 'power2.in', immediateRender: false }, T.abre);
-        // Relevo de contenido dentro de la tarjeta: la fila fuera antes del 40 %, el marco al final.
-        tl.fromTo($('fila-copia'), { opacity: 1 }, { opacity: 0, duration: 0.24, ease: 'power1.in' }, T.abre);
+        // Relevo de contenido dentro de la tarjeta: la barra y el «64» de la fila fuera antes del 40 %, el marco al final.
+        tl.fromTo([$('copia-pista'), $('copia-cifra')], { opacity: 1 }, { opacity: 0, duration: 0.24, ease: 'power1.in' }, T.abre);
+        // El nombre NO se apaga (QA r1: quedaba una losa pálida vacía ~10 fotogramas): «Cruz Rojas Iván» de la fila viaja con
+        // la apertura hasta el nombre del encabezado (x 28 → 216, y 201.2 → 44 en la caja de la tarjeta, 28 → 40 px, 500 → 600,
+        // −0.003 → −0.025 em) y hacia el 60 % de la apertura (2.06–2.20) se disuelve en él. El nombre del encabezado hace el
+        // camino inverso con la misma curva, así que los dos ocupan el mismo lugar en cada instante: sin doble imagen.
+        var NOM = { dx: 216 - 28, dy: 44 - 201.2, s: 40 / 28 };
+        var copiaNombre = $('copia-nombre'), nombreIvan = $('nombre-ivan');
+        gsap.set([copiaNombre, nombreIvan], { transformOrigin: '0 0' });
+        tl.fromTo(copiaNombre, { x: 0, y: 0, scale: 1 }, { x: NOM.dx, y: NOM.dy, scale: NOM.s, duration: 0.65, ease: 'power3.inOut' }, T.abre);
+        // Peso y espaciado de la fila → los del encabezado (en la escala de la copia: −0.7 px × 40/28 = −1 px), ya iguales a
+        // 2.06 s, antes de la disolvencia: los dos nombres coinciden letra por letra. Driver puro (GSAP no interpola bien
+        // letterSpacing en px fraccionarios: lo dejaba en «normal»).
+        var fuente = { p: 0 };
+        var eFuente = gsap.parseEase('power2.inOut');
+        function pintarFuente() {
+            var e = fuente.p <= 1e-4 ? 0 : (fuente.p >= 1 - 1e-4 ? 1 : eFuente(fuente.p));
+            copiaNombre.style.fontWeight = String(Math.round(500 + 100 * e));
+            copiaNombre.style.letterSpacing = (-0.084 - 0.616 * e).toFixed(3) + 'px';
+        }
+        pintarFuente();
+        tl.fromTo(fuente, { p: 0 }, { p: 1, duration: 2.06 - T.abre, ease: 'none', onUpdate: pintarFuente, immediateRender: false }, T.abre);
+        tl.fromTo(nombreIvan, { x: -NOM.dx, y: -NOM.dy, scale: 1 / NOM.s }, { x: 0, y: 0, scale: 1, duration: 0.65, ease: 'power3.inOut' }, T.abre);
+        tl.fromTo(nombreIvan, { opacity: 0 }, { opacity: 1, duration: 0.10, ease: 'power1.inOut' }, 2.06);
+        tl.fromTo(copiaNombre, { opacity: 1 }, { opacity: 0, duration: 0.10, ease: 'power1.inOut' }, 2.10);
         tl.fromTo($('marco'), { opacity: 0 }, { opacity: 1, duration: 0.2, ease: 'power1.out' }, 2.20);
         // El ranking retrocede detrás: su contenido queda al 12 % (0.35 × 0.343) y escala 0.97.
         tl.fromTo($('rig'), { opacity: 1, scale: 1 }, { opacity: 0.12 / 0.35, scale: 0.97, duration: 0.65, ease: 'power3.inOut' }, T.abre);
@@ -391,12 +443,15 @@
         for (var a = 0; a < 8; a++) { if (a !== 2) { asoman.push(filas[a]); } }
         tl.fromTo(asoman, { opacity: 0.35 }, { opacity: 0, duration: 0.3, ease: 'power1.out', immediateRender: false }, 2.40);
 
-        // Cascada (2.15–2.65): avatar, nombre, matrícula, nivel y tendencia.
-        tl.fromTo([$('avatar'), $('nombre-ivan'), $('matricula'), $('chip-nivel'), $('chip-alza')], { opacity: 0, y: 20 },
-            { opacity: 1, y: 0, duration: 0.3, ease: 'power3.out', stagger: 0.05 }, T.cascada);
+        // Cascada (2.15–2.65) en sus mismos tiempos: avatar, matrícula, nivel y tendencia (el nombre ya llegó con la fila).
+        var cascada = [$('avatar'), $('matricula'), $('chip-nivel'), $('chip-alza')];
+        var lugar = [0, 2, 3, 4];
+        for (var k = 0; k < cascada.length; k++) {
+            tl.fromTo(cascada[k], { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.3, ease: 'power3.out' }, T.cascada + 0.05 * lugar[k]);
+        }
         tl.fromTo($('divisor'), { opacity: 0 }, { opacity: 1, duration: 0.3, ease: 'power1.out' }, 2.30);
 
-        // ---------- Escena 3 (2.45–4.40): sección A, la barra frente al límite y «2» faltas restantes ----------
+        // ---------- Escena 3 (2.45–4.55): sección A, la barra frente al límite y «2» faltas restantes ----------
         // La fila «Faltas» entra como StaggerList (y 20 → 0); pista, línea discontinua y chip «Límite 20 %» llegan juntos a 2.45 s.
         tl.fromTo([$('barra'), $('rot-faltas'), $('rot-restantes')], { opacity: 0, y: 20 },
             { opacity: 1, y: 0, duration: 0.4, ease: 'power3.out', stagger: 0.06 }, T.faltas);
@@ -430,7 +485,9 @@
         tl.set(secaSal, { autoAlpha: 0 }, T.salA + 0.30);
 
         // Entrada: y +140 → 0, power3.out 0.50 s, opacidad 0 → 1 en 0.15 s, estela ≤ 10 (envoltorio interno = entrada; filtro
-        // en la hoja). Se solapa 0.10 s con la salida: los dos picos de velocidad se tocan hacia 4.20 s (whoosh-s).
+        // en la hoja). Sin solape (QA r1: con 0.10 s la píldora asomaba bajo el «2» y la barra al 60 % y se leía como una
+        // disolvencia en el mismo lugar): arranca cuando la sección A ya está en 0, a 4.25, y los dos picos de velocidad se
+        // tocan ahí (whoosh-s).
         function subir(ent, hoja, nodo, at) {
             tl.fromTo(ent, { opacity: 0 }, { opacity: 1, duration: 0.15, ease: 'power1.out' }, at);
             conRastro({ el: hoja, nodo: nodo, at: at, dur: 0.50, curva: 'power3.out', dist: 140, eje: 'y', max: 10,
@@ -438,8 +495,9 @@
         }
         subir($('cruce-ent'), $('cruce'), $('mb-cruce-g'), T.cruce);
 
-        // ---------- Escena 4 (4.40–7.6): la acción sugerida y su halo de foco ----------
-        // La fila (ficha calendar-check + «Acción sugerida») sube con la misma receta 0.25 s después de la píldora.
+        // ---------- Escena 4 (4.55–7.6): la acción sugerida y su halo de foco ----------
+        // La fila (ficha calendar-check + «Acción sugerida») sube con la misma receta 0.30 s después de la píldora, con ella ya
+        // al 94 % de su recorrido: un movimiento vertical tras otro, no tres encimados.
         subir($('accion-ent'), $('accion'), $('mb-accion-g'), T.accion);
 
         // «Contactar al alumno esta semana» con el BlurText de la app, por palabra (direction bottom, para no romper la dirección

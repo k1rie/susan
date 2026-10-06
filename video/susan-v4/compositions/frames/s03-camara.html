@@ -404,7 +404,9 @@
         // 5.35–6.15 s: la BarraSegmentada real se llena por segmentos de izquierda a derecha (clip-path, +80 ms por segmento).
         tl.fromTo([$('seg-p'), $('seg-r'), $('seg-s'), $('seg-pe')], { clipPath: 'inset(0% 100% 0% 0% round 999px)' },
             { clipPath: 'inset(0% 0% 0% 0% round 999px)', duration: 0.56, ease: 'power4.out', stagger: 0.08 }, 5.35);
-        // 6.05–6.45 s: «2 con retardo · 2 sin registro · 1 por revisar» entra desde el desenfoque (BlurText por palabra).
+        // 6.40–6.80 s: «2 con retardo · 2 sin registro · 1 por revisar» entra desde el desenfoque (BlurText por palabra). Va
+        // después de que la barra se asienta (6.15) y no encima de ella: tras la vuelta, la ola, el «19» y la barra, cada pieza
+        // nueva conserva ~0.4 s propios (QA r1: era el tramo más cargado del video).
         var pals = Array.prototype.slice.call(document.querySelectorAll('#' + ID + '-detalle .s03-camara-pal'));
         var blurTxt = { t: 0 };
         function aplicarBlur() {
@@ -417,9 +419,10 @@
             }
         }
         aplicarBlur();
-        tl.fromTo(blurTxt, { t: 0 }, { t: 0.40, duration: 0.40, ease: 'none', onUpdate: aplicarBlur, immediateRender: false }, 6.05);
-        // 6.35–6.75 s: bajo la cámara, la línea real de la última captura (rostros de la toma, no lecturas por alumno).
-        tl.fromTo($('ultima'), { y: 16, opacity: 0 }, { y: 0, opacity: 1, duration: 0.40, ease: 'power3.out' }, 6.35);
+        tl.fromTo(blurTxt, { t: 0 }, { t: 0.40, duration: 0.40, ease: 'none', onUpdate: aplicarBlur, immediateRender: false }, 6.40);
+        // 6.85–7.25 s: bajo la cámara, la línea real de la última captura (rostros de la toma, no lecturas por alumno), ya asentado el
+        // renglón de detalle y antes del medidor (7.30).
+        tl.fromTo($('ultima'), { y: 16, opacity: 0 }, { y: 0, opacity: 1, duration: 0.40, ease: 'power3.out' }, 6.85);
         /* ---------- Escena 4 (7.3–8.5 s): el medidor sube a 88 % y el halo pasa a verde ---------- */
         tl.fromTo($('tanque'), { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: 0.40, ease: 'power4.out' }, 7.30);
         tl.fromTo([$('pct'), $('med-et'), $('med-desc')], { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: 0.40, ease: 'power4.out', stagger: 0.06 }, 7.30);

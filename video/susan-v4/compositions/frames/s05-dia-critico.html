@@ -159,9 +159,10 @@
       <div id="s05-dia-critico-toma-rig">
         <div id="s05-dia-critico-toma-cas">
           <svg class="s05-dia-critico-toma-anillo" viewBox="-0.6 -0.6 462 318" aria-hidden="true" data-chart>
-            <path id="s05-dia-critico-anillo-trazo" d="M230.4 3.7 H398.4 A58.7 58.7 0 0 1 457.1 62.4 V254.4 A58.7 58.7 0 0 1 398.4 313.1 H62.4 A58.7 58.7 0 0 1 3.7 254.4 V62.4 A58.7 58.7 0 0 1 62.4 3.7 Z"
-              pathLength="100" fill="none" stroke="rgba(179,38,30,.7)" stroke-width="7.4" stroke-linecap="butt" stroke-linejoin="round"
-              stroke-dasharray="100 100" stroke-dashoffset="100" />
+            <!-- el `d` lo arma el script (esquina superior izquierda, vuelta completa y solape): ver «anillo» -->
+            <path id="s05-dia-critico-anillo-trazo" d="M20.893 20.893"
+              pathLength="100" fill="none" stroke="rgba(179,38,30,.7)" stroke-width="7.4" stroke-linecap="round" stroke-linejoin="round"
+              stroke-dasharray="0 200" stroke-dashoffset="0" visibility="hidden" />
           </svg>
           <div class="s05-dia-critico-toma-relleno"></div>
           <div class="s05-dia-critico-toma-cifra"><span>2</span><span>1</span><span class="s05-dia-critico-toma-p"><span>.</span><span class="s05-dia-critico-toma-oculto"> </span></span><span>8</span><span class="s05-dia-critico-toma-pct"><span class="s05-dia-critico-u">%</span></span></div>
@@ -488,13 +489,41 @@
         tl.fromTo($('toma-meta'), { opacity: 0, y: -12 }, { opacity: 1, y: 0, duration: T.metaFin - T.meta, ease: 'power3.out' }, T.meta);
         desenfoque($('toma-meta-t'), T.meta, T.metaFin - T.meta, 10, 'power2.out');
 
-        // anillo real del día crítico: svg-path-draw sobre el rectángulo redondeado, desde arriba al centro (bajo la píldora)
+        // anillo real del día crítico: svg-path-draw sobre el rectángulo redondeado (coordenadas del viewBox; ver el CSS del anillo).
+        // Revisión r1: el trazo arrancaba arriba al centro, justo bajo la píldora, y power2.out llega con velocidad 0, así que de
+        // 6.0 a 6.15 s quedaba ahí una muesca clara de 1-3 px que se cerraba muy despacio, con el arranque recto como escalón.
+        // Ahora arranca a 45° en la esquina superior izquierda (lejos de la píldora), con remates redondos (la punta que avanza
+        // es un trazo, no un escalón), y el camino da la vuelta completa y sigue SOLAPE px más sobre su propio arranque: el
+        // trazo de un solo camino se pinta como unión, así que al cerrarse no queda costura. El trazado visible (L px) se cierra
+        // justo en T.anilloFin, con el pop-1 y el latido, todavía con velocidad (~450 px/s, < 8 px por fotograma a 60 fps): la
+        // rendija dura a lo más un fotograma. El tramo que sigue (el solape) corre sobre lo ya trazado y no se ve.
+        var AN = { x0: 3.7, y0: 3.7, x1: 457.1, y1: 313.1, r: 58.7 };
+        var SOLAPE = 18;
         var trazo = $('anillo-trazo');
-        var stA = { p: 0 };
+        (function () {
+            var r = AN.r, a = AN.x0 + r, b = AN.y0 + r, c = AN.x1 - r, e = AN.y1 - r;
+            function punto(th) { return (a + r * Math.cos(th)).toFixed(3) + ' ' + (b + r * Math.sin(th)).toFixed(3); }
+            var arco = 'A' + r + ' ' + r + ' 0 0 1 ';
+            var th0 = 1.25 * Math.PI;   // 225°: la mitad del arco superior izquierdo
+            trazo.setAttribute('d', 'M' + punto(th0) + ' ' + arco + a + ' ' + AN.y0 + ' H' + c + ' ' + arco + AN.x1 + ' ' + b +
+                ' V' + e + ' ' + arco + c + ' ' + AN.y1 + ' H' + a + ' ' + arco + AN.x0 + ' ' + e + ' V' + b + ' ' +
+                arco + punto(th0) + ' ' + arco + punto(th0 + SOLAPE / r));
+        })();
+        var LARGO = 2 * (AN.x1 - AN.x0 - 2 * AN.r) + 2 * (AN.y1 - AN.y0 - 2 * AN.r) + 2 * Math.PI * AN.r;   // la vuelta, 1424.8 px
+        var CIERRE = LARGO / (LARGO + SOLAPE);   // fracción del camino (pathLength 100) en que el trazo se cierra
         var easeA = gsap.parseEase('power2.out');
-        function anillo() { trazo.setAttribute('stroke-dashoffset', (100 * (1 - easeA(stA.p))).toFixed(3)); }
+        // power2.out es cúbico en GSAP: e(p) = CIERRE en p = 1 - (1 - CIERRE)^(1/3); el tramo se alarga para que ese p caiga en
+        // T.anilloFin (0.40 s de trazado visible, como antes) y el resto, ~0.12 s, es el solape invisible.
+        var durA = (T.anilloFin - T.anillo) / (1 - Math.cbrt(1 - CIERRE));
+        var stA = { p: 0 };
+        // con remates redondos un guion de largo 0 pintaría un punto: oculto mientras no hay trazo
+        function anillo() {
+            var largo = 100 * easeA(stA.p);
+            trazo.setAttribute('stroke-dasharray', largo.toFixed(3) + ' 200');
+            trazo.setAttribute('visibility', largo < 0.01 ? 'hidden' : 'visible');
+        }
         anillo();
-        tl.fromTo(stA, { p: 0 }, { p: 1, duration: T.anilloFin - T.anillo, ease: 'none', onUpdate: anillo, immediateRender: false }, T.anillo);
+        tl.fromTo(stA, { p: 0 }, { p: 1, duration: durA, ease: 'none', onUpdate: anillo, immediateRender: false }, T.anillo);
         readMark(tl, T.llegaFin, 'Vie 21.8 % · 32 ausencias en 6 sesiones');
 
         // al cerrarse el anillo la casilla late una vez (1 -> 1.04 -> 1 desde su centro, sin sobreimpulso: va y vuelve a su escala)

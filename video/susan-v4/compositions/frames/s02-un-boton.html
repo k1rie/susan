@@ -259,6 +259,7 @@
             empuje: 2.85,       // R3a: la cámara atraviesa hacia el botón (power2.in: la velocidad máxima llega en el corte)
             nubla: 3.05,        // la capa del empuje se desenfoca 0 -> 6 px
             marcaSale: 3.12,    // «SUSAN» se apaga mientras viaja (no desaparece de golpe en el corte)
+            marcaFin: 3.27,     // y ya está en 0 dos fotogramas antes del corte: el tl.set no la arranca a medio fundido
             corte: 3.30,        // whoosh-l: tl.set cambia la toma del empuje por la toma de cerca
             LLEGA_D: 0.50,      // la toma de cerca llega 0.94 -> 1, con el último tercio del paneo, y 6 -> 0 px (expo.out)
             brillo: 3.95,       // sheen-s: el brillo arranca desde fuera del botón (asoma hacia 4.03; el pico del sonido llega a +90 ms)
@@ -433,7 +434,7 @@
         tl.fromTo($('empuje-cam'), { x: 0, y: 0 }, { x: DX, y: DY, duration: EMPUJE_D, ease: 'power2.in' }, T.empuje);
         tl.fromTo($('empuje-cam'), { scale: 1 }, { scale: EMP, duration: EMPUJE_D, ease: 'power1.in' }, T.empuje);
         desenfocar($('empuje'), T.nubla, T.corte - T.nubla, 6, 'power2.in');
-        tl.fromTo($('marca'), { opacity: 1 }, { opacity: 0, duration: T.corte - T.marcaSale, ease: 'power1.in' }, T.marcaSale);
+        tl.fromTo($('marca'), { opacity: 1 }, { opacity: 0, duration: T.marcaFin - T.marcaSale, ease: 'power1.in' }, T.marcaSale);
         // Corte bajo el desenfoque: la toma de cerca, ya maquetada a E = 3.2, entra en el mismo instante que la otra se apaga.
         gsap.set($('cerca'), { autoAlpha: 0 });
         tl.set($('empuje'), { autoAlpha: 0 }, T.corte);
