@@ -68,3 +68,4 @@ Entregar el video final 1080p60 MÁS DINÁMICO (ver BRIEF.md, indicación del 20
 - 08:46 UTC: QA r2 sobre `renders/susan-v4-r2.mp4` → **entregable** (7 menores opcionales; fotogramas en revision/qa-r2/).
 - 09:10 UTC: entrega preparada: `renders/susan-v4.mp4` (= r2), `renders/susan-v4-preview.mp4` y `plan/entrega-contacto.jpg`;
   commit `feat(video): render final de la v4 dinámica` + push. Falta enviarlo a la persona dueña.
+- 09:10 UTC: ENTREGADO. renders/susan-v4.mp4 (1080p60, 55 s, 25.2 MB) y renders/susan-v4-preview.mp4 enviados a la persona dueña; rutina «Reanudar video SUSAN v4» desactivada. Pendiente al despertar: sus comentarios, los 7 menores opcionales del QA r2 y la voz de ElevenLabs (scripts/generar-voz.mjs → mount-voz.mjs).
