@@ -54,6 +54,13 @@ voz» (guion con tiempos amarrados a cada escena).
     en segundos y entiende la asistencia de tus grupos». La ficha funciona como propuesta de logo.
   - Sin tramo extra (ni vista del alumno ni reportes): ese tiempo se le da a la analítica para que las cifras y las
     gráficas se lean con calma.
+- Plan aprobado (2026-10-06) con estos ajustes:
+  - NO decir ni mostrar cuántas muestras/lecturas/capturas usa la cámara para confirmar a un alumno («eso aún lo
+    decidiré»): fuera «tres lecturas», «Lecturas 1/3 → 3/3», «2/3» y cualquier contador equivalente, en voz y en
+    pantalla. La confirmación se cuenta sin número (el marco se vuelve verde y el alumno queda presente).
+  - Gancho con la barra de la clase que se pliega en el semestre (no la píldora «5 min»).
+  - Sin «unas 20 h con 5 grupos»: queda «4 h por grupo al semestre».
+  - Voz recomendada: «Antonio» (la de la v3), a confirmar cuando se genere.
 
 ## Notes
 
