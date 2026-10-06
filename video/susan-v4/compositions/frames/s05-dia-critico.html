@@ -252,7 +252,7 @@
         }
         function tira(items, html) {
             var s = '';
-            for (var i = 0; i < items.length; i++) { s += '<span>' + (html ? items[i] : (items[i] || ' ')) + '</span>'; }
+            for (var i = 0; i < items.length; i++) { s += '<span data-layout-allow-overlap>' + (html ? items[i] : (items[i] || ' ')) + '</span>'; }
             return s;
         }
         var DIAS = [

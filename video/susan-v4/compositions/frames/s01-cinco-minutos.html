@@ -120,7 +120,7 @@
             </div>
             <!-- fila B: «4 h», entra desde abajo en la misma columna -->
             <div class="s01-cinco-minutos-fila" style="top:192px">
-              <span class="s01-cinco-minutos-dig" style="left:16px">4</span>
+              <span class="s01-cinco-minutos-dig" style="left:16px" data-layout-allow-overlap>4</span>
               <span class="s01-cinco-minutos-unidad" style="left:123.2px">h</span>
             </div>
           </div>
@@ -164,7 +164,7 @@
 
         // ---- odometro: tiras generadas una vez (U+2007 = espacio de cifra) ----
         var FIG = ' ';
-        function tira(el, items) { var h = ''; for (var i = 0; i < items.length; i++) { h += '<span>' + items[i] + '</span>'; } el.innerHTML = h; }
+        function tira(el, items) { var h = ''; for (var i = 0; i < items.length; i++) { h += '<span data-layout-allow-overlap>' + items[i] + '</span>'; } el.innerHTML = h; }
         // centenas: vacio -> 5 (un renglon, escena 1) y luego 6..9, 0, 1, 2 (renglon 8, escena 3)
         var t1 = [FIG, '5', '6', '7', '8', '9', '0', '1', '2'];
         var t2 = [FIG]; for (var a = 1; a <= 14; a++) { t2.push(String(a % 10)); }    // decenas: una vuelta + 4

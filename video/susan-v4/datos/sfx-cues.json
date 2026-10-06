@@ -1,5 +1,5 @@
 {
- "generado": "2026-10-06T05:35:29.710Z",
+ "generado": "2026-10-06T07:26:17.917Z",
  "proyecto": "/home/user/susan/video/susan-v4",
  "duracion": 55,
  "cuadros": {
@@ -28,11 +28,11 @@
    "duration": 7.45
   },
   "s07-a-tiempo": {
-   "start": 41.4,
+   "start": 41.400000000000006,
    "duration": 8.1
   },
   "s08-susan": {
-   "start": 49,
+   "start": 49.00000000000001,
    "duration": 6
   }
  },
@@ -199,19 +199,32 @@
    "cuadro": "s02-un-boton",
    "frame": 2,
    "n": 4,
-   "nombre": "sheen-s",
-   "texto": "2.80 sheen-s",
-   "tLocal": 2.8,
-   "t": 9.2,
-   "gananciaDb": 0,
-   "categoria": "texture",
-   "anclaje": "hit"
+   "nombre": "whoosh-l",
+   "texto": "3.30 whoosh-l -6dB",
+   "tLocal": 3.3,
+   "t": 9.7,
+   "gananciaDb": -6,
+   "categoria": "whoosh",
+   "anclaje": "pico"
   },
   {
    "id": "s02-un-boton-5",
    "cuadro": "s02-un-boton",
    "frame": 2,
    "n": 5,
+   "nombre": "sheen-s",
+   "texto": "3.95 sheen-s",
+   "tLocal": 3.95,
+   "t": 10.35,
+   "gananciaDb": 0,
+   "categoria": "texture",
+   "anclaje": "hit"
+  },
+  {
+   "id": "s02-un-boton-6",
+   "cuadro": "s02-un-boton",
+   "frame": 2,
+   "n": 6,
    "nombre": "tap",
    "texto": "4.95 tap",
    "tLocal": 4.95,
@@ -221,10 +234,10 @@
    "anclaje": "hit"
   },
   {
-   "id": "s02-un-boton-6",
+   "id": "s02-un-boton-7",
    "cuadro": "s02-un-boton",
    "frame": 2,
-   "n": 6,
+   "n": 7,
    "nombre": "click-soft2",
    "texto": "5.00 click-soft2 -3dB",
    "tLocal": 5,
@@ -234,10 +247,10 @@
    "anclaje": "hit"
   },
   {
-   "id": "s02-un-boton-7",
+   "id": "s02-un-boton-8",
    "cuadro": "s02-un-boton",
    "frame": 2,
-   "n": 7,
+   "n": 8,
    "nombre": "whoosh-m",
    "texto": "5.60 whoosh-m",
    "tLocal": 5.6,
@@ -264,6 +277,32 @@
    "cuadro": "s03-camara",
    "frame": 3,
    "n": 2,
+   "nombre": "whoosh-l",
+   "texto": "2.70 whoosh-l -6dB",
+   "tLocal": 2.7,
+   "t": 15.15,
+   "gananciaDb": -6,
+   "categoria": "whoosh",
+   "anclaje": "pico"
+  },
+  {
+   "id": "s03-camara-3",
+   "cuadro": "s03-camara",
+   "frame": 3,
+   "n": 3,
+   "nombre": "whoosh-m",
+   "texto": "4.65 whoosh-m -6dB",
+   "tLocal": 4.65,
+   "t": 17.1,
+   "gananciaDb": -6,
+   "categoria": "whoosh",
+   "anclaje": "pico"
+  },
+  {
+   "id": "s03-camara-4",
+   "cuadro": "s03-camara",
+   "frame": 3,
+   "n": 4,
    "nombre": "sheen-s",
    "texto": "4.90 sheen-s -3dB",
    "tLocal": 4.9,
@@ -273,10 +312,10 @@
    "anclaje": "hit"
   },
   {
-   "id": "s03-camara-3",
+   "id": "s03-camara-5",
    "cuadro": "s03-camara",
    "frame": 3,
-   "n": 3,
+   "n": 5,
    "nombre": "blip",
    "texto": "5.00 blip -3dB",
    "tLocal": 5,
@@ -286,10 +325,10 @@
    "anclaje": "hit"
   },
   {
-   "id": "s03-camara-4",
+   "id": "s03-camara-6",
    "cuadro": "s03-camara",
    "frame": 3,
-   "n": 4,
+   "n": 6,
    "nombre": "fill",
    "texto": "5.35 fill -3dB",
    "tLocal": 5.35,
@@ -299,10 +338,10 @@
    "anclaje": "inicio"
   },
   {
-   "id": "s03-camara-5",
+   "id": "s03-camara-7",
    "cuadro": "s03-camara",
    "frame": 3,
-   "n": 5,
+   "n": 7,
    "nombre": "tick-1",
    "texto": "5.61 tick-1",
    "tLocal": 5.61,
@@ -312,10 +351,10 @@
    "anclaje": "hit"
   },
   {
-   "id": "s03-camara-6",
+   "id": "s03-camara-8",
    "cuadro": "s03-camara",
    "frame": 3,
-   "n": 6,
+   "n": 8,
    "nombre": "tick-2",
    "texto": "5.65 tick-2",
    "tLocal": 5.65,
@@ -325,10 +364,10 @@
    "anclaje": "hit"
   },
   {
-   "id": "s03-camara-7",
+   "id": "s03-camara-9",
    "cuadro": "s03-camara",
    "frame": 3,
-   "n": 7,
+   "n": 9,
    "nombre": "fill",
    "texto": "7.30 fill",
    "tLocal": 7.3,
@@ -338,10 +377,10 @@
    "anclaje": "inicio"
   },
   {
-   "id": "s03-camara-8",
+   "id": "s03-camara-10",
    "cuadro": "s03-camara",
    "frame": 3,
-   "n": 8,
+   "n": 10,
    "nombre": "tick-3",
    "texto": "7.85 tick-3",
    "tLocal": 7.85,
@@ -368,13 +407,13 @@
    "cuadro": "s04-revision",
    "frame": 4,
    "n": 2,
-   "nombre": "soft-in",
-   "texto": "0.50 soft-in",
-   "tLocal": 0.5,
-   "t": 21.45,
-   "gananciaDb": 0,
-   "categoria": "texture",
-   "anclaje": "hit"
+   "nombre": "whoosh-m",
+   "texto": "1.80 whoosh-m -3dB",
+   "tLocal": 1.8,
+   "t": 22.75,
+   "gananciaDb": -3,
+   "categoria": "whoosh",
+   "anclaje": "pico"
   },
   {
    "id": "s04-revision-3",
@@ -382,10 +421,10 @@
    "frame": 4,
    "n": 3,
    "nombre": "fill",
-   "texto": "1.45 fill -3dB",
-   "tLocal": 1.45,
-   "t": 22.4,
-   "gananciaDb": -3,
+   "texto": "2.40 fill -6dB",
+   "tLocal": 2.4,
+   "t": 23.35,
+   "gananciaDb": -6,
    "categoria": "texture",
    "anclaje": "inicio"
   },
@@ -395,9 +434,9 @@
    "frame": 4,
    "n": 4,
    "nombre": "pop-3",
-   "texto": "2.65 pop-3 -6dB",
-   "tLocal": 2.65,
-   "t": 23.6,
+   "texto": "3.10 pop-3 -6dB",
+   "tLocal": 3.1,
+   "t": 24.05,
    "gananciaDb": -6,
    "categoria": "pop",
    "anclaje": "hit"
@@ -442,6 +481,19 @@
    "anclaje": "hit"
   },
   {
+   "id": "s04-revision-8",
+   "cuadro": "s04-revision",
+   "frame": 4,
+   "n": 8,
+   "nombre": "pop-2",
+   "texto": "4.80 pop-2 -6dB",
+   "tLocal": 4.8,
+   "t": 25.75,
+   "gananciaDb": -6,
+   "categoria": "pop",
+   "anclaje": "hit"
+  },
+  {
    "id": "s05-dia-critico-1",
    "cuadro": "s05-dia-critico",
    "frame": 5,
@@ -459,6 +511,19 @@
    "cuadro": "s05-dia-critico",
    "frame": 5,
    "n": 2,
+   "nombre": "whoosh-s",
+   "texto": "0.70 whoosh-s -9dB",
+   "tLocal": 0.7,
+   "t": 27.45,
+   "gananciaDb": -9,
+   "categoria": "whoosh",
+   "anclaje": "pico"
+  },
+  {
+   "id": "s05-dia-critico-3",
+   "cuadro": "s05-dia-critico",
+   "frame": 5,
+   "n": 3,
    "nombre": "tick-1",
    "texto": "1.90 tick-1",
    "tLocal": 1.9,
@@ -468,10 +533,10 @@
    "anclaje": "hit"
   },
   {
-   "id": "s05-dia-critico-3",
+   "id": "s05-dia-critico-4",
    "cuadro": "s05-dia-critico",
    "frame": 5,
-   "n": 3,
+   "n": 4,
    "nombre": "tick-2",
    "texto": "2.40 tick-2",
    "tLocal": 2.4,
@@ -481,10 +546,10 @@
    "anclaje": "hit"
   },
   {
-   "id": "s05-dia-critico-4",
+   "id": "s05-dia-critico-5",
    "cuadro": "s05-dia-critico",
    "frame": 5,
-   "n": 4,
+   "n": 5,
    "nombre": "tick-3",
    "texto": "2.90 tick-3",
    "tLocal": 2.9,
@@ -494,10 +559,10 @@
    "anclaje": "hit"
   },
   {
-   "id": "s05-dia-critico-5",
+   "id": "s05-dia-critico-6",
    "cuadro": "s05-dia-critico",
    "frame": 5,
-   "n": 5,
+   "n": 6,
    "nombre": "pop-2",
    "texto": "4.55 pop-2",
    "tLocal": 4.55,
@@ -507,27 +572,40 @@
    "anclaje": "hit"
   },
   {
-   "id": "s05-dia-critico-6",
+   "id": "s05-dia-critico-7",
    "cuadro": "s05-dia-critico",
    "frame": 5,
-   "n": 6,
+   "n": 7,
+   "nombre": "whoosh-l",
+   "texto": "5.40 whoosh-l -3dB",
+   "tLocal": 5.4,
+   "t": 32.15,
+   "gananciaDb": -3,
+   "categoria": "whoosh",
+   "anclaje": "pico"
+  },
+  {
+   "id": "s05-dia-critico-8",
+   "cuadro": "s05-dia-critico",
+   "frame": 5,
+   "n": 8,
    "nombre": "draw",
-   "texto": "5.70 draw",
-   "tLocal": 5.7,
-   "t": 32.45,
+   "texto": "5.75 draw",
+   "tLocal": 5.75,
+   "t": 32.5,
    "gananciaDb": 0,
    "categoria": "texture",
    "anclaje": "hit"
   },
   {
-   "id": "s05-dia-critico-7",
+   "id": "s05-dia-critico-9",
    "cuadro": "s05-dia-critico",
    "frame": 5,
-   "n": 7,
+   "n": 9,
    "nombre": "pop-1",
-   "texto": "6.10 pop-1 -6dB",
-   "tLocal": 6.1,
-   "t": 32.85,
+   "texto": "6.15 pop-1 -6dB",
+   "tLocal": 6.15,
+   "t": 32.9,
    "gananciaDb": -6,
    "categoria": "pop",
    "anclaje": "hit"
@@ -538,9 +616,9 @@
    "frame": 6,
    "n": 1,
    "nombre": "whoosh-s",
-   "texto": "0.30 whoosh-s",
-   "tLocal": 0.3,
-   "t": 34.25,
+   "texto": "0.40 whoosh-s",
+   "tLocal": 0.4,
+   "t": 34.35,
    "gananciaDb": 0,
    "categoria": "whoosh",
    "anclaje": "pico"
@@ -693,24 +771,37 @@
    "cuadro": "s07-a-tiempo",
    "frame": 7,
    "n": 6,
-   "nombre": "pop-2",
-   "texto": "4.10 pop-2",
-   "tLocal": 4.1,
-   "t": 45.5,
-   "gananciaDb": 0,
-   "categoria": "pop",
-   "anclaje": "hit"
+   "nombre": "whoosh-s",
+   "texto": "4.20 whoosh-s -6dB",
+   "tLocal": 4.2,
+   "t": 45.6,
+   "gananciaDb": -6,
+   "categoria": "whoosh",
+   "anclaje": "pico"
   },
   {
    "id": "s07-a-tiempo-7",
    "cuadro": "s07-a-tiempo",
    "frame": 7,
    "n": 7,
+   "nombre": "pop-2",
+   "texto": "4.40 pop-2 -6dB",
+   "tLocal": 4.4,
+   "t": 45.8,
+   "gananciaDb": -6,
+   "categoria": "pop",
+   "anclaje": "hit"
+  },
+  {
+   "id": "s07-a-tiempo-8",
+   "cuadro": "s07-a-tiempo",
+   "frame": 7,
+   "n": 8,
    "nombre": "soft-in",
-   "texto": "5.05 soft-in -3dB",
-   "tLocal": 5.05,
-   "t": 46.45,
-   "gananciaDb": -3,
+   "texto": "5.20 soft-in -6dB",
+   "tLocal": 5.2,
+   "t": 46.6,
+   "gananciaDb": -6,
    "categoria": "texture",
    "anclaje": "hit"
   },
