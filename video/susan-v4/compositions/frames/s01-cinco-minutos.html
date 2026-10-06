@@ -296,7 +296,7 @@
         // aparecen a la izquierda; la cifra no se mueve
         // escondidas hasta que salen: bajo la barra de Lun, su tinta asomaba por el borde suavizado de la pista
         tl.set([filasB[1], filasB[2]], { visibility: 'hidden' }, 0);
-        tl.set([filasB[1], filasB[2]], { visibility: 'visible' }, T.filas);
+        tl.set([filasB[1], filasB[2]], { visibility: 'inherit' }, T.filas);   // 'inherit', nunca 'visible': no debe vencer al cuadro oculto
         // relevo vertical (R2, entrada): cada barra baja a su fila con estela vertical ligada a la velocidad (tope 10), que
         // solo se nota al arrancar y se apaga mucho antes de asentarse; posicion de salida fijada al construir (escondidas)
         gsap.set(filasB[1], { y: -56 }); gsap.set(filasB[2], { y: -112 });
