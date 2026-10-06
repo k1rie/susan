@@ -12,9 +12,10 @@
 .s05-dia-critico-grano{position:absolute;inset:0;pointer-events:none;mix-blend-mode:multiply;opacity:.04;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
 
 #s05-dia-critico-escena{position:absolute;inset:0}
-/* cámara de la estación: el empuje hacia el viernes (4.55-6.10) sale de la casilla Vie (x 1320) a media altura del lienzo;
-   queda en 1.05 en el relevo y el cuadro 6 la regresa a 1 mientras la tarjeta crece a la gráfica semanal */
-#s05-dia-critico-camara{position:absolute;inset:0;transform-origin:1320px 540px}
+/* la estación (PageHeader, selector y tarjeta) en dos capas: la exterior lleva el desenfoque del empuje en px de pantalla (así mide
+   lo mismo que el de la toma al cortar) y la interior es la cámara que empuja hacia la casilla Vie, con origen en su centro */
+#s05-dia-critico-estacion{position:absolute;inset:0}
+#s05-dia-critico-camara{position:absolute;inset:0;transform-origin:1320px 590px}
 /* la UI fija se escribe en px de la app dentro de .ui (zoom E = 2); las posiciones viven en el rig, sin zoom */
 .s05-dia-critico-ui{zoom:2;position:relative}
 
@@ -34,9 +35,14 @@
 .s05-dia-critico-card{position:relative;width:720px;height:260px;box-sizing:border-box;background:#FFFFFF;border:1px solid #E7E2DC;border-radius:14px}
 .s05-dia-critico-card-t{position:absolute;left:29px;top:19px;font-size:16px;font-weight:600;letter-spacing:-0.025em;line-height:20px;white-space:nowrap}
 
+/* cada día es un grupo de tres capas (DINAMISMO §2.0.6): el grupo se apaga con el contexto en el empuje, `entra` hace el látigo
+   de entrada (x) y la hoja interior lleva la estela horizontal; dentro, la casilla (y=495-685) y su día debajo (centro y=725) */
+.s05-dia-critico-grupo{position:absolute;top:495px;width:280px;height:245px}
+.s05-dia-critico-entra,.s05-dia-critico-hoja{position:absolute;inset:0}
+
 /* TiraSemana a E = 2.5 escrita a mano en px del video (las columnas del odómetro y la estela se calculan en px del video):
    casilla 112 x 76 de la app -> 280 x 190, radio 14 -> 35, cifra 44 px 600 con el % al 0.7em, centros y=590 */
-.s05-dia-critico-casilla{position:absolute;top:495px;width:280px;height:190px;transform-origin:50% 50%}
+.s05-dia-critico-casilla{position:absolute;left:0;top:0;width:280px;height:190px;transform-origin:50% 50%}
 .s05-dia-critico-base{position:absolute;inset:0;border-radius:35px;background:#F0EDE8}
 .s05-dia-critico-tinte{position:absolute;inset:0;border-radius:35px;clip-path:circle(0px at 50% 45%)}
 #s05-dia-critico-lun-tinte{background:color-mix(in oklab,#DE4D44 51%,#F0EDE8)}
@@ -56,21 +62,44 @@
 .s05-dia-critico-guion{position:absolute;left:0;right:0;top:58px;height:54px;overflow:hidden;font-size:44px;font-weight:600;line-height:54px;color:#6F6A65;
  -webkit-mask-image:linear-gradient(180deg,transparent 0%,#000 16%,#000 84%,transparent 100%);
  mask-image:linear-gradient(180deg,transparent 0%,#000 16%,#000 84%,transparent 100%)}
-/* anillo real del día crítico (ring-2 de la app, 4 px a E = 2): por fuera del borde, trazado con pathLength 100 */
-.s05-dia-critico-anillo{position:absolute;left:-4px;top:-4px;width:288px;height:198px;overflow:visible}
 
-/* etiquetas de día: 24 px 500 gris, centro y=725 */
-.s05-dia-critico-dia{position:absolute;top:710px;width:280px;height:30px;line-height:30px;text-align:center;font-size:24px;font-weight:500;color:#6F6A65}
+/* etiquetas de día: 24 px 500 gris, centro y=725 (215 px bajo el borde superior del grupo) */
+.s05-dia-critico-dia{position:absolute;left:0;top:215px;width:280px;height:30px;line-height:30px;text-align:center;font-size:24px;font-weight:500;color:#6F6A65}
 
-/* píldora de tinta recta «Día crítico: Viernes»: alto 64, centro x=1320 y=451 (4 px sobre el anillo de Vie, que asoma entero) */
+/* píldora de tinta recta «Día crítico: Viernes»: alto 64, centro x=1320 y=451 (por encima de la casilla levantada) */
 #s05-dia-critico-pildora-caja{position:absolute;left:1020px;top:419px;width:600px;height:64px;display:flex;justify-content:center}
 #s05-dia-critico-pildora{height:64px;padding:0 28px;border-radius:999px;background:#1E1919;color:#FFFFFF;font-size:28px;font-weight:500;
  line-height:64px;white-space:nowrap}
 
-/* meta real bajo «Vie»: 24 px 400 gris, centro x=1320 y=770 */
-#s05-dia-critico-meta{position:absolute;left:920px;top:755px;width:800px;height:30px;display:flex;justify-content:center;column-gap:6px;
- font-size:24px;font-weight:400;line-height:30px;color:#6F6A65;white-space:nowrap}
-.s05-dia-critico-palabra{display:inline-block}
+/* ---- toma del viernes (handoff_out): la casilla Vie de la TiraSemana a E = 4, maquetada a su escala final ----
+   capa exterior = desenfoque de llegada; el rig de la casilla llega de 0.88 a 1 con origen en su centro (960, 560); la píldora y
+   «Vie» llegan en sus propias capas desde donde quedaron al final del empuje (DINAMISMO §2.3 a) */
+#s05-dia-critico-toma{position:absolute;inset:0}
+#s05-dia-critico-toma-rig{position:absolute;inset:0;transform-origin:960px 560px}
+/* casilla 448 x 304 (x 736-1184, y 408-712), radio 56; el latido escala desde su centro */
+#s05-dia-critico-toma-cas{position:absolute;left:736px;top:408px;width:448px;height:304px;transform-origin:50% 50%}
+.s05-dia-critico-toma-relleno{position:absolute;inset:0;border-radius:56px;background:color-mix(in oklab,#DE4D44 63%,#F0EDE8)}
+/* «21.8 %» 70 px 600 centrada en y=544 (136 px bajo el borde: la misma proporción que en la estación) */
+.s05-dia-critico-toma-cifra{position:absolute;left:0;right:0;top:94px;height:84px;display:flex;justify-content:center;
+ font-size:70px;font-weight:600;line-height:84px;letter-spacing:0;white-space:pre}
+.s05-dia-critico-toma-cifra>span{display:block}
+/* el punto ocupa lo mismo que en la columna del odómetro (el ancho mayor entre el punto y el blanco) */
+.s05-dia-critico-toma-cifra>.s05-dia-critico-toma-p{display:grid}
+.s05-dia-critico-toma-p>span{grid-area:1/1;text-align:center}
+.s05-dia-critico-toma-oculto{visibility:hidden}
+.s05-dia-critico-toma-pct{padding-left:4.8px}
+/* anillo real del día crítico, 6.4 px por fuera del borde (rect a 3.2 px del borde, radio 59.2), trazado con pathLength 100 */
+.s05-dia-critico-toma-anillo{position:absolute;left:-6.4px;top:-6.4px;width:460.8px;height:316.8px;overflow:visible}
+/* «Vie» 38 px 500 gris, centro (960, 776) */
+#s05-dia-critico-toma-dia{position:absolute;left:0;top:751px;width:1920px;height:50px;line-height:50px;text-align:center;
+ font-size:38px;font-weight:500;color:#6F6A65;transform-origin:960px 25px}
+/* píldora de tinta: alto 82, texto blanco 36 px 500, centro (960, 340) */
+#s05-dia-critico-toma-pildora-caja{position:absolute;left:0;top:299px;width:1920px;height:82px;display:flex;justify-content:center;transform-origin:960px 41px}
+#s05-dia-critico-toma-pildora{height:82px;padding:0 36px;border-radius:999px;background:#1E1919;color:#FFFFFF;font-size:36px;font-weight:500;
+ line-height:82px;white-space:nowrap}
+/* renglón real de «Ver cifras por día»: 30 px 400 gris, centro (960, 830) */
+#s05-dia-critico-toma-meta{position:absolute;left:0;top:810px;width:1920px;height:40px}
+#s05-dia-critico-toma-meta-t{height:40px;line-height:40px;text-align:center;font-size:30px;font-weight:400;color:#6F6A65;white-space:nowrap}
 </style>
 <div id="root" data-composition-id="s05-dia-critico" data-start="0" data-duration="7.2" data-width="1920" data-height="1080">
   <div id="s05-dia-critico-fondo" class="clip" data-start="0" data-duration="7.2" data-track-index="0">
@@ -78,6 +107,7 @@
   </div>
 
   <div id="s05-dia-critico-escena" class="clip" data-start="0" data-duration="7.2" data-track-index="1">
+    <div id="s05-dia-critico-estacion">
     <div id="s05-dia-critico-camara">
     <div id="s05-dia-critico-cabecera"><div class="s05-dia-critico-ui"><div class="s05-dia-critico-h1"><span class="s05-dia-critico-h1-p">Analítica</span> <span class="s05-dia-critico-h1-p">de</span> <span class="s05-dia-critico-h1-p">ausentismo</span></div></div></div>
     <div id="s05-dia-critico-selector"><div class="s05-dia-critico-ui">
@@ -88,45 +118,64 @@
       <div class="s05-dia-critico-card"><div class="s05-dia-critico-card-t">Ausentismo por día de la semana</div></div>
     </div></div>
 
-    <!-- TiraSemana: solo Lun, Mié y Vie (el horario del 3A) -->
-    <div id="s05-dia-critico-lun" class="s05-dia-critico-casilla" style="left:460px">
-      <div class="s05-dia-critico-base"></div>
-      <div id="s05-dia-critico-lun-tinte" class="s05-dia-critico-tinte"></div>
-      <div class="s05-dia-critico-guion"><span id="s05-dia-critico-lun-g" class="s05-dia-critico-tira"></span></div>
-      <div id="s05-dia-critico-lun-cifra" class="s05-dia-critico-cifra"></div>
-    </div>
-    <div id="s05-dia-critico-mie" class="s05-dia-critico-casilla" style="left:820px">
-      <div class="s05-dia-critico-base"></div>
-      <div id="s05-dia-critico-mie-tinte" class="s05-dia-critico-tinte"></div>
-      <div class="s05-dia-critico-guion"><span id="s05-dia-critico-mie-g" class="s05-dia-critico-tira"></span></div>
-      <div id="s05-dia-critico-mie-cifra" class="s05-dia-critico-cifra"></div>
-    </div>
-    <div id="s05-dia-critico-vie" class="s05-dia-critico-casilla" style="left:1180px">
-      <div class="s05-dia-critico-base"></div>
-      <div id="s05-dia-critico-vie-tinte" class="s05-dia-critico-tinte"></div>
-      <div class="s05-dia-critico-guion"><span id="s05-dia-critico-vie-g" class="s05-dia-critico-tira"></span></div>
-      <div id="s05-dia-critico-vie-cifra" class="s05-dia-critico-cifra"></div>
-      <svg class="s05-dia-critico-anillo" viewBox="0 0 288 198" aria-hidden="true" data-chart>
-        <path id="s05-dia-critico-anillo-trazo" d="M144 2 H249 A37 37 0 0 1 286 39 V159 A37 37 0 0 1 249 196 H39 A37 37 0 0 1 2 159 V39 A37 37 0 0 1 39 2 Z"
-          pathLength="100" fill="none" stroke="rgba(179,38,30,.7)" stroke-width="4" stroke-linecap="butt" stroke-linejoin="round"
-          stroke-dasharray="100 100" stroke-dashoffset="100" />
-      </svg>
-    </div>
-
-    <div id="s05-dia-critico-lun-dia" class="s05-dia-critico-dia" style="left:460px">Lun</div>
-    <div id="s05-dia-critico-mie-dia" class="s05-dia-critico-dia" style="left:820px">Mié</div>
-    <div id="s05-dia-critico-vie-dia" class="s05-dia-critico-dia" style="left:1180px">Vie</div>
+    <!-- TiraSemana: solo Lun, Mié y Vie (el horario del 3A); cada día con su etiqueta debajo, en un mismo grupo -->
+    <div id="s05-dia-critico-lun-grupo" class="s05-dia-critico-grupo" style="left:460px"><div id="s05-dia-critico-lun-entra" class="s05-dia-critico-entra"><div id="s05-dia-critico-lun-hoja" class="s05-dia-critico-hoja">
+      <div id="s05-dia-critico-lun" class="s05-dia-critico-casilla">
+        <div class="s05-dia-critico-base"></div>
+        <div id="s05-dia-critico-lun-tinte" class="s05-dia-critico-tinte"></div>
+        <div class="s05-dia-critico-guion"><span id="s05-dia-critico-lun-g" class="s05-dia-critico-tira"></span></div>
+        <div id="s05-dia-critico-lun-cifra" class="s05-dia-critico-cifra"></div>
+      </div>
+      <div id="s05-dia-critico-lun-dia" class="s05-dia-critico-dia">Lun</div>
+    </div></div></div>
+    <div id="s05-dia-critico-mie-grupo" class="s05-dia-critico-grupo" style="left:820px"><div id="s05-dia-critico-mie-entra" class="s05-dia-critico-entra"><div id="s05-dia-critico-mie-hoja" class="s05-dia-critico-hoja">
+      <div id="s05-dia-critico-mie" class="s05-dia-critico-casilla">
+        <div class="s05-dia-critico-base"></div>
+        <div id="s05-dia-critico-mie-tinte" class="s05-dia-critico-tinte"></div>
+        <div class="s05-dia-critico-guion"><span id="s05-dia-critico-mie-g" class="s05-dia-critico-tira"></span></div>
+        <div id="s05-dia-critico-mie-cifra" class="s05-dia-critico-cifra"></div>
+      </div>
+      <div id="s05-dia-critico-mie-dia" class="s05-dia-critico-dia">Mié</div>
+    </div></div></div>
+    <div id="s05-dia-critico-vie-grupo" class="s05-dia-critico-grupo" style="left:1180px"><div id="s05-dia-critico-vie-entra" class="s05-dia-critico-entra"><div id="s05-dia-critico-vie-hoja" class="s05-dia-critico-hoja">
+      <div id="s05-dia-critico-vie" class="s05-dia-critico-casilla">
+        <div class="s05-dia-critico-base"></div>
+        <div id="s05-dia-critico-vie-tinte" class="s05-dia-critico-tinte"></div>
+        <div class="s05-dia-critico-guion"><span id="s05-dia-critico-vie-g" class="s05-dia-critico-tira"></span></div>
+        <div id="s05-dia-critico-vie-cifra" class="s05-dia-critico-cifra"></div>
+      </div>
+      <div id="s05-dia-critico-vie-dia" class="s05-dia-critico-dia">Vie</div>
+    </div></div></div>
 
     <div id="s05-dia-critico-pildora-caja"><div id="s05-dia-critico-pildora">Día crítico: Viernes</div></div>
-
-    <div id="s05-dia-critico-meta">
-      <span class="s05-dia-critico-palabra">32</span><span class="s05-dia-critico-palabra">ausencias</span><span class="s05-dia-critico-palabra">en</span><span class="s05-dia-critico-palabra">6</span><span class="s05-dia-critico-palabra">sesiones</span>
     </div>
+    </div>
+
+    <!-- toma del viernes: oculta hasta el corte del atravesar (5.40 s) -->
+    <div id="s05-dia-critico-toma">
+      <div id="s05-dia-critico-toma-rig">
+        <div id="s05-dia-critico-toma-cas">
+          <div class="s05-dia-critico-toma-relleno"></div>
+          <div class="s05-dia-critico-toma-cifra"><span>2</span><span>1</span><span class="s05-dia-critico-toma-p"><span>.</span><span class="s05-dia-critico-toma-oculto"> </span></span><span>8</span><span class="s05-dia-critico-toma-pct"><span class="s05-dia-critico-u">%</span></span></div>
+          <svg class="s05-dia-critico-toma-anillo" viewBox="0 0 460.8 316.8" aria-hidden="true" data-chart>
+            <path id="s05-dia-critico-anillo-trazo" d="M230.4 3.2 H398.4 A59.2 59.2 0 0 1 457.6 62.4 V254.4 A59.2 59.2 0 0 1 398.4 313.6 H62.4 A59.2 59.2 0 0 1 3.2 254.4 V62.4 A59.2 59.2 0 0 1 62.4 3.2 Z"
+              pathLength="100" fill="none" stroke="rgba(179,38,30,.7)" stroke-width="6.4" stroke-linecap="butt" stroke-linejoin="round"
+              stroke-dasharray="100 100" stroke-dashoffset="100" />
+          </svg>
+        </div>
+      </div>
+      <div id="s05-dia-critico-toma-dia">Vie</div>
+      <div id="s05-dia-critico-toma-pildora-caja"><div id="s05-dia-critico-toma-pildora">Día crítico: Viernes</div></div>
+      <div id="s05-dia-critico-toma-meta"><div id="s05-dia-critico-toma-meta-t">32 ausencias en 6 sesiones</div></div>
     </div>
   </div>
 
-  <!-- estela vertical de las columnas rápidas del odómetro (décimas y unidades): una por columna, región ajustada al eje -->
+  <!-- estelas: horizontal del látigo de entrada de cada casilla y vertical de las columnas rápidas del odómetro (décimas y
+       unidades); una por objeto, región ajustada al eje -->
   <svg width="0" height="0" aria-hidden="true" style="position:absolute" data-chart>
+    <filter id="s05-dia-critico-mb-lun-x" x="-20%" y="-4%" width="140%" height="108%" color-interpolation-filters="sRGB"><feGaussianBlur id="s05-dia-critico-mb-lun-x-g" stdDeviation="0 0" /></filter>
+    <filter id="s05-dia-critico-mb-mie-x" x="-20%" y="-4%" width="140%" height="108%" color-interpolation-filters="sRGB"><feGaussianBlur id="s05-dia-critico-mb-mie-x-g" stdDeviation="0 0" /></filter>
+    <filter id="s05-dia-critico-mb-vie-x" x="-20%" y="-4%" width="140%" height="108%" color-interpolation-filters="sRGB"><feGaussianBlur id="s05-dia-critico-mb-vie-x-g" stdDeviation="0 0" /></filter>
     <filter id="s05-dia-critico-mb-lun-t" x="-10%" y="-6%" width="120%" height="112%" color-interpolation-filters="sRGB"><feGaussianBlur id="s05-dia-critico-mb-lun-t-g" stdDeviation="0 0" /></filter>
     <filter id="s05-dia-critico-mb-lun-u" x="-10%" y="-6%" width="120%" height="112%" color-interpolation-filters="sRGB"><feGaussianBlur id="s05-dia-critico-mb-lun-u-g" stdDeviation="0 0" /></filter>
     <filter id="s05-dia-critico-mb-mie-t" x="-10%" y="-6%" width="120%" height="112%" color-interpolation-filters="sRGB"><feGaussianBlur id="s05-dia-critico-mb-mie-t-g" stdDeviation="0 0" /></filter>
@@ -144,36 +193,51 @@
         var OBT = 1 / 60;
         // Alto de cada renglón del odómetro: 1.2 x 44 px (constante en CSS, nunca medido en el render).
         var H = 54;
+        // GSAP redondea el progreso a 6 decimales: con este margen la estela es 0 en los dos extremos de cada tramo (DINAMISMO §2.0.4).
+        var EPS = 1e-4;
         function $(s) { return document.getElementById(ID + '-' + s); }
 
         var tl = gsap.timeline({ paused: true });
 
-        // readMark, copiado sin cambios del bloque canónico v4 (scripts/frame-helpers.snippet.js); el resto del bloque (cámara y
-        // pose 3D) no se pega porque este cuadro no mueve cámara ni inclina nada.
+        // readMark, copiado sin cambios del bloque canónico v4 (scripts/frame-helpers.snippet.js); el resto del bloque (pose 3D)
+        // no se pega porque este cuadro no inclina nada.
         window.SFXN = window.SFXN || 0;   // contador unico de etiquetas (compartido por todos los cuadros de la pagina)
         function readMark(tl, t, frase) {
             tl.addLabel('read:' + frase + '#' + (window.SFXN++), t);
             return t;
         }
 
-        // Tiempos del bloque (STORYBOARD, Frame 5) y de sfx_cues: el tween nombrado empieza o termina en ese instante.
+        // Tiempos del bloque (STORYBOARD, Frame 5, y plan/DINAMISMO.md F5) y de sfx_cues: el tween nombrado empieza o termina ahí.
         var T = {
             titulo: 0.45,                 // el título de la estación entra con BlurText al terminar el empuje de entrada
+            entra: 0.70, paso: 0.10,      // 0.70 whoosh-s: Lun 0.70-1.20, Mié 0.80-1.30, Vie 0.90-1.40 (un solo relevo de entrada)
+            entraDur: 0.50, entraDx: 320,
             lun: 1.20, lunFin: 1.90,      // 1.90 tick-1
             mie: 1.70, mieFin: 2.40,      // 2.40 tick-2
             vie: 2.20, vieFin: 2.90,      // 2.90 tick-3
-            casillas: 0.60,               // las casillas vacías entran como la TiraSemana real (opacidad + escala .92 -> 1, +70 ms)
             alza: 3.55, alzaFin: 4.00,    // bloque resaltado: Vie se levanta, Lun y Mié al 55 % (en el hueco de la voz)
-            // 4.55 pop-2 (fin de la entrada de la píldora). La entrada ocupa solo los últimos 0.20 s de la ventana 4.20–4.55:
-            // power3.out es cuártico en GSAP y en 0.35 s la píldora se veía llegada ~0.15 s antes del pop.
+            // 4.55 pop-2 (fin de la entrada de la píldora). power3.out es cuártico en GSAP: en un tramo más largo la píldora se
+            // vería llegada ~0.15 s antes del pop.
             pild: 4.35, pildFin: 4.55,
-            empuje: 4.55, empujeFin: 6.15, // la cámara se acerca al viernes mientras la voz pregunta «qué día faltan más…»
-            meta: 5.20,                   // «32 ausencias en 6 sesiones» desde el desenfoque
-            anillo: 5.70, anilloFin: 6.10, // 5.70 draw (inicio del trazo)
-            latido: 6.10, latidoFin: 6.30, // 6.10 pop-1: la casilla late una vez al cerrarse su anillo; quieto desde 6.30 (handoff_out)
+            empuje: 4.95, corte: 5.40,    // atravesar hacia el viernes (R3 a); 5.40 whoosh-l en el pico de velocidad
+            blurEmpuje: 5.15,             // desenfoque 0 -> 8 px en los últimos 0.25 s del empuje
+            contexto: 5.02, contextoFin: 5.36, // lo que no pasa a la toma se apaga ya desenfocado y en viaje (nada salta en el corte)
+            llegaFin: 5.95,               // la toma llega de 0.88 a 1 y de 8 a 0 px
+            meta: 5.55, metaFin: 5.85,    // «32 ausencias en 6 sesiones» desde el desenfoque
+            anillo: 5.75, anilloFin: 6.15, // 5.75 draw (inicio del trazo)
+            latido: 6.15, latidoFin: 6.35, // 6.15 pop-1: la casilla late al cerrarse su anillo; quieto desde 6.35 (handoff_out)
             D: 7.2
         };
-        var EMPUJE = 1.05;                 // escala final de la cámara (origen 1320, 540): el cuadro 6 arranca así
+        // Atravesar (DINAMISMO F5): la cámara de la estación empuja con origen en la casilla Vie (1320, 590) y la lleva a (960, 560).
+        var EMPUJE = { s: 1.3, x: -360, y: -30, blur: 8 };
+        var LLEGA = 0.88;                  // la toma llega de 0.88 a 1 con origen (960, 560): la casilla mide 394 px contra 386 al cortar
+        // Píldora y «Vie» en el último fotograma del empuje, calculados con las constantes de la estación (centro de la píldora
+        // 1320, 451, alto 64; «Vie» 24 px en y=725; ninguna de las dos se levanta con la casilla):
+        //   píldora: y = 560 + (451 - 590) * 1.3 = 379.3 -> 39.3 px bajo su sitio en la toma (340); alto 83.2 contra 82 y texto
+        //   36.4 contra 36 -> escala 1.013; «Vie»: y = 560 + (725 - 590) * 1.3 = 735.5 -> 40.5 px sobre su sitio (776);
+        //   24 * 1.3 / 38 = 0.821.
+        var PILD0 = { y: 39.3, s: 1.013 };
+        var DIA0 = { y: -40.5, s: 0.821 };
 
         // ---- tiras del odómetro: se generan UNA vez, antes de registrar el timeline ----
         // Cada columna arranca en blanco y rueda hacia arriba hasta su cifra; décimas y unidades con dos vueltas (las unidades
@@ -213,6 +277,11 @@
             $(d.k + '-g').innerHTML = tira(['–', ''], false);
         });
 
+        // Estado inicial explícito: lo que GSAP transforma con immediateRender:false arranca ya con su transform identidad, así el
+        // estado es idéntico venga de donde venga la búsqueda (sin «none» contra «matrix(1, 0, 0, 1, 0, 0)» según el camino).
+        gsap.set([$('camara'), $('vie'), $('toma-rig'), $('toma-pildora-caja'), $('toma-dia'), $('toma-cas')], { x: 0, y: 0, scale: 1 });
+        DIAS.forEach(function (d) { gsap.set([$(d.k + '-q'), $(d.k + '-p'), $(d.k + '-d'), $(d.k + '-g')], { y: 0 }); });
+
         // Velocidad de la curva en fracción por segundo (diferencia central sobre la misma curva: función pura de t).
         function velocidad(ease, p, dur) {
             var h = 0.002;
@@ -221,7 +290,7 @@
             return (ease(b) - ease(a)) / (b - a) / dur;
         }
 
-        // Movimiento con estela direccional (PILOTO §3c): σ = 0.29 · v · OBT, filter:none en reposo.
+        // Movimiento con estela direccional (PILOTO §3c): σ = 0.29 · v · OBT, filter:none en reposo y v = 0 en los extremos.
         function conRastro(o) {
             var ease = gsap.parseEase(o.curva);
             var st = { p: 0 };
@@ -230,7 +299,7 @@
                 var p = st.p;
                 var e = ease(p);
                 o.pos(e, p);
-                var v = (p <= 0 || p >= 1) ? 0 : Math.abs(o.dist) * velocidad(ease, p, o.dur);
+                var v = (p <= EPS || p >= 1 - EPS) ? 0 : Math.abs(o.dist) * velocidad(ease, p, o.dur);
                 var s = Math.min(o.max, 0.29 * v * OBT);
                 o.nodo.setAttribute('stdDeviation', o.eje === 'x' ? s.toFixed(2) + ' 0' : '0 ' + s.toFixed(2));
                 o.el.style.filter = s < 0.3 ? 'none' : filtro;
@@ -245,6 +314,33 @@
             function aplicar() { el.style.filter = st.d < 0.05 ? 'none' : 'blur(' + st.d.toFixed(2) + 'px)'; }
             aplicar();
             tl.fromTo(st, { d: desde }, { d: 0, duration: dur, ease: curva, onUpdate: aplicar, immediateRender: false }, at);
+        }
+
+        // Inverso de `desenfoque` para la capa que se va (DINAMISMO §2.0): 0 -> hasta px. En p = 1 la capa ya está oculta por el
+        // corte, así que vuelve a «none»: nada queda con filtro fuera de su tramo.
+        function desenfocar(el, at, dur, hasta, curva) {
+            var ease = gsap.parseEase(curva);
+            var st = { p: 0 };
+            function aplicar() {
+                var d = hasta * ease(st.p);
+                el.style.filter = (st.p >= 1 - EPS || d < 0.05) ? 'none' : 'blur(' + d.toFixed(2) + 'px)';
+            }
+            aplicar();
+            tl.fromTo(st, { p: 0 }, { p: 1, duration: dur, ease: 'none', onUpdate: aplicar, immediateRender: false }, at);
+        }
+
+        // Desenfoque de llegada de la toma (desde -> 0 px). Arranca 2 ms antes del corte: así en el corte ya vale ~8 px y antes,
+        // con la toma oculta, el filtro es «none».
+        function enfocar(el, at, dur, desde, curva) {
+            var ease = gsap.parseEase(curva);
+            var ADEL = 0.002;
+            var st = { p: 0 };
+            function aplicar() {
+                var d = desde * (1 - ease(st.p));
+                el.style.filter = (st.p <= EPS || d < 0.05) ? 'none' : 'blur(' + d.toFixed(2) + 'px)';
+            }
+            aplicar();
+            tl.fromTo(st, { p: 0 }, { p: 1, duration: dur + ADEL, ease: 'none', onUpdate: aplicar, immediateRender: false }, at - ADEL);
         }
 
         // Columna lenta del odómetro (un paso o pocos, del renglón `desde` al `hasta`): sin estela, power3.out, sin sobreimpulso.
@@ -271,7 +367,7 @@
             tl.fromTo(st, { p: 0 }, { p: 1, duration: dur, ease: 'none', onUpdate: aplicar, immediateRender: false }, at);
         }
 
-        // ---- Scene 1 (0.00–1.20): el título de la estación entra con BlurText (blur 10 -> 0 y -.5em -> 0 por palabra, +90 ms)
+        // ---- Scene 1 (0.00–1.40): el título de la estación entra con BlurText (blur 10 -> 0 y -.5em -> 0 por palabra, +90 ms)
         //      justo después del empuje de entrada: abre el capítulo de datos mientras la voz empieza «Con cada sesión» ----
         var tituloP = document.querySelectorAll('#' + ID + '-cabecera .' + ID + '-h1-p');
         for (var w = 0; w < tituloP.length; w++) {
@@ -279,12 +375,18 @@
             tl.fromTo(tituloP[w], { opacity: 0, y: -13 }, { opacity: 1, y: 0, duration: 0.45, ease: 'power3.out' }, atw);
             desenfoque(tituloP[w], atw, 0.45, 10, 'power2.out');
         }
-        // las tres casillas vacías («–») y sus días entran como la TiraSemana real: opacidad + escala .92 -> 1, 0.5 s, +70 ms
-        [['lun', 'lun-dia'], ['mie', 'mie-dia'], ['vie', 'vie-dia']].forEach(function (par, k) {
-            tl.fromTo([$(par[0]), $(par[1])], { opacity: 0, scale: 0.92 }, { opacity: 1, scale: 1, duration: 0.5, ease: 'power3.out' }, T.casillas + k * 0.07);
+        // R1 de entrada (un solo relevo): las tres casillas vacías («–») con su día debajo llegan juntas desde la derecha, como una
+        // fila, escalonadas 0.10 s de izquierda a derecha: x +320 -> 0 en 0.5 s power3.out, opacidad 0 -> 1 en 0.15 s y estela
+        // horizontal ligada a la velocidad (tope 12, la de una pieza); se posan nítidas. Son las tres estelas del tope.
+        ['lun', 'mie', 'vie'].forEach(function (k, i) {
+            var at = T.entra + i * T.paso;
+            var entra = $(k + '-entra');
+            tl.fromTo(entra, { opacity: 0 }, { opacity: 1, duration: 0.15, ease: 'power1.out' }, at);
+            conRastro({ el: $(k + '-hoja'), nodo: $('mb-' + k + '-x-g'), at: at, dur: T.entraDur, curva: 'power3.out', dist: T.entraDx, eje: 'x', max: 12,
+                pos: function (e) { entra.style.transform = 'translateX(' + (T.entraDx * (1 - e)).toFixed(2) + 'px)'; } });
         });
 
-        // ---- Scene 2 (1.20–3.65): las casillas se llenan una tras otra; cifra y relleno llegan juntos ----
+        // ---- Scene 2 (1.20–3.55): las casillas se llenan una tras otra; cifra y relleno llegan juntos ----
         // Cascada derecha -> izquierda: arrancan escalonadas 0.04 s y se fijan de derecha a izquierda; las decenas dan el último
         // paso (PASO s, power3.out) y terminan exactamente en t1, con el tic. power3.out es cuártico en GSAP: un rodar largo que
         // termina en t1 se ve asentado ~0.15-0.2 s antes, así que la llegada visible del número la pone ese paso corto final
@@ -323,7 +425,7 @@
         });
         readMark(tl, T.vieFin, 'Lun 17.7 · Mié 16.4 · Vie 21.8 %');
 
-        // ---- Scene 3 (3.65–7.20): el bloque resaltado ----
+        // ---- Scene 3 (3.55–7.20): el bloque resaltado y el atravesar hacia el viernes ----
         // Vie se levanta mientras Lun y Mié bajan al 55 % (casilla y etiqueta)
         tl.fromTo($('vie'), { scale: 1 }, { scale: 1.06, duration: T.alzaFin - T.alza, ease: 'power3.out', immediateRender: false }, T.alza);
         tl.fromTo([$('lun'), $('mie'), $('lun-dia'), $('mie-dia')], { opacity: 1 },
@@ -331,28 +433,52 @@
         // píldora de tinta recta: 14 px desde abajo, sin sobreimpulso; un golpe corto que termina de llegar con el pop
         tl.fromTo($('pildora'), { y: 14, opacity: 0 }, { y: 0, opacity: 1, duration: T.pildFin - T.pild, ease: 'power3.out' }, T.pild);
         readMark(tl, T.pildFin, 'Día crítico: Viernes');
-        // meta real bajo «Vie»: BlurText por palabra (blur 10 -> 0, y -.5em -> 0), nítida al asentarse
-        var palabras = document.querySelectorAll('#' + ID + '-meta .' + ID + '-palabra');
-        for (var i = 0; i < palabras.length; i++) {
-            var at = T.meta + i * 0.09;
-            tl.fromTo(palabras[i], { opacity: 0, y: -12 }, { opacity: 1, y: 0, duration: 0.62, ease: 'power3.out' }, at);
-            desenfoque(palabras[i], at, 0.62, 10, 'power2.out');
-        }
-        // la cámara se acerca al viernes: escala 1 -> 1.05 con origen en la casilla Vie (sine.inOut, 1.55 s, un solo gesto que
-        // no vuelve); la casilla, la píldora y la meta quedan casi en su sitio y el resto se abre hacia los bordes
-        tl.fromTo($('camara'), { scale: 1 }, { scale: EMPUJE, duration: T.empujeFin - T.empuje, ease: 'sine.inOut' }, T.empuje);
-        // anillo real del día crítico: svg-path-draw sobre el rectángulo redondeado (arranca bajo la píldora y da la vuelta)
+
+        // Empuje (4.95–5.40): escala 1 -> 1.3 con origen en la casilla Vie, power2.in (la velocidad máxima del acercamiento
+        // llega al corte y la toma la continúa con su expo.out), y traslación que la deja en el centro de la toma. La traslación
+        // va con power2.inOut: con power2.in la casilla cruzaba el corte a 2400 px/s hacia la izquierda y la toma la recibía
+        // quieta (un frenazo seco); así llega centrada sin velocidad lateral y solo el acercamiento atraviesa el corte. La capa
+        // se desenfoca 0 -> 8 px (lineal, en px de pantalla) en el último cuarto de segundo. Solo la cámara de la estación: el
+        // fondo y su halo no se mueven.
+        tl.fromTo($('camara'), { scale: 1 }, { scale: EMPUJE.s, duration: T.corte - T.empuje, ease: 'power2.in', immediateRender: false }, T.empuje);
+        tl.fromTo($('camara'), { x: 0, y: 0 }, { x: EMPUJE.x, y: EMPUJE.y, duration: T.corte - T.empuje, ease: 'power2.inOut', immediateRender: false }, T.empuje);
+        desenfocar($('estacion'), T.blurEmpuje, T.corte - T.blurEmpuje, EMPUJE.blur, 'none');
+        // Todo lo visible coincide en el corte (DINAMISMO §2.3 a): lo que no existe en la toma (tarjeta, título, selector, Lun y
+        // Mié) se apaga mientras viaja rápido y desenfocado, sin moverse por su cuenta; a 5.36 ya no está, así que en el corte
+        // solo quedan la casilla Vie, su día y la píldora, que la toma recibe en el mismo lugar.
+        tl.fromTo([$('cabecera'), $('selector'), $('tarjeta'), $('lun-grupo'), $('mie-grupo')], { opacity: 1 },
+            { opacity: 0, duration: T.contextoFin - T.contexto, ease: 'power1.in', immediateRender: false }, T.contexto);
+
+        // Corte bajo el desenfoque: en el pico de velocidad la estación se cambia por la toma del viernes.
+        gsap.set($('toma'), { autoAlpha: 0 });
+        tl.set($('estacion'), { autoAlpha: 0 }, T.corte);
+        tl.set($('toma'), { autoAlpha: 1 }, T.corte);
+        // Llegada (5.40–5.95, expo.out): la toma ya maquetada a su escala final llega de 0.88 a 1 desde (960, 560) y de 8 a 0 px;
+        // la píldora y «Vie» llegan en su propia capa, con la misma curva, desde donde los dejó el empuje.
+        var dLlega = T.llegaFin - T.corte;
+        tl.fromTo($('toma-rig'), { scale: LLEGA }, { scale: 1, duration: dLlega, ease: 'expo.out', immediateRender: false }, T.corte);
+        tl.fromTo($('toma-pildora-caja'), { y: PILD0.y, scale: PILD0.s }, { y: 0, scale: 1, duration: dLlega, ease: 'expo.out', immediateRender: false }, T.corte);
+        tl.fromTo($('toma-dia'), { y: DIA0.y, scale: DIA0.s }, { y: 0, scale: 1, duration: dLlega, ease: 'expo.out', immediateRender: false }, T.corte);
+        enfocar($('toma'), T.corte, dLlega, EMPUJE.blur, 'expo.out');
+
+        // el renglón real de «Ver cifras por día» entra bajo «Vie» desde el desenfoque (10 -> 0 px, y -12 -> 0), nítido al posarse
+        tl.fromTo($('toma-meta'), { opacity: 0, y: -12 }, { opacity: 1, y: 0, duration: T.metaFin - T.meta, ease: 'power3.out' }, T.meta);
+        desenfoque($('toma-meta-t'), T.meta, T.metaFin - T.meta, 10, 'power2.out');
+
+        // anillo real del día crítico: svg-path-draw sobre el rectángulo redondeado, desde arriba al centro (bajo la píldora)
         var trazo = $('anillo-trazo');
         var stA = { p: 0 };
         var easeA = gsap.parseEase('power2.out');
         function anillo() { trazo.setAttribute('stroke-dashoffset', (100 * (1 - easeA(stA.p))).toFixed(3)); }
         anillo();
         tl.fromTo(stA, { p: 0 }, { p: 1, duration: T.anilloFin - T.anillo, ease: 'none', onUpdate: anillo, immediateRender: false }, T.anillo);
-        // al cerrarse el anillo la casilla late una vez (1.06 -> 1.105 -> 1.06, sin sobreimpulso: va y vuelve a su escala) y
-        // queda quieta desde 6.30 s, 0.22 s antes de «viernes». El latido crece hacia abajo (y +4.3 px compensa el borde de
-        // arriba): el anillo nunca se mete bajo la píldora.
-        tl.fromTo($('vie'), { scale: 1.06, y: 0 }, { scale: 1.105, y: 4.3, duration: 0.08, ease: 'power2.out', immediateRender: false }, T.latido);
-        tl.fromTo($('vie'), { scale: 1.105, y: 4.3 }, { scale: 1.06, y: 0, duration: T.latidoFin - T.latido - 0.08, ease: 'power2.inOut', immediateRender: false }, T.latido + 0.08);
+        readMark(tl, T.llegaFin, 'Vie 21.8 % · 32 ausencias en 6 sesiones');
+
+        // al cerrarse el anillo la casilla late una vez (1 -> 1.04 -> 1 desde su centro, sin sobreimpulso: va y vuelve a su escala)
+        // y queda quieta desde 6.35 s, 0.17 s antes de «viernes»
+        var subida = 0.08;
+        tl.fromTo($('toma-cas'), { scale: 1 }, { scale: 1.04, duration: subida, ease: 'power2.out', immediateRender: false }, T.latido);
+        tl.fromTo($('toma-cas'), { scale: 1.04 }, { scale: 1, duration: T.latidoFin - T.latido - subida, ease: 'power2.inOut', immediateRender: false }, T.latido + subida);
 
         // duración exacta del cuadro
         tl.set({}, {}, T.D);

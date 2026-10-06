@@ -139,6 +139,9 @@
       <filter id="s01-cinco-minutos-mb2" x="-10%" y="-6%" width="120%" height="112%" color-interpolation-filters="sRGB"><feGaussianBlur id="s01-cinco-minutos-mb2-g" stdDeviation="0 0" /></filter>
       <filter id="s01-cinco-minutos-mb3" x="-10%" y="-6%" width="120%" height="112%" color-interpolation-filters="sRGB"><feGaussianBlur id="s01-cinco-minutos-mb3-g" stdDeviation="0 0" /></filter>
       <filter id="s01-cinco-minutos-mbc" x="-6%" y="-20%" width="112%" height="140%" color-interpolation-filters="sRGB"><feGaussianBlur id="s01-cinco-minutos-mbc-g" stdDeviation="0 0" /></filter>
+      <!-- barras de Mie y Vie (1140 x 44): region holgada en vertical para una estela de hasta 10 px -->
+      <filter id="s01-cinco-minutos-mbf1" x="-2%" y="-80%" width="104%" height="260%" color-interpolation-filters="sRGB"><feGaussianBlur id="s01-cinco-minutos-mbf1-g" stdDeviation="0 0" /></filter>
+      <filter id="s01-cinco-minutos-mbf2" x="-2%" y="-80%" width="104%" height="260%" color-interpolation-filters="sRGB"><feGaussianBlur id="s01-cinco-minutos-mbf2-g" stdDeviation="0 0" /></filter>
     </svg>
   </div>
 </div>
@@ -219,6 +222,8 @@
         }
         // Movimiento con estela vertical ligada a la velocidad (s99-piloto): sigma = 0.29 v OBT, filter:none en reposo.
         // Sin aplicar() al crear: dos recorridos sobre la misma tira no se pisan en el fotograma 0.
+        // v = 0 en los extremos con margen de 1e-4: GSAP redondea p a 6 decimales y un 0.999999 dejaria la estela
+        // encendida en el reposo de una curva que no frena (DINAMISMO 2.0.4)
         function conRastro(o) {
             var ease = gsap.parseEase(o.curva);
             var st = { p: 0 };
@@ -226,7 +231,7 @@
             function aplicar() {
                 var p = st.p, e = ease(p);
                 o.pos(e, p);
-                var v = (p <= 0 || p >= 1) ? 0 : Math.abs(o.dist) * velocidad(ease, p, o.dur);
+                var v = (p <= 1e-4 || p >= 1 - 1e-4) ? 0 : Math.abs(o.dist) * velocidad(ease, p, o.dur);
                 var sg = Math.min(o.max, 0.29 * v * OBT);
                 o.nodo.setAttribute('stdDeviation', '0 ' + sg.toFixed(2));
                 o.el.style.filter = sg < 0.3 ? 'none' : filtro;
@@ -292,8 +297,13 @@
         // escondidas hasta que salen: bajo la barra de Lun, su tinta asomaba por el borde suavizado de la pista
         tl.set([filasB[1], filasB[2]], { visibility: 'hidden' }, 0);
         tl.set([filasB[1], filasB[2]], { visibility: 'visible' }, T.filas);
-        tl.fromTo(filasB[1], { y: -56 }, { y: 0, duration: 0.45, ease: 'power3.out' }, T.filas);
-        tl.fromTo(filasB[2], { y: -112 }, { y: 0, duration: 0.5, ease: 'power3.out' }, T.filas + 0.06);
+        // relevo vertical (R2, entrada): cada barra baja a su fila con estela vertical ligada a la velocidad (tope 10), que
+        // solo se nota al arrancar y se apaga mucho antes de asentarse; posicion de salida fijada al construir (escondidas)
+        gsap.set(filasB[1], { y: -56 }); gsap.set(filasB[2], { y: -112 });
+        conRastro({ el: filasB[1], nodo: $('mbf1-g'), at: T.filas, dur: 0.45, curva: 'power3.out', dist: 56, max: 10,
+            pos: function (e) { gsap.set(filasB[1], { y: -56 * (1 - e) }); } });
+        conRastro({ el: filasB[2], nodo: $('mbf2-g'), at: T.filas + 0.06, dur: 0.5, curva: 'power3.out', dist: 112, max: 10,
+            pos: function (e) { gsap.set(filasB[2], { y: -112 * (1 - e) }); } });
 
         // ================= Escena 3 (2.95-5.45): el pliegue en el semestre y «4 h» =================
         tl.fromTo(est, { pliegue: 0 }, { pliegue: 1, duration: 0.6, ease: 'none', onUpdate: recorte, immediateRender: false }, T.pliegue);
