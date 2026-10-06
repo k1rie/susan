@@ -193,8 +193,13 @@ compartido. Profundidad opcional: 1–2 tarjetas reales detrás a escala 0.5–0
 
 **5.1 Doctrina.** Primer movimiento ≤ 0.2 s; héroe visible ≤ 0.5 s. Revelado al ritmo de la voz (`vo_anchor`), nunca todo
 en el primer 25 %; la cifra llega **antes** de que la voz la nombre y queda quieta ≥ 1.2 s. Nunca dos movimientos grandes a
-la vez. **Sin salidas** salvo el último cuadro (fundido a crema en ~0.3 s). Sin respiración ni deriva lenta en la segunda
-mitad (solo vibración finita de baja amplitud); sin colas muertas ≥ 1.0 s; nada de lectura ni ancla en los primeros `dur`
+la vez. **Dinamismo con medida (BRIEF, indicación tras el borrador completo, 2026-10-06; sustituye el antiguo «sin salidas
+salvo el último cuadro»):** algo nuevo (otra pieza real de la app, otra cifra, otro estado) cada ~2–3 s, ninguna composición
+igual más de ~3 s, un solo relevo a la vez y ≥ 1.5 s entre los inicios de dos relevos de composición; las salidas dentro de un
+cuadro están permitidas y son el relevo (R1–R5 de `plan/DINAMISMO.md` §2: lo viejo sale con estela hacia la izquierda o hacia
+arriba y lo nuevo entra desde el lado opuesto); zooms solo como transición, cámara ≤ 1.3 y nunca sostenida; el cierre de F8
+sigue siendo el único fundido a crema. Sin respiración, deriva lenta ni acercamientos de adorno (solo vibración finita de baja
+amplitud); sin colas muertas ≥ 1.0 s; nada de lectura ni ancla en los primeros `dur`
 segundos (los tapa la transición entrante). Meta: ~25–30 % movimiento grande, ~50 % micro-movimiento de datos, ~20–25 %
 lectura quieta.
 
@@ -225,8 +230,9 @@ fundidos y desenfoques en hojas o en un envoltorio exterior.
 o `assets/pantalla-*` + `ffmpeg -vf gblur=sigma=18`) es opcional: solo para un fondo desenfocado que se queda más de ~1 s
 detrás del héroe (aprobado con el plan, 2026-10-06; el piloto midió que la placa a mitad del fundido se ve como doble
 exposición). Fondos 8–14 px; **texto que se lee: 0 px** y ningún texto aterriza desenfocado.
-Estela direccional (feGaussianBlur en un eje, ligada a la velocidad, `filter:none` en reposo) en 1–3 golpes y ≤ 3 objetos
-por escena. No sumar un blur interno pesado a un `blur-crossfade`/`zoom-through` simultáneo.
+Estela direccional (feGaussianBlur en un eje, ligada a la velocidad, `filter:none` en reposo) en cada relevo y odómetro, con
+≤ 3 objetos con estela a la vez (topes de σ y receta en `plan/DINAMISMO.md` §2.0; sustituye el antiguo «1–3 golpes por
+escena»). No sumar un blur interno pesado a un `blur-crossfade`/`zoom-through` simultáneo.
 
 **5.7 Gramática de datos.**
 - **Cifras**: odómetro (columna enmascarada de 1.2 × cuerpo, rueda derecha→izquierda 0.9–1.2 s `power3.out`, escalonado
@@ -243,8 +249,10 @@ por escena. No sumar un blur interno pesado a un `blur-crossfade`/`zoom-through`
   un tween `ease:"none"`. (La fórmula oscilante anterior pasaba un 28 % sobre la marca: era un sobreimpulso más.)
 
 **5.8 Bordes de cuadro.** Relevo con elemento compartido (`cut` + `handoff` con números idénticos, pieza plana y quieta),
-`push-slide LEFT` 0.45–0.5 s (una sola dirección), `blur-crossfade` 0.5 s solo al cambiar de mundo, `zoom-through` ≤ 1 vez;
-nunca `squeeze` ni disoluciones largas.
+`push-slide LEFT` 0.45–0.5 s (una sola dirección), `blur-crossfade` 0.5 s solo al cambiar de mundo, `zoom-through` ≤ 1 vez
+como `transition_in`; nunca `squeeze` ni disoluciones largas. Dentro de los cuadros van los relevos R1–R5 de
+`plan/DINAMISMO.md` §2 (látigo, vertical, atravesar, foco, morph); el «atravesar» (R3) es un cambio de toma dentro del cuadro y
+no cuenta como `zoom-through`.
 
 ## 6. Kit de UI (px de la app dentro de `.ui`; cambia `su-` por `<frame_id>-`)
 
@@ -369,9 +377,12 @@ Lun 14-sep-2026 07:12, semana 7 · Patricia Ortega («PO» `#1F7A47`) · **3A ·
 **88 %** · 21 de 24 inscritos» · «Última captura: 23 rostros · 22 válidos · +1 registro · hace 4 s» · «Minuto 12.0 ·
 Retardo» · presente tipo «0.94 · Automático · 07:02:15»; no se muestra el cierre. Revisión: Ramírez Núñez Emilio ·
 E260003 · 0.893/0.927 (89 %/93 %) · «Sesión del 2026-09-12, 09:00 a 10:00» · «Quedan 2 h 48 min» · «Resolver como
-Presente (Sugerido)» · Pendientes 8 → 7. Analítica 3A: «20.8 % · +4.2 pp vs. semana previa» · S1–S6 13.3 · 20.0 · 22.0 ·
+Presente (Sugerido)» · Pendientes 8 → 7 · lista real de pendientes (DOM 24, todas «Administración Financiera · 3A · 12 sep
+09:00 · Quedan 2 h 48 min · Pendiente»): Ramírez Núñez Emilio (RN `#475569`), Aguilar Ramos Luis (AR `#A21CAF`), Sánchez Herrera
+Daniel (SH `#A21CAF`), Morales Montes Laura (MM `#B4551A`). Encabezado de la sesión: «Pasar lista · Administración Financiera
+(3A) · 14 sep 2026 · 07:00 a 08:00 · Aula A-12» con «Abierta» y «Automático». Analítica 3A: «20.8 % · +4.2 pp vs. semana previa» · S1–S6 13.3 · 20.0 · 22.0 ·
 15.3 · 16.7 · 20.8 % · «Proyección al cierre 24.8 % · Semana 15» · «+0.59 pp por semana» · «Día crítico: Viernes» Lun
-17.7 · Mié 16.4 · Vie 21.8 % · «9 alumnos en riesgo» (Alto 3 · Medio 6 · Bajo 16). Iván Cruz Rojas · E260017 · 7 faltas
+17.7 · Mié 16.4 · Vie 21.8 % («32 ausencias en 6 sesiones», renglón real de «Ver cifras por día») · «9 alumnos en riesgo» (Alto 3 · Medio 6 · Bajo 16). Iván Cruz Rojas · E260017 · 7 faltas
 · 14.9 % · quedan 2 · Alto 64 / 100 · Al alza · cruce estimado semana 9 · «Contactar al alumno esta semana y acordar un
 plan de asistencia» · «Te quedan 2 faltas antes del límite.».
 **Trampas**: ningún número de lecturas, capturas o muestras por alumno, ni en voz ni en pantalla («tres lecturas»,
@@ -387,4 +398,5 @@ por alumno o la fila de Iván); «límite» con tilde; ningún cronómetro; «un
    lecturas, capturas o muestras por alumno?
 4. ¿Tilt solo en el objeto completo, 0° al leer y en ambos bordes; `handoff` con números idénticos; ≤ 2 sobreimpulsos?
 5. ¿GSAP y fuentes locales; `zoom` solo en `.ui` y posiciones en el rig; sin `filter`/opacidad en ancestros 3D?
-6. ¿Desenfoque en presupuesto y nada borroso al leerse; sin cursor, sin UI de desarrollo, sin salidas antes del final?
+6. ¿Desenfoque en presupuesto y nada borroso al leerse; sin cursor, sin UI de desarrollo; salidas solo como relevo (con
+   estela, un relevo a la vez, `plan/DINAMISMO.md` §2) y ningún acercamiento de adorno?

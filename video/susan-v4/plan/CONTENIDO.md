@@ -264,6 +264,7 @@ resolver; alertas «**3 sin derecho · 2 al límite**» (en 3A: 1 sin derecho, 2
 | Por revisar | **1**: Renata Gómez Medina, «Pendiente» | [INVENTADO]; su «Lecturas 2/3»: **[RETIRADO DEL VIDEO · 2026-10-06]** |
 | Sin registro | **2**: Paola Hernández Peña (patrón de semilla «falta los lunes») y Mauricio González Campos (ya sin derecho) | [INVENTADO, coherente con la semilla] |
 | Medidor «Presentes ahora» | **88 %** · «21 de 24 inscritos» | [CÁLCULO: (19+2)/24 = 87.5 → 88, misma regla de la app] |
+| Encabezado de la sesión | «Pasar lista» · «Administración Financiera (3A) · 14 sep 2026 · 07:00 a 08:00 · Aula A-12» · chips «Abierta» y «Automático» (sin «Volver al panel» en el video) | [REAL · `assets/sesion-encabezado-abierta-automatico.png`; F3 del video, 2026-10-06] |
 | Línea de la cifra | «19 de 24 presentes» · «2 con retardo · 2 sin registro · 1 por revisar» | [formato REAL · `ResumenPaseLista.jsx`] |
 | Última captura | «23 rostros · 22 válidos · +1 registro · hace 4 s» (22 = 21 presentes/retardos + Renata; el rostro 23 es una «Visita» que nadie reclama) | [INVENTADO; formato REAL] |
 | Detalle de un presente | «Mejor score 0.94» · «Automático» · hora 07:02:15 | [INVENTADO; el formato del score es `toFixed(2)` y debe ser ≥ 0.85]; el «3/3» de la columna «Lecturas»: **[RETIRADO DEL VIDEO · 2026-10-06]** |
@@ -284,6 +285,20 @@ Emilio Ramírez Núñez · E260003 · 3A · clase de reposición sáb 12 sep 09:
 0.893 (min 2.0) y 0.927 (min 8.0), cámara frontal · «Quedan 2 h 48 min» (límite: 14 sep 2026, 10:00 a.m.) ·
 «Resolver como Presente (Sugerido)». Tras resolver: pestaña «Pendientes» 8 → 7. [REAL · `dom/25-revision-caso.html`;
 el 8 → 7 es CÁLCULO]
+
+Lista de pendientes (columna izquierda de Revisión, primeras cuatro filas de las 8) [REAL · `dom/24-revision-pendientes.html`,
+`assets/pantalla-revision-caso.jpg`; agregado 2026-10-06 para el F4 del video]: todas «Administración Financiera · 3A · 12 sep
+09:00 · Quedan 2 h 48 min · Pendiente».
+
+| Fila | Alumno | Iniciales y color del avatar |
+|---|---|---|
+| 1 | Ramírez Núñez Emilio (el caso) | RN `#475569` |
+| 2 | Aguilar Ramos Luis | AR `#A21CAF` |
+| 3 | Sánchez Herrera Daniel | SH `#A21CAF` |
+| 4 | Morales Montes Laura | MM `#B4551A` |
+
+Las filas 5–8 (Ruiz Salazar Fernanda, Gutiérrez Solís Jorge, Rodríguez Domínguez Daniela, Vargas Silva Ricardo) son del
+13 sep y dicen «Quedan 26 h 48 min»; no salen en el video. La fila activa de la app es `border-foreground bg-accent/50`.
 
 ### 3.6 Alumno en riesgo (protagonista del arco «a tiempo») — REAL de la semilla
 
@@ -314,6 +329,7 @@ Mauricio González Campos E260014 «Sin derecho a examen» 14 faltas 29.8 % (Alt
 | Proyección | S7 20.1 % … **S15 24.8 %** (IC 95 % S15: 0 % a 54.6 %) · «Proyección al cierre 24.8 % · Semana 15» |
 | Faltas acumuladas (promedio por alumno) | S1 0.9 % → S6 8.2 % · proyección S15 19.9 % · «Cruce: No cruza dentro del periodo» |
 | Día de la semana | Lun **17.7 %** (26 ausencias en 6 sesiones) · Mié **16.4 %** (20 en 5) · Vie **21.8 %** (32 en 6) · «Día crítico: Viernes» |
+| «Ver cifras por día» (renglón del viernes) | «Viernes 21.8 % (32 ausencias en 6 sesiones)»; en el video, bajo la casilla del viernes: «32 ausencias en 6 sesiones» [REAL · DOM 21; agregado 2026-10-06] |
 | Riesgo | «9 alumnos en riesgo» · Bajo 16 · Medio 6 · Alto 3 |
 | Ranking (puntaje) | González Campos Mauricio 70 · Mendoza Ríos Héctor 66 · Cruz Rojas Iván 64 · Díaz Castro Miguel 51 · Aguilar Ramos Luis 49 · Hernández Peña Paola 47 · Rodríguez Domínguez Daniela 43 · Flores Cortés Sofía 42 |
 

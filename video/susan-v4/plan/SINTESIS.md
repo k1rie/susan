@@ -121,13 +121,16 @@ describe la v1 (L §1.1) [crít.].
     (cámara/escenario) y los tiempos propios de la app para la UI (D §2.21). **Máximo 2 sobreimpulsos en todo el video**
     (tooltip pop o la pulsación de «Pasar lista»); el squash del sting no es rebote. Nunca dos movimientos grandes a la vez;
     sin respiración ni deriva lenta en la segunda mitad (solo vibración finita de baja amplitud); primer movimiento ≤ 0.2 s;
-    héroe visible ≤ 0.5 s; **sin salidas** salvo el último cuadro; revelado secuencial al ritmo de la voz, nunca todo en el
-    primer 25 %. Objetivo: ~25–30 % de movimiento grande, ~50 % micro-movimiento de datos, ~20–25 % lectura quieta, sin colas
+    héroe visible ≤ 0.5 s; ~~sin salidas salvo el último cuadro~~ **sustituido para la v4 (BRIEF, indicación tras el borrador
+    completo, 2026-10-06): dinamismo con medida, algo nuevo cada ~2–3 s, un solo relevo a la vez, salidas con estela dentro de
+    los cuadros y zooms solo como transición (`plan/DINAMISMO.md` §2)**; revelado secuencial al ritmo de la voz, nunca todo en
+    el primer 25 %. Objetivo: ~25–30 % de movimiento grande, ~50 % micro-movimiento de datos, ~20–25 % lectura quieta, sin colas
     muertas ≥ 1.0 s. *Fuente: P §3.1, R1 §3.3/§3.4, L §4.3/§5, R2 §3.10.*
 19. **Gramática de datos.** Cifras con odómetro (columna enmascarada, `tabular-nums`, sin reescribir texto por fotograma,
     un tic por columna al asentarse); líneas que se dibujan **antes** de que la guía las recorra (`svg-path-draw` →
-    `chart-scrub-readout`, guía = cabezal, sin puntero); barras con `stat-bars-and-fills`; estela direccional solo en 1–3
-    golpes por escena y nunca en texto que se lee; el rack focus de lente solo en aperturas y cambio de mundo. Gráficas
+    `chart-scrub-readout`, guía = cabezal, sin puntero); barras con `stat-bars-and-fills`; estela direccional en los relevos y
+    odómetros (≤ 3 objetos a la vez; antes «1–3 golpes por escena», sustituido por `plan/DINAMISMO.md` §2.0) y nunca en texto
+    que se lee quieto; el rack focus de lente solo en aperturas y cambio de mundo. Gráficas
     con la familia de la app (GraficaLinea rectas entre puntos, nunca suavizadas; TiraSemana; BarrasPildora; AnilloEstados;
     MedidorLiquido solo en sesión en vivo/alumno). *Fuente: R1 T8–T12, R2 M1/M2, D §2.13–§2.18.*
 20. **Transiciones: tres familias como máximo, con mecánica válida.** Entre cuadros solo existen los 5 `transition_in` del
