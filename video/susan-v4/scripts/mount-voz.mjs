@@ -11,6 +11,9 @@
 //   data-start de la linea = desplazamiento que minimiza el error maximo entre anclas ((min + max) / 2 de objetivo_k - t_palabra_k); con
 //   una sola ancla cae exacta. Error de cualquier ancla > holgura (0.3 s, SINTESIS 4) = ERROR: se ajusta la escena por dentro o se
 //   recorta el texto; NUNCA se toca un data-duration ni un data-start de cuadro (prohibido `audio.mjs sync-durations`).
+// Habla REAL: el ultimo caracter alineado ('.', '…') arrastra la cola de silencio del clip (hasta ~1 s con la voz de la v4), asi que
+//   habla_ini/habla_fin se miden sobre la senal (RMS de 20 ms >= -40 dBFS, el tono de sala queda en ~-45) y la alineacion queda como
+//   habla_ini_alineacion/habla_fin_alineacion. Con ellas se calculan huecos entre frases, silencio final, ducking y ventanas de verify-sfx.
 // Comprobaciones: nada antes de 0 ni despues del final del video, frases separadas >= 0.12 s (ERROR); costura < 0.3 s, primera palabra
 //   antes de 1.0 s, < 1.5 s de silencio al cerrar, ancla dentro de la transicion entrante del cuadro y pico de la mezcla > -1 dBFS (AVISO).
 //
@@ -57,6 +60,20 @@ function buscarPalabra(caracteres, palabra) {
     return m ? m.index + m[1].length : -1;
 }
 
+// Inicio y fin del habla sobre la senal de un clip (s, relativos al clip). null si el WAV no se puede leer o no pasa el umbral.
+function limitesHabla(ruta, umbralDb = -40) {
+    let wav;
+    try { wav = leerWav(ruta); } catch { return null; }
+    const x = wav.ch[0], h = Math.round(wav.sr * 0.01), w = 2 * h, umbral = 10 ** (umbralDb / 20);
+    let ini = null, fin = null;
+    for (let i = 0; i + w <= x.length; i += h) {
+        let s = 0;
+        for (let k = i; k < i + w; k++) s += x[k] * x[k];
+        if (Math.sqrt(s / w) >= umbral) { if (ini === null) ini = i / wav.sr; fin = (i + w) / wav.sr; }
+    }
+    return ini === null ? null : { ini, fin };
+}
+
 // ---- 1. colocar cada linea por sus anclas
 const filas = [];
 for (const l of sc.lineas) {
@@ -82,9 +99,13 @@ for (const l of sc.lineas) {
         if (Math.abs(x.error) > HOLGURA + 1e-9) errores.push(`Line ${l.numero}: el ancla «${x.palabra}» queda a ${x.error} s de su t (holgura ${HOLGURA} s): la frase real no encaja en la escena; ajusta la escena por dentro o recorta el texto (nunca estires el cuadro)`);
     }
     const habla = a.caracteres.map((ch, k) => (/\S/.test(ch) ? k : -1)).filter((k) => k >= 0);
+    const alIni = a.inicio_s[habla[0]], alFin = a.fin_s[habla.at(-1)];
+    const real = existsSync(join(R, a.archivo)) ? limitesHabla(join(R, a.archivo)) : null;   // senal medida; la alineacion es el respaldo
+    const hIni = real ? Math.max(real.ini, alIni) : alIni, hFin = real ? Math.min(real.fin, alFin) : alFin;
     filas.push({
         id: l.id, frame: l.frame, cuadro: c.id, texto: l.texto, archivo: a.archivo, inicio: r3(inicio), fin: r3(inicio + a.duracion_s),
-        habla_ini: r3(inicio + a.inicio_s[habla[0]]), habla_fin: r3(inicio + a.fin_s[habla.at(-1)]), duracion: a.duracion_s,
+        habla_ini: r3(inicio + hIni), habla_fin: r3(inicio + hFin), habla_ini_alineacion: r3(inicio + alIni), habla_fin_alineacion: r3(inicio + alFin),
+        habla_medida: !!real, duracion: a.duracion_s,
         anclas: anclas.map((x) => ({ palabra: x.palabra, tLocal: x.tLocal, t: r3(x.objetivo), error: x.error })),
         fixture: !!a.fixture,
     });

@@ -170,6 +170,14 @@ En la cabecera va `**Voice id:** <id>`.
     escena o se recorta el texto. **Nunca se estira un cuadro**; el script comprueba que la duración y los envoltorios no cambien.
   - Errores: clip antes de 0 o después del final, frases separadas por menos de 0.12 s, texto cambiado sin regenerar y palabra ancla
     ausente.
+  - `habla_ini`/`habla_fin` (el habla de cada línea) se miden sobre la señal (RMS de 20 ms ≥ −40 dBFS) y no con el último carácter
+    alineado: «.» y «…» arrastran la cola de silencio del clip (hasta ~1 s con la voz de la v4). Con ellos se calculan los huecos entre
+    frases, el silencio final, el ducking y las ventanas de `verify-sfx`; la alineación queda en `habla_ini_alineacion`/
+    `habla_fin_alineacion` de `datos/voz-montada.json`.
+  - Las anclas de `SCRIPT.md` son estimaciones hasta que existe la voz. Si la voz real habla más junta y una línea no cabe en la
+    holgura (v4: líneas 2, 3 y 7, errores de hasta 0.89 s con las originales; la línea 1 solo se corrió 0.08 s para que la primera palabra suene a ≥ 1.0 s), se vuelven a medir sobre `voz-alineacion.json` hacia
+    el evento visual que ya existe en la escena, y `SCRIPT.md`, `vo_anchor` de `STORYBOARD.md` y el texto de la escena dicen lo mismo.
+    Nunca se estira un cuadro ni se toca la voz.
   - Avisos: costura de menos de 0.3 s, primera palabra antes de 1.0 s, menos de 1.5 s de silencio final, ancla dentro de la transición
     entrante del cuadro y pico de SFX + voz por encima de −1 dBFS.
 - **Ducking**: los SFX que suenan durante una frase (−0.1/+0.18 s) bajan a ×0.3, y los impactos a ×0.6. El volumen original queda en

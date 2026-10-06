@@ -1,0 +1,619 @@
+{
+ "generado": "2026-10-06T14:51:27.947Z",
+ "lineas": [
+  {
+   "id": "01",
+   "frame": 1,
+   "cuadro": "s01-cinco-minutos",
+   "texto": "Pasar lista: cinco minutos cada clase… cuatro horas por grupo al semestre.",
+   "archivo": "assets/voz/01.wav",
+   "inicio": 1.002,
+   "fin": 6.25,
+   "habla_ini": 1.092,
+   "habla_fin": 5.642,
+   "habla_ini_alineacion": 1.002,
+   "habla_fin_alineacion": 6.25,
+   "habla_medida": true,
+   "duracion": 5.247708,
+   "anclas": [
+    {
+     "palabra": "cinco",
+     "tLocal": 2.05,
+     "t": 2.05,
+     "error": 0.067
+    },
+    {
+     "palabra": "cuatro",
+     "tLocal": 3.96,
+     "t": 3.96,
+     "error": -0.067
+    }
+   ],
+   "fixture": false
+  },
+  {
+   "id": "02",
+   "frame": 2,
+   "cuadro": "s02-un-boton",
+   "texto": "Te presentamos a susan. Abres la sesión con un solo botón…",
+   "archivo": "assets/voz/02.wav",
+   "inicio": 7.841,
+   "fin": 12.159,
+   "habla_ini": 7.911,
+   "habla_fin": 11.341,
+   "habla_ini_alineacion": 7.841,
+   "habla_fin_alineacion": 12.16,
+   "habla_medida": true,
+   "duracion": 4.318917,
+   "anclas": [
+    {
+     "palabra": "susan",
+     "tLocal": 2,
+     "t": 8.4,
+     "error": 0.264
+    },
+    {
+     "palabra": "botón",
+     "tLocal": 4.84,
+     "t": 11.24,
+     "error": -0.264
+    }
+   ],
+   "fixture": false
+  },
+  {
+   "id": "03",
+   "frame": 3,
+   "cuadro": "s03-camara",
+   "texto": "La cámara del aula pasa lista por ti mientras das tu clase… y cada alumno queda presente.",
+   "archivo": "assets/voz/03.wav",
+   "inicio": 13.851,
+   "fin": 19.609,
+   "habla_ini": 13.911,
+   "habla_fin": 19.071,
+   "habla_ini_alineacion": 13.851,
+   "habla_fin_alineacion": 19.61,
+   "habla_medida": true,
+   "duracion": 5.758563,
+   "anclas": [
+    {
+     "palabra": "cámara",
+     "tLocal": 1.6,
+     "t": 14.05,
+     "error": -0.002
+    },
+    {
+     "palabra": "alumno",
+     "tLocal": 5.45,
+     "t": 17.9,
+     "error": 0.003
+    },
+    {
+     "palabra": "presente",
+     "tLocal": 6.15,
+     "t": 18.6,
+     "error": -0.002
+    }
+   ],
+   "fixture": false
+  },
+  {
+   "id": "04",
+   "frame": 4,
+   "cuadro": "s04-revision",
+   "texto": "¿Algún caso dudoso? Te espera en Revisión… y lo decides tú.",
+   "archivo": "assets/voz/04.wav",
+   "inicio": 21.485,
+   "fin": 27.15,
+   "habla_ini": 21.725,
+   "habla_fin": 26.035,
+   "habla_ini_alineacion": 21.485,
+   "habla_fin_alineacion": 27.151,
+   "habla_medida": true,
+   "duracion": 5.665667,
+   "anclas": [
+    {
+     "palabra": "dudoso",
+     "tLocal": 1.26,
+     "t": 22.21,
+     "error": 0.157
+    },
+    {
+     "palabra": "Revisión",
+     "tLocal": 3.11,
+     "t": 24.06,
+     "error": 0.072
+    },
+    {
+     "palabra": "decides",
+     "tLocal": 4.65,
+     "t": 25.6,
+     "error": -0.157
+    }
+   ],
+   "fixture": false
+  },
+  {
+   "id": "05",
+   "frame": 5,
+   "cuadro": "s05-dia-critico",
+   "texto": "Con cada sesión, susan analiza a tu grupo: qué día faltan más… el viernes.",
+   "archivo": "assets/voz/05.wav",
+   "inicio": 27.729,
+   "fin": 34.509,
+   "habla_ini": 27.819,
+   "habla_fin": 33.609,
+   "habla_ini_alineacion": 27.729,
+   "habla_fin_alineacion": 34.509,
+   "habla_medida": true,
+   "duracion": 6.780229,
+   "anclas": [
+    {
+     "palabra": "sesión",
+     "tLocal": 1.29,
+     "t": 28.04,
+     "error": 0.2
+    },
+    {
+     "palabra": "día",
+     "tLocal": 4.53,
+     "t": 31.28,
+     "error": -0.01
+    },
+    {
+     "palabra": "viernes",
+     "tLocal": 6.52,
+     "t": 33.27,
+     "error": -0.2
+    }
+   ],
+   "fixture": false
+  },
+  {
+   "id": "06",
+   "frame": 6,
+   "cuadro": "s06-tendencia",
+   "texto": "Ves hacia dónde va, cómo cerraría el semestre… y quién ya se acerca al límite.",
+   "archivo": "assets/voz/06.wav",
+   "inicio": 35.333,
+   "fin": 41.416,
+   "habla_ini": 35.373,
+   "habla_fin": 40.553,
+   "habla_ini_alineacion": 35.333,
+   "habla_fin_alineacion": 41.417,
+   "habla_medida": true,
+   "duracion": 6.083625,
+   "anclas": [
+    {
+     "palabra": "va",
+     "tLocal": 2.03,
+     "t": 35.98,
+     "error": 0.27
+    },
+    {
+     "palabra": "semestre",
+     "tLocal": 3.62,
+     "t": 37.57,
+     "error": 0.015
+    },
+    {
+     "palabra": "límite",
+     "tLocal": 6.54,
+     "t": 40.49,
+     "error": -0.27
+    }
+   ],
+   "fixture": false
+  },
+  {
+   "id": "07",
+   "frame": 7,
+   "cuadro": "s07-a-tiempo",
+   "texto": "A Iván le quedan solo dos faltas… Todavía estás a tiempo de hablar con él.",
+   "archivo": "assets/voz/07.wav",
+   "inicio": 43.099,
+   "fin": 48.393,
+   "habla_ini": 43.169,
+   "habla_fin": 47.329,
+   "habla_ini_alineacion": 43.099,
+   "habla_fin_alineacion": 48.393,
+   "habla_medida": true,
+   "duracion": 5.294146,
+   "anclas": [
+    {
+     "palabra": "Iván",
+     "tLocal": 1.98,
+     "t": 43.38,
+     "error": -0.002
+    },
+    {
+     "palabra": "dos",
+     "tLocal": 3.15,
+     "t": 44.55,
+     "error": -0.001
+    },
+    {
+     "palabra": "tiempo",
+     "tLocal": 4.9,
+     "t": 46.3,
+     "error": 0.002
+    }
+   ],
+   "fixture": false
+  },
+  {
+   "id": "08",
+   "frame": 8,
+   "cuadro": "s08-susan",
+   "texto": "susan. Pasa lista en segundos.",
+   "archivo": "assets/voz/08.wav",
+   "inicio": 51.007,
+   "fin": 53.701,
+   "habla_ini": 51.017,
+   "habla_fin": 53.347,
+   "habla_ini_alineacion": 51.007,
+   "habla_fin_alineacion": 53.701,
+   "habla_medida": true,
+   "duracion": 2.693521,
+   "anclas": [
+    {
+     "palabra": "susan",
+     "tLocal": 2,
+     "t": 51,
+     "error": 0.007
+    },
+    {
+     "palabra": "segundos",
+     "tLocal": 3.79,
+     "t": 52.79,
+     "error": -0.007
+    }
+   ],
+   "fixture": false
+  }
+ ],
+ "ducking": [
+  {
+   "id": "sfx-s01-cinco-minutos-2",
+   "categoria": "tick",
+   "t": 1.65,
+   "de": 0.8,
+   "a": 0.24
+  },
+  {
+   "id": "sfx-s01-cinco-minutos-3",
+   "categoria": "texture",
+   "t": 1.747,
+   "de": 0.8,
+   "a": 0.24
+  },
+  {
+   "id": "sfx-s01-cinco-minutos-4",
+   "categoria": "texture",
+   "t": 1.998,
+   "de": 0.284,
+   "a": 0.085
+  },
+  {
+   "id": "sfx-s01-cinco-minutos-5",
+   "categoria": "whoosh",
+   "t": 3.149,
+   "de": 0.8,
+   "a": 0.24
+  },
+  {
+   "id": "sfx-s01-cinco-minutos-6",
+   "categoria": "texture",
+   "t": 3.249,
+   "de": 0.496,
+   "a": 0.149
+  },
+  {
+   "id": "sfx-s01-cinco-minutos-7",
+   "categoria": "tick",
+   "t": 3.75,
+   "de": 0.8,
+   "a": 0.24
+  },
+  {
+   "id": "sfx-s01-cinco-minutos-8",
+   "categoria": "whoosh",
+   "t": 5.631,
+   "de": 0.8,
+   "a": 0.24
+  },
+  {
+   "id": "sfx-s02-un-boton-3",
+   "categoria": "pop",
+   "t": 7.546,
+   "de": 0.566,
+   "a": 0.17
+  },
+  {
+   "id": "sfx-s02-un-boton-4",
+   "categoria": "whoosh",
+   "t": 9.554,
+   "de": 0.401,
+   "a": 0.12
+  },
+  {
+   "id": "sfx-s02-un-boton-5",
+   "categoria": "texture",
+   "t": 10.346,
+   "de": 0.44,
+   "a": 0.132
+  },
+  {
+   "id": "sfx-s02-un-boton-6",
+   "categoria": "click",
+   "t": 11.35,
+   "de": 0.64,
+   "a": 0.192
+  },
+  {
+   "id": "sfx-s02-un-boton-7",
+   "categoria": "click",
+   "t": 11.396,
+   "de": 0.453,
+   "a": 0.136
+  },
+  {
+   "id": "sfx-s03-camara-1",
+   "categoria": "click",
+   "t": 13.75,
+   "de": 0.64,
+   "a": 0.192
+  },
+  {
+   "id": "sfx-s03-camara-2",
+   "categoria": "whoosh",
+   "t": 15.004,
+   "de": 0.401,
+   "a": 0.12
+  },
+  {
+   "id": "sfx-s03-camara-3",
+   "categoria": "whoosh",
+   "t": 16.981,
+   "de": 0.401,
+   "a": 0.12
+  },
+  {
+   "id": "sfx-s03-camara-4",
+   "categoria": "texture",
+   "t": 17.346,
+   "de": 0.311,
+   "a": 0.093
+  },
+  {
+   "id": "sfx-s03-camara-5",
+   "categoria": "ui",
+   "t": 17.45,
+   "de": 0.566,
+   "a": 0.17
+  },
+  {
+   "id": "sfx-s03-camara-7",
+   "categoria": "tick",
+   "t": 18.06,
+   "de": 0.8,
+   "a": 0.24
+  },
+  {
+   "id": "sfx-s03-camara-6",
+   "categoria": "texture",
+   "t": 18.095,
+   "de": 0.566,
+   "a": 0.17
+  },
+  {
+   "id": "sfx-s03-camara-8",
+   "categoria": "tick",
+   "t": 18.1,
+   "de": 0.8,
+   "a": 0.24
+  },
+  {
+   "id": "sfx-s04-revision-2",
+   "categoria": "whoosh",
+   "t": 22.631,
+   "de": 0.566,
+   "a": 0.17
+  },
+  {
+   "id": "sfx-s04-revision-3",
+   "categoria": "texture",
+   "t": 23.345,
+   "de": 0.401,
+   "a": 0.12
+  },
+  {
+   "id": "sfx-s04-revision-4",
+   "categoria": "pop",
+   "t": 24.047,
+   "de": 0.401,
+   "a": 0.12
+  },
+  {
+   "id": "sfx-s04-revision-5",
+   "categoria": "click",
+   "t": 24.9,
+   "de": 0.64,
+   "a": 0.192
+  },
+  {
+   "id": "sfx-s04-revision-6",
+   "categoria": "ui",
+   "t": 24.95,
+   "de": 0.566,
+   "a": 0.17
+  },
+  {
+   "id": "sfx-s04-revision-7",
+   "categoria": "tick",
+   "t": 25.35,
+   "de": 0.8,
+   "a": 0.24
+  },
+  {
+   "id": "sfx-s04-revision-8",
+   "categoria": "pop",
+   "t": 25.746,
+   "de": 0.401,
+   "a": 0.12
+  },
+  {
+   "id": "sfx-s05-dia-critico-3",
+   "categoria": "tick",
+   "t": 28.65,
+   "de": 0.8,
+   "a": 0.24
+  },
+  {
+   "id": "sfx-s05-dia-critico-4",
+   "categoria": "tick",
+   "t": 29.15,
+   "de": 0.8,
+   "a": 0.24
+  },
+  {
+   "id": "sfx-s05-dia-critico-5",
+   "categoria": "tick",
+   "t": 29.65,
+   "de": 0.8,
+   "a": 0.24
+  },
+  {
+   "id": "sfx-s05-dia-critico-6",
+   "categoria": "pop",
+   "t": 31.296,
+   "de": 0.8,
+   "a": 0.24
+  },
+  {
+   "id": "sfx-s05-dia-critico-7",
+   "categoria": "whoosh",
+   "t": 32.004,
+   "de": 0.566,
+   "a": 0.17
+  },
+  {
+   "id": "sfx-s05-dia-critico-8",
+   "categoria": "texture",
+   "t": 32.497,
+   "de": 0.8,
+   "a": 0.24
+  },
+  {
+   "id": "sfx-s05-dia-critico-9",
+   "categoria": "pop",
+   "t": 32.895,
+   "de": 0.401,
+   "a": 0.12
+  },
+  {
+   "id": "sfx-s06-tendencia-3",
+   "categoria": "tick",
+   "t": 36.5,
+   "de": 0.8,
+   "a": 0.24
+  },
+  {
+   "id": "sfx-s06-tendencia-4",
+   "categoria": "texture",
+   "t": 36.497,
+   "de": 0.401,
+   "a": 0.12
+  },
+  {
+   "id": "sfx-s06-tendencia-5",
+   "categoria": "pop",
+   "t": 37.147,
+   "de": 0.8,
+   "a": 0.24
+  },
+  {
+   "id": "sfx-s06-tendencia-6",
+   "categoria": "whoosh",
+   "t": 39.081,
+   "de": 0.8,
+   "a": 0.24
+  },
+  {
+   "id": "sfx-s06-tendencia-7",
+   "categoria": "tick",
+   "t": 40.45,
+   "de": 0.8,
+   "a": 0.24
+  },
+  {
+   "id": "sfx-s07-a-tiempo-3",
+   "categoria": "whoosh",
+   "t": 43.369,
+   "de": 0.8,
+   "a": 0.24
+  },
+  {
+   "id": "sfx-s07-a-tiempo-4",
+   "categoria": "texture",
+   "t": 43.845,
+   "de": 0.401,
+   "a": 0.12
+  },
+  {
+   "id": "sfx-s07-a-tiempo-5",
+   "categoria": "tick",
+   "t": 44.25,
+   "de": 0.8,
+   "a": 0.24
+  },
+  {
+   "id": "sfx-s07-a-tiempo-6",
+   "categoria": "whoosh",
+   "t": 45.549,
+   "de": 0.401,
+   "a": 0.12
+  },
+  {
+   "id": "sfx-s07-a-tiempo-7",
+   "categoria": "pop",
+   "t": 45.946,
+   "de": 0.401,
+   "a": 0.12
+  },
+  {
+   "id": "sfx-s07-a-tiempo-8",
+   "categoria": "texture",
+   "t": 46.598,
+   "de": 0.401,
+   "a": 0.12
+  },
+  {
+   "id": "sfx-s08-susan-3",
+   "categoria": "texture",
+   "t": 51.498,
+   "de": 0.401,
+   "a": 0.12
+  }
+ ],
+ "mezcla": {
+  "objetivo_lufs_por_linea": -17,
+  "pico_verdadero_db": -1.5,
+  "volumen_voz": 0.95,
+  "ducking_sfx": {
+   "factor": 0.3,
+   "factor_impactos": 0.6,
+   "antes_s": 0.1,
+   "despues_s": 0.18,
+   "categorias_impacto": [
+    "impact"
+   ]
+  },
+  "separacion_minima_s": 0.12,
+  "costura_s": 0.3,
+  "holgura_ancla_s": 0.3,
+  "silencio_inicial_s": 1,
+  "silencio_final_s": 1.5
+ },
+ "picoMezclaDbFS": -1.7
+}

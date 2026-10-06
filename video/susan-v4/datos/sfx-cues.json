@@ -1,5 +1,5 @@
 {
- "generado": "2026-10-06T08:40:08.358Z",
+ "generado": "2026-10-06T14:51:27.563Z",
  "proyecto": "/home/user/susan/video/susan-v4",
  "duracion": 55,
  "cuadros": {
@@ -122,9 +122,9 @@
    "frame": 1,
    "n": 7,
    "nombre": "tick-2",
-   "texto": "3.65 tick-2",
-   "tLocal": 3.65,
-   "t": 3.65,
+   "texto": "3.75 tick-2",
+   "tLocal": 3.75,
+   "t": 3.75,
    "gananciaDb": 0,
    "categoria": "tick",
    "anclaje": "hit"
@@ -325,19 +325,6 @@
    "anclaje": "hit"
   },
   {
-   "id": "s03-camara-6",
-   "cuadro": "s03-camara",
-   "frame": 3,
-   "n": 6,
-   "nombre": "fill",
-   "texto": "5.35 fill -3dB",
-   "tLocal": 5.35,
-   "t": 17.8,
-   "gananciaDb": -3,
-   "categoria": "texture",
-   "anclaje": "inicio"
-  },
-  {
    "id": "s03-camara-7",
    "cuadro": "s03-camara",
    "frame": 3,
@@ -349,6 +336,19 @@
    "gananciaDb": 0,
    "categoria": "tick",
    "anclaje": "hit"
+  },
+  {
+   "id": "s03-camara-6",
+   "cuadro": "s03-camara",
+   "frame": 3,
+   "n": 6,
+   "nombre": "fill",
+   "texto": "5.65 fill -3dB",
+   "tLocal": 5.65,
+   "t": 18.1,
+   "gananciaDb": -3,
+   "categoria": "texture",
+   "anclaje": "inicio"
   },
   {
    "id": "s03-camara-8",
@@ -850,9 +850,9 @@
    "frame": 8,
    "n": 4,
    "nombre": "sheen",
-   "texto": "4.45 sheen",
-   "tLocal": 4.45,
-   "t": 53.45,
+   "texto": "4.55 sheen",
+   "tLocal": 4.55,
+   "t": 53.55,
    "gananciaDb": 0,
    "categoria": "texture",
    "anclaje": "hit"

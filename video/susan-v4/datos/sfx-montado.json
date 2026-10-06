@@ -1,5 +1,5 @@
 {
- "generado": "2026-10-06T08:40:08.358Z",
+ "generado": "2026-10-06T14:51:27.563Z",
  "html": "index.html",
  "duracion": 55,
  "mezcla": {
@@ -7,7 +7,7 @@
   "picoDbFS": -4.232,
   "picoT": 50.005,
   "topeDbFS": -1.5,
-  "lufsIntegradoEstimado": -23.956,
+  "lufsIntegradoEstimado": -24.022,
   "picoVerdaderoEstimadoDbFS": -4.232,
   "polifoniaMax": 4,
   "atenuadosPorPolifonia": 0,
@@ -30,8 +30,8 @@
    -23.5,
    -60,
    -22.1,
+   -23.1,
    -22.3,
-   -27.2,
    -19.3,
    -17.7,
    -20.7,
@@ -86,9 +86,9 @@
    -60,
    -32.2,
    -60,
-   -28.9,
-   -25,
-   -34.3,
+   -29.4,
+   -26.5,
+   -28.5,
    -22.6,
    -27.3,
    -30.3,
@@ -138,17 +138,17 @@
     "db": 8.649
    },
    {
-    "deSegundo": 19,
-    "aSegundo": 20,
-    "db": 7.975
+    "deSegundo": 25,
+    "aSegundo": 26,
+    "db": 4.94
    }
   ],
   "densidad": {
    "cues": 63,
    "sfxPorSeg": 1.145,
-   "eventos": 55,
-   "eventosPorSeg": 1,
-   "capasMax": 2
+   "eventos": 54,
+   "eventosPorSeg": 0.982,
+   "capasMax": 3
   }
  },
  "cues": [
@@ -266,10 +266,10 @@
    "file": "assets/sfx/derived/tick-2.wav",
    "cuadro": "s01-cinco-minutos",
    "sfx": "tick-2",
-   "tLocal": 3.65,
-   "tCue": 3.65,
+   "tLocal": 3.75,
+   "tCue": 3.75,
    "gananciaDb": 0,
-   "dataStart": 3.65,
+   "dataStart": 3.75,
    "mediaStart": 0,
    "dataDuration": 0.07,
    "ancla": 0,
@@ -549,24 +549,6 @@
    "pista": 22
   },
   {
-   "id": "s03-camara-6",
-   "audioId": "sfx-s03-camara-6",
-   "file": "assets/sfx/derived/fill.wav",
-   "cuadro": "s03-camara",
-   "sfx": "fill",
-   "tLocal": 5.35,
-   "tCue": 17.8,
-   "gananciaDb": -3,
-   "dataStart": 17.795,
-   "mediaStart": 0,
-   "dataDuration": 1.2,
-   "ancla": 0.005,
-   "anclaje": "inicio",
-   "categoria": "texture",
-   "volume": 0.566,
-   "pista": 20
-  },
-  {
    "id": "s03-camara-7",
    "audioId": "sfx-s03-camara-7",
    "file": "assets/sfx/derived/tick-1.wav",
@@ -582,6 +564,24 @@
    "anclaje": "hit",
    "categoria": "tick",
    "volume": 0.8,
+   "pista": 20
+  },
+  {
+   "id": "s03-camara-6",
+   "audioId": "sfx-s03-camara-6",
+   "file": "assets/sfx/derived/fill.wav",
+   "cuadro": "s03-camara",
+   "sfx": "fill",
+   "tLocal": 5.65,
+   "tCue": 18.1,
+   "gananciaDb": -3,
+   "dataStart": 18.095,
+   "mediaStart": 0,
+   "dataDuration": 1.2,
+   "ancla": 0.005,
+   "anclaje": "inicio",
+   "categoria": "texture",
+   "volume": 0.566,
    "pista": 21
   },
   {
@@ -1274,10 +1274,10 @@
    "file": "assets/sfx/derived/sheen.wav",
    "cuadro": "s08-susan",
    "sfx": "sheen",
-   "tLocal": 4.45,
-   "tCue": 53.45,
+   "tLocal": 4.55,
+   "tCue": 53.55,
    "gananciaDb": 0,
-   "dataStart": 53.444,
+   "dataStart": 53.544,
    "mediaStart": 0,
    "dataDuration": 0.44,
    "ancla": 0.006,

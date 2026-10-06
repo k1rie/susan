@@ -5,29 +5,31 @@
 **Voice direction:** Español de México, cálido y seguro, sin prisa: un colega que le cuenta a otro docente algo que le resuelve la mañana, con tono de lanzamiento pero nunca de anuncio gritado. Los «…» son pausas reales de media respiración; las comas, apenas un respiro. Las cifras se dicen con letra y sin énfasis exagerado; el énfasis va en las palabras ancla. «susan» siempre en minúsculas (en mayúsculas la deletrea); si en la toma suena italiana, probar «Súsan». La línea 7 baja medio tono y se vuelve cercana; la línea 8 cierra hacia abajo, firme.
 **Total:** 100 palabras en 8 líneas · ≈ 38.5 s de voz a 2.6 palabras/s (≈ 70 % de cobertura de 55 s) · 1.0 s de silencio al abrir y 1.63 s al cerrar · tiempos locales de cada cuadro; las anclas marcan el inicio de la palabra (holgura ±0.3 s; nunca se estira un cuadro)
 
+**Montaje con la voz real (2026-10-06):** las anclas de las líneas 1, 2, 3 y 7 se volvieron a medir sobre la voz de «Antonio» ya generada (`datos/voz-alineacion.json`): la locución real habla más junta que lo estimado (≈ 36 s de voz con sus pausas internas, contra ≈ 43.7 s de ventanas **Time:**) y con pausas «…» más cortas, y con las anclas originales las líneas 2, 3 y 7 no cabían en ±0.3 s con un solo desplazamiento (errores de hasta 0.89 s) y la 1 abría 0.04 s antes del segundo de silencio inicial. Se movieron solo las anclas y las ventanas **Time:**/**Video:** de esas líneas, hacia el evento visual que ya existía en la escena (sin tocar la voz ni la duración de ningún cuadro); las líneas 4, 5, 6 y 8 conservan sus anclas. Detalle por línea en `plan/VOZ-MONTAJE.md`.
+
 ---
 
 ## Line 1 — Cinco minutos cada clase (Frame 1)
 
-**Time:** 1.00 – 6.27s
-**Anchor:** «cinco» @ 1.97s · «cuatro» @ 3.96s
-**Delivery:** Arranque limpio, casi de pizarrón: «Pasar lista» se dice como el nombre de un ritual conocido, coma breve. «cinco minutos cada clase» llano, y pausa de media respiración. «cuatro horas» con peso, sin dramatizar; cierra hacia abajo en «semestre». Video: 1.00 – 6.27 s.
+**Time:** 1.00 – 6.05s
+**Anchor:** «cinco» @ 2.05s · «cuatro» @ 3.96s
+**Delivery:** Arranque limpio, casi de pizarrón: «Pasar lista» se dice como el nombre de un ritual conocido, coma breve. «cinco minutos cada clase» llano, y pausa de media respiración. «cuatro horas» con peso, sin dramatizar; cierra hacia abajo en «semestre». Video: 1.00 – 6.05 s.
 
     Pasar lista: cinco minutos cada clase… cuatro horas por grupo al semestre.
 
 ## Line 2 — Te presentamos a susan (Frame 2)
 
-**Time:** 0.70 – 5.33s
-**Anchor:** «susan» @ 1.85s · «botón» @ 4.84s
-**Delivery:** El revelado: sonrisa en la voz, «susan» clara y sin acento extranjero, punto y pausa. La segunda frase es sencilla y práctica, con el énfasis en «un solo botón»; queda abierta en los «…» porque el botón se pulsa justo después. Video: 7.10 – 11.73 s.
+**Time:** 1.44 – 4.94s
+**Anchor:** «susan» @ 2.00s · «botón» @ 4.84s
+**Delivery:** El revelado: sonrisa en la voz, «susan» clara y sin acento extranjero, punto y pausa. La segunda frase es sencilla y práctica, con el énfasis en «un solo botón»; queda abierta en los «…» porque el botón se pulsa justo después. Video: 7.84 – 11.34 s.
 
     Te presentamos a susan. Abres la sesión con un solo botón…
 
 ## Line 3 — La cámara pasa lista (Frame 3)
 
-**Time:** 0.40 – 7.54s
-**Anchor:** «cámara» @ 0.63s · «alumno» @ 6.00s · «presente» @ 6.96s
-**Delivery:** Descriptiva y tranquila, con asombro contenido: «pasa lista por ti mientras das tu clase» es la promesa, se dice cercana, con el peso en «por ti». Pausa en los «…» (ahí los marcos se vuelven verdes). «y cada alumno queda presente» llano y resuelto, cerrando hacia abajo en «presente». No se cuenta nada: ni lecturas ni capturas (decisión de la persona dueña, 2026-10-06). Video: 12.85 – 19.99 s.
+**Time:** 1.40 – 6.65s
+**Anchor:** «cámara» @ 1.60s · «alumno» @ 5.45s · «presente» @ 6.15s
+**Delivery:** Descriptiva y tranquila, con asombro contenido: «pasa lista por ti mientras das tu clase» es la promesa, se dice cercana, con el peso en «por ti». Pausa en los «…» (ahí los marcos se vuelven verdes). «y cada alumno queda presente» llano y resuelto, cerrando hacia abajo en «presente». No se cuenta nada: ni lecturas ni capturas (decisión de la persona dueña, 2026-10-06). Video: 13.85 – 19.10 s.
 
     La cámara del aula pasa lista por ti mientras das tu clase… y cada alumno queda presente.
 
@@ -57,9 +59,9 @@
 
 ## Line 7 — Todavía a tiempo (Frame 7)
 
-**Time:** 1.25 – 7.47s
-**Anchor:** «Iván» @ 1.49s · «dos» @ 3.21s · «tiempo» @ 5.93s
-**Delivery:** El momento humano: medio tono más bajo y cercano. «A Iván» con nombre propio claro; «solo dos faltas» sin alarma, con un dejo de urgencia. Pausa en los «…». «Todavía estás a tiempo» se dice como buena noticia, y «de hablar con él» cierra suave. Video: 42.65 – 48.87 s.
+**Time:** 1.70 – 5.94s
+**Anchor:** «Iván» @ 1.98s · «dos» @ 3.15s · «tiempo» @ 4.90s
+**Delivery:** El momento humano: medio tono más bajo y cercano. «A Iván» con nombre propio claro; «solo dos faltas» sin alarma, con un dejo de urgencia. Pausa en los «…». «Todavía estás a tiempo» se dice como buena noticia, y «de hablar con él» cierra suave. Video: 43.10 – 47.34 s.
 
     A Iván le quedan solo dos faltas… Todavía estás a tiempo de hablar con él.
 

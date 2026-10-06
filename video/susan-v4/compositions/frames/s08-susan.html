@@ -103,18 +103,19 @@
         function $(s) { return document.getElementById(ID + '-' + s); }
 
         // Tiempos locales; los de sfx_cues son contrato: whoosh-s 0.98 dentro de la caída, thud 1.00 = contacto,
-        // soft-in 2.50 = inicio del lema, sheen 4.45 = inicio del barrido (la banda arranca fuera de la «S» y su borde la toca
-        // hacia 4.60, en el cuerpo del sheen, que crece hasta su pico entre 0.12 y 0.19 s).
+        // soft-in 2.50 = inicio del lema, sheen 4.55 = inicio del barrido (la banda arranca fuera de la «S» y su borde la toca
+        // hacia 4.70, en el cuerpo del sheen, que crece hasta su pico entre 0.12 y 0.19 s).
         // Tramos quietos (frame-check): 1.8–2.6, 2.7–3.5, 3.9–4.7 y 4.9–5.7 s; ninguno llega a 1.0 s (el paso del cielo, 3.25–4.05,
         // parte en dos lo que antes era un tramo de 1.8 s sin cambio perceptible entre el lema asentado y el barrido).
         // Voz real (datos/voz-alineacion.json, línea 08, montada por anclas con inicio en 2.007 s del cuadro): «segundos» suena de
-        // 3.78 a 4.34 s; por eso el barrido NO se adelanta (el sheen 4.45 queda 0.11 s después de la última «s»; adelantarlo 0.1 s
-        // lo pondría sobre la cola de la voz y solo quitaría 0.1 s de quietud).
+        // 3.78 a 4.34 s; el barrido NO se adelanta (lo pondría sobre la cola de la voz) y se retrasó 0.10 s, de 4.45 a 4.55: el
+        // ducking de mount-voz baja a ×0.3 todo SFX que arranca antes de «fin del habla + 0.18 s» (4.53 s) y el sheen, el único
+        // sonido del silencio final, sonaba a −10 dB; a 4.55 s suena entero y el tramo quieto previo (4.05–4.55) sigue siendo de 0.5 s.
         var T = {
             cae: 0.60, contacto: 1.00, squashFin: 1.06,
             desliza: 1.45, marca: 1.45,
             lema: 2.50, aclara: 3.25, aclaraDur: 0.80,
-            barrido: 4.45, fundido: 5.70, fin: 6.0
+            barrido: 4.55, fundido: 5.70, fin: 6.0
         };
         var DESDE = -640;        // la ficha entra desde 640 px más arriba (fuera de cuadro)
         var DESLIZA = -162;      // de x = 900 a x = 738: lockup centrado en 960 con 44 px de separación (medido)
@@ -199,14 +200,14 @@
         // Mientras la voz dice «…lista en segundos», el cielo da un paso hacia la crema (capa nueva encima, un solo paso
         // de 0.8 s de 3.25 a 4.05 s, sin deriva ni vuelta atrás): es el «fondo E1 aclarado a crema» de frame.md §8 y prepara el
         // fundido final. El lockup y el lema no se mueven. Es lo que rompe el tramo quieto que dejaban el lema asentado (~2.8 s)
-        // y el barrido (4.45 s): el paso se nota (el azul de arriba se va) y termina 0.4 s antes de que arranque el barrido.
+        // y el barrido (4.55 s): el paso se nota (el azul de arriba se va) y termina 0.5 s antes de que arranque el barrido.
         tl.fromTo($('cielo-claro'), { opacity: 0 }, { opacity: 1, duration: T.aclaraDur, ease: 'power1.inOut' }, T.aclara);
 
         // ---- Escena 4 (3.8–6.0 s): barrido holográfico de una sola pasada, ya en silencio (la voz acaba en 4.34 s), y fundido.
         //      El porcentaje va al revés del viaje: 93 % → 7 % se lee de izquierda a derecha. La banda (40–60 % de un fondo de
         //      300 %) ARRANCA FUERA de las letras: en 93 % su borde azul transparente queda ~20 px antes de la tinta de la «S», así
         //      el color no se enciende de golpe en el primer fotograma del cue (QA r1: en 86 % media «S» pasaba a azul en un solo
-        //      fotograma, 46 niveles por bloque de 40 px). Con la arrancada lenta de power2.inOut el borde entra hacia 4.60 s ya en
+        //      fotograma, 46 niveles por bloque de 40 px). Con la arrancada lenta de power2.inOut el borde entra hacia 4.70 s ya en
         //      movimiento y crece por fotogramas (0.3 → 7 → 22 niveles), nunca de golpe. En 7 % la banda entera ya salió tras la
         //      «N» (en 10 % su cola rosa se quedaba en la esquina inferior derecha de la «N» hasta el fundido): la palabra vuelve a
         //      tinta exacta. Antes del cue rige el 100 % del CSS (immediateRender: false): nada de color en reposo.
