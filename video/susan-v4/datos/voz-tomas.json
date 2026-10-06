@@ -1,0 +1,58 @@
+{
+ "01": {
+  "semilla": 1629,
+  "toma": "e432f7b941ebd8ff",
+  "puntaje": null,
+  "elegida": "2026-10-06T05:51:58.000Z",
+  "criterio": "rehecha por acento en «cinco minutos cada clase»: tonicas por silaba + panel de jueces (Borda 1.a) + anclas"
+ },
+ "02": {
+  "semilla": 1518,
+  "toma": "b245b67792678e26",
+  "puntaje": 4.957,
+  "elegida": "2026-10-06T05:27:04.000Z",
+  "criterio": "rehecha a pedido: entonacion segun SCRIPT.md + anclas + Speech to Text + sin pop"
+ },
+ "03": {
+  "semilla": 1555,
+  "toma": "c8d4faa4fef330de",
+  "puntaje": 5.13,
+  "elegida": "2026-10-06T05:27:04.000Z",
+  "criterio": "rehecha a pedido: entonacion segun SCRIPT.md + anclas + Speech to Text + sin pop"
+ },
+ "04": {
+  "semilla": 1333,
+  "toma": "7344de260b68854f",
+  "puntaje": 6.5,
+  "elegida": "2026-10-06T05:13:36.000Z",
+  "criterio": "entonacion segun SCRIPT.md + anclas + Speech to Text + sin pop"
+ },
+ "05": {
+  "semilla": 1037,
+  "toma": "acf47e52cd9e639f",
+  "puntaje": 5.726,
+  "elegida": "2026-10-06T05:13:36.000Z",
+  "criterio": "entonacion segun SCRIPT.md + anclas + Speech to Text + sin pop"
+ },
+ "06": {
+  "semilla": 1148,
+  "toma": "c13bab949eaf9ff1",
+  "puntaje": 5.263,
+  "elegida": "2026-10-06T05:13:36.000Z",
+  "criterio": "entonacion segun SCRIPT.md + anclas + Speech to Text + sin pop"
+ },
+ "07": {
+  "semilla": 1333,
+  "toma": "a16f06b1750276e5",
+  "puntaje": 5.224,
+  "elegida": "2026-10-06T05:13:36.000Z",
+  "criterio": "entonacion segun SCRIPT.md + anclas + Speech to Text + sin pop"
+ },
+ "08": {
+  "semilla": 1148,
+  "toma": "edcb5fce681a0a49",
+  "puntaje": 6.977,
+  "elegida": "2026-10-06T05:13:36.000Z",
+  "criterio": "entonacion segun SCRIPT.md + anclas + Speech to Text + sin pop"
+ }
+}
