@@ -298,18 +298,20 @@ function camPlano(tl, el, t, o) { return camPose(tl, el, t, { rx: 0, ry: 0 }, o 
 /* ============================ fin del bloque canonico v4 ============================ */
 
         // Tiempos locales del cuadro (plan/DINAMISMO.md §3 F4). Los que llevan sonido son contrato con sfx_cues (el tween nombrado
-        // empieza, termina o tiene su pico ahí): 0.25 whoosh-m (empuje entrante) · 1.80 whoosh-m (instante de cambio del látigo:
+        // empieza, termina o tiene su pico ahí): 0.25 whoosh-m (empuje entrante) · 1.90 whoosh-m (instante de cambio del látigo:
         // la lista va a su velocidad máxima y la tarjeta arranca) · 2.40 fill (barra 1) · 3.10 pop-3 (botones) · 3.95 tap
         // (compresión) · 4.00 blip (chip) · 4.40 tick-1 (contador) · 4.80 pop-2 (aviso).
         var T = {
             foco: 0.85,
-            salida: 1.50, salidaFade: 1.71, salidaFin: 1.85,
-            entrada: 1.75, entradaOpac: 1.93, sombra: 2.10, plana: 2.35,
+            salida: 1.60, salidaFade: 1.81, salidaFin: 1.95,
+            entrada: 1.85, entradaOpac: 2.03, sombra: 2.20, plana: 2.45,
             barra1: 2.40, barra2: 2.49, cifra1: 2.75, cifra2: 2.84,
             botones: 3.10,
             focoBtn: 3.80, presion: 3.95, liberacion: 4.04, chip: 4.00, chipFuera: 4.08, contador: 4.10, quieto: 4.40,
             secundarios: 4.45, aviso: 4.80, focoFuera: 4.80, halo: 5.10, fin: 5.8
         };
+        // El látigo arranca 0.10 s después que en el primer corte: «dudoso» suena de 1.42 a 1.94 s (alineación real de la voz 04) y
+        // ningún relevo debe empezar con la palabra recién dicha; la lista arranca despacio (power2.in) y a 1.70 s lleva solo ~8 % del recorrido.
         var LATIGO = { dist: 760, dur: T.salidaFin - T.salida };          // salida: x 0 → −760, power2.in, 0.35 s
         var LLEGADA = { dist: 640, dur: T.plana - T.entrada };           // entrada: x +640 → 0, power3.out, 0.60 s
         var tarjetaMov = $('tarjeta-mov');
@@ -348,22 +350,23 @@ function camPlano(tl, el, t, o) { return camPose(tl, el, t, { rx: 0, ry: 0 }, o 
         }
 
         // ---- Escena 1 (0.0–1.5 s): bajo el empuje la estación ya está completa y plana (PageHeader, Tabs y la lista real de
-        // pendientes); la tarjeta del caso no está (opacidad 0) hasta 1.75 s. Foco (R4) en la fila de Emilio con el estilo real de
+        // pendientes); la tarjeta del caso no está (opacidad 0) hasta 1.85 s. Foco (R4) en la fila de Emilio con el estilo real de
         // la fila activa (`border-foreground bg-accent/50`: borde de tinta y #EFECE7 al 50 % sobre blanco ≈ #F7F6F3); las otras
-        // bajan al 45 %, sin desenfoque ni escala. Queda quieta de 1.15 a 1.50 s: «dudoso» (1.26) cae con la fila elegida en reposo.
+        // bajan al 45 %, sin desenfoque ni escala. Queda quieta de 1.15 a 1.60 s: «dudoso» (1.26 de ancla, 1.42 dicha) cae con la
+        // fila elegida en reposo.
         tl.fromTo($('fila-1'), { borderColor: '#E7E2DC', backgroundColor: '#FFFFFF' },
             { borderColor: '#1E1919', backgroundColor: '#F7F6F3', duration: 0.3, ease: 'power3.out' }, T.foco);
         tl.fromTo([$('fila-2'), $('fila-3'), $('fila-4')], { opacity: 1 }, { opacity: 0.45, duration: 0.3, ease: 'power3.out' }, T.foco);
 
-        // ---- Escena 2 (1.5–3.7 s): «Te espera en Revisión…». Látigo (R1). La lista entera sale por la izquierda (power2.in: la
+        // ---- Escena 2 (1.6–3.7 s): «Te espera en Revisión…». Látigo (R1). La lista entera sale por la izquierda (power2.in: la
         // velocidad máxima llega al final), con UNA hoja con estela para el grupo (tope 16), opacidad → 0 en el último 40 % y
         // autoAlpha 0 al terminar. Con la salida al 71 % entra la tarjeta del caso desde la derecha: la pose suave viaja en el mismo
-        // tween (rotationY −8 → 0, rotationX 5 → 0, z −160 → 0, power3.out) y queda plana a 2.35 s. Los dos picos de velocidad
-        // coinciden hacia 1.80 s (el whoosh). La sombra hace EXACTAMENTE el mismo tween 3D y solo aparece al final del aterrizaje
+        // tween (rotationY −8 → 0, rotationX 5 → 0, z −160 → 0, power3.out) y queda plana a 2.45 s. Los dos picos de velocidad
+        // coinciden hacia 1.90 s (el whoosh). La sombra hace EXACTAMENTE el mismo tween 3D y solo aparece al final del aterrizaje
         // (una sombra plana bajo la tarjeta inclinada deja un doble borde: PILOTO §3b corregido).
         tl.fromTo($('lista-sal'), { x: 0 }, { x: -LATIGO.dist, duration: LATIGO.dur, ease: 'power2.in' }, T.salida);
         estela({ el: $('lista-hoja'), nodo: $('mb-lista-g'), at: T.salida, dur: LATIGO.dur, curva: 'power2.in', dist: LATIGO.dist, eje: 'x', max: 16 });
-        // autoAlpha en el MISMO fromTo: llega a 0 (visibility hidden) a 1.85 s y al buscar hacia atrás vuelve a 1 y visible. Un
+        // autoAlpha en el MISMO fromTo: llega a 0 (visibility hidden) a 1.95 s y al buscar hacia atrás vuelve a 1 y visible. Un
         // tl.set({autoAlpha: 0}) aparte registraba como inicio la opacidad 0 que deja este fundido y, al rebobinar, dejaba la lista
         // oculta en t = 0 (visto en la prueba de búsqueda).
         tl.fromTo($('lista-sal'), { autoAlpha: 1 }, { autoAlpha: 0, duration: T.salidaFin - T.salidaFade, ease: 'power1.in' }, T.salidaFade);
@@ -379,7 +382,8 @@ function camPlano(tl, el, t, o) { return camPose(tl, el, t, { rx: 0, ry: 0 }, o 
         tl.fromTo(sombraMov, { opacity: 0 }, { opacity: 1, duration: T.plana - T.sombra, ease: 'power2.out' }, T.sombra);
         readMark(tl, T.plana, 'Quedan 2 h 48 min');
 
-        // Columnas de score (stat-bars-and-fills): crecen de abajo arriba con clip-path, 0.6 s, +0.09 s; cada cifra 0.35 s
+        // Columnas de score (stat-bars-and-fills): crecen de abajo arriba con clip-path, 0.6 s, +0.09 s (la primera arranca a
+        // 2.40 s, 0.05 s antes de que la tarjeta quede plana: a esa altura le queda ~0.4 px de recorrido y 0.005° de pose); cada cifra 0.35 s
         // después de su barra (2.75 y 2.84 s, antes de «Revisión»), nunca antes. Luego la fila real de botones en cascada
         // (StaggerList: y 14 → 0, 0.5 s, +60 ms). La cámara no se acerca: queda en 1 todo el cuadro.
         var CLIP0 = 'inset(100% 0% 0% 0% round 18px)', CLIP1 = 'inset(0% 0% 0% 0% round 18px)';

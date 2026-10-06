@@ -59,7 +59,7 @@ ni `audio.mjs fetch-sfx`, `audio.mjs` (generate) o `audio.mjs sync-durations` (S
 | `localizar-gsap.mjs` | el `<script>` de GSAP | **sí** (solo esa línea); `--check` no escribe |
 | `transitions.mjs inject` (skill) | envoltorios `el-*` y el bloque de transiciones; alarga el `data-duration` de los cuadros salientes | **sí** |
 | `mount-sfx.mjs` | bloque `<!-- sfx:start/end -->`, `datos/sfx-cues.json`, `datos/sfx-montado.json` | **sí** (solo su bloque; reaplica el ducking) |
-| `mount-voz.mjs` | bloque `<!-- voz:start/end -->`, `data-volume`/`data-vol-orig` de los SFX, `datos/voz-montada.json` | **sí** (su bloque y el ducking) |
+| `mount-voz.mjs` | bloque `<!-- voz:start/end -->`, `data-volume`/`data-vol-orig` de los SFX, `datos/voz-montada.json`, `assets/voz/derived/NN.wav` (solo líneas con realce) | **sí** (su bloque y el ducking) |
 | `generar-voz.mjs` | `assets/voz/NN.wav`, `datos/voz-alineacion.json`, `voz-cache/`, `datos/voz-tomas.json` (`--elegir`) | no |
 | `extract-events.mjs` | `datos/eventos.json` | no |
 | `verify-sfx.mjs` | `datos/verify-sfx.json`, `datos/sfx-efectivo.json` y `datos/verify-sfx-sync.json` (con `--video`) | no |
@@ -180,6 +180,13 @@ En la cabecera va `**Voice id:** <id>`.
     Nunca se estira un cuadro ni se toca la voz.
   - Avisos: costura de menos de 0.3 s, primera palabra antes de 1.0 s, menos de 1.5 s de silencio final, ancla dentro de la transición
     entrante del cuadro y pico de SFX + voz por encima de −1 dBFS.
+- **Realce por línea** (`VOZ.mezcla.realce_por_linea` en `lib/voz-lib.mjs`): el loudnorm por línea es lineal, así que un transitorio
+  aislado (la «P» de «Pasa» en la línea 8 de la v4, pico −1.5 dBFS) frena la ganancia y deja la línea por debajo de −17 LUFS. Para esas
+  líneas `mount-voz` monta una copia derivada, `assets/voz/derived/NN.wav` (ganancia en dB + `alimiter` con `limite` lineal, `ataque_ms`,
+  `relajacion_ms`; con la v4: `'08': { db: 5, limite: 0.84, ataque_ms: 2, relajacion_ms: 40 }` → −22.6 a −17.8 LUFS, pico −1.5 dBFS). El
+  WAV original no se toca y la colocación por anclas, el habla (ducking, silencio final) y la duración salen de él: el realce cambia el
+  nivel, nunca un tiempo. `mount-voz` informa el LUFS y el pico verdadero de la copia y avisa si quedan a más de 1 LU del objetivo o por
+  encima de −1 dBTP. Si se regenera la voz de una línea con realce (`generar-voz.mjs`), `mount-voz` la vuelve a derivar sola.
 - **Ducking**: los SFX que suenan durante una frase (−0.1/+0.18 s) bajan a ×0.3, y los impactos a ×0.6. El volumen original queda en
   `data-vol-orig`, así que el proceso es idempotente; `--sin-ducking` lo revierte.
 - **Red**: `api.elevenlabs.io` está bloqueado por la política de red de esta máquina (2026-10-06). Detrás de un proxy, Node necesita

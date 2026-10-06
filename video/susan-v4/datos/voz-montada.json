@@ -1,5 +1,5 @@
 {
- "generado": "2026-10-06T14:51:27.947Z",
+ "generado": "2026-10-06T15:28:05.930Z",
  "lineas": [
   {
    "id": "01",
@@ -7,6 +7,8 @@
    "cuadro": "s01-cinco-minutos",
    "texto": "Pasar lista: cinco minutos cada clase… cuatro horas por grupo al semestre.",
    "archivo": "assets/voz/01.wav",
+   "archivo_origen": "assets/voz/01.wav",
+   "realce": null,
    "inicio": 1.002,
    "fin": 6.25,
    "habla_ini": 1.092,
@@ -37,6 +39,8 @@
    "cuadro": "s02-un-boton",
    "texto": "Te presentamos a susan. Abres la sesión con un solo botón…",
    "archivo": "assets/voz/02.wav",
+   "archivo_origen": "assets/voz/02.wav",
+   "realce": null,
    "inicio": 7.841,
    "fin": 12.159,
    "habla_ini": 7.911,
@@ -67,6 +71,8 @@
    "cuadro": "s03-camara",
    "texto": "La cámara del aula pasa lista por ti mientras das tu clase… y cada alumno queda presente.",
    "archivo": "assets/voz/03.wav",
+   "archivo_origen": "assets/voz/03.wav",
+   "realce": null,
    "inicio": 13.851,
    "fin": 19.609,
    "habla_ini": 13.911,
@@ -103,6 +109,8 @@
    "cuadro": "s04-revision",
    "texto": "¿Algún caso dudoso? Te espera en Revisión… y lo decides tú.",
    "archivo": "assets/voz/04.wav",
+   "archivo_origen": "assets/voz/04.wav",
+   "realce": null,
    "inicio": 21.485,
    "fin": 27.15,
    "habla_ini": 21.725,
@@ -139,6 +147,8 @@
    "cuadro": "s05-dia-critico",
    "texto": "Con cada sesión, susan analiza a tu grupo: qué día faltan más… el viernes.",
    "archivo": "assets/voz/05.wav",
+   "archivo_origen": "assets/voz/05.wav",
+   "realce": null,
    "inicio": 27.729,
    "fin": 34.509,
    "habla_ini": 27.819,
@@ -175,6 +185,8 @@
    "cuadro": "s06-tendencia",
    "texto": "Ves hacia dónde va, cómo cerraría el semestre… y quién ya se acerca al límite.",
    "archivo": "assets/voz/06.wav",
+   "archivo_origen": "assets/voz/06.wav",
+   "realce": null,
    "inicio": 35.333,
    "fin": 41.416,
    "habla_ini": 35.373,
@@ -211,6 +223,8 @@
    "cuadro": "s07-a-tiempo",
    "texto": "A Iván le quedan solo dos faltas… Todavía estás a tiempo de hablar con él.",
    "archivo": "assets/voz/07.wav",
+   "archivo_origen": "assets/voz/07.wav",
+   "realce": null,
    "inicio": 43.099,
    "fin": 48.393,
    "habla_ini": 43.169,
@@ -246,7 +260,17 @@
    "frame": 8,
    "cuadro": "s08-susan",
    "texto": "susan. Pasa lista en segundos.",
-   "archivo": "assets/voz/08.wav",
+   "archivo": "assets/voz/derived/08.wav",
+   "archivo_origen": "assets/voz/08.wav",
+   "realce": {
+    "db": 5,
+    "limite": 0.84,
+    "ataque_ms": 2,
+    "relajacion_ms": 40,
+    "lufs_origen": -22.571,
+    "lufs": -17.841,
+    "pico_verdadero_dbtp": -1.456
+   },
    "inicio": 51.007,
    "fin": 53.701,
    "habla_ini": 51.017,
@@ -416,7 +440,7 @@
   {
    "id": "sfx-s04-revision-2",
    "categoria": "whoosh",
-   "t": 22.631,
+   "t": 22.731,
    "de": 0.566,
    "a": 0.17
   },
@@ -600,6 +624,14 @@
   "objetivo_lufs_por_linea": -17,
   "pico_verdadero_db": -1.5,
   "volumen_voz": 0.95,
+  "realce_por_linea": {
+   "08": {
+    "db": 5,
+    "limite": 0.84,
+    "ataque_ms": 2,
+    "relajacion_ms": 40
+   }
+  },
   "ducking_sfx": {
    "factor": 0.3,
    "factor_impactos": 0.6,

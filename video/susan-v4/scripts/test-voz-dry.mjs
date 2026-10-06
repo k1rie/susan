@@ -13,7 +13,8 @@ import { join, resolve } from 'node:path';
 import { CLI_VERSION, DIR_SCRIPTS, opcion } from './lib/rutas.mjs';
 import { crearPasos, pasosEnsamblado, prepararJuguete, sh } from './lib/juguete.mjs';
 import { leerIndice, quitarBloque } from './lib/indice.mjs';
-import { leerWav, lufsIntegrado } from './lib/sfx-lib.mjs';
+import { leerWav, lufsIntegrado, picoWav } from './lib/sfx-lib.mjs';
+import { derivarRealce } from './lib/voz-lib.mjs';
 import { leerStoryboard, normalizarTexto } from './lib/storyboard.mjs';
 
 const D = resolve(opcion(process.argv, '--dir', join(tmpdir(), 'susan-v4-toy-voz')));
@@ -44,6 +45,18 @@ afirmar('voz-alineacion.json: 3 lineas con caracteres, inicios, fines y marca fi
 const lufs = ['01', '02', '03'].map((id) => { const w = leerWav(join(D, `assets/voz/${id}.wav`)); return { id, sr: w.sr, canales: w.canales, lufs: lufsIntegrado([w.ch[0], w.ch[0]]) - 3.01 }; });
 afirmar('assets/voz/NN.wav: 48 kHz mono a -17 LUFS (+-0.5)', lufs.every((x) => x.sr === 48000 && x.canales === 1 && Math.abs(x.lufs + 17) <= 0.5), JSON.stringify(lufs.map((x) => ({ ...x, lufs: Math.round(x.lufs * 100) / 100 }))));
 paso('generar-voz --fixture otra vez: todo sale de voz-cache/', nodeS('generar-voz.mjs', '--fixture', FIX), { patron: /0 generadas, 3 reutilizadas/ });
+// realce por linea (voz-lib.derivarRealce, lo usa mount-voz con VOZ.mezcla.realce_por_linea): sube el nivel, el limitador respeta su techo,
+// sale PCM 16 bit mono a 48 kHz y volver a derivar da el mismo archivo byte a byte (git no ve cambios al re-ejecutar)
+{
+    const origen = join(D, 'assets/voz/03.wav'), r = { db: 4, limite: 0.8, ataque_ms: 2, relajacion_ms: 40 };
+    const dos = [join(D, 'realce-prueba/a.wav'), join(D, 'realce-prueba/b.wav')];
+    for (const d of dos) derivarRealce(origen, d, r);
+    const w0 = leerWav(origen), w1 = leerWav(dos[0]);
+    const lufs = (w) => lufsIntegrado([w.ch[0], w.ch[0]]) - 3.01;
+    afirmar('derivarRealce: sube el nivel, pico <= limite, 48 kHz mono 16 bit', w1.sr === 48000 && w1.canales === 1 && w1.frames === w0.frames && lufs(w1) > lufs(w0) + 0.5 && picoWav(w1) <= r.limite + 0.01,
+        JSON.stringify({ lufs0: Math.round(lufs(w0) * 100) / 100, lufs1: Math.round(lufs(w1) * 100) / 100, pico: Math.round(picoWav(w1) * 1000) / 1000, frames: [w0.frames, w1.frames] }));
+    afirmar('derivarRealce: determinista (mismos bytes al repetir)', readFileSync(dos[0]).equals(readFileSync(dos[1])));
+}
 
 // ---- 3. montaje por anclas
 paso('mount-voz --dry no escribe', nodeS('mount-voz.mjs', '--dry'));

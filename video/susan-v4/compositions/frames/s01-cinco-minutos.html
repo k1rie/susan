@@ -254,7 +254,10 @@
 
         var camara = $('camara'), cifraRig = $('cifra-rig');
         var tira1 = $('tira1'), tira2 = $('tira2'), tira3 = $('tira3');
-        gsap.set([tira1, tira2, tira3], { y: 0 });
+        // la columna de las centenas abre ya sobre el «1» (renglon 1): el primer fotograma y la miniatura llevan una cifra, no solo la
+        // barra; el giro 2 -> 5 arranca a 0.40 s como siempre y el «5» se asienta a 1.65 s (ancla de «cinco» intacta)
+        gsap.set([tira2, tira3], { y: 0 });
+        gsap.set(tira1, { y: -H });
 
         // ================= Escena 1 (0.0-1.15): rack focus; la barra es el unico objeto =================
         desenfoque($('escena'), T.foco, 0.85, 20, 'power2.out');
@@ -264,13 +267,13 @@
         tl.fromTo([camara, cifraRig], { scale: 1.12, y: -60 }, { scale: 1, y: 0, duration: 1.2, ease: 'power3.out' }, T.foco);
         // la cifra esta en el mismo plano que la barra: entra con el mismo desenfoque del rack (misma curva), no mas nitida que ella
         desenfoque($('cifra'), T.foco, 0.85, 20, 'power2.out');
-        // la columna de las centenas esta vacia (U+2007) y cuenta 1, 2, 3, 4, 5 (cinco renglones) con estela solo mientras va
-        // rapido: arranca a 0.40 s y la primera cifra asoma bajo la mascara hacia 0.45 s (la apertura ya no queda casi vacia);
-        // cada cifra se lee ~0.1 s y el 5 se asienta (la rampa power3.out termina) con el tic de 1.65 s, antes de «cinco»
+        // la columna de las centenas (renglon 0 vacio, U+2007) cuenta 1, 2, 3, 4, 5 con estela solo mientras va rapido: abre ya
+        // sobre el «1» (desde el fotograma 0, bajo el mismo rack que la barra) y rueda 1 -> 5 desde 0.40 s (cuatro renglones: 2, 3,
+        // 4, 5); cada cifra se lee ~0.1 s y el 5 se asienta (la rampa power3.out termina) con el tic de 1.65 s, antes de «cinco»
         // (~2.08 s con la voz real). Los renglones 1 a 4 son solo la mecanica del odometro (no son datos): la cifra que se
         // queda y la que nombra la voz es «5».
-        conRastro({ el: tira1, nodo: $('mb1-g'), at: T.giro, dur: T.tic5 - T.giro, curva: 'power3.out', dist: CONTEO * H, max: 16,
-            pos: function (e) { gsap.set(tira1, { y: -CONTEO * H * e }); } });
+        conRastro({ el: tira1, nodo: $('mb1-g'), at: T.giro, dur: T.tic5 - T.giro, curva: 'power3.out', dist: (CONTEO - 1) * H, max: 16,
+            pos: function (e) { gsap.set(tira1, { y: -H - (CONTEO - 1) * H * e }); } });
 
         // ================= Escena 2 (1.15-2.95): «5 min», el primer tramo de tinta y «cada clase» =================
         tl.fromTo($('min'), { opacity: 0, y: 36 }, { opacity: 1, y: 0, duration: 0.25, ease: 'power3.out' }, T.tic5 - 0.25);
@@ -302,10 +305,11 @@
         }
         recorte();
         tl.fromTo(est, { relleno: 0 }, { relleno: 1, duration: 0.4, ease: 'power4.out', onUpdate: recorte, immediateRender: false }, T.relleno);
-        // apertura con contraste: la pista abre en el token de campo (#D8D2CA, frame.md) durante el rack focus y vuelve al token
-        // de borde (#E7E2DC) mientras se pinta la tinta (misma ventana que el relleno); asi la barra se lee desde el primer
-        // segundo y la tinta gana contraste al pintarse. Las pistas de Mie y Vie salen a 2.00 s ya casi en el color final
-        tl.fromTo(pistas, { backgroundColor: '#D8D2CA' }, { backgroundColor: '#E7E2DC', duration: 0.4, ease: 'power2.out' }, T.relleno);
+        // apertura con contraste: la pista abre una vuelta MAS oscura que el token de campo (#C9C2B8; el token #D8D2CA con 20 px de
+        // desenfoque daba solo 16/255 de contraste en el fotograma 0, la miniatura) durante el rack focus y vuelve al token de borde
+        // (#E7E2DC) mientras se pinta la tinta (misma ventana que el relleno); asi la barra se lee desde el primer fotograma y la
+        // tinta gana contraste al pintarse. Las pistas de Mie y Vie salen a 2.00 s a ~4/255 del color final (no se nota)
+        tl.fromTo(pistas, { backgroundColor: '#C9C2B8' }, { backgroundColor: '#E7E2DC', duration: 0.4, ease: 'power2.out' }, T.relleno);
         // «cada clase»: las barras de Mie y Vie salen de debajo de la de Lun (3 clases por semana, frame.md 10) y sus dias
         // aparecen a la izquierda; la cifra no se mueve
         // escondidas hasta que salen: bajo la barra de Lun, su tinta asomaba por el borde suavizado de la pista

@@ -14,19 +14,23 @@
 // Habla REAL: el ultimo caracter alineado ('.', '…') arrastra la cola de silencio del clip (hasta ~1 s con la voz de la v4), asi que
 //   habla_ini/habla_fin se miden sobre la senal (RMS de 20 ms >= -40 dBFS, el tono de sala queda en ~-45) y la alineacion queda como
 //   habla_ini_alineacion/habla_fin_alineacion. Con ellas se calculan huecos entre frases, silencio final, ducking y ventanas de verify-sfx.
+// Realce por linea (VOZ.mezcla.realce_por_linea): si el loudnorm de una linea no llego a -17 LUFS, el <audio> apunta a una COPIA derivada
+//   (assets/voz/derived/NN.wav: ganancia + limitador de pico, scripts/lib/voz-lib.mjs) y el original no se toca. Colocacion por anclas, habla
+//   (ducking, silencio final) y duracion salen del ORIGINAL: el realce cambia el nivel, nunca un tiempo. Se informa su LUFS y pico real.
 // Comprobaciones: nada antes de 0 ni despues del final del video, frases separadas >= 0.12 s (ERROR); costura < 0.3 s, primera palabra
 //   antes de 1.0 s, < 1.5 s de silencio al cerrar, ancla dentro de la transicion entrante del cuadro y pico de la mezcla > -1 dBFS (AVISO).
 //
 // ORDEN: assemble-index -> localizar-gsap -> transitions inject -> mount-sfx -> mount-voz -> render. assemble-index borra ambos bloques;
 // mount-sfx reaplica el ducking si la voz ya esta montada.
 // Uso: node scripts/mount-voz.mjs [--root <proyecto>] [--dry] [--sin-ducking] [--holgura 0.3]
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { bandera, leerJson, opcion, r3, raiz, rutas } from './lib/rutas.mjs';
 import { leerScript, leerStoryboard, normalizarTexto } from './lib/storyboard.mjs';
 import { escribirBloque, leerIndice } from './lib/indice.mjs';
-import { VOZ, aplicarDucking } from './lib/voz-lib.mjs';
-import { db, leerWav, mezclar } from './lib/sfx-lib.mjs';
+import { VOZ, aplicarDucking, derivarRealce } from './lib/voz-lib.mjs';
+import { db, leerWav, lufsIntegrado, mezclar, picoVerdadero } from './lib/sfx-lib.mjs';
 
 const argv = process.argv;
 const R = raiz(argv);
@@ -36,6 +40,9 @@ const SIN_DUCKING = bandera(argv, '--sin-ducking');
 const mz = VOZ.mezcla;
 const HOLGURA = Number(opcion(argv, '--holgura', mz.holgura_ancla_s));
 const errores = [], avisos = [];
+const DERIVADOS = 'assets/voz/derived';
+const REALCES = mz.realce_por_linea ?? {};
+const fisico = new Map();   // src montado -> ruta real (en --dry, la copia derivada vive en una carpeta temporal y no se escribe nada)
 const morir = (lista) => { console.error(`mount-voz: ${lista.length} error(es); no se escribio nada:\n  ${lista.join('\n  ')}`); process.exit(1); };
 
 for (const [r, que] of [[P.script, 'SCRIPT.md'], [P.storyboard, 'STORYBOARD.md'], [P.index, 'index.html'], [P.vozAlineacion, 'datos/voz-alineacion.json (corre generar-voz.mjs)']]) if (!existsSync(r)) morir([`falta ${que}`]);
@@ -103,14 +110,14 @@ for (const l of sc.lineas) {
     const real = existsSync(join(R, a.archivo)) ? limitesHabla(join(R, a.archivo)) : null;   // senal medida; la alineacion es el respaldo
     const hIni = real ? Math.max(real.ini, alIni) : alIni, hFin = real ? Math.min(real.fin, alFin) : alFin;
     filas.push({
-        id: l.id, frame: l.frame, cuadro: c.id, texto: l.texto, archivo: a.archivo, inicio: r3(inicio), fin: r3(inicio + a.duracion_s),
+        id: l.id, frame: l.frame, cuadro: c.id, texto: l.texto, archivo: REALCES[l.id] ? `${DERIVADOS}/${l.id}.wav` : a.archivo, archivo_origen: a.archivo, realce: REALCES[l.id] ?? null, inicio: r3(inicio), fin: r3(inicio + a.duracion_s),
         habla_ini: r3(inicio + hIni), habla_fin: r3(inicio + hFin), habla_ini_alineacion: r3(inicio + alIni), habla_fin_alineacion: r3(inicio + alFin),
         habla_medida: !!real, duracion: a.duracion_s,
         anclas: anclas.map((x) => ({ palabra: x.palabra, tLocal: x.tLocal, t: r3(x.objetivo), error: x.error })),
         fixture: !!a.fixture,
     });
 }
-for (const f of filas) if (!existsSync(join(R, f.archivo))) errores.push(`${f.id}: no existe ${f.archivo}`);
+for (const f of filas) if (!existsSync(join(R, f.archivo_origen))) errores.push(`${f.id}: no existe ${f.archivo_origen}`);
 
 // ---- 2. comprobaciones de tiempo
 filas.sort((x, y) => x.habla_ini - y.habla_ini);
@@ -131,6 +138,21 @@ if (filas.length) {
 }
 if (errores.length) morir(errores);
 
+// ---- 2b. copias realzadas (solo las lineas de VOZ.mezcla.realce_por_linea)
+const tmpDry = SECO ? mkdtempSync(join(tmpdir(), 'susan-voz-')) : null;
+const realzadas = [];
+for (const f of filas.filter((x) => x.realce)) {
+    const destino = SECO ? join(tmpDry, `${f.id}.wav`) : join(R, f.archivo);
+    derivarRealce(join(R, f.archivo_origen), destino, f.realce);
+    fisico.set(f.archivo, destino);
+    const antes = leerWav(join(R, f.archivo_origen)), despues = leerWav(destino);
+    const lufs = (w) => lufsIntegrado([w.ch[0], w.ch[0]]) - 3.01;   // mono: BS.1770 lo cuenta como dos canales iguales (+3.01 LU), se resta
+    f.realce = { ...f.realce, lufs_origen: r3(lufs(antes)), lufs: r3(lufs(despues)), pico_verdadero_dbtp: r3(db(picoVerdadero(despues.ch))) };
+    realzadas.push(f);
+    if (Math.abs(f.realce.lufs - mz.objetivo_lufs_por_linea) > 1) avisos.push(`${f.id}: con el realce queda a ${f.realce.lufs} LUFS (objetivo ${mz.objetivo_lufs_por_linea}, tolerancia 1 LU): ajusta realce_por_linea en voz-lib.mjs`);
+    if (f.realce.pico_verdadero_dbtp > -1) avisos.push(`${f.id}: con el realce el pico verdadero es ${f.realce.pico_verdadero_dbtp} dBTP (> -1): baja el limite de realce_por_linea`);
+}
+
 // ---- 3. bloque de voz (pistas 40/41 alternas: dos lineas contiguas pueden solapar sus colas) + ducking
 const lineasAudio = filas.map((f, k) => `      <audio id="voz-${f.id}" src="${f.archivo}" data-start="${f.inicio}" data-duration="${r3(f.duracion + 0.02)}" data-track-index="${40 + (k % 2)}" data-volume="${mz.volumen_voz}"></audio>`);
 const antes = html;
@@ -145,7 +167,8 @@ if (firma(antes) !== firma(html)) morir(['el montaje de la voz cambio la duracio
 
 // ---- 5. pico de la mezcla completa (SFX con ducking + voz)
 const idx2 = leerIndice(html);
-const items = [...idx2.sfx, ...idx2.voz].filter((x) => existsSync(join(R, x.src))).map((x) => ({ wav: leerWav(join(R, x.src)), dataStart: x.start, mediaStart: x.mediaStart, dataDuration: x.duration, vol: x.volume }));
+const rutaReal = (src) => fisico.get(src) ?? join(R, src);
+const items = [...idx2.sfx, ...idx2.voz].filter((x) => existsSync(rutaReal(x.src))).map((x) => ({ wav: leerWav(rutaReal(x.src)), dataStart: x.start, mediaStart: x.mediaStart, dataDuration: x.duration, vol: x.volume }));
 const mezcla = items.length ? mezclar(items, total) : { pico: 0, picoT: 0 };
 if (db(mezcla.pico) > -1) avisos.push(`pico de la mezcla SFX + voz ${r3(db(mezcla.pico))} dBFS en t=${r3(mezcla.picoT)} s (> -1 dBFS): baja los SFX de ese instante con -NdB en sfx_cues`);
 
@@ -154,8 +177,9 @@ const habla = filas.reduce((s, f) => s + (f.habla_fin - f.habla_ini), 0);
 const palabras = filas.reduce((s, f) => s + f.texto.split(/\s+/).filter(Boolean).length, 0);
 console.log(`Voz: ${filas.length} lineas por ancla; ${palabras} palabras, voz ${r3(habla)} s de ${total} s (${Math.round((100 * habla) / total)} %, SINTESIS 2: 65-75 %), ${r3(palabras / Math.max(habla, 1e-6))} palabras/s; ${detalle.length} efectos con ducking; pico SFX + voz ${r3(db(mezcla.pico))} dBFS`);
 for (const f of filas) console.log(`  ${f.id} (${f.cuadro})  clip ${f.inicio}-${f.fin}  habla ${f.habla_ini}-${f.habla_fin}  anclas ${f.anclas.map((x) => `«${x.palabra}»@${x.t}${x.error ? ` (${x.error > 0 ? '+' : ''}${x.error})` : ''}`).join(' ')}${f.fixture ? '  [voz de prueba]' : ''}`);
+for (const f of realzadas) console.log(`  ${f.id} realzada +${f.realce.db} dB con limitador ${f.realce.limite}: ${f.realce.lufs_origen} -> ${f.realce.lufs} LUFS, pico verdadero ${f.realce.pico_verdadero_dbtp} dBTP (${f.archivo})`);
 for (const a of avisos) console.log(`AVISO: ${a}`);
-if (SECO) { console.log('--dry: no se escribio nada'); process.exit(0); }
+if (SECO) { rmSync(tmpDry, { recursive: true, force: true }); console.log('--dry: no se escribio nada'); process.exit(0); }
 writeFileSync(P.index, html);
 mkdirSync(P.datos, { recursive: true });
 writeFileSync(P.vozMontada, JSON.stringify({ generado: new Date().toISOString(), lineas: filas, ducking: detalle, mezcla: mz, picoMezclaDbFS: r3(db(mezcla.pico)) }, null, 1) + '\n');
