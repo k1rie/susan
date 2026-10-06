@@ -34,8 +34,15 @@
 .s06-tendencia-sup{background:color-mix(in oklab,#DE4D44 63%,#F0EDE8);clip-path:inset(198px 596px 188px 596px round 56px)}
 
 /* contenido viejo: la toma del viernes (TiraSemana a E = 4), con los numeros del handoff del cuadro 5 */
-.s06-tendencia-v-cifra{left:736px;top:501px;width:448px;height:86px;line-height:86px;text-align:center;font-size:70px;font-weight:600;letter-spacing:0;white-space:nowrap}
-.s06-tendencia-v-cifra .s06-tendencia-u{font-size:.7em;font-weight:500;padding-left:5px}
+/* «21.8 %» con la misma maqueta que la toma del cuadro 5 (cifras en bloques, el punto con el ancho de su columna de odometro
+   y el «%» a 4.8 px): asi cada glifo cae en el mismo subpixel a ambos lados del corte */
+.s06-tendencia-v-cifra{left:736px;top:501px;width:448px;height:86px;line-height:86px;display:flex;justify-content:center;font-size:70px;font-weight:600;letter-spacing:0;white-space:pre}
+.s06-tendencia-v-cifra>span{display:block}
+.s06-tendencia-v-cifra>.s06-tendencia-v-p{display:grid}
+.s06-tendencia-v-p>span{grid-area:1/1;text-align:center}
+.s06-tendencia-v-oculto{visibility:hidden}
+.s06-tendencia-v-pct{padding-left:4.8px}
+.s06-tendencia-v-cifra .s06-tendencia-u{font-size:.7em;font-weight:500}
 .s06-tendencia-v-dia{left:736px;top:753px;width:448px;height:46px;line-height:46px;text-align:center;font-size:38px;font-weight:500;color:#6F6A65}
 .s06-tendencia-v-meta{left:0;top:810px;width:1920px;height:40px;line-height:40px;text-align:center;font-size:30px;font-weight:400;color:#6F6A65;white-space:nowrap}
 /* pildora de tinta recta «Dia critico: Viernes»: alto 82, centro x=960 y=340 */
@@ -160,7 +167,7 @@
       <div id="s06-tendencia-hint" class="s06-tendencia-abs s06-tendencia-hint"><svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" data-lucide="trending-up" aria-hidden="true"><path d="M16 7h6v6"/><path d="m22 7-8.5 8.5-5-5L2 17"/></svg>+4.2 pp vs. semana previa</div>
 
       <!-- contenido viejo: la toma del viernes (encima de todo: se apaga antes del 40 % del morph) -->
-      <div id="s06-tendencia-v-cifra" class="s06-tendencia-abs s06-tendencia-v-cifra">21.8<span class="s06-tendencia-u">%</span></div>
+      <div id="s06-tendencia-v-cifra" class="s06-tendencia-abs s06-tendencia-v-cifra"><span>2</span><span>1</span><span class="s06-tendencia-v-p"><span>.</span><span class="s06-tendencia-v-oculto"> </span></span><span>8</span><span class="s06-tendencia-v-pct"><span class="s06-tendencia-u">%</span></span></div>
       <div id="s06-tendencia-v-dia" class="s06-tendencia-abs s06-tendencia-v-dia">Vie</div>
       <div id="s06-tendencia-v-meta" class="s06-tendencia-abs s06-tendencia-v-meta">32 ausencias en 6 sesiones</div>
       <!-- la pildora «Dia critico» suelta su texto y se condensa en el punto de tinta que sera la cabeza de la guia -->
