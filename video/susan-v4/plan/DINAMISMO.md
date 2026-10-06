@@ -49,8 +49,10 @@ Render `renders/actual-draft.mp4` (draft, 30 fps, 55.0 s, 2026-10-06 05:37). Hay
 ### 2.0 Reglas comunes (valen para los cinco)
 
 1. **Medida.**
-   - Un solo relevo a la vez.
-   - Entre dos relevos de composición pasan ≥ 1.5 s; el objetivo es 2–3 s.
+   - Un solo relevo a la vez. Si dos piezas tienen que dejar la pantalla en el mismo tramo, la de abajo NO viaja: la tapa
+     la que se mueve (una sola estela, un solo desenfoque) y se apaga con `tl.set autoAlpha 0` ya cubierta.
+   - Entre los inicios de dos relevos de composición pasan ≥ 1.5 s (el push-slide de entrada cuenta como uno); el objetivo
+     es 2–3 s.
    - Dentro de una toma, la pieza que entró puede «armarse» con los tiempos de la app (cascada, odómetro, barras, trazo). Eso
      no es un relevo y es lo que mantiene la quietud < 1.0 s que mide frame-check.
 2. **Anclas.** Toda cifra que la voz nombra está nítida, plana y quieta desde ≥ 0.3 s antes de la palabra hasta ≥ 0.3 s
@@ -157,13 +159,21 @@ Dos formas. Ninguna se queda en una escala ≠ 1: el zoom ES el cambio de toma.
 Los números están calculados para que, en el corte, el elemento destino tenga el mismo centro y casi el mismo tamaño en las dos
 capas (±5 %). Por eso el corte no se ve.
 
+**Todo lo visible coincide en el corte, no solo el destino.** Si la toma siguiente maqueta otra pieza visible (una píldora, un
+rótulo) en otra proporción que la capa del empuje, esa pieza no llega con la escala común: llega en su propia capa desde el
+centro y la escala exactos que tenía en el último fotograma del empuje (medidos en el HTML) hasta su lugar final, con la misma
+curva, la misma duración y el mismo desenfoque que la toma. Un salto hacia atrás de 2–3 fotogramas de recorrido se ve como un
+tropiezo aunque vaya desenfocado.
+
 **(b) Abrir a pantalla completa y volver.** El elemento mismo crece desde su caja hasta cubrir el cuadro.
 - `transform-origin: 0 0`, x/y/scale, 0.5 s con `expo.inOut`.
 - El radio baja a 0 por `clip-path`.
 - Su cromo (chips, rótulos) NO escala: viaja con las esquinas o con su punto de anclaje a tamaño nativo, con el mismo ease y
   la misma duración.
 - La vuelta («salir para revelar el contexto») es el mismo tween al revés y termina exactamente en la caja original.
-- Desenfoque ligero ≤ 4 px solo en el tercio rápido.
+- Desenfoque ligero ≤ 4 px solo en el tercio rápido, a la ida y a la vuelta.
+- La escala cubre el cuadro con holgura (≥ 1 px por lado): sin hilo de fondo en los bordes.
+- La pieza que se abre va por encima (z) de lo que tapa; lo tapado no viaja (§2.0.1).
 - La toma abierta dura ≤ 2 s. El escalado sin `will-change` es nítido (PILOTO §3b), pero se revisa en un cuadro del MP4.
 
 **Prohibido.**
@@ -201,7 +211,7 @@ capas (±5 %). Por eso el corte no se ve.
 
 | Relevo | Cuadros |
 |---|---|
-| R1 látigo | F3 (el encabezado sale), F4 (lista → tarjeta del caso), F5 (las casillas entran), F6 (la gráfica sale) |
+| R1 látigo | F4 (lista → tarjeta del caso), F5 (las tres casillas entran juntas, solo entrada), F6 (la gráfica sale) |
 | R2 vertical | F1 (las barras de la semana suben; «240 min» → «4 h»), F4 (aviso), F7 (sección «Faltas» → «Cruce + Acción»), F8 (la ficha cae) |
 | R3 atravesar | F2 (a) al botón, F3 (b) la cámara a pantalla completa y de vuelta, F5 (a) al viernes |
 | R4 foco | F4 (fila de Emilio), F7 (fila de Iván) |
@@ -251,8 +261,9 @@ Si frame-check vuelve a marcar el tramo 1.1–3.0 s, se acepta como en la constr
 - La cámara (rig, sombras y la capa de la marca) va de scale 1 → 1.25 con origen (1264, 650).
 - x 0 → −304 y y 0 → +37.2, con `power2.in`.
 - La capa de escena se desenfoca 0 → 6 px entre 3.05 y 3.30.
-- «SUSAN» sale por la izquierda con el empuje: queda en x < 170 y se apaga en el corte. Para este tramo la marca va con la
-  cámara.
+- «SUSAN» sale por la izquierda con el empuje: para este tramo la marca va con la cámara y queda en x < 170. No desaparece de
+  golpe en el corte (a 3.30 todavía asoma su «N»): su opacidad baja 1 → 0 entre 3.12 y 3.30 (`power1.in`), mientras viaja
+  rápido y desenfocada.
 
 **Toma de cerca (3.30–3.80).** A 3.30 se intercambia la capa por la tarjeta PasarListaHero maquetada a E = 3.2:
 - tarjeta de 1136 × 928 px, x 392–1528, y 76–1004, radio 44.8;
@@ -288,7 +299,7 @@ el cambio de ese tramo.
 | 0.10–0.50 | 23 rostros pueblan la cámara (as is) | — | «La cámara» 0.63 |
 | 0.45–0.95 | **NUEVO: encabezado real de la sesión** en la columna izquierda | cascada | «del aula» |
 | 1.30 / 1.60 | detección (as is); chip «Pendiente» del rostro central (as is) | — | «pasa lista» |
-| 2.45–2.95 | **la cámara se abre a pantalla completa** y el encabezado sale por la izquierda | R3b + R1 | «por ti» |
+| 2.45–2.95 | **la cámara se abre a pantalla completa** y, al crecer, tapa el encabezado (que no viaja) | R3b | «por ti» |
 | 2.95–4.40 | **la clase a pantalla completa** | — | «mientras das tu clase» |
 | 4.40–4.90 | **vuelta a la caja**, que revela la columna «Asistencia ahora · 0 de 24 presentes» | R3b | «…» |
 | 4.90–7.30 | ola, «Presente», 0 → 19, BarraSegmentada, línea, «Última captura…» (as is) | — | «alumno» 6.00, «presente» 6.96 |
@@ -302,13 +313,16 @@ el cambio de ese tramo.
 Activo: `assets/sesion-encabezado-abierta-automatico.png` (sin «Volver al panel»). Recoge el «Abierta» con el que termina F2.
 
 **Abrir la cámara (2.45–2.95, R3b).**
-- La vista y su sombra: `transform-origin 0 0`, x 0 → −880, y 0 → −200 y scale 1 → 2.134, con `expo.inOut`. Llena 1920 × 1080.
+- La vista y su sombra: `transform-origin 0 0`, x 0 → −880, y 0 → −200 y scale 1 → 2.135, con `expo.inOut`. Cubre 1921.5 ×
+  1080.3 px: sin hilo crema abajo (con 2.134 quedaba 1079.8).
 - El radio baja de 28 a 0 por `clip-path`; la sombra se apaga.
 - «Reconociendo» y «Cámara frente» no escalan: viajan con sus esquinas y el margen pasa de 24 a 48 px.
 - El chip «Pendiente» va anclado bajo su rostro a tamaño nativo, con el mismo ease.
 - Desenfoque de la vista ≤ 4 px solo entre 2.60 y 2.80.
-- A la vez, el encabezado sale por la izquierda (R1): x 0 → −560 entre 2.45 y 2.80 con `power2.in`, estela ≤ 12 y opacidad →
-  0 en el último 40 %.
+- **El encabezado no viaja** (corrección del crítico: un látigo con estela al mismo tiempo que la vista que se abre y se
+  desenfoca eran dos movimientos grandes y dos superficies con filtro a la vez). La vista va por encima de la columna (z) y,
+  al crecer hacia la izquierda, lo tapa como una cortinilla; a 2.95, ya cubierto, `tl.set autoAlpha 0`. Se lee de 0.95 a
+  ≈ 2.60 s (más de 1.6 s).
 
 **La clase a pantalla completa (2.95–4.40).**
 - Rostros de 179 px con sus esquinas; esquinas y avatares escalan con la vista.
@@ -316,8 +330,8 @@ Activo: `assets/sesion-encabezado-abierta-automatico.png` (sin «Volver al panel
 - 3.85–4.15: late el scan-face de «Reconociendo».
 - Ningún contador.
 
-**Vuelta (4.40–4.90, R3b).** Es el mismo tween al revés: termina exacto en x 880, y 200, 900 × 506, radio 28 y la sombra
-vuelve. Mientras tanto, la columna real se revela por debajo, no encima: entra desde la izquierda (x −60 → 0 y opacidad,
+**Vuelta (4.40–4.90, R3b).** Es el mismo tween al revés, con su desenfoque ≤ 4 px solo de 4.55 a 4.75: termina exacto en x
+880, y 200, 900 × 506, radio 28 y la sombra vuelve. Mientras tanto, la columna real se revela por debajo, no encima: entra desde la izquierda (x −60 → 0 y opacidad,
 `power3.out` 0.45 s, 4.55–5.00). La columna es «Asistencia ahora» con «0» y «de 24 presentes», más la pista vacía de la
 BarraSegmentada. Activo: `assets/sesion-resumen-0-de-24.png`.
 
@@ -331,54 +345,66 @@ handoff_out no cambian.
 | t | En pantalla | Relevo | Voz |
 |---|---|---|---|
 | 0.00–0.50 | entra con el push-slide: Revisión + **NUEVO: la lista real de pendientes** | push | — |
-| 0.85–1.15 | foco en la fila de Emilio | R4 | «¿Algún caso dudoso?» 1.26 |
-| 1.30–1.65 | la lista sale por la izquierda | R1 | — |
-| 1.55–2.15 | la tarjeta del caso entra desde la derecha con la pose suave; plana a 2.15 | R1 | «Te espera…» |
-| 2.30–2.95 | columnas de score 89 % y 93 % (cifras a 2.65 y 2.74) | — | «…en Revisión» 3.11 |
+| 0.85–1.15 | foco en la fila de Emilio; quieta hasta 1.50 | R4 | «¿Algún caso dudoso?» 1.26 |
+| 1.50–1.85 | la lista sale por la izquierda | R1 | — |
+| 1.75–2.35 | la tarjeta del caso entra desde la derecha con la pose suave; plana a 2.35 | R1 | «Te espera…» |
+| 2.40–3.09 | columnas de score 89 % y 93 % (cifras a 2.75 y 2.84) | — | «…en Revisión» 3.11 |
 | 3.10–3.65 | fila «Resolver como» en cascada | — | — |
 | 3.80–4.80 | halo, toque, «Presente», (8) → (7), secundarios al 45 % (as is) | — | «decides» 4.65 |
 | 4.80–5.80 | aviso «Resuelto como Presente» (R2, as is); el halo vira a violeta | R2 | «tú» |
 
-**La lista (nueva).** Es la columna izquierda real de Revisión:
-- 3 filas completas y la 4.ª cortada por un desvanecido de 80 px;
-- filas a E = 2 de 720 × 162 px, radio 24, borde 2 px #E7E2DC, fondo blanco;
-- borde izquierdo x = 140 y topes en y = 312, 492, 672 y 852.
+**Corrección del crítico: el látigo pasa de 1.30 a 1.50.** Con 1.30 la lista solo se leía 0.8 s tras el push, el látigo
+arrancaba 0.15 s después de que se asentara el foco y justo sobre «dudoso», y entre el inicio del push y el del látigo había
+1.30 s (la regla pide ≥ 1.5). Con 1.50, «dudoso» cae con la fila elegida quieta y el resto del cuadro se recorre +0.20 s
+hasta las columnas, que siguen leyéndose antes de «Revisión». La fila «Resolver como» y la cadena del toque no se mueven.
 
-Cada fila lleva:
-- avatar de iniciales con su color de la app: RN pizarra, AR y SH magenta/violeta, MM ocre (lee los colores de
-  `capture/app-real/dom/24-revision-pendientes.html`);
-- nombre (28 px 500);
-- «Administración Financiera · 3A · 12 sep 09:00» y «Quedan 2 h 48 min» (24 px gris);
-- StatusChip «Pendiente».
+**La lista (nueva).** Es la columna izquierda real de Revisión (`assets/pantalla-revision-caso.jpg`, DOM 24):
+- 3 filas completas y la 4.ª cortada por un desvanecido de 80 px;
+- filas a E = 2 de 720 × 164 px (82 px en la app), radio 24 (`rounded-xl`), borde 2 px #E7E2DC, fondo blanco; paso de 180 px
+  (`gap-2` = 16 px);
+- borde izquierdo x = 140 y topes en y = 312, 492, 672 y 852;
+- 720 px de ancho en lugar de los 640 de la app para que la meta no se trunque («12 sep 09…» en la app).
+
+Cada fila lleva, como en la app:
+- avatar de iniciales de 72 px (`size-9`) con su color exacto del DOM 24: RN #475569, AR #A21CAF, SH #A21CAF, MM #B4551A,
+  iniciales blancas 600;
+- en el primer renglón, el nombre (28 px 500) y, a la derecha, el StatusChip «Pendiente»;
+- debajo, «Administración Financiera · 3A · 12 sep 09:00» (24 px gris) y «Quedan 2 h 48 min» (24 px 500, tinta).
 
 Nombres, en orden: Ramírez Núñez Emilio, Aguilar Ramos Luis, Sánchez Herrera Daniel y Morales Montes Laura. Son datos REALES
-de la semilla (todos 3A): la captura `assets/pantalla-revision-caso.jpg` y el DOM 24. Ver pedido 2 en §5.
+de la semilla (todos 3A), ya registrados en `plan/CONTENIDO.md` §3.5 y `frame.md` §10.
 
-**Foco (0.85–1.15, R4).** La fila de Emilio toma el fondo #EFECE7 y un borde #1E1919 de 2 px (la fila activa de la app). Las
-otras bajan al 45 %, sin desenfoque. El PageHeader y las Tabs no se mueven en todo el cuadro.
+**Foco (0.85–1.15, R4).** La fila de Emilio toma el estilo real de la fila activa (`border-foreground bg-accent/50`): borde
+#1E1919 de 2 px y fondo #EFECE7 al 50 % (≈ #F7F6F3 sobre blanco). Las otras bajan al 45 %, sin desenfoque. Queda quieta hasta
+1.50. El PageHeader y las Tabs no se mueven en todo el cuadro.
 
-**Salida (1.30–1.65, R1).** La lista entera va de x 0 → −760 con `power2.in`. Lleva una sola hoja con estela ≤ 16 para el grupo,
-opacidad → 0 entre 1.51 y 1.65, y `autoAlpha 0` a 1.65.
+**Salida (1.50–1.85, R1).** La lista entera va de x 0 → −760 con `power2.in`. Lleva una sola hoja con estela ≤ 16 para el grupo,
+opacidad → 0 entre 1.71 y 1.85, y `autoAlpha 0` a 1.85.
 
-**Entrada (1.55–2.15, R1).** La tarjeta del caso, el objeto flotante, entra con `power3.out`:
+**Entrada (1.75–2.35, R1).** Arranca con la salida al 71 %. La tarjeta del caso, el objeto flotante, entra con `power3.out`:
 - x +640 → 0, rotationY −8 → 0, rotationX 5 → 0 y z −160 → 0;
 - estela horizontal ≤ 14 solo mientras va rápida, en una hoja interior: nada de filtro en el padre con `perspective`;
-- opacidad 0 → 1 entre 1.55 y 1.73;
-- la sombra hace el mismo tween 3D y su opacidad sube entre 1.90 y 2.15;
+- opacidad 0 → 1 entre 1.75 y 1.93;
+- la sombra hace el mismo tween 3D y su opacidad sube entre 2.10 y 2.35;
 - caja final como ahora, centro (1010, 610). Contenido as is.
 
-**Se quita.** El acercamiento 1.03 (1.40–2.10) y su regreso (3.30–3.80).
+**Columnas (2.40–3.09).** Como ahora (0.6 s, +0.09 s), recorridas +0.10 s: cifras «89 %» a 2.75 y «93 %» a 2.84, 0.35 s después
+de su barra.
 
-**Handoffs.** El handoff_in cambia (la lista ya está bajo el push). El handoff_out no cambia.
+**Se quita.** El acercamiento 1.03 (1.40–2.10) y su regreso (3.30–3.80): la cámara queda en 1 todo el cuadro.
 
-`sfx_cues`: `0.25 whoosh-m; 1.60 whoosh-m -3dB; 2.30 fill -6dB; 3.10 pop-3 -6dB; 3.95 tap; 4.00 blip -3dB; 4.40 tick-1; 4.80 pop-2 -6dB`
+**Handoffs.** El handoff_in cambia (la lista ya está bajo el push; la tarjeta en opacidad 0 hasta 1.75). El handoff_out solo
+corrige «cámara en scale 1 todo el cuadro».
+
+`sfx_cues`: `0.25 whoosh-m; 1.80 whoosh-m -3dB; 2.40 fill -6dB; 3.10 pop-3 -6dB; 3.95 tap; 4.00 blip -3dB; 4.40 tick-1; 4.80 pop-2 -6dB`
 
 ### F5 · Qué día faltan más (7.20 s)
 
 | t | En pantalla | Relevo | Voz |
 |---|---|---|---|
 | 0.00–0.50 | push-slide; título con BlurText 0.45–1.08 (as is) | push | «Con cada» |
-| 0.70–2.20 | **las casillas entran desde la derecha una por una** y ruedan sus cifras hasta 2.90 | R1 (entrada) | «sesión» 1.29, «susan analiza a tu grupo» |
+| 0.70–1.40 | **las tres casillas entran juntas desde la derecha** (escalonadas 0.10 s) | R1 (entrada) | «sesión» 1.29 |
+| 1.20–2.90 | sus cifras ruedan y se tiñen una tras otra (as is) | — | «susan analiza a tu grupo» |
 | 2.90–3.55 | lectura de las tres cifras | — | — |
 | 3.55–4.55 | resaltado del viernes y píldora «Día crítico: Viernes» (as is) | — | «qué día» 4.53 |
 | 4.95–5.40 | **empuje hacia el viernes** | R3a | «faltan más» |
@@ -386,13 +412,17 @@ opacidad → 0 entre 1.51 y 1.65, y `autoAlpha 0` a 1.65.
 | 5.55–6.35 | «32 ausencias en 6 sesiones», anillo trazado y latido | — | — |
 | 6.35–7.20 | quieto (0.85 s), handoff_out | — | «viernes» 6.52 |
 
-**Casillas (0.70–2.20, R1 de entrada).** Cada casilla de la TiraSemana entra con su día debajo:
-- Lun 0.70–1.20, Mié 1.20–1.70, Vie 1.70–2.20;
-- x +320 → 0, `power3.out` 0.5 s, estela ≤ 12, opacidad 0 → 1 en 0.15 s;
-- llegan vacías con «–» y al asentarse empieza su odómetro y su relleno, como ahora: Lun 1.20–1.90, Mié 1.70–2.40, Vie
-  2.20–2.90.
+**Casillas (0.70–1.40, R1 de entrada, un solo relevo).** Las tres casillas de la TiraSemana entran juntas, cada una con su día
+debajo, como una sola fila que llega:
+- Lun 0.70–1.20, Mié 0.80–1.30, Vie 0.90–1.40 (escalonado 0.10 s, de izquierda a derecha);
+- x +320 → 0, `power3.out` 0.5 s, estela ≤ 12 (σ < 0.3 antes del último 35 % de cada tramo), opacidad 0 → 1 en 0.15 s;
+- llegan vacías con «–» y su odómetro y su relleno corren como ahora, uno tras otro: Lun 1.20–1.90, Mié 1.70–2.40, Vie
+  2.20–2.90. Mié y Vie esperan con «–»: se lee como el análisis que avanza día por día.
 
-Esto reemplaza la aparición en su lugar de 0.60–1.24.
+Esto reemplaza la aparición en su lugar de 0.60–1.24. **Corrección del crítico:** el director las hacía entrar una por una
+(Lun 0.70, Mié 1.20, Vie 1.70), cada entrada encimada con el odómetro de la anterior: tres látigos en 1.5 s, algo nuevo cada
+0.5 s y, a 1.70–1.90, tres estelas en movimiento justo después del push. Era la saturación que la persona dueña pidió evitar.
+Ahora es un solo relevo y, después, una cifra a la vez.
 
 **Empuje hacia el viernes (4.95–5.40, R3a).**
 - La capa de la estación (PageHeader, selector y tarjeta; no el fondo) va de scale 1 → 1.3 con origen (1320, 590).
@@ -407,11 +437,23 @@ Esto reemplaza la aparición en su lugar de 0.60–1.24.
 - «Vie» debajo, Hanken 500 38 px #6F6A65, centro y = 776;
 - encima, la píldora de tinta «Día crítico: Viernes»: alto 82, texto blanco 36 px 500, centro (960, 340).
 
-Comprobación: en el corte la casilla mide 386 × 262 px en el empuje y 394 × 268 px al llegar.
+Comprobación: en el corte la casilla mide 386 × 262 px en el empuje y 394 × 268 px al llegar, con el mismo centro (960, 560).
+
+**La píldora y «Vie» llegan en su propia capa** (§2.3, corrección del crítico). La toma las maqueta en otra proporción que la
+estación (la píldora mide 64 px de alto sobre una casilla de 190 en la estación y 82 sobre 304 en la toma), así que con la escala
+común de llegada saltarían en el corte: la píldora 13 px hacia abajo (de y ≈ 379 a 366) y 13 % más chica, contra su propio
+movimiento, y «Vie» 14 px. Por eso cada una llega en su capa, de 5.40 a 5.95 con el mismo `expo.out` y el mismo desenfoque
+8 → 0 que la toma:
+- la píldora, de centro (960, ≈ 379) y scale ≈ 1.015 a centro (960, 340) y scale 1;
+- «Vie», de centro (960, ≈ 735) y scale ≈ 0.82 a centro (960, 776) y scale 1.
+
+Los valores de partida son los que esas piezas tienen en el último fotograma del empuje (calculados con la píldora de la estación
+en (1320, 451), alto 64, y «Vie» de 24 px en y = 725 sin levantar); el worker los mide en el HTML y los usa tal cual.
 
 **Lo que sigue en la toma.**
 - 5.55–5.85: «32 ausencias en 6 sesiones» (Hanken 400 30 px #6F6A65, centro y = 830) entra desde el desenfoque. Es el renglón
-  real de «Ver cifras por día» (DOM 21: «Viernes 21.8 % (32 ausencias en 6 sesiones) · día crítico»).
+  real de «Ver cifras por día» (DOM 21: «Viernes 21.8 % (32 ausencias en 6 sesiones, día crítico)»). En la construcción ya
+estaba, bajo «Vie» en la estación (5.20 s); ahora llega en la toma.
 - 5.75–6.15: se traza el anillo real de la casilla, 6.4 px rgba(179,38,30,.7).
 - 6.15–6.35: la casilla late (scale 1 → 1.04 → 1, origen en su centro).
 
