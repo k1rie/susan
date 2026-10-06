@@ -1,0 +1,47 @@
+<template>
+<style>
+#root{position:absolute;inset:0;overflow:hidden}
+#s02-linea-bg{position:absolute;inset:0;background:#EEE9F7}
+#s02-linea-world{position:absolute;inset:0}
+#s02-linea-card{position:absolute;left:120px;top:90px;width:720px;height:340px;border:2px solid #E7E2DC;border-radius:28px;background:#FFFFFF}
+#s02-linea-svg{position:absolute;left:40px;top:150px}
+.s02-linea-col{position:absolute;top:40px;width:48px;height:72px;border-radius:12px;background:#1E1919}
+#s02-linea-col-1{left:40px}
+#s02-linea-col-2{left:100px}
+#s02-linea-badge{position:absolute;left:520px;top:40px;width:160px;height:56px;border-radius:999px;background:#FBE6E2;overflow:hidden}
+#s02-linea-brillo{position:absolute;left:0;top:0;width:60px;height:56px;background:#FFFFFF;opacity:0.7}
+</style>
+<div id="root" data-composition-id="s02-linea" data-start="0" data-duration="3" data-width="960" data-height="540">
+  <div id="s02-linea-bg" class="clip" data-start="0" data-duration="3" data-track-index="0"></div>
+  <div id="s02-linea-world">
+    <div id="s02-linea-card">
+      <div id="s02-linea-col-1" class="s02-linea-col"></div>
+      <div id="s02-linea-col-2" class="s02-linea-col"></div>
+      <div id="s02-linea-badge"><div id="s02-linea-brillo"></div></div>
+      <svg id="s02-linea-svg" data-chart width="640" height="160" viewBox="0 0 640 160"><path id="s02-linea-trazo" d="M0 140 L160 90 L320 110 L480 40 L640 20" stroke="#6F4FB3" stroke-width="8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+  </div>
+</div>
+<script src="assets/vendor/gsap.min.js"></script>
+<script>
+(function () {
+    // whoosh-m @0.25 lo justifica el push-slide de index.html (0.00-0.50 local); el resto, los tweens de abajo.
+    var T = { tarjeta: 0.05, trazo: 0.7, col1: 1.6, col2: 1.75, badge: 2.2 };
+    var D = 3;
+    var $ = function (n) { return document.getElementById('s02-linea-' + n); };
+    var tl = gsap.timeline({ paused: true });
+    tl.fromTo($('card'), { y: 40 }, { y: 0, duration: 0.6, ease: 'power3.out' }, T.tarjeta);
+    var L = 700;
+    // draw @0.70: el trazo empieza a dibujarse
+    tl.fromTo($('trazo'), { strokeDasharray: L, strokeDashoffset: L }, { strokeDashoffset: 0, duration: 0.8, ease: 'power2.inOut' }, T.trazo);
+    // tick-2 @1.60 y tick-4 @1.75: un tic por columna al asentarse (no por entero)
+    tl.fromTo($('col-1'), { y: -60, opacity: 0 }, { y: 0, opacity: 1, duration: 0.25, ease: 'power3.out' }, T.col1);
+    tl.fromTo($('col-2'), { y: -60, opacity: 0 }, { y: 0, opacity: 1, duration: 0.25, ease: 'power3.out' }, T.col2);
+    // blip + sheen-s @2.20: el chip aparece y el brillo lo cruza una vez
+    tl.fromTo($('badge'), { scale: 0.6, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.3, ease: 'power3.out' }, T.badge);
+    tl.fromTo($('brillo'), { xPercent: -120 }, { xPercent: 300, duration: 0.6, ease: 'power2.inOut' }, T.badge);
+    tl.set({}, {}, D);
+    window.__timelines['s02-linea'] = tl;
+})();
+</script>
+</template>

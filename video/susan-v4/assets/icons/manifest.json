@@ -10,6 +10,24 @@
       "hash": "49e279e66513ebc0"
     },
     {
+      "nombre": "arrow-left",
+      "archivo": "arrow-left.svg",
+      "version": "1.50.0",
+      "hash": "019db235bb308816"
+    },
+    {
+      "nombre": "arrow-right",
+      "archivo": "arrow-right.svg",
+      "version": "1.50.0",
+      "hash": "af97d3170d5fbd70"
+    },
+    {
+      "nombre": "arrow-up-right",
+      "archivo": "arrow-up-right.svg",
+      "version": "1.50.0",
+      "hash": "0a2a941305b3d4cc"
+    },
+    {
       "nombre": "badge-check",
       "archivo": "badge-check.svg",
       "version": "1.50.0",
@@ -46,16 +64,34 @@
       "hash": "8bc2add623b6f948"
     },
     {
+      "nombre": "calendar-clock",
+      "archivo": "calendar-clock.svg",
+      "version": "1.50.0",
+      "hash": "02ed4a5792a254f2"
+    },
+    {
       "nombre": "calendar-days",
       "archivo": "calendar-days.svg",
       "version": "1.50.0",
       "hash": "453ff38fcec42181"
     },
     {
+      "nombre": "camera-off",
+      "archivo": "camera-off.svg",
+      "version": "1.50.0",
+      "hash": "5ac8154fa01e6f73"
+    },
+    {
       "nombre": "camera",
       "archivo": "camera.svg",
       "version": "1.50.0",
       "hash": "41ef7a635014cc9f"
+    },
+    {
+      "nombre": "chart-column",
+      "archivo": "chart-column.svg",
+      "version": "1.50.0",
+      "hash": "152fe12ed73ba647"
     },
     {
       "nombre": "chart-line",
@@ -76,10 +112,34 @@
       "hash": "21e5339aa3c82b11"
     },
     {
+      "nombre": "chevron-right",
+      "archivo": "chevron-right.svg",
+      "version": "1.50.0",
+      "hash": "e79c16015906bd0c"
+    },
+    {
+      "nombre": "chevrons-up-down",
+      "archivo": "chevrons-up-down.svg",
+      "version": "1.50.0",
+      "hash": "4aee801b90453679"
+    },
+    {
+      "nombre": "circle-alert",
+      "archivo": "circle-alert.svg",
+      "version": "1.50.0",
+      "hash": "276afcdb43b8a401"
+    },
+    {
       "nombre": "circle-check",
       "archivo": "circle-check.svg",
       "version": "1.50.0",
       "hash": "3cb432ad16370f92"
+    },
+    {
+      "nombre": "clipboard-check",
+      "archivo": "clipboard-check.svg",
+      "version": "1.50.0",
+      "hash": "875dd8656b5f3eb5"
     },
     {
       "nombre": "clipboard-list",
@@ -100,10 +160,34 @@
       "hash": "c283becd8ec149ad"
     },
     {
+      "nombre": "ellipsis",
+      "archivo": "ellipsis.svg",
+      "version": "1.50.0",
+      "hash": "508e3ad24a1bc0ea"
+    },
+    {
+      "nombre": "file-chart-column-increasing",
+      "archivo": "file-chart-column-increasing.svg",
+      "version": "1.50.0",
+      "hash": "b36012e59c5834ac"
+    },
+    {
+      "nombre": "file-chart-column",
+      "archivo": "file-chart-column.svg",
+      "version": "1.50.0",
+      "hash": "6d1c095a6a375795"
+    },
+    {
       "nombre": "file-spreadsheet",
       "archivo": "file-spreadsheet.svg",
       "version": "1.50.0",
       "hash": "b578f159414b54bd"
+    },
+    {
+      "nombre": "file-text",
+      "archivo": "file-text.svg",
+      "version": "1.50.0",
+      "hash": "9d2d9971954a77a6"
     },
     {
       "nombre": "fingerprint-pattern",
@@ -116,6 +200,12 @@
       "archivo": "flame.svg",
       "version": "1.50.0",
       "hash": "b3dd62906a6e92bf"
+    },
+    {
+      "nombre": "gauge",
+      "archivo": "gauge.svg",
+      "version": "1.50.0",
+      "hash": "10a4980cbd6410b7"
     },
     {
       "nombre": "graduation-cap",
@@ -142,10 +232,28 @@
       "hash": "73b16043a47349f2"
     },
     {
+      "nombre": "info",
+      "archivo": "info.svg",
+      "version": "1.50.0",
+      "hash": "0327522640605d21"
+    },
+    {
       "nombre": "layers",
       "archivo": "layers.svg",
       "version": "1.50.0",
       "hash": "ba69babcc9e29046"
+    },
+    {
+      "nombre": "layout-dashboard",
+      "archivo": "layout-dashboard.svg",
+      "version": "1.50.0",
+      "hash": "b38713d09274e4a3"
+    },
+    {
+      "nombre": "layout-grid",
+      "archivo": "layout-grid.svg",
+      "version": "1.50.0",
+      "hash": "a7faa3f0a4fc7200"
     },
     {
       "nombre": "lock-keyhole",
@@ -160,10 +268,34 @@
       "hash": "1074deb124b44052"
     },
     {
+      "nombre": "menu",
+      "archivo": "menu.svg",
+      "version": "1.50.0",
+      "hash": "a5c1946b1be0ae90"
+    },
+    {
       "nombre": "mouse-pointer-2",
       "archivo": "mouse-pointer-2.svg",
       "version": "1.50.0",
       "hash": "8741520d6901d679"
+    },
+    {
+      "nombre": "octagon-alert",
+      "archivo": "octagon-alert.svg",
+      "version": "1.50.0",
+      "hash": "084739cc8c352e0c"
+    },
+    {
+      "nombre": "pause",
+      "archivo": "pause.svg",
+      "version": "1.50.0",
+      "hash": "50d1daec54410c02"
+    },
+    {
+      "nombre": "pencil",
+      "archivo": "pencil.svg",
+      "version": "1.50.0",
+      "hash": "7e4a5074a9b57d1d"
     },
     {
       "nombre": "qr-code",
@@ -182,6 +314,18 @@
       "archivo": "scroll-text.svg",
       "version": "1.50.0",
       "hash": "982ef246662c2d67"
+    },
+    {
+      "nombre": "search",
+      "archivo": "search.svg",
+      "version": "1.50.0",
+      "hash": "eff705ff3f7175ab"
+    },
+    {
+      "nombre": "shield-alert",
+      "archivo": "shield-alert.svg",
+      "version": "1.50.0",
+      "hash": "7686ea330c01dfd8"
     },
     {
       "nombre": "shield-check",
@@ -214,10 +358,22 @@
       "hash": "d87939c45da82c4a"
     },
     {
+      "nombre": "timer-off",
+      "archivo": "timer-off.svg",
+      "version": "1.50.0",
+      "hash": "b9b3943bd91da0e6"
+    },
+    {
       "nombre": "timer",
       "archivo": "timer.svg",
       "version": "1.50.0",
       "hash": "6980341c9a5ecb44"
+    },
+    {
+      "nombre": "trending-down",
+      "archivo": "trending-down.svg",
+      "version": "1.50.0",
+      "hash": "2beaf92617195fd9"
     },
     {
       "nombre": "trending-up",
@@ -236,6 +392,12 @@
       "archivo": "user-check.svg",
       "version": "1.50.0",
       "hash": "e8d50ff9ab4f431e"
+    },
+    {
+      "nombre": "user-pen",
+      "archivo": "user-pen.svg",
+      "version": "1.50.0",
+      "hash": "b1fffcc1aa1cf2b1"
     },
     {
       "nombre": "user-round-x",

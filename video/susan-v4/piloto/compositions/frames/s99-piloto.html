@@ -1,0 +1,358 @@
+<template>
+<style>
+@font-face{font-family:"Hanken Grotesk";font-weight:100 900;font-style:normal;font-display:block;src:url("assets/fonts/HankenGrotesk-var.woff2") format("woff2");}
+/* will-change en la raíz: todo el texto sale con antialias en gris (sin franjas de color LCD) y no cambia de tipo de
+   antialias cuando un elemento entra o sale de su propia capa. Medido: mismo costo, sin perder nitidez. */
+#root{position:absolute;inset:0;overflow:hidden;will-change:transform;font-family:"Hanken Grotesk",sans-serif;color:#1E1919;
+ font-variant-numeric:tabular-nums;letter-spacing:-0.003em;-webkit-font-smoothing:antialiased}
+#s99-piloto-bg{position:absolute;inset:0;background:#F7F5F2}
+.s99-seg{position:absolute;inset:0;overflow:hidden}
+.s99-mundo{position:absolute;inset:0;transform-origin:50% 50%}
+.s99-escena{position:absolute;inset:0}
+.s99-placa{position:absolute;left:0;top:0;width:1920px;height:1080px;display:block}
+/* E3 «lienzo de datos» con halo de módulo */
+.s99-e3{position:absolute;inset:0;background:
+ radial-gradient(55% 60% at 62% 48%,var(--halo) 0%,rgba(247,245,242,0) 72%),
+ radial-gradient(120% 90% at 50% 40%,#F7F5F2 55%,#F3F1ED 100%)}
+.s99-ui{zoom:2}
+/* escena A: panel del docente (E = 1.6) */
+.s99-panel{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+.s99-panel .s99-ui{zoom:1.6;width:920px}
+.s99-h1{font-size:26px;font-weight:500;letter-spacing:-0.025em;line-height:1.25}
+.s99-sub{font-size:14px;color:#6F6A65;margin-top:4px}
+.s99-card{background:#FFFFFF;border:1px solid #E7E2DC;border-radius:14px}
+.s99-hero{margin-top:20px;padding:24px;display:flex;align-items:center;justify-content:space-between}
+.s99-fila{display:flex;align-items:center;gap:12px}
+.s99-ficha-ico{width:36px;height:36px;border-radius:10px;background:#E6EEFC;color:#1D5FD1;display:flex;align-items:center;justify-content:center}
+.s99-ficha-ico svg{width:20px;height:20px}
+.s99-gris{color:#6F6A65}
+.s99-t14{font-size:14px;line-height:1.5}
+.s99-chip{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:500;color:#5B5651;background:#EEEBE6;border-radius:999px;padding:3px 10px}
+.s99-chip i{width:6px;height:6px;border-radius:50%;background:#5B5651;display:block}
+.s99-titulo{font-size:20px;font-weight:600;letter-spacing:-0.025em;line-height:1.25;margin-top:16px}
+.s99-cam{display:flex;align-items:center;gap:8px;margin-top:10px}
+.s99-cam svg{width:16px;height:16px;color:#1F7A47}
+.s99-btn{display:inline-flex;align-items:center;gap:10px;height:48px;padding:0 24px;border-radius:8px;background:#1E1919;color:#FFFFFF;font-size:14px;font-weight:500;white-space:nowrap}
+.s99-btn svg{width:18px;height:18px}
+.s99-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:16px}
+.s99-stat{padding:20px}
+.s99-stat-l{font-size:13px;font-weight:500;color:#6F6A65}
+.s99-stat-v{font-size:30px;font-weight:600;letter-spacing:-0.025em;line-height:1;margin-top:10px}
+.s99-stat-h{font-size:12px;font-weight:500;margin-top:8px}
+/* escena B: cielo E1 + tarjeta flotante con pose 3D */
+.s99-cielo{position:absolute;inset:0;background:linear-gradient(180deg,#C6D8F7 0%,#D2E0F9 22%,#E6EEFC 48%,#EFF2F7 72%,#F7F5F2 100%)}
+.s99-nube{position:absolute;border-radius:50%}
+.s99-nube-fria{background:radial-gradient(closest-side,rgba(255,255,255,.9),rgba(255,255,255,0))}
+.s99-nube-calida{background:radial-gradient(closest-side,rgba(246,237,211,.8),rgba(246,237,211,0))}
+.s99-nube-rubor{background:radial-gradient(closest-side,rgba(251,230,226,.6),rgba(251,230,226,0))}
+.s99-escenario3d{position:absolute;inset:0;perspective:1600px;perspective-origin:36% 46%}
+.s99-sombra{position:absolute;left:290px;top:230px;width:800px;height:580px;border-radius:40px;
+ box-shadow:0 40px 120px rgba(29,95,209,.14),0 8px 24px rgba(29,95,209,.08)}
+.s99-card3d{position:absolute;left:290px;top:230px;width:800px;height:580px;background:#FFFFFF;
+ border:2px solid #E7E2DC;border-radius:40px;overflow:hidden}
+.s99-portada{position:relative;height:300px;overflow:hidden;background:#FFFFFF}
+.s99-holo{position:absolute;inset:-30%;opacity:.75;
+ background:
+  radial-gradient(40% 50% at 78% 72%,#FF6AA9 0%,rgba(255,106,169,0) 70%),
+  radial-gradient(35% 45% at 60% 90%,#FFB36B 0%,rgba(255,179,107,0) 70%),
+  radial-gradient(40% 40% at 94% 50%,#8BE3B5 0%,rgba(139,227,181,0) 70%),
+  radial-gradient(45% 45% at 70% 38%,#6BB8FF 0%,rgba(107,184,255,0) 70%),
+  conic-gradient(from 200deg at 75% 70%,#FFD5E5,#FFE9D4,#DEF7E9,#D4EAFF,#E0D9F1,#FFD5E5)}
+.s99-holo-velo{position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,0) 40%,rgba(255,255,255,.35) 100%)}
+.s99-ficha-portada{position:absolute;left:40px;top:40px;width:80px;height:80px;border-radius:20px;background:#FFFFFF;
+ border:2px solid rgba(0,0,0,.05);color:#1D5FD1;display:flex;align-items:center;justify-content:center}
+.s99-ficha-portada svg{width:40px;height:40px}
+.s99-cuerpo{padding:20px}
+.s99-portada-titulo{font-size:14.5px;font-weight:500;line-height:1.375}
+.s99-portada-meta{font-size:13px;color:#6F6A65;margin-top:2px}
+.s99-cuerpo .s99-btn{height:40px;padding:0 16px;margin-top:16px;gap:8px}
+.s99-cuerpo .s99-btn svg{width:16px;height:16px}
+.s99-brillo{position:absolute;inset:0;background:linear-gradient(105deg,rgba(255,255,255,0) 42%,rgba(255,255,255,.55) 50%,rgba(255,255,255,0) 58%)}
+/* tira de comparación de nitidez: zoom contra transform: scale */
+.s99-comparar{position:absolute;left:1190px;top:250px;width:680px}
+.s99-cmp-fila{position:relative;height:170px}
+.s99-cmp-tag{font-size:20px;font-weight:500;color:#4A4541;height:34px}
+.s99-cmp-muestra{position:absolute;left:0;top:40px;width:340px;transform-origin:0 0;white-space:nowrap}
+.s99-cmp-muestra .s99-t14{font-weight:600}
+.s99-wc{will-change:transform}
+/* escena C: odómetro */
+.s99-odo-bloque{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.s99-odo-rotulo{font-size:40px;font-weight:500;color:#6F6A65;line-height:1.2}
+.s99-odo{display:flex;align-items:flex-start;font-size:160px;font-weight:600;letter-spacing:-0.03em;height:176px;margin-top:20px}
+/* la ventana de cada columna se desvanece arriba y abajo: la estela no termina en un corte duro; en reposo la cifra no se toca */
+.s99-odo-col{display:block;height:176px;overflow:hidden;-webkit-mask-image:linear-gradient(180deg,transparent 0%,#000 16%,#000 84%,transparent 100%);mask-image:linear-gradient(180deg,transparent 0%,#000 16%,#000 84%,transparent 100%)}
+.s99-odo-tira{display:block}
+.s99-odo-tira span{display:block;height:176px;line-height:176px;text-align:center}
+.s99-odo-pct{display:block;height:176px;line-height:176px;font-size:80px;font-weight:500;color:#6F6A65;margin-left:14px;position:relative;top:30px}
+.s99-odo-pie{font-size:32px;font-weight:500;color:#6F6A65;margin-top:24px}
+/* escena D: ficha que cae y se resuelve en el wordmark */
+.s99-cierre{position:absolute;inset:0;background:linear-gradient(180deg,#E6EEFC 0%,#EFF2F7 38%,#F7F5F2 72%)}
+.s99-ficha-mov{position:absolute;left:816px;top:366px;width:168px;height:168px}
+.s99-ficha-esc{position:absolute;inset:0;transform-origin:50% 100%}
+.s99-ficha{position:absolute;inset:0;border-radius:50%;background:#1E1919;color:#FFFFFF;
+ box-shadow:0 0 0 15px #FFFFFF,0 30px 90px rgba(30,25,25,.18);display:flex;align-items:center;justify-content:center}
+.s99-ficha svg{width:72px;height:72px}
+.s99-fantasma{position:absolute;inset:0;border-radius:50%;background:#1E1919;box-shadow:0 0 0 15px #FFFFFF;opacity:0}
+.s99-marca{position:absolute;left:862px;top:380px;font-size:136px;font-weight:600;letter-spacing:-0.025em;line-height:1;white-space:nowrap}
+.s99-subrayado{position:absolute;left:862px;top:486px;width:440px;height:40px;overflow:visible}
+.s99-lema{position:absolute;left:0;top:600px;width:1920px;text-align:center;font-size:40px;font-weight:500;color:#6F6A65}
+</style>
+<div id="root" data-composition-id="s99-piloto" data-start="0" data-duration="6" data-width="1920" data-height="1080">
+  <div id="s99-piloto-bg" class="clip" data-start="0" data-duration="6" data-track-index="0"></div>
+
+  <!-- (a) 0–1.4 s: rack focus con placas pre-desenfocadas (σ 24 y σ 6) que se funden sobre el DOM nítido -->
+  <div id="s99-piloto-a" class="clip s99-seg" data-start="0" data-duration="1.4" data-track-index="1">
+    <div id="s99-piloto-a-mundo" class="s99-mundo">
+      <div id="s99-piloto-a-escena" class="s99-escena"></div>
+      <img id="s99-piloto-a-placa6" class="s99-placa" src="assets/piloto/plate-s6.jpg" alt="" />
+      <img id="s99-piloto-a-placa24" class="s99-placa" src="assets/piloto/plate-s24.jpg" alt="" />
+    </div>
+  </div>
+
+  <!-- (a2) 1.4–2.4 s: la misma escena con filter: blur(24px → 0) animado sobre toda la capa -->
+  <div id="s99-piloto-a2" class="clip s99-seg" data-start="1.4" data-duration="1" data-track-index="1">
+    <div id="s99-piloto-a2-mundo" class="s99-mundo">
+      <div id="s99-piloto-a2-escena" class="s99-escena"></div>
+    </div>
+  </div>
+
+  <!-- (b) 2.4–3.8 s: tarjeta flotante con pose 3D, sombra teñida aparte, holograma y brillo -->
+  <div id="s99-piloto-b" class="clip s99-seg" data-start="2.4" data-duration="1.4" data-track-index="1">
+    <div class="s99-cielo"></div>
+    <div class="s99-nube s99-nube-fria" data-layout-allow-overflow style="left:-120px;top:40px;width:900px;height:420px"></div>
+    <div class="s99-nube s99-nube-calida" data-layout-allow-overflow style="left:980px;top:-60px;width:1000px;height:460px"></div>
+    <div class="s99-nube s99-nube-rubor" data-layout-allow-overflow style="left:520px;top:620px;width:1100px;height:420px"></div>
+    <div class="s99-escenario3d">
+      <div id="s99-piloto-b-sombra" class="s99-sombra"></div>
+      <div id="s99-piloto-b-tarjeta" class="s99-card3d">
+        <div class="s99-portada">
+          <div id="s99-piloto-b-holo" class="s99-holo" data-layout-allow-overflow></div>
+          <div class="s99-holo-velo"></div>
+          <div class="s99-ficha-portada" data-ico="scan-face"></div>
+        </div>
+        <div class="s99-ui">
+          <div class="s99-cuerpo">
+            <div class="s99-portada-titulo">Pasar lista</div>
+            <div class="s99-portada-meta">Administración Financiera (3A) · 24 inscritos</div>
+            <div class="s99-btn"><span data-ico="scan-face"></span>Abrir y pasar lista<span data-ico="arrow-right"></span></div>
+          </div>
+        </div>
+        <div id="s99-piloto-b-brillo" class="s99-brillo"></div>
+      </div>
+    </div>
+    <div id="s99-piloto-b-comparar" class="s99-comparar" data-layout-allow-overlap>
+      <div class="s99-cmp-fila">
+        <div class="s99-cmp-tag">zoom: 2</div>
+        <div class="s99-cmp-muestra"><div class="s99-ui"><div class="s99-t14">Administración Financiera (3A)</div><div class="s99-t14 s99-gris">07:00 - 08:00 · Aula A-12</div></div></div>
+      </div>
+      <div class="s99-cmp-fila">
+        <div class="s99-cmp-tag">transform: scale 1 → 2</div>
+        <div id="s99-piloto-b-esc1" class="s99-cmp-muestra"><div class="s99-t14">Administración Financiera (3A)</div><div class="s99-t14 s99-gris">07:00 - 08:00 · Aula A-12</div></div>
+      </div>
+      <div class="s99-cmp-fila">
+        <div class="s99-cmp-tag">scale 1 → 2 + will-change</div>
+        <div id="s99-piloto-b-esc2" class="s99-cmp-muestra s99-wc"><div class="s99-t14">Administración Financiera (3A)</div><div class="s99-t14 s99-gris">07:00 - 08:00 · Aula A-12</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- (c) 3.8–5.2 s: odómetro 0 → 88 % con desenfoque vertical ligado a la velocidad -->
+  <div id="s99-piloto-c" class="clip s99-seg" data-start="3.8" data-duration="1.4" data-track-index="1">
+    <div class="s99-e3" style="--halo:#E5F3EE"></div>
+    <div class="s99-odo-bloque">
+      <div id="s99-piloto-c-rotulo" class="s99-odo-rotulo">Presentes ahora</div>
+      <div class="s99-odo">
+        <span class="s99-odo-col"><span id="s99-piloto-c-tira-d" class="s99-odo-tira"></span></span>
+        <span class="s99-odo-col"><span id="s99-piloto-c-tira-u" class="s99-odo-tira"></span></span>
+        <span class="s99-odo-pct">%</span>
+      </div>
+      <div id="s99-piloto-c-pie" class="s99-odo-pie">21 de 24 inscritos</div>
+    </div>
+  </div>
+
+  <!-- (d) 5.2–6.0 s: la ficha del botón central cae con estela y squash, y se resuelve en «SUSAN» -->
+  <div id="s99-piloto-d" class="clip s99-seg" data-start="5.2" data-duration="0.8" data-track-index="1">
+    <div class="s99-cierre"></div>
+    <div id="s99-piloto-d-marca" class="s99-marca" data-layout-allow-occlusion>SUSAN</div>
+    <svg id="s99-piloto-d-subrayado" class="s99-subrayado" viewBox="0 0 440 40" aria-hidden="true">
+      <path id="s99-piloto-d-trazo" d="M8.8 26.7 C96.8 10, 176 33.3, 264 16.7 S396 13.3, 431.2 23.3" pathLength="100" fill="none" stroke="#A8842C"
+        stroke-opacity=".8" stroke-width="10" stroke-linecap="round" stroke-dasharray="100" stroke-dashoffset="100" />
+    </svg>
+    <div id="s99-piloto-d-lema" class="s99-lema">Pasa lista en segundos y entiende la asistencia de tus grupos</div>
+    <div id="s99-piloto-d-mov" class="s99-ficha-mov">
+      <div id="s99-piloto-d-fant2" class="s99-fantasma" aria-hidden="true"></div>
+      <div id="s99-piloto-d-fant1" class="s99-fantasma" aria-hidden="true"></div>
+      <div id="s99-piloto-d-esc" class="s99-ficha-esc">
+        <div id="s99-piloto-d-ficha" class="s99-ficha" data-ico="scan-face"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- filtros de estela: uno por elemento que se mueve; región ajustada al eje del movimiento -->
+  <svg width="0" height="0" aria-hidden="true" style="position:absolute">
+    <filter id="s99-piloto-mb-d" x="-10%" y="-6%" width="120%" height="112%" color-interpolation-filters="sRGB">
+      <feGaussianBlur id="s99-piloto-mb-d-g" stdDeviation="0 0" />
+    </filter>
+    <filter id="s99-piloto-mb-u" x="-10%" y="-6%" width="120%" height="112%" color-interpolation-filters="sRGB">
+      <feGaussianBlur id="s99-piloto-mb-u-g" stdDeviation="0 0" />
+    </filter>
+    <filter id="s99-piloto-mb-f" x="-20%" y="-60%" width="140%" height="220%" color-interpolation-filters="sRGB">
+      <feGaussianBlur id="s99-piloto-mb-f-g" stdDeviation="0 0" />
+    </filter>
+  </svg>
+</div>
+<!-- GSAP local: el CDN (cdn.jsdelivr.net) responde 403 al CONNECT en esta máquina y el render queda sin animación -->
+<script src="assets/vendor/gsap.min.js"></script>
+<script>
+    (function () {
+        var ID = 's99-piloto';
+        // Obturador en segundos: el largo de la estela no depende de los fps del render (1/60 = 180° a 30 fps, 360° a 60).
+        var OBT = 1 / 60;
+        var H = 176;
+        function $(s) { return document.getElementById(ID + '-' + s); }
+
+        // Iconos Lucide (copiados de assets/icons, sin modificar los trazos).
+        var ICO = {
+            'scan-face': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><path d="M9 9h.01"/><path d="M15 9h.01"/></svg>',
+            'camera': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13.997 4a2 2 0 0 1 1.76 1.05l.486.9A2 2 0 0 0 18.003 7H20a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h1.997a2 2 0 0 0 1.759-1.048l.489-.904A2 2 0 0 1 10.004 4z"/><circle cx="12" cy="13" r="3"/></svg>',
+            'arrow-right': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>'
+        };
+
+        // Escena del panel (se clona en (a) y (a2) para comparar la placa contra el blur vivo).
+        var ESCENA = '' +
+            '<div class="s99-e3" style="--halo:#E6EEFC"></div>' +
+            '<div class="s99-panel"><div class="s99-ui">' +
+              '<div class="s99-h1">Mi panel</div>' +
+              '<div class="s99-sub">Hoy: 2026-09-14 · Buenos días, Patricia</div>' +
+              '<div class="s99-card s99-hero">' +
+                '<div>' +
+                  '<div class="s99-fila"><div class="s99-ficha-ico" data-ico="scan-face"></div><span class="s99-t14 s99-gris" style="font-weight:500">Pasar lista</span>' +
+                    '<span class="s99-chip"><i></i>Programada</span></div>' +
+                  '<div class="s99-titulo">Administración Financiera (3A)</div>' +
+                  '<div class="s99-t14 s99-gris">07:00 - 08:00 · Aula A-12</div>' +
+                  '<div class="s99-cam"><span data-ico="camera" style="display:flex;color:#1F7A47"></span><span class="s99-t14">Cámara del aula lista</span></div>' +
+                '</div>' +
+                '<div class="s99-btn"><span data-ico="scan-face" style="display:flex"></span>Abrir y pasar lista<span data-ico="arrow-right" style="display:flex"></span></div>' +
+              '</div>' +
+              '<div class="s99-stats">' +
+                '<div class="s99-card s99-stat"><div class="s99-stat-l">Registros pendientes de revisión</div><div class="s99-stat-v">8</div><div class="s99-stat-h" style="color:#A8842C">Revisión</div></div>' +
+                '<div class="s99-card s99-stat"><div class="s99-stat-l">Justificantes por resolver</div><div class="s99-stat-v">4</div><div class="s99-stat-h" style="color:#1F5FA8">Justificantes</div></div>' +
+                '<div class="s99-card s99-stat"><div class="s99-stat-l">Alertas de asistencia</div><div class="s99-stat-v">3</div><div class="s99-stat-h" style="color:#B3261E">sin derecho · 2 al límite</div></div>' +
+              '</div>' +
+            '</div></div>';
+        $('a-escena').innerHTML = ESCENA;
+        $('a2-escena').innerHTML = ESCENA;
+
+        // Tiras del odómetro: decenas «␣,1…8» (la primera es un espacio de cifra) y unidades «0…9,0…8» (una vuelta).
+        var FIG = ' ';
+        var htmlD = '<span>' + FIG + '</span>';
+        for (var i = 1; i <= 8; i++) { htmlD += '<span>' + i + '</span>'; }
+        var htmlU = '';
+        for (var j = 0; j < 19; j++) { htmlU += '<span>' + (j % 10) + '</span>'; }
+        $('c-tira-d').innerHTML = htmlD;
+        $('c-tira-u').innerHTML = htmlU;
+
+        var nodosIco = document.querySelectorAll('#root [data-ico]');
+        for (var k = 0; k < nodosIco.length; k++) {
+            var n = nodosIco[k];
+            if (n.closest('[data-composition-id]') && n.closest('[data-composition-id]').getAttribute('data-composition-id') !== ID) { continue; }
+            n.innerHTML = ICO[n.getAttribute('data-ico')] || '';
+        }
+
+        var tl = gsap.timeline({ paused: true });
+
+        // Velocidad de la curva en fracción por segundo (diferencia central sobre la misma curva: función pura de t).
+        function velocidad(ease, p, dur) {
+            var h = 0.002;
+            var a = Math.max(0, p - h);
+            var b = Math.min(1, p + h);
+            return (ease(b) - ease(a)) / (b - a) / dur;
+        }
+
+        // Movimiento con estela direccional: σ = 0.29 · v · OBT (caja del obturador → gaussiana), filter:none en reposo.
+        function conRastro(o) {
+            var ease = gsap.parseEase(o.curva);
+            var st = { p: 0 };
+            var filtro = 'url(#' + o.nodo.parentNode.id + ')';
+            function aplicar() {
+                var p = st.p;
+                var e = ease(p);
+                o.pos(e, p);
+                var v = (p <= 0 || p >= 1) ? 0 : Math.abs(o.dist) * velocidad(ease, p, o.dur);
+                var s = Math.min(o.max, 0.29 * v * OBT);
+                o.nodo.setAttribute('stdDeviation', o.eje === 'x' ? s.toFixed(2) + ' 0' : '0 ' + s.toFixed(2));
+                o.el.style.filter = s < 0.3 ? 'none' : filtro;
+                if (o.extra) { o.extra(p, v, ease); }
+            }
+            aplicar();
+            tl.fromTo(st, { p: 0 }, { p: 1, duration: o.dur, ease: 'none', onUpdate: aplicar, immediateRender: false }, o.at);
+        }
+
+        // Desenfoque de lente como función pura del tiempo: blur(px) mientras > 0.05, «none» en reposo.
+        function desenfoque(el, at, dur, desde, curva) {
+            var st = { d: desde };
+            function aplicar() { el.style.filter = st.d < 0.05 ? 'none' : 'blur(' + st.d.toFixed(2) + 'px)'; }
+            aplicar();
+            tl.fromTo(st, { d: desde }, { d: 0, duration: dur, ease: curva, onUpdate: aplicar, immediateRender: false }, at);
+        }
+
+        // (a) placas: σ24 encima, σ6 debajo, DOM nítido al fondo; solo opacidades + escala del mundo.
+        tl.fromTo($('a-mundo'), { scale: 1.12 }, { scale: 1, duration: 1.3, ease: 'power3.out' }, 0);
+        tl.fromTo($('a-placa24'), { opacity: 1 }, { opacity: 0, duration: 0.45, ease: 'power1.inOut' }, 0.15);
+        tl.fromTo($('a-placa6'), { opacity: 1 }, { opacity: 0, duration: 0.55, ease: 'power1.inOut' }, 0.45);
+
+        // (a2) blur vivo a cuadro completo 24 → 0.
+        tl.fromTo($('a2-mundo'), { scale: 1.12 }, { scale: 1, duration: 1.0, ease: 'power3.out' }, 1.4);
+        desenfoque($('a2-escena'), 1.42, 0.85, 24, 'power2.out');
+
+        // (b) pose 3D suave: entra inclinada y se aplana en 1.0 s; la sombra va aparte y en sentido contrario.
+        var tarjeta = $('b-tarjeta');
+        tl.fromTo(tarjeta, { rotationX: 8, rotationY: -10, z: -160, y: 40 },
+            { rotationX: 0, rotationY: 0, z: 0, y: 0, duration: 1.0, ease: 'power3.out' }, 2.42);
+        tl.fromTo(tarjeta, { opacity: 0 }, { opacity: 1, duration: 0.3, ease: 'power1.out' }, 2.42);
+        tl.fromTo($('b-sombra'), { opacity: 0, x: 40, y: 70, scale: 0.9 },
+            { opacity: 1, x: 0, y: 0, scale: 1, duration: 1.0, ease: 'power3.out' }, 2.42);
+        tl.fromTo($('b-holo'), { rotation: 0, xPercent: -4 }, { rotation: 8, xPercent: 4, duration: 1.38, ease: 'none' }, 2.42);
+        tl.fromTo($('b-brillo'), { xPercent: -120 }, { xPercent: 120, duration: 0.7, ease: 'power2.inOut' }, 2.95);
+        tl.fromTo($('b-comparar'), { opacity: 0 }, { opacity: 1, duration: 0.3, ease: 'power1.out' }, 2.42);
+        tl.fromTo([$('b-esc1'), $('b-esc2')], { scale: 1 }, { scale: 2, duration: 0.7, ease: 'power3.inOut' }, 2.5);
+
+        // (c) odómetro: unidades una vuelta + 8, decenas de «␣» a 8; estela vertical por columna.
+        tl.fromTo($('c-rotulo'), { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.4, ease: 'power3.out' }, 3.82);
+        var tiraU = $('c-tira-u');
+        var tiraD = $('c-tira-d');
+        conRastro({ el: tiraU, nodo: $('mb-u-g'), at: 3.95, dur: 0.9, curva: 'expo.out', dist: 18 * H, eje: 'y', max: 16,
+            pos: function (e) { gsap.set(tiraU, { y: -18 * H * e }); } });
+        conRastro({ el: tiraD, nodo: $('mb-d-g'), at: 3.99, dur: 0.9, curva: 'expo.out', dist: 8 * H, eje: 'y', max: 16,
+            pos: function (e) { gsap.set(tiraD, { y: -8 * H * e }); } });
+        tl.fromTo($('c-pie'), { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.4, ease: 'power3.out' }, 4.6);
+
+        // (d) caída power2.in (velocidad máxima al contacto) con estela SVG + 2 fantasmas, squash de volumen constante.
+        var DESDE = -620;
+        var mov = $('d-mov');
+        var f1 = $('d-fant1');
+        var f2 = $('d-fant2');
+        conRastro({ el: $('d-ficha'), nodo: $('mb-f-g'), at: 5.2, dur: 0.32, curva: 'power2.in', dist: -DESDE, eje: 'y', max: 26,
+            pos: function (e) { gsap.set(mov, { y: DESDE * (1 - e) }); },
+            extra: function (p, v, ease) {
+                var e = ease(p);
+                var fuerza = (p <= 0 || p >= 1) ? 0 : Math.min(1, v / 2500);
+                var p1 = Math.max(0, p - OBT / 0.32);
+                var p2 = Math.max(0, p - 2 * OBT / 0.32);
+                gsap.set(f1, { y: DESDE * (e - ease(p1)), opacity: 0.32 * fuerza });
+                gsap.set(f2, { y: DESDE * (e - ease(p2)), opacity: 0.16 * fuerza });
+            } });
+        var esc = $('d-esc');
+        tl.fromTo(esc, { scaleX: 1, scaleY: 1 }, { scaleX: 1.07, scaleY: 0.93, duration: 0.06, ease: 'power2.out', immediateRender: false }, 5.52);
+        tl.fromTo(esc, { scaleX: 1.07, scaleY: 0.93 }, { scaleX: 1, scaleY: 1, duration: 0.24, ease: 'power3.out', immediateRender: false }, 5.58);
+        tl.fromTo(mov, { x: 0 }, { x: -182, duration: 0.34, ease: 'power3.inOut', immediateRender: false }, 5.6);
+        tl.fromTo($('d-marca'), { clipPath: 'inset(0% 100% 0% 0%)', x: -30 },
+            { clipPath: 'inset(0% 0% 0% 0%)', x: 0, duration: 0.32, ease: 'power3.out' }, 5.64);
+        tl.fromTo($('d-trazo'), { attr: { 'stroke-dashoffset': 100 } },
+            { attr: { 'stroke-dashoffset': 0 }, duration: 0.24, ease: 'power2.out' }, 5.74);
+        tl.fromTo($('d-lema'), { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.18, ease: 'power2.out' }, 5.8);
+
+        window.__timelines[ID] = tl;
+    })();
+</script>
+</template>
