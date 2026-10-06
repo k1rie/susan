@@ -7,6 +7,11 @@ se ve) > PLAYBOOK (cómo se construye) > REFERENCIA/REFERENCIA-2 (lenguaje de mo
 Abreviaturas de fuente: **B** BRIEF · **R1** REFERENCIA · **R2** REFERENCIA-2 · **L** LECCIONES-V3 · **P** PLAYBOOK ·
 **C** CONTENIDO · **D** DISENO-APP · **[crít.]** verificado por esta crítica.
 
+**Enmiendas con el plan aprobado (2026-10-06):** regla 2 (costuras de voz de 0.7–1.6 s, 2.1 s antes del sting), regla 6
+(sin «2/3» en Revisión), regla 8 (se retira «3 lecturas confirman»: el video no dice ni muestra cuántas lecturas, capturas
+o muestras confirman a un alumno, BRIEF) y regla 21 (rack focus de apertura con blur vivo ≤ 20 px y ≤ 0.9 s; placa
+opcional, PILOTO §3a).
+
 Dato de contexto corregido: la v3 **dura 50.75 s** (`susan-presentacion/index.html:53`), no 56 s; el STORYBOARD de la v3
 describe la v1 (L §1.1) [crít.].
 
@@ -21,10 +26,13 @@ describe la v1 (L §1.1) [crít.].
    **la marca y la primera UI de SUSAN están en pantalla antes del segundo 8–9** (la v3 la mostró en el 16.45). *Fuente:
    B, L §4.4/§4.7/§5, R1 §3.4, R2 §4.2.* El esqueleto de C §5 pone el nombre en el 11 s: hay que adelantarlo (ver §4).
 2. **Voz primero, construida «lista para voz».** Guion de **95–105 palabras (tope 110)** a ~2.6–2.7 palabras/s
-   (cobertura 65–75 %). Cada cuadro lleva `voiceover` (una línea, pistas separadas por pausas) y `vo_anchor` («palabra» @
-   t local); `SCRIPT.md` lleva una sola `## Line N — … (Frame N)` por cuadro, texto con sangría de 4 espacios y
-   `**Anchor:**`. Silencio de 1.0–1.5 s al abrir, 0.3–0.5 s en cada costura y ≥ 1.5 s al cerrar. Las 127 palabras de C
-   §5 se recortan con sus propios corchetes (~105). *Fuente: L §4.5/§5, R1 §3.4, P §2, C §5.*
+   (cobertura 65–75 %). Cada cuadro lleva `voiceover` (una línea, pistas separadas por pausas) y `vo_anchor` («palabra»
+   @ t local); `SCRIPT.md` lleva una sola `## Line N — … (Frame N)` por cuadro, texto con sangría de 4 espacios y
+   `**Anchor:**`. Silencio de 1.0–1.5 s al abrir, **0.7–1.6 s en cada costura entre líneas (≈ 2.1 s antes del sting
+   del cierre)** y ≥ 1.5 s al cerrar. *Enmienda aprobada con el plan (2026-10-06): la cifra anterior, 0.3–0.5 s, no cabe
+   con 65–75 % de cobertura en 55 s y una línea por cuadro; las costuras del storyboard miden 0.72–1.56 s y 2.13 s antes
+   del sting.* Las 127 palabras de C §5 se recortan con sus propios corchetes (~105). *Fuente: L §4.5/§5, R1 §3.4, P §2,
+   C §5.*
 3. **Reglas de escritura para ElevenLabs:** «susan» en minúsculas (en mayúsculas la deletrea; vigilar que no suene
    italiana, probar «Súsan» si hace falta), cifras con letra («veinte por ciento»), «sin papeleo» en vez de «sin escribir
    nada». Ajustes probados en la v3: `eleven_multilingual_v2`, stability 0.35, similarity 0.8, style 0.45, semilla 1037,
@@ -43,8 +51,9 @@ describe la v1 (L §1.1) [crít.].
    (`avatar-16-po`), **3A · Administración Financiera**, Aula A-12, 24 alumnos, 47 sesiones, 9 faltas permitidas. Sesión
    en vivo (instantánea inventada pero coherente): **«19 de 24 presentes · 2 con retardo · 2 sin registro · 1 por
    revisar»**, medidor «Presentes ahora **88 %** · 21 de 24 inscritos» (presentes + retardos, regla verificada en la
-   captura real). Panel: 8 pendientes, 4 justificantes. Revisión: Emilio Ramírez Núñez, 2/3, 0.893/0.927, «Resolver como
-   Presente (Sugerido)», 8 → 7. Analítica 3A: S1–S6 13.3 → **20.8 %** «+4.2 pp vs. semana previa», proyección S15 24.8 %,
+   captura real). Panel: 8 pendientes, 4 justificantes. Revisión: Emilio Ramírez Núñez, sesión del 2026-09-12, «Quedan 2 h 48 min»,
+   0.893/0.927 (sin «Lecturas válidas: 2/3»: retirado por la persona dueña el 2026-10-06), «Resolver como Presente
+   (Sugerido)», 8 → 7. Analítica 3A: S1–S6 13.3 → **20.8 %** «+4.2 pp vs. semana previa», proyección S15 24.8 %,
    «Día crítico: Viernes» 21.8 %, «9 alumnos en riesgo». Alumno en riesgo: **Iván Cruz Rojas**, 7 faltas, 14.9 %, quedan
    2, Alto 64/100, cruce estimado semana 9. **Se retiran todas las cifras de la v3** (2 h 30, 21+2+1, HM 21.6 %, S1–S8,
    AG 71 %, 29/33, «listo en 6 s»). *Fuente: C §3/§6 [crít.: verificado contra `capture/app-real/dom`].*
@@ -53,10 +62,13 @@ describe la v1 (L §1.1) [crít.].
    alumno o la fila de Iván); **no se muestra el cierre de la sesión de hoy** (las capturas 32–37 cierran con 24/24 = 100 %:
    solo sirven como maqueta); tira semanal solo Lun · Mié · Vie; escribir «límite» con tilde. *Fuente: C §3.4/§3.11 [crít.].*
 8. **Afirmaciones:** solo las de C §1 y §4 (5 min por sesión, 4 h por grupo al semestre, «unas 20 h» con 5 grupos como
-   **estimación**, 3 lecturas confirman, lo dudoso lo decide el docente, sin consentimiento no hay reconocimiento, sin fotos
-   en la base de datos, bitácora). **Prohibido:** cronómetros («en 6 s»), «anti-suplantación», «cifrado», «la IA aprende»,
-   «te avisa por correo», «100 % preciso», «ahorra 20 h» como hecho, «app» para el alumno, módulos «Próximamente», UI de
-   desarrollo (Reloj de demostración, «Reloj simulado», cámara simulada, cuadros magenta). *Fuente: C §1/§2/§4, D §3.8.*
+   **estimación**, ~~3 lecturas confirman~~ **[retirada por la persona dueña el 2026-10-06: el video no dice ni muestra
+   cuántas lecturas, capturas o muestras confirman a un alumno; lo decidirá después]**, lo dudoso lo decide el docente,
+   sin consentimiento no hay reconocimiento, sin fotos en la base de datos, bitácora). **Prohibido:** cualquier número
+   de lecturas, capturas o muestras por alumno («tres lecturas», «Lecturas 1/3 → 3/3», «Lecturas válidas: 2/3»,
+   cualquier x/3), cronómetros («en 6 s»), «anti-suplantación», «cifrado», «la IA aprende», «te avisa por correo»,
+   «100 % preciso», «ahorra 20 h» como hecho, «app» para el alumno, módulos «Próximamente», UI de desarrollo (Reloj de
+   demostración, «Reloj simulado», cámara simulada, cuadros magenta). *Fuente: C §1/§2/§4, D §3.8.*
 9. **Funciones por prioridad.** Imprescindibles: pasar lista con cámara + sesión en vivo (clímax de producto), analítica
    (patrón + tendencia + proyección, clímax de datos), alumno en riesgo → acción (cierra el arco «a tiempo»), panel/tarjeta
    «Pasar lista» (entrada). Alta: revisión «Resolver como». Opcionales (≤ 3–4 s, o fundidas): reportes/«Exportar CSV»,
@@ -126,11 +138,13 @@ describe la v1 (L §1.1) [crít.].
     producto); **nunca** `squeeze` ni disoluciones largas (lavan a crema). «Cut the curve», «zoom-through» del catálogo de
     cortes, morphs y rack focus son costuras **dentro** de un cuadro. *Fuente: P §3.4/§3.5, L §3.3/§4.4/§5, R1 §3.4/T13/T14
     [crít.: R1 T14 anotado].*
-21. **Presupuesto de render.** Como máximo **una superficie grande desenfocada a la vez, ≤ 24 px y ≤ 1.2 s**; rack focus de
-    apertura con **placa pre-desenfocada** (snapshot + `ffmpeg gblur`) en vez de animar un blur a cuadro completo; ≤ 3
-    objetos con estela por escena (filtro SVG en áreas chicas, `filter:none` en reposo); grano como imagen estática
-    (PNG o data-URI) movida solo por `transform`/`tl.set`, nunca un `<filter>` vivo sobre el cuadro; no sumar un blur interno
-    pesado con un `blur-crossfade`/`zoom-through` en el mismo instante; nada de `filter`/`opacity < 1`/`overflow`/`mask` en
+21. **Presupuesto de render.** Como máximo **una superficie grande desenfocada a la vez, ≤ 24 px y ≤ 1.2 s**; rack focus
+    de apertura con **blur vivo ≤ 20 px durante ≤ 0.9 s** (driver `desenfoque`, `filter: none` en reposo; PILOTO §3a
+    midió +12 ms por cuadro y un enfoque limpio), y **placa pre-desenfocada** (snapshot + `ffmpeg gblur`) **opcional**,
+    solo para fondos desenfocados sostenidos más de ~1 s (enmienda aprobada con el plan, 2026-10-06); ≤ 3 objetos con
+    estela por escena (filtro SVG en áreas chicas, `filter:none` en reposo); grano como imagen estática (PNG o data-URI)
+    movida solo por `transform`/`tl.set`, nunca un `<filter>` vivo sobre el cuadro; no sumar un blur interno pesado con
+    un `blur-crossfade`/`zoom-through` en el mismo instante; nada de `filter`/`opacity < 1`/`overflow`/`mask` en
     ancestros con `preserve-3d`. *Fuente: R1 §2.16/T1, R2 §3.10, P §4, D §3.7 [crít.: D corregido de 32 px a ≤ 24 px].*
 22. **Sonido: solo SFX, sin música.** ~0.8–1 evento/s de 2–3 capas (≈ 1–2 SFX/s, frente a 4.0/s de la v3), golpes en el
     fotograma en que el movimiento llega o alcanza su pico; transitorios fuertes solo en los huecos de la voz; saltos de
@@ -163,8 +177,8 @@ Cumple las decisiones 1, 2, 9 y 20. Tiempos absolutos aproximados; agrupar en 7�
 |---|---|---|---|---|
 | Gancho + problema | 0–7.5 s | Apertura en rack focus; «5 min por sesión» → «4 h por grupo al semestre» (odómetro/morph de píldora, R2 M4); «unas 20 h» como estimación | E1 o E3 neutro | — |
 | Marca → producto | 6.5–13 s | Sting/wordmark (C → A) en la bisagra; saludo «Buenos días, Patricia» (serif) y tarjeta «Pasar lista» (E2) que se vuelve PasarListaHero; pulso en «Abrir y pasar lista» | E1 → E3 azul | `zoom-through` o C |
-| Pasar lista en vivo | 13–22 s | Cámara con avatares Lorelei, esquinas blancas → verdes por oleada, lecturas 1/3 → 3/3, «19 de 24 presentes», medidor 88 % | E3 azul → verde | A |
-| Revisión | 22–26 s | Caso de Emilio 2/3, «Resolver como Presente (Sugerido)», pestaña 8 → 7 | E3 dorado | A o B |
+| Pasar lista en vivo | 13–22 s | Cámara con avatares Lorelei, esquinas blancas → verdes en una ola, chip «Pendiente» → «Presente» (sin contador de lecturas, 2026-10-06), «19 de 24 presentes», medidor 88 % | E3 azul → verde | A |
+| Revisión | 22–26 s | Caso de Emilio (sesión del 12-sep, «Quedan 2 h 48 min», 89 % y 93 %; sin «2/3»), «Resolver como Presente (Sugerido)», pestaña 8 → 7 | E3 dorado | A o B |
 | Analítica | 26–35 s | «20.8 %» + «+4.2 pp», línea S1–S6 + proyección S15 con guía y tooltip de tinta; relevo a la tira Lun · Mié · Vie con «Día crítico: Viernes» | E3 violeta | B |
 | A tiempo (Iván) | 35–41 s | Ranking BarrasPildora con «Límite 20 %»; rack focus a Iván: Alto 64, «quedan 2 faltas», cruce semana 9, acción sugerida | E3 rosa | A |
 | Alumno / reportes (opcional) | 41–45 s | «Te quedan 2 faltas antes del límite.» en teléfono, o «Exportar CSV» | E3 verde | B |
