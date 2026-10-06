@@ -17,12 +17,14 @@
 .s02-un-boton-nube-rubor{background:radial-gradient(closest-side,rgba(251,230,226,.6),rgba(251,230,226,0))}
 .s02-un-boton-grano{position:absolute;inset:0;pointer-events:none;mix-blend-mode:multiply;opacity:.04;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
 #s02-un-boton-grano-cielo{opacity:.10}
-/* «SUSAN»: el BrandMark de la app ampliado (Hanken 600, 136 px, -0.025em), sin escudo. Línea base en y = 540 (ascenso medido: 115 px). */
+/* «SUSAN»: el BrandMark de la app ampliado (Hanken 600, 136 px, -0.025em), sin escudo y sin subrayado (BRIEF, ajuste del 2026-10-06).
+   Línea base en y = 540 (ascenso medido: 115 px). */
 #s02-un-boton-marca{position:absolute;left:136px;top:425px;font-size:136px;font-weight:600;letter-spacing:-0.025em;line-height:1;white-space:nowrap;color:#1E1919}
 .s02-un-boton-letra{display:inline-block}
-#s02-un-boton-subrayado{position:absolute;left:139px;top:543px;width:404px;height:40px;overflow:visible}
 /* escena: sombras en capa aparte, superficie (tarjeta -> cámara), botón (la ficha estirada) y brillo */
 .s02-un-boton-rig{position:absolute;inset:0;transform-origin:1340px 592px}
+/* las sombras escalan con el rig (mismo origen) pero no siguen su despegue en y: así se leen como altura */
+#s02-un-boton-sombras{position:absolute;inset:0;transform-origin:1340px 592px}
 .s02-un-boton-sombra-cielo-crece{position:absolute;left:984px;top:209px;width:712px;height:582px;transform-origin:356px 383px}
 #s02-un-boton-sombra-cielo{position:absolute;inset:0;border-radius:28px;transform-origin:0 0;
  box-shadow:0 40px 120px rgba(29,95,209,.14),0 8px 24px rgba(29,95,209,.08)}
@@ -62,16 +64,17 @@
 #s02-un-boton-frente{right:24px}
 /* Botón «Abrir y pasar lista» = la ficha del botón central estirada. Caja 632 x 168 centrada en (1340, 592) que cubre disco y botón. */
 #s02-un-boton-boton{position:absolute;left:1024px;top:508px;width:632px;height:168px;transform-origin:316px 84px}
-#s02-un-boton-ficha-sombra{position:absolute;left:232px;top:0;width:168px;height:168px;border-radius:50%;box-shadow:0 30px 90px rgba(30,25,25,.18);transform-origin:50% 50%}
+#s02-un-boton-ficha-sombra{position:absolute;left:217px;top:-15px;width:198px;height:198px;border-radius:50%;box-shadow:0 30px 90px rgba(30,25,25,.18);transform-origin:50% 50%}
 #s02-un-boton-foco{position:absolute;left:0;top:36px;width:632px;height:96px;border-radius:16px;box-shadow:0 0 0 8px rgba(0,97,254,.3)}
 #s02-un-boton-anillo{position:absolute;left:-15px;top:-15px;width:662px;height:198px;background:#FFFFFF}
 #s02-un-boton-sup{position:absolute;inset:0;background:#1E1919;color:#FFFFFF}
-#s02-un-boton-ico{position:absolute;left:152px;top:64px;width:40px;height:40px;display:block;transform-origin:50% 50%}
+/* scan-face se maqueta a 72 px (el del cuadro 1, idéntico al píxel en el corte) y se asienta a 40 px con escala 40/72 */
+#s02-un-boton-ico{position:absolute;left:136px;top:48px;width:72px;height:72px;display:block;transform-origin:50% 50%}
 #s02-un-boton-rotulo{position:absolute;left:208px;top:64px;height:40px;display:flex;align-items:center;gap:16px}
 #s02-un-boton-rotulo-texto{font-size:28px;line-height:40px;font-weight:500;white-space:nowrap}
 #s02-un-boton-flecha{display:block;width:32px;height:32px}
 #s02-un-boton-flecha svg{width:32px;height:32px;display:block}
-#s02-un-boton-brillo-caja{position:absolute;left:984px;top:209px;width:712px;height:582px;border-radius:28px;overflow:hidden;pointer-events:none}
+#s02-un-boton-brillo-caja{position:absolute;left:0;top:36px;width:632px;height:96px;border-radius:16px;overflow:hidden;pointer-events:none}
 #s02-un-boton-brillo{position:absolute;inset:0;background:linear-gradient(105deg,rgba(255,255,255,0) 42%,rgba(255,255,255,.55) 50%,rgba(255,255,255,0) 58%)}
 </style>
 <div id="root" data-composition-id="s02-un-boton" data-start="0" data-duration="6.05" data-width="1920" data-height="1080">
@@ -88,11 +91,6 @@
     <div id="s02-un-boton-nube-cerca" class="s02-un-boton-nube s02-un-boton-nube-fria" data-layout-allow-overflow style="left:-280px;top:-40px;width:1160px;height:580px"></div>
     <div id="s02-un-boton-grano-cielo" class="s02-un-boton-grano"></div>
     <div id="s02-un-boton-marca" aria-label="SUSAN" data-layout-allow-occlusion><span class="s02-un-boton-letra">S</span><span class="s02-un-boton-letra">U</span><span class="s02-un-boton-letra">S</span><span class="s02-un-boton-letra">A</span><span class="s02-un-boton-letra">N</span></div>
-    <!-- Resaltado dorado: receta de PILOTO 3d (viewBox en px reales, pathLength 100, sin vector-effect) -->
-    <svg id="s02-un-boton-subrayado" viewBox="0 0 404 40" aria-hidden="true">
-      <path id="s02-un-boton-trazo" d="M8.08 26.67 C88.88 10, 161.6 33.33, 242.4 16.67 S363.6 13.33, 395.92 23.33" pathLength="100" fill="none"
-        stroke="#A8842C" stroke-opacity=".8" stroke-width="14" stroke-linecap="round" stroke-dasharray="100" stroke-dashoffset="100" />
-    </svg>
   </div>
 
   <!-- pista 2: E3 con halo azul de cámara; sube ENCIMA del cielo (el cielo nunca baja a 0) -->
@@ -102,10 +100,12 @@
 
   <!-- pista 3: el objeto flotante -->
   <div id="s02-un-boton-escena" class="clip s02-un-boton-capa" data-start="0" data-duration="6.05" data-track-index="3">
-    <div id="s02-un-boton-sombra-crece" class="s02-un-boton-sombra-cielo-crece"><div id="s02-un-boton-sombra-cielo"></div></div>
-    <div id="s02-un-boton-sombra-tinta"></div>
+    <div id="s02-un-boton-sombras" data-layout-allow-overflow>
+      <div id="s02-un-boton-sombra-crece" class="s02-un-boton-sombra-cielo-crece"><div id="s02-un-boton-sombra-cielo"></div></div>
+      <div id="s02-un-boton-sombra-tinta"></div>
+    </div>
 
-    <!-- rig del objeto flotante (sin zoom): despegue y acercamiento; las sombras quedan fuera y se leen como altura -->
+    <!-- rig del objeto flotante (sin zoom): despegue y acercamiento; las sombras escalan con él pero no despegan (se leen como altura) -->
     <div id="s02-un-boton-rig" class="s02-un-boton-rig" data-layout-allow-overflow>
     <div id="s02-un-boton-superficie">
       <div id="s02-un-boton-sup-borde"></div>
@@ -154,15 +154,15 @@
       <div id="s02-un-boton-foco"></div>
       <div id="s02-un-boton-anillo"></div>
       <div id="s02-un-boton-sup">
-        <svg id="s02-un-boton-ico" xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" data-lucide="scan-face" aria-hidden="true"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><path d="M9 9h.01"/><path d="M15 9h.01"/></svg>
+        <svg id="s02-un-boton-ico" xmlns="http://www.w3.org/2000/svg" width="72" height="72" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" data-lucide="scan-face" aria-hidden="true"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><path d="M9 9h.01"/><path d="M15 9h.01"/></svg>
         <div id="s02-un-boton-rotulo">
           <span id="s02-un-boton-rotulo-texto">Abrir y pasar lista</span>
           <span id="s02-un-boton-flecha"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" data-lucide="arrow-right" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span>
         </div>
       </div>
+      <!-- brillo de la CTA: recortado a la forma final del botón, sobre la tinta (en el blanco de la tarjeta no se vería) -->
+      <div id="s02-un-boton-brillo-caja"><div id="s02-un-boton-brillo" data-layout-allow-overflow></div></div>
     </div>
-
-    <div id="s02-un-boton-brillo-caja"><div id="s02-un-boton-brillo" data-layout-allow-overflow></div></div>
     </div>
   </div>
 </div>
@@ -179,19 +179,18 @@
         var T = {
             cielo: 0.10,        // soft-in: el fondo pasa de crema a cielo
             ficha: 0.10,        // la ficha viaja y se estira (whoosh-s en su pico, 0.40)
-            rotulo: 0.45,
+            rotulo: 0.52,       // cuando el icono ya despejó su lugar (≈0.525), dentro de la ventana 0.45-0.75
             tarjeta: 0.55,      // la superficie crece alrededor del botón (termina en 1.15: pop-2)
             contenido: 0.75,
             marca: 1.15,
-            subrayado: 1.95,    // draw
-            brillo: 2.80,       // sheen-s
+            despegue: 1.95,     // la tarjeta sube a su lugar mientras la voz dice «susan» (el hueco que dejó el subrayado)
+            brillo: 2.80,       // sheen-s: primer fotograma visible del brillo
             pulso: 3.50,
+            acercar: 4.15,      // la cámara se acerca al botón (gesto de 0.8 s que termina en la compresión)
             foco: 4.78,
             presion: 4.95,      // tap
             estado: 5.00,       // click-soft2
             camara: 5.30,       // morph a la cámara (whoosh-m en su pico, 5.60)
-            despegue: 2.20,     // la tarjeta sube a su lugar tras «susan»
-            acercar: 3.55,      // la cámara se acerca al botón con «Abres la sesión con un solo botón»
             DESPEGUE: 8,
             ACERCA: 1.04,
             D: 6.05
@@ -224,6 +223,7 @@
         var MORPH = { duration: 0.6, ease: 'power3.inOut' };
         var boton = $('boton');
         var rig = $('rig');
+        var sombras = $('sombras');
         tl.fromTo(boton, { x: -380, y: -92 }, { x: 0, y: 0, duration: MORPH.duration, ease: MORPH.ease }, T.ficha);
         // El objeto flotante se posa 8 px por debajo de su lugar (la sombra no baja con él) y despega a su sitio
         // cuando la voz ya dijo el nombre (Escena 2): un solo gesto finito, sin vuelta.
@@ -234,16 +234,17 @@
         tl.fromTo($('anillo'), { clipPath: 'inset(0px 232px 0px 232px round 99px)' },
             { clipPath: 'inset(36px 0px 36px 0px round 31px)', duration: MORPH.duration, ease: MORPH.ease }, T.ficha);
         tl.fromTo($('anillo'), { opacity: 1 }, { opacity: 0, duration: 0.45, ease: 'power2.in' }, T.ficha);
-        // La sombra de tinta de la ficha se estira con ella y cede el paso a la sombra-cielo de la tarjeta.
-        tl.fromTo($('ficha-sombra'), { scaleX: 1, scaleY: 1 }, { scaleX: 632 / 168, scaleY: 96 / 168, duration: MORPH.duration, ease: MORPH.ease }, T.ficha);
+        // La sombra de tinta de la ficha (la del cuadro 1: círculo de 198 px bajo el anillo) sigue al anillo
+        // (662 x 126 al final) y cede el paso a la sombra-cielo de la tarjeta.
+        tl.fromTo($('ficha-sombra'), { scaleX: 1, scaleY: 1 }, { scaleX: 662 / 198, scaleY: 126 / 198, duration: MORPH.duration, ease: MORPH.ease }, T.ficha);
         tl.fromTo($('ficha-sombra'), { opacity: 1 }, { opacity: 0, duration: 0.45, ease: 'power1.in' }, T.ficha);
         // scan-face 72 -> 40 px y del centro del disco a su lugar en el botón.
-        tl.fromTo($('ico'), { x: 144, scale: 1.8 }, { x: 0, scale: 1, duration: MORPH.duration, ease: MORPH.ease }, T.ficha);
-        // «Abrir y pasar lista» y la flecha entran desde el desenfoque.
-        tl.fromTo($('rotulo-texto'), { opacity: 0, y: -14 }, { opacity: 1, y: 0, duration: 0.25, ease: 'power4.out' }, T.rotulo);
-        desenfoque($('rotulo-texto'), T.rotulo, 0.25, 10, 'power4.out');
-        tl.fromTo($('flecha'), { opacity: 0, y: -14 }, { opacity: 1, y: 0, duration: 0.25, ease: 'power4.out' }, T.rotulo + 0.05);
-        desenfoque($('flecha'), T.rotulo + 0.05, 0.25, 10, 'power4.out');
+        tl.fromTo($('ico'), { x: 144, scale: 1 }, { x: 0, scale: 40 / 72, duration: MORPH.duration, ease: MORPH.ease }, T.ficha);
+        // «Abrir y pasar lista» y la flecha entran desde el desenfoque cuando scan-face ya llegó a su sitio (no lo pisan).
+        tl.fromTo($('rotulo-texto'), { opacity: 0, y: -14 }, { opacity: 1, y: 0, duration: 0.22, ease: 'power4.out' }, T.rotulo);
+        desenfoque($('rotulo-texto'), T.rotulo, 0.22, 10, 'power4.out');
+        tl.fromTo($('flecha'), { opacity: 0, y: -14 }, { opacity: 1, y: 0, duration: 0.20, ease: 'power4.out' }, T.rotulo + 0.03);
+        desenfoque($('flecha'), T.rotulo + 0.03, 0.20, 10, 'power4.out');
 
         // center-outward-expansion: la superficie de la tarjeta crece desde el botón (expo.out) con su borde de 2 px y su sombra.
         var CRECE = { duration: 0.6, ease: 'expo.out' };
@@ -257,22 +258,27 @@
             tl.fromTo($(p[0]), { opacity: 0, y: p[1] }, { opacity: 1, y: 0, duration: 0.5, ease: 'power4.out' }, T.contenido + i * 0.06);
         });
 
-        // ---------- Escena 2 (1.15-2.8 s): «SUSAN» se escribe y se subraya en oro ----------
+        // ---------- Escena 2 (1.15-2.8 s): «SUSAN» se escribe, limpio (sin subrayado: BRIEF, 2026-10-06) ----------
         var letras = document.querySelectorAll('#' + ID + '-marca .s02-un-boton-letra');
         for (var i = 0; i < letras.length; i++) {
             var at = T.marca + i * 0.045;
             tl.fromTo(letras[i], { opacity: 0, y: 40.8 }, { opacity: 1, y: 0, duration: 0.5, ease: 'power4.out' }, at);
             desenfoque(letras[i], at, 0.5, 12, 'power4.out');
         }
-        tl.fromTo($('trazo'), { attr: { 'stroke-dashoffset': 100 } }, { attr: { 'stroke-dashoffset': 0 }, duration: 0.8, ease: 'power4.out' }, T.subrayado);
-        // Presentación del producto: con el nombre ya dicho, la tarjeta despega 8 px a su lugar (power3.out, 0.45 s).
+        // Presentación del producto: con la marca ya asentada (1.83) y la voz en «susan», la tarjeta despega 8 px a su lugar
+        // (power3.out, 0.45 s; las sombras se quedan, así que se lee como altura).
         tl.fromTo(rig, { y: T.DESPEGUE }, { y: 0, duration: 0.45, ease: 'power3.out', immediateRender: false }, T.despegue);
 
-        // ---------- Escena 3 (2.8-4.9 s): brillo, pulso de la cámara y halo de foco ----------
-        tl.fromTo($('brillo'), { xPercent: -120 }, { xPercent: 120, duration: 0.7, ease: 'power2.inOut' }, T.brillo);
-        // «...con un solo botón»: la cámara se acerca al botón (escala 1 -> 1.04 con origen en su centro, sin hold largo:
-        // termina en la compresión y vuelve a 1 dentro del morph a la cámara). BRIEF: el toque se cuenta con «cámara que se acerca».
-        tl.fromTo(rig, { scale: 1 }, { scale: T.ACERCA, duration: T.presion - T.acercar, ease: 'power2.inOut' }, T.acercar);
+        // ---------- Escena 3 (2.8-4.9 s): brillo de la CTA, pulso de la cámara y halo de foco ----------
+        // El brillo cruza una vez el botón de tinta. Arranca ya dentro del borde izquierdo (xPercent -52: la mitad delantera de la
+        // banda asoma) para que el primer fotograma visible sea 2.80, el ancla de sheen-s; antes de 2.80 no existe (opacidad 0).
+        tl.set($('brillo'), { opacity: 0 }, 0);
+        tl.set($('brillo'), { opacity: 1 }, T.brillo);
+        tl.fromTo($('brillo'), { xPercent: -52 }, { xPercent: 120, duration: 0.5, ease: 'power2.inOut' }, T.brillo);
+        // «...con un solo botón»: la cámara se acerca al botón (escala 1 -> 1.04 con origen en su centro) en un gesto decidido que
+        // termina en la compresión y vuelve a 1 dentro del morph a la cámara. BRIEF: el toque se cuenta con «cámara que se acerca».
+        // Las sombras escalan con el mismo origen para que la tarjeta no se despegue de su sombra.
+        tl.fromTo([rig, sombras], { scale: 1 }, { scale: T.ACERCA, duration: T.presion - T.acercar, ease: 'power3.inOut' }, T.acercar);
         [['pulso-1', 0], ['pulso-2', 0.10]].forEach(function (p) {
             var c = $(p[0]);
             tl.fromTo(c, { attr: { r: 8 } }, { attr: { r: 22 }, duration: 0.45, ease: 'power2.out' }, T.pulso + p[1]);
@@ -290,8 +296,9 @@
         tl.fromTo($('sup'), { backgroundColor: '#1E1919' }, { backgroundColor: '#3A3433', duration: 0.09, ease: 'power1.in' }, T.presion);
         tl.fromTo($('sup'), { backgroundColor: '#3A3433' }, { backgroundColor: '#1E1919', duration: 0.25, ease: 'power3.out', immediateRender: false }, T.presion + 0.09);
         // Cambio de estado: «Programada» -> «Abierta» (tokens de justificado) y el halo de foco se abre una vez.
-        tl.fromTo($('programada'), { opacity: 1 }, { opacity: 0, duration: 0.06, ease: 'power1.in' }, T.estado);
-        tl.fromTo($('abierta'), { opacity: 0, scale: 0.92 }, { opacity: 1, scale: 1, duration: 0.18, ease: 'power3.out' }, T.estado + 0.02);
+        // Relevo en secuencia (los dos rótulos nunca se enciman): «Programada» sale en 0.04 s y «Abierta» entra justo después.
+        tl.fromTo($('programada'), { opacity: 1 }, { opacity: 0, duration: 0.04, ease: 'power1.in' }, T.estado);
+        tl.fromTo($('abierta'), { opacity: 0, scale: 0.92 }, { opacity: 1, scale: 1, duration: 0.18, ease: 'power3.out' }, T.estado + 0.04);
         tl.fromTo($('foco'), { boxShadow: '0 0 0 8px rgba(0,97,254,0.3)' }, { boxShadow: '0 0 0 28px rgba(0,97,254,0)', duration: 0.5, ease: 'power2.out' }, T.estado);
 
         // card-morph-anchor con constantes: la superficie va de la caja de la tarjeta a la de la cámara (clip-path, sin escala)
@@ -301,7 +308,7 @@
             { clipPath: inset(CAMARA, 28), backgroundColor: '#1E1919', duration: VIAJE.duration, ease: VIAJE.ease, immediateRender: false }, T.camara);
         tl.fromTo($('sup-fondo'), { clipPath: inset(mas(TARJETA, 2), 26), backgroundColor: '#FFFFFF' },
             { clipPath: inset(mas(CAMARA, 2), 26), backgroundColor: '#1E1919', duration: VIAJE.duration, ease: VIAJE.ease, immediateRender: false }, T.camara);
-        tl.fromTo(rig, { scale: T.ACERCA }, { scale: 1, duration: VIAJE.duration, ease: VIAJE.ease, immediateRender: false }, T.camara);
+        tl.fromTo([rig, sombras], { scale: T.ACERCA }, { scale: 1, duration: VIAJE.duration, ease: VIAJE.ease, immediateRender: false }, T.camara);
         tl.fromTo($('tarjeta'), { opacity: 1 }, { opacity: 0, duration: 0.24, ease: 'power1.in' }, T.camara);
         tl.fromTo(boton, { opacity: 1 }, { opacity: 0, duration: 0.24, ease: 'power1.in' }, T.camara);
         tl.fromTo([$('reconociendo'), $('frente')], { opacity: 0 }, { opacity: 1, duration: 0.24, ease: 'power1.out' }, T.camara + 0.36);
