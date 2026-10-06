@@ -50,7 +50,7 @@ voz» (guion con tiempos amarrados a cada escena).
     antes de que se lea cualquier cifra y en cada borde de cuadro. El tooltip de la gráfica va RECTO (sin rotación en
     el plano). Esto levanta, solo para la v4, el veto a la rotación que se dio en la v3.
   - Cierre: la ficha redonda de tinta del botón central «Pasar lista» (barra móvil real) cae con estela y squash sin
-    rebote y se resuelve en el wordmark «SUSAN» (Hanken Grotesk 600, subrayado dorado) con el lema debajo: «Pasa lista
+    rebote y se resuelve en el wordmark «SUSAN» (Hanken Grotesk 600, SIN subrayado: ver ajuste posterior) con el lema debajo: «Pasa lista
     en segundos y entiende la asistencia de tus grupos». La ficha funciona como propuesta de logo.
   - Sin tramo extra (ni vista del alumno ni reportes): ese tiempo se le da a la analítica para que las cifras y las
     gráficas se lean con calma.
@@ -61,6 +61,10 @@ voz» (guion con tiempos amarrados a cada escena).
   - Gancho con la barra de la clase que se pliega en el semestre (no la píldora «5 min»).
   - Sin «unas 20 h con 5 grupos»: queda «4 h por grupo al semestre».
   - Voz recomendada: «Antonio» (la de la v3), a confirmar cuando se genere.
+- Ajuste tras ver el avance de los primeros 10 s (2026-10-06): SIN el subrayado dorado ondulado bajo «SUSAN» (cuadros 2
+  y 8) — «ese como palo en zigzag, no me gusta». El wordmark va limpio: «SUSAN» en Hanken Grotesk 600, sin trazo
+  debajo; en el cierre, el lema queda bajo el nombre sin subrayado intermedio. Nada lo reemplaza (no inventar otro
+  adorno dorado); el oro deja de ser obligatorio en esos cuadros.
 
 ## Notes
 
