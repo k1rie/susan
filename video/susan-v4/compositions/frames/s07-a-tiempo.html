@@ -230,6 +230,9 @@
             cruce: 4.10,      // pop-2
             accion: 5.05,     // soft-in
             halo: 6.45,
+            empuje: 3.00,     // cámara: empuje hacia la fila «Faltas»
+            encuadre: 4.40,   // cámara: encuadra el pie de la tarjeta, donde llega la acción
+            regreso: 5.85,    // cámara: vuelve a la identidad a 6.65 s (handoff quieto)
             fin: 7.6
         };
 
@@ -282,12 +285,10 @@
         var filas = [], rellenos = [], cifras = [];
         for (var i = 0; i < 8; i++) { filas.push($('fila-' + i)); rellenos.push($('relleno-' + i)); cifras.push($('cifra-' + i)); }
         // Nombre y pista con la fila; la cifra de la fila se oculta aparte y llega 0.3 s después de su barra.
-        for (var k = 0; k < 8; k++) {
-            var tk = T.filas + 0.03 * k;
-            tl.fromTo(filas[k], { opacity: 0, x: -12 }, { opacity: 1, x: 0, duration: 0.3, ease: 'power2.out' }, tk);
-            tl.fromTo(rellenos[k], { clipPath: 'inset(0% 100% 0% 0%)' }, { clipPath: 'inset(0% 0% 0% 0%)', duration: 0.5, ease: 'power4.out' }, tk);
-            tl.fromTo(cifras[k], { opacity: 0 }, { opacity: 1, duration: 0.3, ease: 'power1.out' }, tk + 0.3);
-        }
+        // 0.20 + 7 × 0.03 + 0.5 = 0.91 s: la última barra termina; su cifra, 0.3 s después de arrancar la barra.
+        tl.fromTo(filas, { opacity: 0, x: -12 }, { opacity: 1, x: 0, duration: 0.3, ease: 'power2.out', stagger: 0.03 }, T.filas);
+        tl.fromTo(rellenos, { clipPath: 'inset(0% 100% 0% 0%)' }, { clipPath: 'inset(0% 0% 0% 0%)', duration: 0.5, ease: 'power4.out', stagger: 0.03 }, T.filas);
+        tl.fromTo(cifras, { opacity: 0 }, { opacity: 1, duration: 0.3, ease: 'power1.out', stagger: 0.03 }, T.filas + 0.3);
         tl.fromTo($('leyenda'), { opacity: 0 }, { opacity: 1, duration: 0.3, ease: 'power1.out' }, 0.72);
 
         // ---------- Escena 2 (1.05–2.45): foco selectivo, despegue y apertura en la tarjeta de Iván ----------
@@ -333,8 +334,9 @@
         tl.fromTo($('divisor'), { opacity: 0 }, { opacity: 1, duration: 0.3, ease: 'power1.out' }, 2.30);
 
         // ---------- Escena 3 (2.45–4.45): la barra frente al límite y «2» faltas restantes ----------
-        tl.fromTo([$('rot-restantes'), $('rot-faltas'), $('pista-f'), $('lim-linea'), $('lim-chip')], { opacity: 0 },
-            { opacity: 1, duration: 0.2, ease: 'power2.out' }, T.faltas);
+        // La fila «Faltas» entra como StaggerList (y 20 → 0); pista, línea discontinua y chip «Límite 20 %» llegan juntos a 2.45 s.
+        tl.fromTo([$('barra'), $('rot-faltas'), $('rot-restantes')], { opacity: 0, y: 20 },
+            { opacity: 1, y: 0, duration: 0.4, ease: 'power3.out', stagger: 0.06 }, T.faltas);
         // 14.9 % sobre un eje de 0 a 30 %: el relleno mide (776 − 4) × 14.9 / 30 = 383 px; el hueco hasta la línea es el margen.
         tl.fromTo($('relleno-f'), { clipPath: 'inset(0% 100% 0% 0%)' }, { clipPath: 'inset(0% 0% 0% 0%)', duration: 0.5, ease: 'power4.out' }, T.faltas);
         var tira = $('odo-tira');
@@ -342,7 +344,7 @@
             pos: function (e) { gsap.set(tira, { y: -144 * e }); } });
         tl.addLabel('read:faltas-restantes#0', T.odo + 0.25);
         tl.fromTo($('valor'), { opacity: 0 }, { opacity: 1, duration: 0.4, ease: 'power1.out' }, T.valor);
-        tl.fromTo($('cruce'), { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.35, ease: 'power3.out' }, T.cruce);
+        tl.fromTo($('cruce'), { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.35, ease: 'power3.out' }, T.cruce);
 
         // ---------- Escena 4 (4.45–7.6): la acción sugerida y su halo de foco ----------
         var accA = $('accion-a'), accB = $('accion-b');
@@ -352,17 +354,28 @@
         pintarBlur([accB], 10);
         blurTramo(bA, [accA], T.accion, 0.36, 10, 0, 'power2.out', true);
         blurTramo(bB, [accB], T.accion + 0.09, 0.36, 10, 0, 'power2.out', true);
-        tl.fromTo(accA, { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.36, ease: 'power3.out' }, T.accion);
-        tl.fromTo(accB, { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.36, ease: 'power3.out' }, T.accion + 0.09);
+        tl.fromTo(accA, { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.36, ease: 'power3.out' }, T.accion);
+        tl.fromTo(accB, { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.36, ease: 'power3.out' }, T.accion + 0.09);
         tl.addLabel('read:accion-sugerida#1', T.accion + 0.45);
         // Halo de foco nativo (sin cursor ni pulsación): es lo siguiente que hace la docente.
-        tl.fromTo($('accion-halo'), { opacity: 0 }, { opacity: 1, duration: 0.2, ease: 'power2.out' }, T.halo);
+        // El anillo se enciende como el foco nativo (casi de golpe, al final del tramo) y la fila toma el fondo activo #EFECE7.
+        tl.fromTo($('accion-halo'), { opacity: 0 }, { opacity: 1, duration: 0.2, ease: 'power3.in' }, T.halo);
+        tl.fromTo($('accion-fondo'), { backgroundColor: '#F7F5F2' }, { backgroundColor: '#EFECE7', duration: 0.2, ease: 'power3.in', immediateRender: false }, T.halo);
+
+        // ---------- Cámara de lectura (debajo de las escenas 3 y 4) ----------
+        // Tres viajes cortos power3.inOut que siguen la voz y vuelven a la identidad antes del handoff:
+        // empuje hacia el margen («…solo dos faltas»), encuadre de la acción antes de que llegue («Todavía…»),
+        // y regreso a la tarjeta completa, centrada y a escala 1, a 6.65 s. Sin deriva: entre viajes la cámara está quieta.
+        var cam = $('camara');
+        tl.fromTo(cam, { scale: 1, x: 0, y: 0 }, { scale: 1.06, x: 0, y: 1, duration: 0.8, ease: 'power3.inOut' }, T.empuje);
+        tl.fromTo(cam, { scale: 1.06, x: 0, y: 1 }, { scale: 1.04, x: 0, y: -40, duration: 0.8, ease: 'power3.inOut', immediateRender: false }, T.encuadre);
+        tl.fromTo(cam, { scale: 1.04, x: 0, y: -40 }, { scale: 1, x: 0, y: 0, duration: 0.8, ease: 'power3.inOut', immediateRender: false }, T.regreso);
 
         // Cuadro quieto deliberado desde 6.65 s; la duración la fija este ancla.
         tl.set({}, {}, T.fin);
 
         window.__timelines = window.__timelines || {};
-        window.__timelines[ID] = tl;
+        window.__timelines["s07-a-tiempo"] = tl;
     })();
 </script>
 </template>

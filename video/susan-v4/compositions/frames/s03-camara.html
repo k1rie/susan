@@ -10,8 +10,6 @@
 .s03-camara-e3{position:absolute;inset:0;background:radial-gradient(55% 60% at 1330px 450px,var(--halo) 0%,rgba(247,245,242,0) 72%),
  radial-gradient(120% 90% at 50% 40%,#F7F5F2 55%,#F3F1ED 100%)}
 .s03-camara-grano{position:absolute;inset:0;pointer-events:none;mix-blend-mode:multiply;opacity:.04;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
-.s03-camara-abs{position:absolute}
-
 /* ---- VistaCamara (objeto de escena): marco de tinta 900 × 506, radio 28; sombra de tinta en capa aparte ---- */
 .s03-camara-sombra{position:absolute;left:880px;top:200px;width:900px;height:506px;border-radius:28px;box-shadow:0 40px 120px rgba(30,25,25,.14)}
 .s03-camara-vista{position:absolute;left:880px;top:200px;width:900px;height:506px;border-radius:28px;background:#1E1919;overflow:hidden}
@@ -45,10 +43,10 @@
 .s03-camara-chip-pendiente{background:#EEEBE6;color:#5B5651}
 /* chips oscuros de la cámara (handoff: alto 44, texto e icono de 24) */
 .s03-camara-camchip{position:absolute;left:24px;top:24px;height:44px;display:inline-flex;align-items:center;gap:12px;padding:0 20px;border-radius:999px;
- background:rgba(30,25,25,.8);color:#FFFFFF;font-size:24px;font-weight:500;line-height:32px;white-space:nowrap;letter-spacing:0}
+ background:rgba(30,25,25,.8);color:#FFFFFF;font-size:24px;font-weight:500;line-height:32px;white-space:nowrap}
 .s03-camara-ico{display:block;width:24px;height:24px;flex:none}
-.s03-camara-frente{position:absolute;right:24px;top:24px;height:44px;display:flex;align-items:center;color:#FFFFFF;font-size:24px;font-weight:500;line-height:32px;white-space:nowrap;letter-spacing:0}
-
+.s03-camara-frente{position:absolute;right:24px;top:24px;height:44px;display:inline-flex;align-items:center;padding:0 20px;border-radius:999px;
+ background:rgba(30,25,25,.8);color:#FFFFFF;font-size:24px;font-weight:500;line-height:32px;white-space:nowrap}
 /* ---- columna izquierda: ventana de la cifra (ResumenPaseLista a escala de héroe) ---- */
 .s03-camara-rotulo{position:absolute;left:140px;top:236px;font-size:32px;font-weight:500;line-height:40px;color:#6F6A65;white-space:nowrap}
 .s03-camara-cifra{position:absolute;left:140px;top:300px;height:176px;width:720px}
@@ -67,7 +65,6 @@
 .s03-camara-pal{display:inline-block}
 .s03-camara-ultima{position:absolute;left:880px;top:730px;font-size:24px;font-weight:400;line-height:36px;color:#6F6A65;white-space:nowrap;letter-spacing:0}
 .s03-camara-ultima b{font-weight:600;color:#1E1919}
-
 /* ---- MedidorLiquido real a E = 1.6: tanque 134 × 269, radio 38, vidrio #F0EDE8, líquido #4A86F0, 5 marcas ---- */
 .s03-camara-tanque{position:absolute;left:140px;top:620px;width:134px;height:269px;border-radius:38px;background:#F0EDE8;overflow:hidden}
 .s03-camara-liquido{position:absolute;inset:0;background:#4A86F0;clip-path:polygon(0 100%,100% 100%,100% 100%,0 100%)}
@@ -88,7 +85,6 @@
     <div id="s03-camara-halo-verde" class="s03-camara-e3" style="--halo:#E5F3EE"></div>
     <div class="s03-camara-grano"></div>
   </div>
-
   <div id="s03-camara-escena" class="clip s03-camara-capa" data-start="0" data-duration="8.5" data-track-index="1">
     <div id="s03-camara-sombra" class="s03-camara-sombra"></div>
     <div id="s03-camara-vista" class="s03-camara-vista">
@@ -142,7 +138,6 @@
       <div id="s03-camara-frente" class="s03-camara-frente">Cámara frente</div>
     </div>
     <div id="s03-camara-ultima" class="s03-camara-ultima">Última captura: <b>23</b> rostros · <b>22</b> válidos</div>
-
     <div id="s03-camara-rotulo" class="s03-camara-rotulo">Asistencia ahora</div>
     <div id="s03-camara-cifra" class="s03-camara-cifra">
       <div id="s03-camara-fila19" class="s03-camara-fila">
@@ -152,7 +147,6 @@
     </div>
     <div id="s03-camara-barra" class="s03-camara-barra"><div class="s03-camara-segs"><span id="s03-camara-seg-p" class="s03-camara-seg" style="width:528.83px;background:#27A06A"></span><span id="s03-camara-seg-r" class="s03-camara-seg" style="width:55.67px;background:#C98100"></span><span id="s03-camara-seg-s" class="s03-camara-seg" style="width:55.67px;background:#DE4D44"></span><span id="s03-camara-seg-pe" class="s03-camara-seg" style="width:27.83px;background:#8F8A82"></span></div></div>
     <div id="s03-camara-detalle" class="s03-camara-detalle"><span id="s03-camara-pal-0" class="s03-camara-pal">2</span> <span id="s03-camara-pal-1" class="s03-camara-pal">con</span> <span id="s03-camara-pal-2" class="s03-camara-pal">retardo</span> <span id="s03-camara-pal-3" class="s03-camara-pal">·</span> <span id="s03-camara-pal-4" class="s03-camara-pal">2</span> <span id="s03-camara-pal-5" class="s03-camara-pal">sin</span> <span id="s03-camara-pal-6" class="s03-camara-pal">registro</span> <span id="s03-camara-pal-7" class="s03-camara-pal">·</span> <span id="s03-camara-pal-8" class="s03-camara-pal">1</span> <span id="s03-camara-pal-9" class="s03-camara-pal">por</span> <span id="s03-camara-pal-10" class="s03-camara-pal">revisar</span></div>
-
     <div id="s03-camara-tanque" class="s03-camara-tanque">
       <div id="s03-camara-liquido" class="s03-camara-liquido"></div>
       <div class="s03-camara-marcas"></div>
@@ -167,7 +161,6 @@
       <div id="s03-camara-med-desc" class="s03-camara-med-desc">21 de 24 inscritos</div>
     </div>
   </div>
-
   <!-- estela vertical de los odómetros: un filtro por columna, región ajustada al eje (PILOTO §3c) -->
   <svg width="0" height="0" aria-hidden="true" style="position:absolute">
     <filter id="s03-camara-mb-d19" x="-10%" y="-6%" width="120%" height="112%" color-interpolation-filters="sRGB"><feGaussianBlur id="s03-camara-mb-d19-g" stdDeviation="0 0" /></filter>
@@ -185,7 +178,6 @@
         var DOS_PI = Math.PI * 2;
         // Obturador en segundos: la estela mide lo mismo a 30 y a 60 fps (PILOTO §3c).
         var OBT = 1 / 60;
-
         // Rostros: k, estado (p presente · r retardo · pe pendiente · v visita), central, retraso de la ola y x en el lienzo.
         var CARAS = [{"k":0,"e":"p","c":0,"d":0.37,"x":948},{"k":1,"e":"r","c":0,"d":0.27,"x":1055},{"k":2,"e":"p","c":0,"d":0.2,"x":1154},{"k":3,"e":"p","c":0,"d":0.15,"x":1263},{"k":4,"e":"p","c":0,"d":0.15,"x":1361},{"k":5,"e":"pe","c":0,"d":0.22,"x":1469},{"k":6,"e":"p","c":0,"d":0.3,"x":1569},{"k":7,"e":"p","c":0,"d":0.39,"x":1678},{"k":8,"e":"p","c":0,"d":0.3,"x":986},{"k":9,"e":"p","c":0,"d":0.2,"x":1085},{"k":10,"e":"p","c":0,"d":0.1,"x":1195},{"k":11,"e":"p","c":1,"d":0,"x":1298},{"k":12,"e":"p","c":0,"d":0.1,"x":1398},{"k":13,"e":"p","c":0,"d":0.2,"x":1507},{"k":14,"e":"r","c":0,"d":0.3,"x":1607},{"k":15,"e":"p","c":0,"d":0.4,"x":1714},{"k":16,"e":"p","c":0,"d":0.31,"x":1016},{"k":17,"e":"p","c":0,"d":0.22,"x":1125},{"k":18,"e":"p","c":0,"d":0.16,"x":1223},{"k":19,"e":"p","c":0,"d":0.15,"x":1330},{"k":20,"e":"p","c":0,"d":0.19,"x":1436},{"k":21,"e":"p","c":0,"d":0.27,"x":1535},{"k":22,"e":"v","c":0,"d":0,"x":1643}];
         var N = CARAS.length;
@@ -198,19 +190,15 @@
         var visita = CARAS.filter(function (c) { return c.e === 'v'; })[0];
         var central = CARAS.filter(function (c) { return c.c; })[0];
         var ambar = alumnos(function (c) { return c.e === 'r'; });
-
         var tl = gsap.timeline({ paused: true });
-
         /* ===== bloque canónico v4 (scripts/frame-helpers.snippet.js): solo se usa readMark ===== */
         window.SFXN = window.SFXN || 0;
         function readMark(tl, t, frase) {
             tl.addLabel('read:' + frase + '#' + (window.SFXN++), t);
             return t;
         }
-
         function sstep(x) { x = Math.max(0, Math.min(1, x)); return x * x * (3 - 2 * x); }
         function cubOut(x) { x = Math.max(0, Math.min(1, x)); return 1 - Math.pow(1 - x, 3); }
-
         // Velocidad de la curva en fracción por segundo (diferencia central: función pura de t).
         function velocidad(ease, p, dur) {
             var h = 0.002, a = Math.max(0, p - h), b = Math.min(1, p + h);
@@ -232,7 +220,6 @@
             aplicar();
             tl.fromTo(st, { p: 0 }, { p: 1, duration: o.dur, ease: 'none', onUpdate: aplicar, immediateRender: false }, o.at);
         }
-
         /* ---------- Escena 1 (0.0–1.3 s): el marco vacío se puebla y entra la columna izquierda ---------- */
         // 23 avatares en tres filas (8, 8, 7): opacidad y escala 0.92 → 1, escalonado por índice entre 0.10 y 0.50 s.
         tl.fromTo(av, { opacity: 0, scale: 0.92 }, { opacity: 1, scale: 1, duration: 0.20, ease: 'power3.out', stagger: { each: 0.20 / (N - 1) } }, 0.10);
@@ -240,14 +227,13 @@
         tl.fromTo([$('rotulo'), $('cifra'), $('barra')], { y: 28, opacity: 0 }, { y: 0, opacity: 1, duration: 0.38, ease: 'power4.out', stagger: 0.06 }, 0.45);
         // La cifra muestra «0» alineada a x = 140: la columna de decenas (vacía) queda a la izquierda hasta que rueda.
         tl.fromTo($('fila19'), { x: -84.8 }, { x: 0, duration: 0.56, ease: 'expo.out' }, 5.05);
-
         /* La clase sigue: un solo driver mueve cada rostro (seno lento con fase propia) y DERIVA su marco del rostro en el mismo
            onUpdate (ai-tracking-box: el marco nunca tiene tween de posición propio). Envolvente: entra de 0.6 a 1.4 s y se apaga
            de 6.8 a 8.3 s, así todo queda quieto desde 8.30 s (handoff_out). */
         var FX = [], FY = [], PX = [], PY = [], AX = [];
         for (var k = 0; k < N; k++) {
             var a = (k * 0.6180339) % 1, b = (k * 0.3819660 + 0.27) % 1, c2 = (k * 0.7372 + 0.11) % 1;
-            FX.push(0.42 + 0.24 * a); FY.push((0.42 + 0.24 * a) * 1.37); PX.push(DOS_PI * b); PY.push(DOS_PI * c2); AX.push(4 + (k % 3));
+            FX.push(0.42 + 0.24 * a); FY.push((0.42 + 0.24 * a) * 1.37); PX.push(DOS_PI * b); PY.push(DOS_PI * c2); AX.push(3 + 0.75 * (k % 3));
         }
         var MOV0 = 0.6, MOV1 = 8.3;
         function envolvente(t) { return Math.min(sstep((t - MOV0) / 0.8), 1 - sstep((t - 6.8) / (MOV1 - 6.8))); }
@@ -268,7 +254,6 @@
         }
         aplicarMov();
         tl.fromTo(mov, { t: MOV0 }, { t: MOV1, duration: MOV1 - MOV0, ease: 'none', onUpdate: aplicarMov, immediateRender: false }, MOV0);
-
         /* ---------- Escena 2 (1.3–4.9 s): detección, traba y seguimiento ---------- */
         // 1.30 s (shutter): las esquinas se traban en 22 rostros en un barrido de izquierda a derecha; todas trabadas a 1.90 s.
         var porX = alumnos().slice().sort(function (p, q) { return p.x - q.x; }).map(function (c) { return me[c.k]; });
@@ -291,7 +276,6 @@
         }
         aplicarPulso();
         tl.fromTo(pulso, { p: 0 }, { p: 1, duration: 0.30, ease: 'none', onUpdate: aplicarPulso, immediateRender: false }, 3.85);
-
         /* ---------- Escena 3 (4.9–7.3 s): la ola confirma sin número ---------- */
         // Ola desde el rostro central hacia los bordes (frente de 4.90 a 5.30 s): velo del estado 0 → 1 → 0 en 0.3 s por marco y las
         // esquinas pasan de blanco a su color (verde 19, ámbar 2; la pendiente sigue blanca).
@@ -344,7 +328,6 @@
         tl.fromTo(blurTxt, { t: 0 }, { t: 0.40, duration: 0.40, ease: 'none', onUpdate: aplicarBlur, immediateRender: false }, 6.05);
         // 6.35–6.75 s: bajo la cámara, la línea real de la última captura (rostros de la toma, no lecturas por alumno).
         tl.fromTo($('ultima'), { y: 16, opacity: 0 }, { y: 0, opacity: 1, duration: 0.40, ease: 'power3.out' }, 6.35);
-
         /* ---------- Escena 4 (7.3–8.5 s): el medidor sube a 88 % y el halo pasa a verde ---------- */
         tl.fromTo($('tanque'), { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: 0.40, ease: 'power4.out' }, 7.30);
         tl.fromTo([$('pct'), $('med-et'), $('med-desc')], { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: 0.40, ease: 'power4.out', stagger: 0.06 }, 7.30);
@@ -374,10 +357,9 @@
         var meAmbar = ambar.map(function (c) { return me[c.k]; });
         tl.fromTo(meAmbar, { scale: 1 }, { scale: 1.06, duration: 0.08, ease: 'power2.out', immediateRender: false }, 7.85);
         tl.fromTo(meAmbar, { scale: 1.06 }, { scale: 1, duration: 0.17, ease: 'power2.inOut', immediateRender: false }, 7.93);
-
         tl.set({}, {}, 8.5);
         window.__timelines = window.__timelines || {};
-        window.__timelines[ID] = tl;
+        window.__timelines["s03-camara"] = tl;
     })();
 </script>
 </template>

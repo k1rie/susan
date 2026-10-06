@@ -142,17 +142,13 @@
 
         var tl = gsap.timeline({ paused: true });
 
-        /* ============================================================================================================
-           BLOQUE CANONICO v4 (lectura + camara + pose 3D). Opcional: se PEGA TAL CUAL dentro del <script> de un cuadro, despues de crear
-           `tl` (var tl = gsap.timeline({ paused: true });) y antes de registrarlo. No lo edites en el cuadro: edita este archivo.
-           Es idempotente: pegarlo en varios cuadros (mismo window) redefine las mismas funciones.
-           ============================================================================================================ */
+        // readMark, copiado sin cambios del bloque canónico v4 (scripts/frame-helpers.snippet.js); el resto del bloque (cámara y
+        // pose 3D) no se pega porque este cuadro no mueve cámara ni inclina nada.
         window.SFXN = window.SFXN || 0;   // contador unico de etiquetas (compartido por todos los cuadros de la pagina)
         function readMark(tl, t, frase) {
             tl.addLabel('read:' + frase + '#' + (window.SFXN++), t);
             return t;
         }
-        /* ============================ fin del bloque canonico v4 (solo readMark: este cuadro no mueve camara ni pose) ============================ */
 
         // Tiempos del bloque (STORYBOARD, Frame 5) y de sfx_cues: el tween nombrado empieza o termina en ese instante.
         var T = {
@@ -187,7 +183,7 @@
         DIAS.forEach(function (d) {
             var dec = Number(d.v.charAt(0)), uni = Number(d.v.charAt(1)), dcm = Number(d.v.charAt(3));
             d.cols = {
-                d: digitos(0, 0, dec),
+                d: digitos(1, 0, dec),   // decenas sin cero a la izquierda: blanco -> 1 (-> 2)
                 u: digitos(0, 1, uni),
                 p: ['', '.'],
                 t: digitos(0, 2, dcm),
@@ -252,7 +248,7 @@
                 var e = ease(st.p);
                 if (st.p >= 1) { el.style.clipPath = 'none'; el.style.opacity = '1'; return; }
                 el.style.clipPath = 'circle(' + (RADIO * e).toFixed(2) + 'px at 50% 45%)';
-                el.style.opacity = (0.6 + 0.4 * e).toFixed(3);
+                el.style.opacity = (0.35 + 0.65 * e).toFixed(3);
             }
             aplicar();
             tl.fromTo(st, { p: 0 }, { p: 1, duration: dur, ease: 'none', onUpdate: aplicar, immediateRender: false }, at);

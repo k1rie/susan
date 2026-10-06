@@ -2,6 +2,7 @@ export const meta = {
   name: 'susan-v4-ensamblar',
   description: 'Ensambla la v4 (index, GSAP local, transiciones, SFX, costuras), renderiza a 60 fps y revisa el MP4',
   phases: [
+    { title: 'Cambios del dueño', detail: 'sin subrayado bajo SUSAN (cuadros 2 y 8) y ajustes de composición vistos en el avance' },
     { title: 'Ensamblar', detail: 'index, GSAP local, transiciones, SFX, check, costuras' },
     { title: 'Render y QA', detail: 'render 60 fps alta calidad, sincronía medida y revisión del MP4' },
   ],
@@ -16,6 +17,16 @@ const S = `${SK}/product-launch-video/scripts`
 const HF = 'npx --yes hyperframes@0.8.134'
 
 const frameSummary = args.frameSummary
+phase('Cambios del dueño')
+const cambios = await agent(`${CTX}
+
+The 8 frames are built and individually reviewed. Per-frame outcomes:
+${frameSummary}
+
+Apply the owner's latest changes BEFORE assembly (read ${P}/BRIEF.md, the 2026-10-06 adjustment about the underline):
+1. REMOVE the wavy gold underline ('subrayado dorado', the Resaltado stroke) under the «SUSAN» wordmark everywhere — owner: «no pongas esa cosa abajo de SUSAN, ese como palo en zigzag, no me gusta». In ${P}/compositions/frames/s02-un-boton.html and ${P}/compositions/frames/s08-susan.html delete the stroke and its draw tween, and re-balance the lockup: «SUSAN» stays clean (Hanken Grotesk 600, ink); in frame 8 the tagline «Pasa lista en segundos y entiende la asistencia de tus grupos» sits under the name with the spacing the underline used to occupy redistributed so the lockup is optically centered; do NOT invent any replacement ornament (no dot, no line, no other gold mark). Keep timing alive: where the underline draw filled a beat, let the existing next reveal (tagline, card, chip slide) arrive slightly earlier or let the hold breathe, respecting no dead stills >= 1.0 s. Update ${P}/STORYBOARD.md (frames 2 and 8: scene, focal, Scene lines, and remove the sfx_cues that belonged to the underline draw), ${P}/frame.md (§3 gold rule examples and §8 lockup: underline withdrawn by the owner), ${P}/plan/PLAN.md (frames 2/8 rows and the 'Topes' gold line).
+2. Composition notes from the 10 s preview the owner saw (fix only if still present after the per-frame reviews): in s01-cinco-minutos the content sat in the upper half with a large empty band below — center the hero group optically in the 1920x1080 frame (title-safe), keeping the handoff_out geometry of the ink chip consistent with s02's handoff_in (if you move the chip's final position, update BOTH frames and the STORYBOARD handoff numbers identically); in s02-un-boton the 'Pasar lista' card read small for 1080p — make sure the card is the hero (roughly 40-50 % of frame width at its readable moment, UI scale E=2 or a bit larger) with «SUSAN» balanced beside it, again keeping the s02 -> s03 handoff numbers consistent on both sides.
+After editing, run for s01, s02 and s08: node ${P}/scripts/preview-frame.mjs <id> --bordes --anclas --sheet and node ${P}/scripts/frame-check.mjs <id>; LOOK at the stills; iterate until clean. Final reply: what changed per file and the check results.`, { label: 'cambios:sin-subrayado', phase: 'Cambios del dueño' })
 phase('Ensamblar')
 const SEAM_SCHEMA = {
   type: 'object',
@@ -36,6 +47,9 @@ const assembled = await agent(`${CTX}
 
 You are the assembler. All 8 frames exist in ${P}/compositions/frames/. Per-frame outcomes:
 ${frameSummary}
+
+Owner changes applied just before you (gold underline removed from frames 2 and 8, composition fixes):
+${cambios || '(sin informe)'}
 
 Run the v4 pipeline EXACTLY in the order of ${P}/scripts/README.md §1 (read it first; respect its warnings: assemble-index rewrites index.html entirely; localizar-gsap after assembling; transitions inject ONCE per assembly; never audio.mjs fetch-sfx/sync-durations): assemble-index → localizar-gsap (+ --check) → transitions inject → transitions verify → mount-sfx → verify-sfx → ${HF} check (fix every error; if a frame has a lint/runtime error, make the minimal fix in that frame file) → mark every frame '- status: animated' in STORYBOARD.md (status line only).
 Then the SEAMS: for each of the 7 cuts, take snapshots at cut−0.1 s and cut+0.2 s (and the transition midpoint for push-slide/blur-crossfade) with \`${HF} snapshot . --at <times>\`, LOOK at each pair, and verify every handoff (STORYBOARD handoff_out/handoff_in: same element, same position/scale/opacity/rotation, no pop, no double image, nothing disappearing). Fix any seam with the minimal edit in the frame file(s) (frame edits do not require re-assembly unless a duration changes; if one does, redo the pipeline from assemble-index). Also take snapshots at every frame midpoint and build one contact sheet (the snapshot command writes snapshots/contact-sheet.jpg) and LOOK at it.

@@ -14,6 +14,10 @@
 .s04-revision-violeta{--halo:#EEE9F7}
 .s04-revision-grano{position:absolute;inset:0;pointer-events:none;mix-blend-mode:multiply;opacity:.04;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
 
+/* ---- cámara: rig sin zoom que lleva la estación y la tarjeta (el fondo queda fuera). Origen en el centro de la tarjeta
+   (1010, 610): la tarjeta no se desplaza, solo se acerca; sin will-change (cambia de escala: PILOTO §3b). ---- */
+.s04-revision-camara{position:absolute;inset:0;transform-origin:1010px 610px}
+
 /* ---- estación de Revisión: PageHeader y Tabs reales a E = 2 (zoom en .ui; posición en el rig) ---- */
 .s04-revision-ui2{zoom:2;position:relative}
 .s04-revision-cabecera{position:absolute;left:140px;top:118px}
@@ -60,9 +64,9 @@
 .s04-revision-grafica{position:relative;flex:1 1 auto;min-height:0;margin-top:14px;border:1px solid #E7E2DC;border-radius:14px;padding:12px 16px}
 .s04-revision-graf-t{font-size:16px;font-weight:600;letter-spacing:-0.025em;line-height:20px;white-space:nowrap}
 .s04-revision-graf-d{margin-top:2px;font-size:14px;line-height:20px;color:#6F6A65;white-space:nowrap}
-.s04-revision-plot{position:absolute;top:12px;bottom:12px;right:16px;width:300px}
+.s04-revision-plot{position:absolute;top:4px;bottom:12px;right:16px;width:300px}
 .s04-revision-columna{position:absolute;top:0;bottom:0;width:150px}
-.s04-revision-barra{position:absolute;bottom:0;left:55px;width:40px;border-radius:999px;background:#27A06A}
+.s04-revision-barra{position:absolute;bottom:0;left:57px;width:36px;border-radius:999px;background:#27A06A}
 .s04-revision-cifra{position:absolute;left:0;width:150px;text-align:center;font-size:15px;font-weight:500;line-height:18px;color:#1E1919;white-space:nowrap}
 /* fila real «Resolver como»: primario de tinta, secundarios con borde #D8D2CA */
 .s04-revision-acciones{display:flex;gap:8px;margin-top:16px;height:40px;flex:none}
@@ -82,6 +86,7 @@
   </div>
 
   <div id="s04-revision-escena" class="clip" data-start="0" data-duration="5.8" data-track-index="1">
+   <div id="s04-revision-camara" class="s04-revision-camara">
     <!-- PageHeader real -->
     <div class="s04-revision-cabecera">
       <div class="s04-revision-ui2">
@@ -126,14 +131,14 @@
               <div class="s04-revision-graf-t">Score por lectura</div>
               <div class="s04-revision-graf-d">Similitud con la foto de registro (%)</div>
               <div class="s04-revision-plot">
-                <!-- alto del 100 % = 68 px de la app: 89 % = 60.52 y 93 % = 63.24; la cifra va 6 px sobre la punta -->
+                <!-- alto del 100 % = 75 px de la app: 89 % = 66.75 y 93 % = 69.75; la cifra va 6 px sobre la punta -->
                 <div class="s04-revision-columna" style="left:0">
-                  <span id="s04-revision-barra-1" class="s04-revision-barra" style="height:60.52px"></span>
-                  <span id="s04-revision-cifra-1" class="s04-revision-cifra" style="bottom:66.52px">89 %</span>
+                  <span id="s04-revision-barra-1" class="s04-revision-barra" style="height:66.75px"></span>
+                  <span id="s04-revision-cifra-1" class="s04-revision-cifra" style="bottom:72.75px">89 %</span>
                 </div>
                 <div class="s04-revision-columna" style="left:150px">
-                  <span id="s04-revision-barra-2" class="s04-revision-barra" style="height:63.24px"></span>
-                  <span id="s04-revision-cifra-2" class="s04-revision-cifra" style="bottom:69.24px">93 %</span>
+                  <span id="s04-revision-barra-2" class="s04-revision-barra" style="height:69.75px"></span>
+                  <span id="s04-revision-cifra-2" class="s04-revision-cifra" style="bottom:75.75px">93 %</span>
                 </div>
               </div>
             </div>
@@ -146,6 +151,7 @@
         </div>
       </div>
     </div>
+   </div>
   </div>
 </div>
 <!-- GSAP local: el CDN responde 403 en esta máquina (frame.md §1) -->
@@ -237,8 +243,10 @@ function camPlano(tl, el, t, o) { return camPose(tl, el, t, { rx: 0, ry: 0 }, o 
             barra1: 1.45, barra2: 1.54, cifra1: 1.80, cifra2: 1.89,
             botones: 2.65,
             foco: 3.80, presion: 3.95, liberacion: 4.04, chip: 4.00, contador: 4.10, quieto: 4.40,
-            secundarios: 4.45, focoFuera: 4.80, halo: 5.10, fin: 5.8
+            secundarios: 4.45, focoFuera: 4.80, halo: 5.10, fin: 5.8,
+            acercar: 1.40, alejar: 4.70
         };
+        var CAM = 1.03;   // la cámara se acerca a la tarjeta (sin desplazar su centro); vuelve a 1 antes del borde (handoff a escala 1)
         var tarjeta = $('tarjeta');
         var btn = $('btn-presente');
 
@@ -253,7 +261,10 @@ function camPlano(tl, el, t, o) { return camPose(tl, el, t, { rx: 0, ry: 0 }, o 
 
         // ---- Escena 2 (1.4–3.7 s): las dos columnas crecen de abajo arriba con clip-path (0.85 s, +0.09 s); cada cifra 0.35 s
         // después de su barra, nunca antes. Luego la fila real de botones en cascada (StaggerList: y 14 → 0, 0.5 s, +60 ms).
-        var CLIP0 = 'inset(100% 0% 0% 0% round 20px)', CLIP1 = 'inset(0% 0% 0% 0% round 20px)';
+        // La cámara se acerca (power3.inOut 0.7 s, escala ≤ 1.3) mientras crece la evidencia: un solo movimiento grande a la vez,
+        // la tarjeta ya está plana y quieta desde 1.15 s.
+        tl.fromTo($('camara'), { scale: 1 }, { scale: CAM, duration: 0.7, ease: 'power3.inOut' }, T.acercar);
+        var CLIP0 = 'inset(100% 0% 0% 0% round 18px)', CLIP1 = 'inset(0% 0% 0% 0% round 18px)';
         tl.fromTo($('barra-1'), { clipPath: CLIP0 }, { clipPath: CLIP1, duration: 0.85, ease: 'power4.out' }, T.barra1);
         tl.fromTo($('barra-2'), { clipPath: CLIP0 }, { clipPath: CLIP1, duration: 0.85, ease: 'power4.out' }, T.barra2);
         tl.fromTo($('cifra-1'), { opacity: 0, y: 4 }, { opacity: 1, y: 0, duration: 0.4, ease: 'power2.out' }, T.cifra1);
@@ -285,12 +296,15 @@ function camPlano(tl, el, t, o) { return camPose(tl, el, t, { rx: 0, ry: 0 }, o 
         // Lo no elegido baja al 45 %; el halo de foco se retira (0.4 s) y el escenario vira a violeta subiendo la capa nueva.
         tl.fromTo([$('btn-retardo'), $('btn-ausente')], { opacity: 1 }, { opacity: 0.45, duration: 0.35, ease: 'power2.out', immediateRender: false }, T.secundarios);
         tl.fromTo($('foco'), { opacity: 1 }, { opacity: 0, duration: 0.4, ease: 'power2.inOut', immediateRender: false }, T.focoFuera);
+        // «…lo decides tú»: con la cadena ya asentada, la cámara se aleja a la estación completa (escala 1, tarjeta en 1010/610)
+        // y queda quieta 0.5 s antes del empuje.
+        tl.fromTo($('camara'), { scale: CAM }, { scale: 1, duration: 0.6, ease: 'power3.inOut', immediateRender: false }, T.alejar);
         tl.fromTo($('halo-violeta'), { opacity: 0 }, { opacity: 1, duration: T.fin - T.halo, ease: 'power1.inOut' }, T.halo);
 
         tl.set({}, {}, T.fin);
 
         window.__timelines = window.__timelines || {};
-        window.__timelines[ID] = tl;
+        window.__timelines["s04-revision"] = tl;
     })();
 </script>
 </template>
