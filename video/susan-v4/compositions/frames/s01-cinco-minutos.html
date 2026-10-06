@@ -137,7 +137,7 @@
         var PASO = 85.2;                   // avance de cifra tabular a 160 px con -0.03em
         var C = { x: 960, y: 500 };        // centro de la ficha (handoff_out)
         // Tiempos que comparten el cuadro y sfx_cues (contrato: el tween nombrado empieza o termina ahi).
-        var T = { foco: 0.10, giro: 0.90, tic5: 1.65, relleno: 1.95, pliegue: 2.95, cuenta: 3.00, ola: 3.25, unidad: 3.45, tic4h: 3.65,
+        var T = { foco: 0.10, giro: 0.70, tic5: 1.65, relleno: 1.95, pliegue: 2.95, cuenta: 3.00, ola: 3.25, unidad: 3.45, tic4h: 3.65,
             igual: 4.45, junta: 5.45, disco: 5.74, ficha: 6.05, quieta: 6.20 };
         function $(s) { return document.getElementById(ID + '-' + s); }
         function clamp01(v) { return v < 0 ? 0 : v > 1 ? 1 : v; }
@@ -233,8 +233,9 @@
         // la cifra lleva la misma escala del rack en su propio rig, y nada mas: queda registrada con la barra y nunca se
         // mueve con el acercamiento de la barra ni con el pliegue
         tl.fromTo([camara, cifraRig], { scale: 1.12 }, { scale: 1, duration: 1.2, ease: 'power3.out' }, T.foco);
-        // la columna de las centenas sigue vacia hasta 0.90 s (rack < 0.1 px) y rueda UN renglon, de vacio a 5, con estela
-        // solo mientras va rapido; se asienta con el tic de 1.65 s, 0.3 s antes de «cinco». «5» es la unica cifra de la escena.
+        // la columna de las centenas esta vacia (U+2007) y rueda UN renglon, de vacio a 5, con estela solo mientras va rapido:
+        // arranca a 0.70 s con el 5 todavia bajo la mascara, que asoma hacia 0.80 s, cuando el rack ya bajo de 1 px; se asienta
+        // con el tic de 1.65 s, 0.3 s antes de «cinco». «5» es la unica cifra que aparece en la escena.
         conRastro({ el: tira1, nodo: $('mb1-g'), at: T.giro, dur: T.tic5 - T.giro, curva: 'power3.out', dist: H, max: 16,
             pos: function (e) { gsap.set(tira1, { y: -H * e }); } });
 
@@ -306,7 +307,7 @@
         tl.fromTo(cuenta, { opacity: 0, y: -14 }, { opacity: 1, y: 0, duration: 0.4, ease: 'power3.out' }, T.igual);
         desenfoque(cuenta, T.igual, 0.4, 10, 'power2.out');
         for (var n = 0; n < casillas.length; n++) {
-            var tp = T.igual + casillas[n].col * 0.016 + casillas[n].fila * 0.006;
+            var tp = T.igual + casillas[n].col * 0.012 + casillas[n].fila * 0.006;
             if (n === 0) {
                 tl.fromTo(est, { pulso: 0 }, { pulso: 1, duration: 0.1, ease: 'power2.out', onUpdate: recorte, immediateRender: false }, tp);
                 tl.fromTo(est, { pulso: 1 }, { pulso: 0, duration: 0.2, ease: 'power2.inOut', onUpdate: recorte, immediateRender: false }, tp + 0.1);

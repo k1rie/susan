@@ -23,9 +23,9 @@
 .s04-revision-cabecera{position:absolute;left:140px;top:118px}
 .s04-revision-h1{font-size:26px;font-weight:500;letter-spacing:-0.025em;line-height:1.25;white-space:nowrap}
 .s04-revision-h1-d{margin-top:4px;font-size:14px;line-height:1.5;color:#6F6A65;white-space:nowrap}
-.s04-revision-tabsrig{position:absolute;left:140px;top:224px;width:1640px}
-.s04-revision-tabs{display:flex;gap:24px;border-bottom:1px solid #E7E2DC;height:37px}
-.s04-revision-tab{position:relative;height:36px;display:flex;align-items:center;font-size:14px;font-weight:500;color:#6F6A65;white-space:nowrap}
+.s04-revision-tabsrig{position:absolute;left:140px;top:214px;width:1640px}
+.s04-revision-tabs{display:flex;gap:24px;border-bottom:1px solid #E7E2DC;height:45px;box-sizing:border-box}
+.s04-revision-tab{position:relative;min-height:44px;box-sizing:border-box;padding-bottom:2px;display:flex;align-items:center;font-size:14px;line-height:20px;font-weight:500;color:#6F6A65;white-space:nowrap}
 .s04-revision-tab.s04-revision-on{color:#1E1919}
 .s04-revision-tab.s04-revision-on::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;background:#1E1919}
 .s04-revision-cnt{display:inline-flex;margin-left:4px;font-size:12px;font-weight:500;line-height:16px;color:#6F6A65}
@@ -74,6 +74,15 @@
  border-radius:8px;border:1px solid transparent;background:#1E1919;color:#FFFFFF;font-size:14px;font-weight:500;white-space:nowrap;transform-origin:50% 50%}
 .s04-revision-sug{font-size:12px;font-weight:400}
 .s04-revision-sec{background:#FFFFFF;color:#1E1919;border-color:#D8D2CA}
+/* aviso real al resolver (Toast de ColaRevision: max-w-sm, flex gap-3, rounded-xl, borde de éxito al 40 %, bg-card, p-3.5,
+   text-sm, con su «Cerrar» min-h-9 px-3 gris), a E = 2. Desviaciones: sin sombra (solo el objeto flotante la lleva), mensaje
+   centrado con «Cerrar» (la app lo alinea arriba: en video se lee como error) y arriba a la derecha, centrado con el título,
+   porque en su sitio de la app (abajo a la derecha) caería bajo y = 900. */
+.s04-revision-avisorig{position:absolute;right:140px;top:84px;width:768px}
+.s04-revision-aviso{box-sizing:border-box;width:384px;display:flex;align-items:center;gap:12px;padding:14px;border:1px solid rgba(31,122,71,.4);
+ border-radius:14px;background:#FFFFFF;font-size:14px;line-height:20px;font-weight:400;color:#1E1919;white-space:nowrap}
+.s04-revision-aviso-m{flex:1;min-width:0}
+.s04-revision-aviso-x{flex:none;display:flex;align-items:center;min-height:36px;padding:0 12px;color:#6F6A65}
 /* halo de foco nativo: 4 px de la app × 1.8 ≈ 8 px de video; capa propia, solo su opacidad se anima */
 .s04-revision-foco{position:absolute;inset:-1px;border-radius:8px;box-shadow:0 0 0 4.44px rgba(0,97,254,.3);pointer-events:none}
 </style>
@@ -104,6 +113,11 @@
           <div class="s04-revision-tab"><span>Correcciones<span class="s04-revision-cnt"><span>(0)</span></span></span></div>
         </div>
       </div>
+    </div>
+
+    <!-- aviso de la app al resolver; entra desde abajo (8 px de la app) en 0.3 s -->
+    <div id="s04-revision-avisorig" class="s04-revision-avisorig">
+      <div class="s04-revision-ui2"><div class="s04-revision-aviso"><div class="s04-revision-aviso-m">Resuelto como Presente</div><span class="s04-revision-aviso-x">Cerrar</span></div></div>
     </div>
 
     <!-- la tarjeta del caso de Emilio (sábado 12): objeto flotante; sombra de tinta en capa aparte -->
@@ -239,31 +253,38 @@ function camPlano(tl, el, t, o) { return camPose(tl, el, t, { rx: 0, ry: 0 }, o 
         // Tiempos locales del cuadro. Los que llevan sonido son contrato con sfx_cues (el tween nombrado empieza o termina ahí):
         // 0.50 soft-in (llegada) · 1.45 fill (barra 1) · 2.65 pop-3 (botones) · 3.95 tap (compresión) · 4.00 blip (chip) · 4.40 tick-1 (contador).
         var T = {
-            tarjeta: 0.50, plana: 1.15,
-            barra1: 1.45, barra2: 1.54, cifra1: 1.80, cifra2: 1.89,
-            botones: 2.65,
-            foco: 3.80, presion: 3.95, liberacion: 4.04, chip: 4.00, contador: 4.10, quieto: 4.40,
-            secundarios: 4.45, focoFuera: 4.80, halo: 5.10, fin: 5.8,
-            acercar: 1.40, alejar: 4.70
+            tarjeta: 0.50, sombra: 0.80, plana: 1.15,
+            acercar: 1.40, barra1: 1.45, barra2: 1.54, cifra1: 1.80, cifra2: 1.89,
+            botones: 2.65, alejar: 3.30,
+            foco: 3.80, presion: 3.95, liberacion: 4.04, chip: 4.00, chipFuera: 4.08, contador: 4.10, quieto: 4.40,
+            secundarios: 4.45, aviso: 4.80, focoFuera: 4.80, halo: 5.10, fin: 5.8
         };
-        var CAM = 1.03;   // la cámara se acerca a la tarjeta (sin desplazar su centro); vuelve a 1 antes del borde (handoff a escala 1)
+        // La cámara se acerca a la tarjeta (sin desplazar su centro) mientras crece la evidencia y vuelve a 1 ANTES del toque:
+        // desde 3.80 s nada de la estación se mueve salvo la cadena del toque, y «Presente» y «(7)» quedan quietos desde 4.40 s.
+        var CAM = 1.03;
+        var camara = $('camara');
         var tarjeta = $('tarjeta');
         var btn = $('btn-presente');
 
         // ---- Escena 1 (0.0–1.4 s): bajo el empuje la estación ya está completa; la tarjeta aterriza después (0.50–1.15 s) con
-        // pose 3D suave y se aplana antes de que se lea nada. La sombra va en su capa, desplazada contra la inclinación.
-        tl.fromTo(tarjeta, { rotationX: 5, rotationY: -8, z: -160, y: 40 },
-            { rotationX: 0, rotationY: 0, z: 0, y: 0, duration: T.plana - T.tarjeta, ease: 'power3.out' }, T.tarjeta);
+        // pose 3D suave y se aplana antes de que se lea nada. La sombra va en su capa con EXACTAMENTE la misma pose que la
+        // tarjeta (si su caja se proyecta distinto, el box-shadow hueco asoma como una segunda hoja de borde duro) y solo
+        // aparece cuando la tarjeta ya es opaca (0.80 s): la sombra se asienta con el aterrizaje.
+        function aterriza(el) {
+            tl.fromTo(el, { rotationX: 5, rotationY: -8, z: -160, y: 40 },
+                { rotationX: 0, rotationY: 0, z: 0, y: 0, duration: T.plana - T.tarjeta, ease: 'power3.out' }, T.tarjeta);
+        }
+        aterriza(tarjeta);
         tl.fromTo(tarjeta, { opacity: 0 }, { opacity: 1, duration: 0.3, ease: 'power1.out' }, T.tarjeta);
-        tl.fromTo($('sombra'), { opacity: 0, x: 40, y: 70, scale: 0.9 },
-            { opacity: 1, x: 0, y: 0, scale: 1, duration: T.plana - T.tarjeta, ease: 'power3.out' }, T.tarjeta);
+        aterriza($('sombra'));
+        tl.fromTo($('sombra'), { opacity: 0 }, { opacity: 1, duration: T.plana - T.sombra, ease: 'power2.out' }, T.sombra);
         readMark(tl, T.plana, 'Quedan 2 h 48 min');
 
-        // ---- Escena 2 (1.4–3.7 s): las dos columnas crecen de abajo arriba con clip-path (0.85 s, +0.09 s); cada cifra 0.35 s
-        // después de su barra, nunca antes. Luego la fila real de botones en cascada (StaggerList: y 14 → 0, 0.5 s, +60 ms).
-        // La cámara se acerca (power3.inOut 0.7 s, escala ≤ 1.3) mientras crece la evidencia: un solo movimiento grande a la vez,
-        // la tarjeta ya está plana y quieta desde 1.15 s.
-        tl.fromTo($('camara'), { scale: 1 }, { scale: CAM, duration: 0.7, ease: 'power3.inOut' }, T.acercar);
+        // ---- Escena 2 (1.4–3.7 s): «Te espera en Revisión…». La cámara se acerca a la evidencia (1 → 1.03, power3.inOut 0.7 s)
+        // mientras las dos columnas crecen de abajo arriba con clip-path (0.85 s, +0.09 s); cada cifra 0.35 s después de su
+        // barra, nunca antes. Luego la fila real de botones en cascada (StaggerList: y 14 → 0, 0.5 s, +60 ms) y, ya asentada,
+        // la cámara vuelve a la estación completa (0.5 s power3.inOut, termina con el halo de foco): un movimiento grande a la vez.
+        tl.fromTo(camara, { scale: 1 }, { scale: CAM, duration: 0.7, ease: 'power3.inOut' }, T.acercar);
         var CLIP0 = 'inset(100% 0% 0% 0% round 18px)', CLIP1 = 'inset(0% 0% 0% 0% round 18px)';
         tl.fromTo($('barra-1'), { clipPath: CLIP0 }, { clipPath: CLIP1, duration: 0.85, ease: 'power4.out' }, T.barra1);
         tl.fromTo($('barra-2'), { clipPath: CLIP0 }, { clipPath: CLIP1, duration: 0.85, ease: 'power4.out' }, T.barra2);
@@ -274,6 +295,7 @@ function camPlano(tl, el, t, o) { return camPose(tl, el, t, { rx: 0, ry: 0 }, o 
         [btn, $('btn-retardo'), $('btn-ausente')].forEach(function (el, i) {
             tl.fromTo(el, { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.5, ease: 'power4.out' }, T.botones + i * 0.06);
         });
+        tl.fromTo(camara, { scale: CAM }, { scale: 1, duration: T.foco - T.alejar, ease: 'power3.inOut', immediateRender: false }, T.alejar);
 
         // ---- Escena 3 (3.7–5.8 s): toque sin cursor (press-release-spring sin sobreimpulso) y la consecuencia en cadena:
         // botón → chip → pestaña. Halo de foco 0.15 s antes; compresión lineal a 0.97 en 0.09 s; recuperación power3.out 0.3 s
@@ -284,21 +306,22 @@ function camPlano(tl, el, t, o) { return camPose(tl, el, t, { rx: 0, ry: 0 }, o 
         tl.fromTo(btn, { scale: 0.97 }, { scale: 1, duration: 0.3, ease: 'power3.out', immediateRender: false }, T.liberacion);
         tl.fromTo(btn, { backgroundColor: '#3A3433' }, { backgroundColor: '#1E1919', duration: 0.3, ease: 'power2.out', immediateRender: false }, T.liberacion);
 
-        // Cambio de estado +0.05 s: «Pendiente» cede su lugar a «Presente» (mismo hueco, alineados a la derecha).
-        tl.fromTo($('chip-pendiente'), { opacity: 1, y: 0 }, { opacity: 0, y: -6, duration: 0.2, ease: 'power2.out' }, T.chip);
-        tl.fromTo($('chip-presente'), { opacity: 0, y: 6 }, { opacity: 1, y: 0, duration: 0.3, ease: 'power3.out' }, T.chip);
+        // Cambio de estado +0.05 s, en secuencia y no en fundido cruzado (los dos textos tienen distinto ancho y se leían
+        // superpuestos): «Pendiente» se apaga en 0.08 s (power2.out: ya casi no está a 4.06 s) y «Presente» entra cuando
+        // termina, en el mismo hueco y alineado a la derecha (0.25 s power3.out, quieto desde 4.33 s).
+        tl.fromTo($('chip-pendiente'), { opacity: 1, y: 0 }, { opacity: 0, y: -3, duration: T.chipFuera - T.chip, ease: 'power2.out' }, T.chip);
+        tl.fromTo($('chip-presente'), { opacity: 0, y: 6 }, { opacity: 1, y: 0, duration: 0.25, ease: 'power3.out' }, T.chipFuera);
 
         // El contador de la pestaña rueda UN renglón de (8) a (7), hacia abajo (cuenta regresiva), power3.out sin rebote.
         tl.fromTo($('pila'), { y: -16 }, { y: 0, duration: T.quieto - T.contador, ease: 'power3.out' }, T.contador);
         readMark(tl, T.quieto, 'Presente');
         readMark(tl, T.quieto, 'Pendientes (7)');
 
-        // Lo no elegido baja al 45 %; el halo de foco se retira (0.4 s) y el escenario vira a violeta subiendo la capa nueva.
+        // Lo no elegido baja al 45 %; con la cadena quieta llega el aviso real de la app («Resuelto como Presente»: entra desde
+        // abajo, 8 px de la app, en 0.3 s) mientras el halo de foco se retira, y el escenario vira a violeta subiendo la capa nueva.
         tl.fromTo([$('btn-retardo'), $('btn-ausente')], { opacity: 1 }, { opacity: 0.45, duration: 0.35, ease: 'power2.out', immediateRender: false }, T.secundarios);
+        tl.fromTo($('avisorig'), { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.3, ease: 'expo.out' }, T.aviso);
         tl.fromTo($('foco'), { opacity: 1 }, { opacity: 0, duration: 0.4, ease: 'power2.inOut', immediateRender: false }, T.focoFuera);
-        // «…lo decides tú»: con la cadena ya asentada, la cámara se aleja a la estación completa (escala 1, tarjeta en 1010/610)
-        // y queda quieta 0.5 s antes del empuje.
-        tl.fromTo($('camara'), { scale: CAM }, { scale: 1, duration: 0.6, ease: 'power3.inOut', immediateRender: false }, T.alejar);
         tl.fromTo($('halo-violeta'), { opacity: 0 }, { opacity: 1, duration: T.fin - T.halo, ease: 'power1.inOut' }, T.halo);
 
         tl.set({}, {}, T.fin);
