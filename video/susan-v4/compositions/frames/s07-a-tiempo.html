@@ -272,10 +272,13 @@
             faltas: 2.45,     // fill: el relleno arranca
             odo: 2.60,        // la cifra «2» rueda un renglón (tick al asentarse, 2.85); quieta hasta 3.95
             valor: 2.80,
+            focoA: 3.00,      // R4: el encabezado se va a contexto y quedan nítidos el «2» y la barra, antes de «dos» (3.21)
+            refocoA: 3.65,    // el desenfoque del encabezado vuelve a none (queda la atenuación); desenfoque total 0.90 s
             salA: 3.95,       // R2: la sección A sube y sale (0.30 s), ya en la pausa «…»; whoosh-s 4.20 sobre el cambio
             cruce: 4.15,      // R2: la píldora del cruce sube desde abajo (0.50 s)
             accion: 4.40,     // pop-2: la fila de la acción sube con la misma receta (0.50 s)
             texto: 5.20,      // soft-in: «Contactar al alumno esta semana» entra desde el desenfoque (0.40 s), 0.33 s antes de «tiempo»
+            latido: 5.50,     // la fila de la acción late al asentarse su texto (1 → 1.035 → 1 y 5 px; quieta desde 5.82, antes de «tiempo»)
             halo: 6.45,
             fin: 7.6
         };
@@ -405,6 +408,17 @@
         tl.addLabel('read:faltas-restantes#0', T.odo + 0.25);
         tl.fromTo($('valor'), { opacity: 0 }, { opacity: 1, duration: 0.4, ease: 'power1.out' }, T.valor);
 
+        // Foco en el dato (R4, la misma gramática que el foco en la fila de Iván): con el «2» ya asentado, el encabezado
+        // (identidad) pasa a contexto con desenfoque de 6 px y opacidad 0.4 y quedan nítidos «Faltas restantes 2» y la barra
+        // frente al límite cuando la voz dice «dos». El «2» no se mueve. El desenfoque vuelve a none antes del relevo (queda la
+        // atenuación) y el encabezado regresa a 1 con la salida de la sección A, ya plano y nítido para leer la sección B.
+        var encabezado = [$('avatar'), $('nombre-ivan'), $('matricula'), $('chips'), $('divisor')];
+        var dofA = { d: 0 };
+        blurTramo(dofA, encabezado, T.focoA, 0.20, 0, 6, 'power2.out', false);
+        tl.fromTo(encabezado, { opacity: 1 }, { opacity: 0.4, duration: 0.20, ease: 'power2.out', immediateRender: false }, T.focoA);
+        blurTramo(dofA, encabezado, T.refocoA, 0.25, 6, 0, 'power2.inOut', false);
+        tl.fromTo(encabezado, { opacity: 0.4 }, { opacity: 1, duration: 0.30, ease: 'power2.inOut', immediateRender: false }, T.salA);
+
         // Relevo vertical R2 (DINAMISMO §2.2), recortado por el cuerpo con desvanecido de 24 px. El «2» queda quieto de 2.85 a
         // 3.95 s («dos» a 3.21) y la sección sale ya en la pausa «…» (la frase «dos faltas» termina hacia 3.85 s).
         // Salida: y 0 → −140, power2.in 0.30 s (velocidad máxima al final), estela vertical ≤ 10 en la hoja interior,
@@ -430,7 +444,7 @@
 
         // «Contactar al alumno esta semana» con el BlurText de la app, por palabra (direction bottom, para no romper la dirección
         // única hacia arriba): blur 10 → 0, y +0.5em → 0 y opacidad, curva de salida de la app; 0.28 s por palabra, +0.03 s.
-        // Un solo driver puro del tiempo: cada palabra se calcula de su progreso local; filter:none en reposo.
+        // Un solo driver puro del tiempo: cada palabra se calcula de su progreso local; filter:none en reposo (antes y después).
         var palabras = $('accion-b').querySelectorAll('.s07-a-tiempo-pal');
         var BT = { dur: 0.40, pal: 0.28, paso: 0.03, sube: 16, blur: 10 };
         var eBT = gsap.parseEase('power4.out');
@@ -440,7 +454,8 @@
             for (var k = 0; k < palabras.length; k++) {
                 var q = Math.min(1, Math.max(0, (t - k * BT.paso) / BT.pal));
                 var e = q <= 1e-4 ? 0 : (q >= 1 - 1e-4 ? 1 : eBT(q));
-                var b = BT.blur * (1 - e);
+                // Sin filtro mientras la palabra no ha empezado (opacidad 0): filter:none en reposo también antes de entrar.
+                var b = e <= 0 ? 0 : BT.blur * (1 - e);
                 gsap.set(palabras[k], { opacity: e, y: BT.sube * (1 - e) });
                 palabras[k].style.filter = b < 0.05 ? 'none' : 'blur(' + b.toFixed(2) + 'px)';
             }
@@ -448,6 +463,13 @@
         pintarTexto();
         tl.fromTo(bt, { p: 0 }, { p: 1, duration: BT.dur, ease: 'none', onUpdate: pintarTexto, immediateRender: false }, T.texto);
         tl.addLabel('read:accion-sugerida#1', T.texto + BT.dur);
+
+        // Latido de la fila al asentarse su texto (vibración finita, como el latido de la casilla en F5 y la píldora que «acusa
+        // el peso» en F6): 1 → 1.035 y 5 px abajo en 0.10 s, vuelta en 0.22 s, sin rebote; quieta desde 5.82 s, antes de «tiempo»
+        // (5.93) y del halo (6.45). Va en la hoja (#accion), no en el envoltorio de entrada que mueve conRastro.
+        var accHoja = $('accion');
+        tl.fromTo(accHoja, { scale: 1, y: 0 }, { scale: 1.035, y: 5, duration: 0.10, ease: 'power2.out', immediateRender: false }, T.latido);
+        tl.fromTo(accHoja, { scale: 1.035, y: 5 }, { scale: 1, y: 0, duration: 0.22, ease: 'power2.inOut', immediateRender: false }, T.latido + 0.10);
 
         // Halo de foco nativo (sin cursor ni pulsación): es lo siguiente que hace la docente.
         // El anillo se enciende como el foco nativo (casi de golpe, al final del tramo) y la fila toma el fondo activo #EFECE7.

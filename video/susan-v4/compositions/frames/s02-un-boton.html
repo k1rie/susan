@@ -260,8 +260,8 @@
             nubla: 3.05,        // la capa del empuje se desenfoca 0 -> 6 px
             marcaSale: 3.12,    // «SUSAN» se apaga mientras viaja (no desaparece de golpe en el corte)
             corte: 3.30,        // whoosh-l: tl.set cambia la toma del empuje por la toma de cerca
-            LLEGA_D: 0.50,      // la toma de cerca llega 0.94 -> 1 y 6 -> 0 px (expo.out)
-            brillo: 3.95,       // sheen-s: primer fotograma visible del brillo
+            LLEGA_D: 0.50,      // la toma de cerca llega 0.94 -> 1, con el último tercio del paneo, y 6 -> 0 px (expo.out)
+            brillo: 3.95,       // sheen-s: el brillo arranca desde fuera del botón (asoma hacia 4.03; el pico del sonido llega a +90 ms)
             foco: 4.78,
             presion: 4.95,      // tap
             estado: 5.00,       // click-soft2
@@ -316,10 +316,22 @@
         var KBC = { x: KB.x + KB.w / 2, y: KB.y + KB.h / 2 };                    // (960, 687.2)
         var RB2 = 8 * E2, RT2 = 14 * E2;                                          // 25.6 y 44.8
         var CAM = { x: 880, y: 200, w: 900, h: 506 };  // handoff_out: marco de la cámara (contrato con el cuadro 3)
-        // Empuje: escala 1.25 con origen en el botón, que viaja a su sitio en la toma de cerca. La toma llega de 0.94:
-        // en el corte el botón mide 756 x 1.25 = 945 y 1008 x 0.94 = 947.5 px, y el centro de la tarjeta queda en y ≈ 549 en las dos.
+        // Empuje: escala 1.25 con origen en el botón. La toma llega de 0.94: en el corte el botón mide 756 x 1.25 = 945 y
+        // 1008 x 0.94 = 947.5 px en las dos capas.
+        // Inercia en el corte (DINAMISMO 2.3 a): el recorrido del botón hasta su sitio en la toma de cerca (-304, +37.2) se
+        // reparte entre el empuje y la llegada para que la velocidad sea la misma a los dos lados del corte (si la llegada
+        // empieza con traslación 0, el paneo frena en seco). Pendientes medidas en las curvas de GSAP: power2.in (cúbica)
+        // termina con 3 y expo.out arranca con 10·ln 2 ≈ 6.93; la escala del empuje va con power1.in (termina con 2) para que
+        // también empalme: 2·0.25/0.45/1.25 ≈ 0.889/s contra 0.06·13.86/0.94 ≈ 0.885/s (relativas).
         var EMP = 1.25, LLEGA = 0.94;
-        var DX = KBC.x - BCX, DY = KBC.y - BCY;        // -304, +37.2
+        var EMPUJE_D = T.corte - T.empuje;             // 0.45 s
+        function pendiente(curva, p) { var e = gsap.parseEase(curva), h = 1e-4; return p >= 1 ? (1 - e(1 - h)) / h : e(h) / h; }
+        var V_EMP = pendiente('power2.in', 1) / EMPUJE_D, V_LLEGA = pendiente('expo.out', 0) / T.LLEGA_D;
+        var REPARTO = V_LLEGA / (V_EMP + V_LLEGA);     // 0.675 del recorrido en el empuje
+        var DX = (KBC.x - BCX) * REPARTO, DY = (KBC.y - BCY) * REPARTO;               // -205.3, +25.1
+        var LX = (KBC.x - BCX) * (REPARTO - 1), LY = (KBC.y - BCY) * (REPARTO - 1);   // +98.7, -12.1 (desde donde llega)
+        // En el corte el botón queda en (1058.7, 675.1) y el centro de la tarjeta en y ≈ 537 en las dos capas; ambas se mueven
+        // a -1369 px/s en x y +167 px/s en y.
         // tinta de la toma de cerca: caja que cubre botón y cámara; recortes en sus coordenadas
         var U = { x0: Math.min(KB.x, CAM.x), y0: Math.min(KB.y, CAM.y), x1: Math.max(KB.x + KB.w, CAM.x + CAM.w), y1: Math.max(KB.y + KB.h, CAM.y + CAM.h) };
         function cajaU(x0, y0, x1, y1) { return [y0 - U.y0, U.x1 - x1, U.y1 - y1, x0 - U.x0]; }
@@ -415,25 +427,26 @@
 
         // ---------- Escena 3 (2.85-4.9 s): atravesar hacia el botón (R3a) y toma de cerca ----------
         // Empuje: la cámara de la toma (marca, sombras y rig; nunca el cielo) va de 1 a 1.25 con origen en el botón y lo lleva
-        // a su sitio en la toma de cerca; power2.in: la velocidad máxima llega en el corte. La capa se desenfoca en el último
-        // cuarto de segundo y «SUSAN», que sale por la izquierda con el empuje (queda en x < 170), se apaga mientras viaja.
-        var EMPUJE_D = T.corte - T.empuje;
-        tl.fromTo($('empuje-cam'), { scale: 1, x: 0, y: 0 }, { scale: EMP, x: DX, y: DY, duration: EMPUJE_D, ease: 'power2.in' }, T.empuje);
+        // dos tercios del camino hacia su sitio en la toma de cerca; power2.in: la velocidad máxima llega en el corte. La escala
+        // va en su propio tween con power1.in (empalme de escala, ver la geometría). La capa se desenfoca en el último cuarto de
+        // segundo y «SUSAN», que sale por la izquierda con el empuje (su borde derecho queda en x ≈ 268), se apaga mientras viaja.
+        tl.fromTo($('empuje-cam'), { x: 0, y: 0 }, { x: DX, y: DY, duration: EMPUJE_D, ease: 'power2.in' }, T.empuje);
+        tl.fromTo($('empuje-cam'), { scale: 1 }, { scale: EMP, duration: EMPUJE_D, ease: 'power1.in' }, T.empuje);
         desenfocar($('empuje'), T.nubla, T.corte - T.nubla, 6, 'power2.in');
         tl.fromTo($('marca'), { opacity: 1 }, { opacity: 0, duration: T.corte - T.marcaSale, ease: 'power1.in' }, T.marcaSale);
         // Corte bajo el desenfoque: la toma de cerca, ya maquetada a E = 3.2, entra en el mismo instante que la otra se apaga.
         gsap.set($('cerca'), { autoAlpha: 0 });
         tl.set($('empuje'), { autoAlpha: 0 }, T.corte);
         tl.set($('cerca'), { autoAlpha: 1 }, T.corte);
-        // Llegada: 0.94 -> 1 con origen en el botón y desenfoque 6 -> 0 (expo.out); la sombra-cielo viaja en la misma cámara.
-        tl.fromTo($('cerca-cam'), { scale: LLEGA }, { scale: 1, duration: T.LLEGA_D, ease: 'expo.out' }, T.corte);
+        // Llegada: 0.94 -> 1 con origen en el botón, el tercio restante del recorrido (hereda la inercia del empuje) y
+        // desenfoque 6 -> 0 (expo.out); la sombra-cielo viaja en la misma cámara.
+        tl.fromTo($('cerca-cam'), { scale: LLEGA, x: LX, y: LY }, { scale: 1, x: 0, y: 0, duration: T.LLEGA_D, ease: 'expo.out' }, T.corte);
         desenfoque($('cerca'), T.corte, T.LLEGA_D, 6, 'expo.out');
 
-        // El brillo cruza una vez el botón grande. Arranca ya dentro del borde izquierdo (xPercent -52: la mitad delantera de la
-        // banda asoma) para que el primer fotograma visible sea 3.95, el ancla de sheen-s; antes no existe (opacidad 0).
-        tl.set($('cerca-brillo'), { opacity: 0 }, 0);
-        tl.set($('cerca-brillo'), { opacity: 1 }, T.brillo);
-        tl.fromTo($('cerca-brillo'), { xPercent: -52 }, { xPercent: 120, duration: 0.5, ease: 'power2.inOut' }, T.brillo);
+        // El brillo cruza una vez el botón grande y entra desde fuera: a xPercent -60 el tope del 58 % del degradado (la banda va
+        // inclinada 15°) ya queda a la izquierda de todo el botón, esquina redondeada incluida (hace falta ≥ 59.8). Empieza a
+        // moverse en 3.95, el ancla de sheen-s; antes espera quieto fuera del recorte.
+        tl.fromTo($('cerca-brillo'), { xPercent: -60 }, { xPercent: 120, duration: 0.5, ease: 'power2.inOut' }, T.brillo);
         // Halo de foco nativo (ring 4 px de la app = 12.8 px a E 3.2, rgba(0,97,254,.3)) 0.17 s antes de la compresión, sobre
         // «botón»; la flecha avanza 2 px de la app como en hover.
         var FOCO = 4 * E2;
