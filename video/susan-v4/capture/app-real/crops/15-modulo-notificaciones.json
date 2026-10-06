@@ -1,0 +1,7 @@
+{
+  "pantalla": "15-modulo-notificaciones",
+  "ruta": "/modulos/notificaciones",
+  "cuenta": "docente1",
+  "sistemaDeCoordenadas": "px CSS de la página completa (en escritorio, con el panel blanco desenrollado); multiplicar por el deviceScaleFactor (2 escritorio, 3 móvil) para px del .full.png",
+  "componentes": []
+}

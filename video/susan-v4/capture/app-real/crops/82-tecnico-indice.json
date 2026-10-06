@@ -1,0 +1,162 @@
+{
+  "pantalla": "82-tecnico-indice",
+  "ruta": "/tecnico",
+  "cuenta": "tecnico",
+  "sistemaDeCoordenadas": "px CSS de la página completa (en escritorio, con el panel blanco desenrollado); multiplicar por el deviceScaleFactor (2 escritorio, 3 móvil) para px del .full.png",
+  "componentes": [
+    {
+      "componente": "CampoComando",
+      "instancia": 1,
+      "archivo": "crops/82-tecnico-indice--CampoComando.png",
+      "caja": {
+        "x": 576,
+        "y": 262,
+        "width": 448,
+        "height": 44
+      },
+      "raicesDom": 1,
+      "etiqueta": "button",
+      "clases": "flex h-11 w-full max-w-md items-center gap-2.5 rounded-md border border-input bg-card px-3 text-left transition-[border-color,box-shadow] duration-150 hover:border-foreground/30 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/30"
+    },
+    {
+      "componente": "Tabs",
+      "instancia": 1,
+      "archivo": "crops/82-tecnico-indice--Tabs.png",
+      "caja": {
+        "x": 576,
+        "y": 346,
+        "width": 992,
+        "height": 45
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "flex max-w-full gap-6 overflow-x-auto border-b border-border"
+    },
+    {
+      "componente": "IndiceFacialPanel",
+      "instancia": 1,
+      "archivo": "crops/82-tecnico-indice--IndiceFacialPanel.png",
+      "caja": {
+        "x": 576,
+        "y": 407,
+        "width": 992,
+        "height": 366
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "flex flex-col gap-4"
+    },
+    {
+      "componente": "TarjetaGrafica",
+      "instancia": 1,
+      "archivo": "crops/82-tecnico-indice--TarjetaGrafica.png",
+      "caja": {
+        "x": 1078,
+        "y": 407,
+        "width": 490,
+        "height": 300
+      },
+      "raicesDom": 1,
+      "etiqueta": "figure",
+      "clases": "m-0 flex flex-col rounded-xl border border-border bg-card p-5"
+    },
+    {
+      "componente": "AnilloEstados",
+      "instancia": 1,
+      "archivo": "crops/82-tecnico-indice--AnilloEstados.png",
+      "caja": {
+        "x": 1099,
+        "y": 490,
+        "width": 448,
+        "height": 196
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "@container"
+    },
+    {
+      "componente": "FilaModulos",
+      "instancia": 1,
+      "archivo": "crops/82-tecnico-indice--FilaModulos.png",
+      "caja": {
+        "x": 576,
+        "y": 813,
+        "width": 992,
+        "height": 262
+      },
+      "raicesDom": 1,
+      "etiqueta": "section",
+      "clases": ""
+    },
+    {
+      "componente": "ModuloCard",
+      "instancia": 1,
+      "archivo": "crops/82-tecnico-indice--ModuloCard.png",
+      "caja": {
+        "x": 576,
+        "y": 879,
+        "width": 186,
+        "height": 196
+      },
+      "raicesDom": 1,
+      "etiqueta": "a",
+      "clases": "group/tarjeta flex h-full min-h-[12.25rem] w-full flex-col overflow-hidden rounded-xl border border-border bg-card text-left transition-[border-color,background-color] duration-150 hover:border-input hover:bg-accent/30 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/30"
+    },
+    {
+      "componente": "TarjetaPortada",
+      "instancia": 1,
+      "archivo": "crops/82-tecnico-indice--TarjetaPortada.png",
+      "caja": {
+        "x": 576,
+        "y": 879,
+        "width": 186,
+        "height": 196
+      },
+      "raicesDom": 1,
+      "etiqueta": "a",
+      "clases": "group/tarjeta flex h-full min-h-[12.25rem] w-full flex-col overflow-hidden rounded-xl border border-border bg-card text-left transition-[border-color,background-color] duration-150 hover:border-input hover:bg-accent/30 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/30"
+    },
+    {
+      "componente": "FilaModulos",
+      "instancia": 2,
+      "archivo": "crops/82-tecnico-indice--FilaModulos-2.png",
+      "caja": {
+        "x": 576,
+        "y": 1115,
+        "width": 992,
+        "height": 262
+      },
+      "raicesDom": 1,
+      "etiqueta": "section",
+      "clases": ""
+    },
+    {
+      "componente": "ModuloCard",
+      "instancia": 2,
+      "archivo": "crops/82-tecnico-indice--ModuloCard-2.png",
+      "caja": {
+        "x": 576,
+        "y": 1181,
+        "width": 186,
+        "height": 196
+      },
+      "raicesDom": 1,
+      "etiqueta": "a",
+      "clases": "group/tarjeta flex h-full min-h-[12.25rem] w-full flex-col overflow-hidden rounded-xl border border-border bg-card text-left transition-[border-color,background-color] duration-150 hover:border-input hover:bg-accent/30 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/30"
+    },
+    {
+      "componente": "TarjetaPortada",
+      "instancia": 2,
+      "archivo": "crops/82-tecnico-indice--TarjetaPortada-2.png",
+      "caja": {
+        "x": 576,
+        "y": 1181,
+        "width": 186,
+        "height": 196
+      },
+      "raicesDom": 1,
+      "etiqueta": "a",
+      "clases": "group/tarjeta flex h-full min-h-[12.25rem] w-full flex-col overflow-hidden rounded-xl border border-border bg-card text-left transition-[border-color,background-color] duration-150 hover:border-input hover:bg-accent/30 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/30"
+    }
+  ]
+}

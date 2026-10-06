@@ -1,0 +1,316 @@
+{
+  "pantalla": "25-revision-caso",
+  "ruta": "/docente/revision",
+  "cuenta": "docente1",
+  "sistemaDeCoordenadas": "px CSS de la página completa (en escritorio, con el panel blanco desenrollado); multiplicar por el deviceScaleFactor (2 escritorio, 3 móvil) para px del .full.png",
+  "componentes": [
+    {
+      "componente": "PageHeader",
+      "instancia": 1,
+      "archivo": "crops/25-revision-caso--PageHeader.png",
+      "caja": {
+        "x": 576,
+        "y": 119,
+        "width": 992,
+        "height": 57
+      },
+      "raicesDom": 1,
+      "etiqueta": "header",
+      "clases": "mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between"
+    },
+    {
+      "componente": "Tabs",
+      "instancia": 1,
+      "archivo": "crops/25-revision-caso--Tabs.png",
+      "caja": {
+        "x": 576,
+        "y": 200,
+        "width": 992,
+        "height": 45
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "flex max-w-full gap-6 overflow-x-auto border-b border-border mb-4"
+    },
+    {
+      "componente": "StatusChip",
+      "instancia": 1,
+      "archivo": "crops/25-revision-caso--StatusChip.png",
+      "caja": {
+        "x": 800,
+        "y": 274,
+        "width": 83,
+        "height": 20
+      },
+      "raicesDom": 1,
+      "etiqueta": "span",
+      "clases": "inline-flex items-center gap-1.5 whitespace-nowrap rounded-full font-medium px-2 py-0.5 text-xs text-pendiente bg-pendiente-bg"
+    },
+    {
+      "componente": "PlazoRestante",
+      "instancia": 1,
+      "archivo": "crops/25-revision-caso--PlazoRestante.png",
+      "caja": {
+        "x": 637,
+        "y": 314,
+        "width": 105,
+        "height": 16
+      },
+      "raicesDom": 1,
+      "etiqueta": "span",
+      "clases": "text-muted-foreground"
+    },
+    {
+      "componente": "StatusChip",
+      "instancia": 2,
+      "archivo": "crops/25-revision-caso--StatusChip-2.png",
+      "caja": {
+        "x": 800,
+        "y": 364,
+        "width": 83,
+        "height": 20
+      },
+      "raicesDom": 1,
+      "etiqueta": "span",
+      "clases": "inline-flex items-center gap-1.5 whitespace-nowrap rounded-full font-medium px-2 py-0.5 text-xs text-pendiente bg-pendiente-bg"
+    },
+    {
+      "componente": "PlazoRestante",
+      "instancia": 2,
+      "archivo": "crops/25-revision-caso--PlazoRestante-2.png",
+      "caja": {
+        "x": 637,
+        "y": 404,
+        "width": 105,
+        "height": 16
+      },
+      "raicesDom": 1,
+      "etiqueta": "span",
+      "clases": "text-muted-foreground"
+    },
+    {
+      "componente": "StatusChip",
+      "instancia": 3,
+      "archivo": "crops/25-revision-caso--StatusChip-3.png",
+      "caja": {
+        "x": 800,
+        "y": 454,
+        "width": 83,
+        "height": 20
+      },
+      "raicesDom": 1,
+      "etiqueta": "span",
+      "clases": "inline-flex items-center gap-1.5 whitespace-nowrap rounded-full font-medium px-2 py-0.5 text-xs text-pendiente bg-pendiente-bg"
+    },
+    {
+      "componente": "PlazoRestante",
+      "instancia": 3,
+      "archivo": "crops/25-revision-caso--PlazoRestante-3.png",
+      "caja": {
+        "x": 637,
+        "y": 494,
+        "width": 105,
+        "height": 16
+      },
+      "raicesDom": 1,
+      "etiqueta": "span",
+      "clases": "text-muted-foreground"
+    },
+    {
+      "componente": "StatusChip",
+      "instancia": 4,
+      "archivo": "crops/25-revision-caso--StatusChip-4.png",
+      "caja": {
+        "x": 800,
+        "y": 544,
+        "width": 83,
+        "height": 20
+      },
+      "raicesDom": 1,
+      "etiqueta": "span",
+      "clases": "inline-flex items-center gap-1.5 whitespace-nowrap rounded-full font-medium px-2 py-0.5 text-xs text-pendiente bg-pendiente-bg"
+    },
+    {
+      "componente": "PlazoRestante",
+      "instancia": 4,
+      "archivo": "crops/25-revision-caso--PlazoRestante-4.png",
+      "caja": {
+        "x": 637,
+        "y": 584,
+        "width": 105,
+        "height": 16
+      },
+      "raicesDom": 1,
+      "etiqueta": "span",
+      "clases": "text-muted-foreground"
+    },
+    {
+      "componente": "StatusChip",
+      "instancia": 5,
+      "archivo": "crops/25-revision-caso--StatusChip-5.png",
+      "caja": {
+        "x": 800,
+        "y": 634,
+        "width": 83,
+        "height": 20
+      },
+      "raicesDom": 1,
+      "etiqueta": "span",
+      "clases": "inline-flex items-center gap-1.5 whitespace-nowrap rounded-full font-medium px-2 py-0.5 text-xs text-pendiente bg-pendiente-bg"
+    },
+    {
+      "componente": "PlazoRestante",
+      "instancia": 5,
+      "archivo": "crops/25-revision-caso--PlazoRestante-5.png",
+      "caja": {
+        "x": 637,
+        "y": 674,
+        "width": 112,
+        "height": 16
+      },
+      "raicesDom": 1,
+      "etiqueta": "span",
+      "clases": "text-muted-foreground"
+    },
+    {
+      "componente": "StatusChip",
+      "instancia": 6,
+      "archivo": "crops/25-revision-caso--StatusChip-6.png",
+      "caja": {
+        "x": 800,
+        "y": 724,
+        "width": 83,
+        "height": 20
+      },
+      "raicesDom": 1,
+      "etiqueta": "span",
+      "clases": "inline-flex items-center gap-1.5 whitespace-nowrap rounded-full font-medium px-2 py-0.5 text-xs text-pendiente bg-pendiente-bg"
+    },
+    {
+      "componente": "PlazoRestante",
+      "instancia": 6,
+      "archivo": "crops/25-revision-caso--PlazoRestante-6.png",
+      "caja": {
+        "x": 637,
+        "y": 764,
+        "width": 112,
+        "height": 16
+      },
+      "raicesDom": 1,
+      "etiqueta": "span",
+      "clases": "text-muted-foreground"
+    },
+    {
+      "componente": "CasoPendiente",
+      "instancia": 1,
+      "archivo": "crops/25-revision-caso--CasoPendiente.png",
+      "caja": {
+        "x": 912,
+        "y": 261,
+        "width": 656,
+        "height": 879
+      },
+      "raicesDom": 1,
+      "etiqueta": "article",
+      "clases": "flex flex-col gap-4 rounded-xl border border-border bg-card p-5"
+    },
+    {
+      "componente": "LecturasCaso",
+      "instancia": 1,
+      "archivo": "crops/25-revision-caso--LecturasCaso.png",
+      "caja": {
+        "x": 933,
+        "y": 396,
+        "width": 614,
+        "height": 552
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "flex flex-col gap-3"
+    },
+    {
+      "componente": "TarjetaGrafica",
+      "instancia": 1,
+      "archivo": "crops/25-revision-caso--TarjetaGrafica.png",
+      "caja": {
+        "x": 933,
+        "y": 440,
+        "width": 614,
+        "height": 306
+      },
+      "raicesDom": 1,
+      "etiqueta": "figure",
+      "clases": "m-0 flex flex-col rounded-xl border border-border bg-card p-5"
+    },
+    {
+      "componente": "BarrasPildora",
+      "instancia": 1,
+      "archivo": "crops/25-revision-caso--BarrasPildora.png",
+      "caja": {
+        "x": 954,
+        "y": 523,
+        "width": 572,
+        "height": 202
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": ""
+    },
+    {
+      "componente": "RecorteFirmado",
+      "instancia": 1,
+      "archivo": "crops/25-revision-caso--RecorteFirmado.png",
+      "caja": {
+        "x": 933,
+        "y": 758,
+        "width": 80,
+        "height": 80
+      },
+      "raicesDom": 1,
+      "etiqueta": "img",
+      "clases": "h-20 w-20 shrink-0 rounded-xl border border-border object-cover "
+    },
+    {
+      "componente": "RecorteFirmado",
+      "instancia": 2,
+      "archivo": "crops/25-revision-caso--RecorteFirmado-2.png",
+      "caja": {
+        "x": 942,
+        "y": 859,
+        "width": 80,
+        "height": 80
+      },
+      "raicesDom": 1,
+      "etiqueta": "img",
+      "clases": "h-20 w-20 shrink-0 rounded-xl border border-border object-cover "
+    },
+    {
+      "componente": "RecorteFirmado",
+      "instancia": 3,
+      "archivo": "crops/25-revision-caso--RecorteFirmado-3.png",
+      "caja": {
+        "x": 1253,
+        "y": 859,
+        "width": 80,
+        "height": 80
+      },
+      "raicesDom": 1,
+      "etiqueta": "img",
+      "clases": "h-20 w-20 shrink-0 rounded-xl border border-border object-cover "
+    },
+    {
+      "componente": "ResolverComo",
+      "instancia": 1,
+      "archivo": "crops/25-revision-caso--ResolverComo.png",
+      "caja": {
+        "x": 933,
+        "y": 964,
+        "width": 614,
+        "height": 154
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "flex flex-col gap-3"
+    }
+  ]
+}

@@ -1,0 +1,50 @@
+{
+  "pantalla": "28-revision-correcciones",
+  "ruta": "/docente/revision?pestana=correcciones",
+  "cuenta": "docente1",
+  "sistemaDeCoordenadas": "px CSS de la página completa (en escritorio, con el panel blanco desenrollado); multiplicar por el deviceScaleFactor (2 escritorio, 3 móvil) para px del .full.png",
+  "componentes": [
+    {
+      "componente": "PageHeader",
+      "instancia": 1,
+      "archivo": "crops/28-revision-correcciones--PageHeader.png",
+      "caja": {
+        "x": 576,
+        "y": 119,
+        "width": 992,
+        "height": 57
+      },
+      "raicesDom": 1,
+      "etiqueta": "header",
+      "clases": "mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between"
+    },
+    {
+      "componente": "Tabs",
+      "instancia": 1,
+      "archivo": "crops/28-revision-correcciones--Tabs.png",
+      "caja": {
+        "x": 576,
+        "y": 200,
+        "width": 992,
+        "height": 45
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "flex max-w-full gap-6 overflow-x-auto border-b border-border mb-4"
+    },
+    {
+      "componente": "EmptyState",
+      "instancia": 1,
+      "archivo": "crops/28-revision-correcciones--EmptyState.png",
+      "caja": {
+        "x": 576,
+        "y": 261,
+        "width": 992,
+        "height": 101
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "flex flex-col items-center gap-2 px-4 py-10 text-center"
+    }
+  ]
+}

@@ -1,0 +1,498 @@
+{
+  "pantalla": "39-escalonados-final",
+  "ruta": "/docente/sesiones/19?pasar-lista=1",
+  "cuenta": "docente1",
+  "sistemaDeCoordenadas": "px CSS de la página completa (en escritorio, con el panel blanco desenrollado); multiplicar por el deviceScaleFactor (2 escritorio, 3 móvil) para px del .full.png",
+  "componentes": [
+    {
+      "componente": "PageHeader",
+      "instancia": 1,
+      "archivo": "crops/39-escalonados-final--PageHeader.png",
+      "caja": {
+        "x": 576,
+        "y": 119,
+        "width": 992,
+        "height": 85
+      },
+      "raicesDom": 1,
+      "etiqueta": "header",
+      "clases": "mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between"
+    },
+    {
+      "componente": "StatusChip",
+      "instancia": 1,
+      "archivo": "crops/39-escalonados-final--StatusChip.png",
+      "caja": {
+        "x": 1378,
+        "y": 176,
+        "width": 79,
+        "height": 28
+      },
+      "raicesDom": 1,
+      "etiqueta": "span",
+      "clases": "inline-flex items-center gap-1.5 whitespace-nowrap rounded-full font-medium px-2.5 py-1 text-sm text-justificado bg-justificado-bg"
+    },
+    {
+      "componente": "StatusChip",
+      "instancia": 2,
+      "archivo": "crops/39-escalonados-final--StatusChip-2.png",
+      "caja": {
+        "x": 1464,
+        "y": 176,
+        "width": 104,
+        "height": 28
+      },
+      "raicesDom": 1,
+      "etiqueta": "span",
+      "clases": "inline-flex items-center gap-1.5 whitespace-nowrap rounded-full font-medium px-2.5 py-1 text-sm text-justificado bg-justificado-bg"
+    },
+    {
+      "componente": "MonitorSesion",
+      "instancia": 1,
+      "archivo": "crops/39-escalonados-final--MonitorSesion.png",
+      "caja": {
+        "x": 576,
+        "y": 228,
+        "width": 992,
+        "height": 2913
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "flex flex-col gap-4"
+    },
+    {
+      "componente": "GuiaPasarLista",
+      "instancia": 1,
+      "archivo": "crops/39-escalonados-final--GuiaPasarLista.png",
+      "caja": {
+        "x": 576,
+        "y": 228,
+        "width": 992,
+        "height": 135
+      },
+      "raicesDom": 1,
+      "etiqueta": "section",
+      "clases": "rounded-xl border border-border bg-card p-4 sm:p-5"
+    },
+    {
+      "componente": "CapturaContinua",
+      "instancia": 1,
+      "archivo": "crops/39-escalonados-final--CapturaContinua.png",
+      "caja": {
+        "x": 576,
+        "y": 379,
+        "width": 992,
+        "height": 854
+      },
+      "raicesDom": 1,
+      "etiqueta": "section",
+      "clases": "flex flex-col gap-4 rounded-xl border border-border bg-card p-4 outline-none focus-visible:ring-4 focus-visible:ring-ring/30 sm:p-5"
+    },
+    {
+      "componente": "VistaCamara",
+      "instancia": 1,
+      "archivo": "crops/39-escalonados-final--VistaCamara.png",
+      "caja": {
+        "x": 597,
+        "y": 400,
+        "width": 560,
+        "height": 315
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "relative"
+    },
+    {
+      "componente": "LienzoSimulado",
+      "instancia": 1,
+      "archivo": "crops/39-escalonados-final--LienzoSimulado.png",
+      "caja": {
+        "x": 597,
+        "y": 400,
+        "width": 560,
+        "height": 315
+      },
+      "raicesDom": 1,
+      "etiqueta": "canvas",
+      "clases": "block size-full object-cover"
+    },
+    {
+      "componente": "ResumenPaseLista",
+      "instancia": 1,
+      "archivo": "crops/39-escalonados-final--ResumenPaseLista.png",
+      "caja": {
+        "x": 1181,
+        "y": 400,
+        "width": 366,
+        "height": 174
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": ""
+    },
+    {
+      "componente": "BarraSegmentada",
+      "instancia": 1,
+      "archivo": "crops/39-escalonados-final--BarraSegmentada.png",
+      "caja": {
+        "x": 1181,
+        "y": 486,
+        "width": 366,
+        "height": 8
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "mt-3"
+    },
+    {
+      "componente": "AccionesPaseLista",
+      "instancia": 1,
+      "archivo": "crops/39-escalonados-final--AccionesPaseLista.png",
+      "caja": {
+        "x": 1181,
+        "y": 594,
+        "width": 366,
+        "height": 152
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "flex flex-col gap-2"
+    },
+    {
+      "componente": "SimuladorCamara",
+      "instancia": 1,
+      "archivo": "crops/39-escalonados-final--SimuladorCamara.png",
+      "caja": {
+        "x": 597,
+        "y": 762,
+        "width": 950,
+        "height": 450
+      },
+      "raicesDom": 1,
+      "etiqueta": "section",
+      "clases": "flex flex-col gap-3 rounded-xl border border-dashed border-input bg-muted/40 p-4"
+    },
+    {
+      "componente": "Alert",
+      "instancia": 1,
+      "archivo": "crops/39-escalonados-final--Alert.png",
+      "caja": {
+        "x": 614,
+        "y": 1081,
+        "width": 916,
+        "height": 70
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "flex items-start gap-3 rounded-xl border p-3.5 text-sm border-info/25 text-info bg-justificado-bg"
+    },
+    {
+      "componente": "StatCard",
+      "instancia": 1,
+      "archivo": "crops/39-escalonados-final--StatCard.png",
+      "caja": {
+        "x": 576,
+        "y": 1249,
+        "width": 239,
+        "height": 120
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "group/stat flex min-h-[7.5rem] flex-col rounded-xl border border-border bg-card p-4"
+    },
+    {
+      "componente": "StatCard",
+      "instancia": 2,
+      "archivo": "crops/39-escalonados-final--StatCard-2.png",
+      "caja": {
+        "x": 827,
+        "y": 1249,
+        "width": 239,
+        "height": 120
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "group/stat flex min-h-[7.5rem] flex-col rounded-xl border border-border bg-card p-4"
+    },
+    {
+      "componente": "StatCard",
+      "instancia": 3,
+      "archivo": "crops/39-escalonados-final--StatCard-3.png",
+      "caja": {
+        "x": 1078,
+        "y": 1249,
+        "width": 239,
+        "height": 120
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "group/stat flex min-h-[7.5rem] flex-col rounded-xl border border-border bg-card p-4"
+    },
+    {
+      "componente": "StatCard",
+      "instancia": 4,
+      "archivo": "crops/39-escalonados-final--StatCard-4.png",
+      "caja": {
+        "x": 1329,
+        "y": 1249,
+        "width": 239,
+        "height": 120
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "group/stat flex min-h-[7.5rem] flex-col rounded-xl border border-border bg-card p-4"
+    },
+    {
+      "componente": "GraficaAsistenciaSesion",
+      "instancia": 1,
+      "archivo": "crops/39-escalonados-final--GraficaAsistenciaSesion.png",
+      "caja": {
+        "x": 576,
+        "y": 1385,
+        "width": 488,
+        "height": 380
+      },
+      "raicesDom": 1,
+      "etiqueta": "figure",
+      "clases": "m-0 flex flex-col rounded-xl border border-border bg-card p-5"
+    },
+    {
+      "componente": "TarjetaGrafica",
+      "instancia": 1,
+      "archivo": "crops/39-escalonados-final--TarjetaGrafica.png",
+      "caja": {
+        "x": 576,
+        "y": 1385,
+        "width": 488,
+        "height": 380
+      },
+      "raicesDom": 1,
+      "etiqueta": "figure",
+      "clases": "m-0 flex flex-col rounded-xl border border-border bg-card p-5"
+    },
+    {
+      "componente": "AnilloEstados",
+      "instancia": 1,
+      "archivo": "crops/39-escalonados-final--AnilloEstados.png",
+      "caja": {
+        "x": 597,
+        "y": 1468,
+        "width": 212,
+        "height": 276
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "@container w-full min-w-0 @min-[26rem]:flex-1"
+    },
+    {
+      "componente": "MedidorLiquido",
+      "instancia": 1,
+      "archivo": "crops/39-escalonados-final--MedidorLiquido.png",
+      "caja": {
+        "x": 833,
+        "y": 1530,
+        "width": 210,
+        "height": 152
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "flex flex-wrap items-center gap-x-5 gap-y-3 @min-[26rem]:shrink-0"
+    },
+    {
+      "componente": "SloshGauge",
+      "instancia": 1,
+      "archivo": "crops/39-escalonados-final--SloshGauge.png",
+      "caja": {
+        "x": 833,
+        "y": 1530,
+        "width": 76,
+        "height": 152
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "relative isolate box-border inline-block overflow-clip leading-none font-semibold tabular-nums select-none [width:var(--sg-w)] [height:var(--sg-h)] [border-radius:var(--sg-r)] [background:var(--sg-glass)] [font-size:var(--sg-font)] [-webkit-tap-highlight-color:transparent]"
+    },
+    {
+      "componente": "VentanaTolerancia",
+      "instancia": 1,
+      "archivo": "crops/39-escalonados-final--VentanaTolerancia.png",
+      "caja": {
+        "x": 1080,
+        "y": 1385,
+        "width": 488,
+        "height": 134
+      },
+      "raicesDom": 1,
+      "etiqueta": "section",
+      "clases": "rounded-xl border border-border bg-card p-5"
+    },
+    {
+      "componente": "GraficaActividadSesion",
+      "instancia": 1,
+      "archivo": "crops/39-escalonados-final--GraficaActividadSesion.png",
+      "caja": {
+        "x": 1080,
+        "y": 1535,
+        "width": 488,
+        "height": 188
+      },
+      "raicesDom": 1,
+      "etiqueta": "figure",
+      "clases": "m-0 flex flex-col rounded-xl border border-border bg-card p-5"
+    },
+    {
+      "componente": "TarjetaGrafica",
+      "instancia": 2,
+      "archivo": "crops/39-escalonados-final--TarjetaGrafica-2.png",
+      "caja": {
+        "x": 1080,
+        "y": 1535,
+        "width": 488,
+        "height": 188
+      },
+      "raicesDom": 1,
+      "etiqueta": "figure",
+      "clases": "m-0 flex flex-col rounded-xl border border-border bg-card p-5"
+    },
+    {
+      "componente": "BarrasPildora",
+      "instancia": 1,
+      "archivo": "crops/39-escalonados-final--BarrasPildora.png",
+      "caja": {
+        "x": 1101,
+        "y": 1618,
+        "width": 446,
+        "height": 84
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": ""
+    },
+    {
+      "componente": "EstadoCamaras",
+      "instancia": 1,
+      "archivo": "crops/39-escalonados-final--EstadoCamaras.png",
+      "caja": {
+        "x": 576,
+        "y": 1813,
+        "width": 992,
+        "height": 74
+      },
+      "raicesDom": 1,
+      "etiqueta": "ul",
+      "clases": "grid grid-cols-1 gap-2 sm:grid-cols-2"
+    },
+    {
+      "componente": "TarjetaFila",
+      "instancia": 1,
+      "archivo": "crops/39-escalonados-final--TarjetaFila.png",
+      "caja": {
+        "x": 576,
+        "y": 1813,
+        "width": 492,
+        "height": 74
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "flex min-h-[4.5rem] items-center gap-4 rounded-xl border border-border bg-card p-4 text-left"
+    },
+    {
+      "componente": "StatusChip",
+      "instancia": 3,
+      "archivo": "crops/39-escalonados-final--StatusChip-3.png",
+      "caja": {
+        "x": 988,
+        "y": 1841,
+        "width": 63,
+        "height": 20
+      },
+      "raicesDom": 1,
+      "etiqueta": "span",
+      "clases": "inline-flex items-center gap-1.5 whitespace-nowrap rounded-full font-medium px-2 py-0.5 text-xs text-presente bg-presente-bg"
+    },
+    {
+      "componente": "TarjetaFila",
+      "instancia": 2,
+      "archivo": "crops/39-escalonados-final--TarjetaFila-2.png",
+      "caja": {
+        "x": 1076,
+        "y": 1813,
+        "width": 492,
+        "height": 74
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "flex min-h-[4.5rem] items-center gap-4 rounded-xl border border-border bg-card p-4 text-left"
+    },
+    {
+      "componente": "StatusChip",
+      "instancia": 4,
+      "archivo": "crops/39-escalonados-final--StatusChip-4.png",
+      "caja": {
+        "x": 1439,
+        "y": 1841,
+        "width": 112,
+        "height": 20
+      },
+      "raicesDom": 1,
+      "etiqueta": "span",
+      "clases": "inline-flex items-center gap-1.5 whitespace-nowrap rounded-full font-medium px-2 py-0.5 text-xs text-retardo bg-retardo-bg"
+    },
+    {
+      "componente": "TablaAlumnosSesion",
+      "instancia": 1,
+      "archivo": "crops/39-escalonados-final--TablaAlumnosSesion.png",
+      "caja": {
+        "x": 576,
+        "y": 1935,
+        "width": 992,
+        "height": 1206
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "overflow-x-auto rounded-xl border border-border bg-card"
+    },
+    {
+      "componente": "Table",
+      "instancia": 1,
+      "archivo": "crops/39-escalonados-final--Table.png",
+      "caja": {
+        "x": 576,
+        "y": 1935,
+        "width": 992,
+        "height": 1206
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "overflow-x-auto rounded-xl border border-border bg-card"
+    },
+    {
+      "componente": "StatusChip",
+      "instancia": 5,
+      "archivo": "crops/39-escalonados-final--StatusChip-5.png",
+      "caja": {
+        "x": 904,
+        "y": 2027,
+        "width": 73,
+        "height": 20
+      },
+      "raicesDom": 1,
+      "etiqueta": "span",
+      "clases": "inline-flex items-center gap-1.5 whitespace-nowrap rounded-full font-medium px-2 py-0.5 text-xs text-retardo bg-retardo-bg"
+    },
+    {
+      "componente": "StatusChip",
+      "instancia": 6,
+      "archivo": "crops/39-escalonados-final--StatusChip-6.png",
+      "caja": {
+        "x": 1193,
+        "y": 2027,
+        "width": 95,
+        "height": 20
+      },
+      "raicesDom": 1,
+      "etiqueta": "span",
+      "clases": "inline-flex items-center gap-1.5 whitespace-nowrap rounded-full font-medium px-2 py-0.5 text-xs text-justificado bg-justificado-bg"
+    }
+  ]
+}

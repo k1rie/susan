@@ -1,0 +1,64 @@
+{
+  "pantalla": "68-admin-materias",
+  "ruta": "/admin/materias",
+  "cuenta": "admin",
+  "sistemaDeCoordenadas": "px CSS de la página completa (en escritorio, con el panel blanco desenrollado); multiplicar por el deviceScaleFactor (2 escritorio, 3 móvil) para px del .full.png",
+  "componentes": [
+    {
+      "componente": "ListadoMaterias",
+      "instancia": 1,
+      "archivo": "crops/68-admin-materias--ListadoMaterias.png",
+      "caja": {
+        "x": 576,
+        "y": 119,
+        "width": 992,
+        "height": 535
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "flex flex-col gap-4"
+    },
+    {
+      "componente": "CatalogoTabla",
+      "instancia": 1,
+      "archivo": "crops/68-admin-materias--CatalogoTabla.png",
+      "caja": {
+        "x": 576,
+        "y": 119,
+        "width": 992,
+        "height": 535
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "flex flex-col gap-4"
+    },
+    {
+      "componente": "PageHeader",
+      "instancia": 1,
+      "archivo": "crops/68-admin-materias--PageHeader.png",
+      "caja": {
+        "x": 576,
+        "y": 119,
+        "width": 992,
+        "height": 57
+      },
+      "raicesDom": 1,
+      "etiqueta": "header",
+      "clases": "mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between"
+    },
+    {
+      "componente": "Table",
+      "instancia": 1,
+      "archivo": "crops/68-admin-materias--Table.png",
+      "caja": {
+        "x": 576,
+        "y": 296,
+        "width": 992,
+        "height": 306
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "overflow-x-auto rounded-xl border border-border bg-card"
+    }
+  ]
+}

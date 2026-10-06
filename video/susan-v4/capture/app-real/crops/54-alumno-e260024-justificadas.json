@@ -1,0 +1,540 @@
+{
+  "pantalla": "54-alumno-e260024-justificadas",
+  "ruta": "/alumno",
+  "cuenta": "e260024",
+  "sistemaDeCoordenadas": "px CSS de la página completa (en escritorio, con el panel blanco desenrollado); multiplicar por el deviceScaleFactor (2 escritorio, 3 móvil) para px del .full.png",
+  "componentes": [
+    {
+      "componente": "Resaltado",
+      "instancia": 1,
+      "archivo": "crops/54-alumno-e260024-justificadas--Resaltado.png",
+      "caja": {
+        "x": 829,
+        "y": 151,
+        "width": 144,
+        "height": 55
+      },
+      "raicesDom": 1,
+      "etiqueta": "span",
+      "clases": "relative inline-block"
+    },
+    {
+      "componente": "CampoComando",
+      "instancia": 1,
+      "archivo": "crops/54-alumno-e260024-justificadas--CampoComando.png",
+      "caja": {
+        "x": 576,
+        "y": 262,
+        "width": 448,
+        "height": 44
+      },
+      "raicesDom": 1,
+      "etiqueta": "button",
+      "clases": "flex h-11 w-full max-w-md items-center gap-2.5 rounded-md border border-input bg-card px-3 text-left transition-[border-color,box-shadow] duration-150 hover:border-foreground/30 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/30"
+    },
+    {
+      "componente": "GraficasAsistencia",
+      "instancia": 1,
+      "archivo": "crops/54-alumno-e260024-justificadas--GraficasAsistencia.png",
+      "caja": {
+        "x": 576,
+        "y": 386,
+        "width": 490,
+        "height": 590
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "grid grid-cols-1 gap-3"
+    },
+    {
+      "componente": "TarjetaGrafica",
+      "instancia": 1,
+      "archivo": "crops/54-alumno-e260024-justificadas--TarjetaGrafica.png",
+      "caja": {
+        "x": 576,
+        "y": 386,
+        "width": 490,
+        "height": 590
+      },
+      "raicesDom": 1,
+      "etiqueta": "figure",
+      "clases": "m-0 flex flex-col rounded-xl border border-border bg-card p-5"
+    },
+    {
+      "componente": "MedidorLiquido",
+      "instancia": 1,
+      "archivo": "crops/54-alumno-e260024-justificadas--MedidorLiquido.png",
+      "caja": {
+        "x": 612,
+        "y": 469,
+        "width": 418,
+        "height": 176
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "flex flex-wrap items-center gap-x-5 gap-y-3 @min-[34rem]:min-w-0 @min-[34rem]:flex-1"
+    },
+    {
+      "componente": "SloshGauge",
+      "instancia": 1,
+      "archivo": "crops/54-alumno-e260024-justificadas--SloshGauge.png",
+      "caja": {
+        "x": 612,
+        "y": 469,
+        "width": 88,
+        "height": 176
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "relative isolate box-border inline-block overflow-clip leading-none font-semibold tabular-nums select-none [width:var(--sg-w)] [height:var(--sg-h)] [border-radius:var(--sg-r)] [background:var(--sg-glass)] [font-size:var(--sg-font)] [-webkit-tap-highlight-color:transparent]"
+    },
+    {
+      "componente": "AnilloEstados",
+      "instancia": 1,
+      "archivo": "crops/54-alumno-e260024-justificadas--AnilloEstados.png",
+      "caja": {
+        "x": 597,
+        "y": 669,
+        "width": 448,
+        "height": 226
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "@container w-full @min-[34rem]:w-72 @min-[34rem]:flex-none"
+    },
+    {
+      "componente": "ResumenMaterias",
+      "instancia": 1,
+      "archivo": "crops/54-alumno-e260024-justificadas--ResumenMaterias.png",
+      "caja": {
+        "x": 1078,
+        "y": 386,
+        "width": 490,
+        "height": 222
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "flex flex-col gap-3"
+    },
+    {
+      "componente": "BarraFaltas",
+      "instancia": 1,
+      "archivo": "crops/54-alumno-e260024-justificadas--BarraFaltas.png",
+      "caja": {
+        "x": 1099,
+        "y": 493,
+        "width": 448,
+        "height": 32
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "mt-2"
+    },
+    {
+      "componente": "CifrasMateria",
+      "instancia": 1,
+      "archivo": "crops/54-alumno-e260024-justificadas--CifrasMateria.png",
+      "caja": {
+        "x": 576,
+        "y": 1062,
+        "width": 992,
+        "height": 137
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "@container"
+    },
+    {
+      "componente": "StatCard",
+      "instancia": 1,
+      "archivo": "crops/54-alumno-e260024-justificadas--StatCard.png",
+      "caja": {
+        "x": 576,
+        "y": 1062,
+        "width": 155,
+        "height": 137
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "group/stat flex min-h-[7.5rem] flex-col rounded-xl border border-border bg-card p-4"
+    },
+    {
+      "componente": "StatCard",
+      "instancia": 2,
+      "archivo": "crops/54-alumno-e260024-justificadas--StatCard-2.png",
+      "caja": {
+        "x": 743,
+        "y": 1062,
+        "width": 155,
+        "height": 137
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "group/stat flex min-h-[7.5rem] flex-col rounded-xl border border-border bg-card p-4"
+    },
+    {
+      "componente": "StatCard",
+      "instancia": 3,
+      "archivo": "crops/54-alumno-e260024-justificadas--StatCard-3.png",
+      "caja": {
+        "x": 911,
+        "y": 1062,
+        "width": 155,
+        "height": 137
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "group/stat flex min-h-[7.5rem] flex-col rounded-xl border border-border bg-card p-4"
+    },
+    {
+      "componente": "StatCard",
+      "instancia": 4,
+      "archivo": "crops/54-alumno-e260024-justificadas--StatCard-4.png",
+      "caja": {
+        "x": 1078,
+        "y": 1062,
+        "width": 155,
+        "height": 137
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "group/stat flex min-h-[7.5rem] flex-col rounded-xl border border-border bg-card p-4"
+    },
+    {
+      "componente": "StatCard",
+      "instancia": 5,
+      "archivo": "crops/54-alumno-e260024-justificadas--StatCard-5.png",
+      "caja": {
+        "x": 1245,
+        "y": 1062,
+        "width": 155,
+        "height": 137
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "group/stat flex min-h-[7.5rem] flex-col rounded-xl border border-border bg-card p-4"
+    },
+    {
+      "componente": "StatCard",
+      "instancia": 6,
+      "archivo": "crops/54-alumno-e260024-justificadas--StatCard-6.png",
+      "caja": {
+        "x": 1413,
+        "y": 1062,
+        "width": 155,
+        "height": 137
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "group/stat flex min-h-[7.5rem] flex-col rounded-xl border border-border bg-card p-4"
+    },
+    {
+      "componente": "CalendarioRacha",
+      "instancia": 1,
+      "archivo": "crops/54-alumno-e260024-justificadas--CalendarioRacha.png",
+      "caja": {
+        "x": 576,
+        "y": 1211,
+        "width": 992,
+        "height": 430
+      },
+      "raicesDom": 1,
+      "etiqueta": "figure",
+      "clases": "m-0 flex flex-col rounded-xl border border-border bg-card p-5"
+    },
+    {
+      "componente": "TarjetaGrafica",
+      "instancia": 2,
+      "archivo": "crops/54-alumno-e260024-justificadas--TarjetaGrafica-2.png",
+      "caja": {
+        "x": 576,
+        "y": 1211,
+        "width": 992,
+        "height": 430
+      },
+      "raicesDom": 1,
+      "etiqueta": "figure",
+      "clases": "m-0 flex flex-col rounded-xl border border-border bg-card p-5"
+    },
+    {
+      "componente": "CalendarioAsistencia",
+      "instancia": 1,
+      "archivo": "crops/54-alumno-e260024-justificadas--CalendarioAsistencia.png",
+      "caja": {
+        "x": 597,
+        "y": 1298,
+        "width": 524,
+        "height": 261
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": ""
+    },
+    {
+      "componente": "HistorialMateria",
+      "instancia": 1,
+      "archivo": "crops/54-alumno-e260024-justificadas--HistorialMateria.png",
+      "caja": {
+        "x": 576,
+        "y": 1688,
+        "width": 992,
+        "height": 524
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "flex flex-col gap-3"
+    },
+    {
+      "componente": "StatusChip",
+      "instancia": 1,
+      "archivo": "crops/54-alumno-e260024-justificadas--StatusChip.png",
+      "caja": {
+        "x": 1459,
+        "y": 1702,
+        "width": 92,
+        "height": 20
+      },
+      "raicesDom": 1,
+      "etiqueta": "span",
+      "clases": "inline-flex items-center gap-1.5 whitespace-nowrap rounded-full font-medium px-2 py-0.5 text-xs text-retardo bg-retardo-bg"
+    },
+    {
+      "componente": "StatusChip",
+      "instancia": 2,
+      "archivo": "crops/54-alumno-e260024-justificadas--StatusChip-2.png",
+      "caja": {
+        "x": 1459,
+        "y": 1748,
+        "width": 92,
+        "height": 20
+      },
+      "raicesDom": 1,
+      "etiqueta": "span",
+      "clases": "inline-flex items-center gap-1.5 whitespace-nowrap rounded-full font-medium px-2 py-0.5 text-xs text-retardo bg-retardo-bg"
+    },
+    {
+      "componente": "StatusChip",
+      "instancia": 3,
+      "archivo": "crops/54-alumno-e260024-justificadas--StatusChip-3.png",
+      "caja": {
+        "x": 1474,
+        "y": 1802,
+        "width": 77,
+        "height": 20
+      },
+      "raicesDom": 1,
+      "etiqueta": "span",
+      "clases": "inline-flex items-center gap-1.5 whitespace-nowrap rounded-full font-medium px-2 py-0.5 text-xs text-presente bg-presente-bg"
+    },
+    {
+      "componente": "StatusChip",
+      "instancia": 4,
+      "archivo": "crops/54-alumno-e260024-justificadas--StatusChip-4.png",
+      "caja": {
+        "x": 1474,
+        "y": 1864,
+        "width": 77,
+        "height": 20
+      },
+      "raicesDom": 1,
+      "etiqueta": "span",
+      "clases": "inline-flex items-center gap-1.5 whitespace-nowrap rounded-full font-medium px-2 py-0.5 text-xs text-presente bg-presente-bg"
+    },
+    {
+      "componente": "StatusChip",
+      "instancia": 5,
+      "archivo": "crops/54-alumno-e260024-justificadas--StatusChip-5.png",
+      "caja": {
+        "x": 1474,
+        "y": 1926,
+        "width": 77,
+        "height": 20
+      },
+      "raicesDom": 1,
+      "etiqueta": "span",
+      "clases": "inline-flex items-center gap-1.5 whitespace-nowrap rounded-full font-medium px-2 py-0.5 text-xs text-presente bg-presente-bg"
+    },
+    {
+      "componente": "StatusChip",
+      "instancia": 6,
+      "archivo": "crops/54-alumno-e260024-justificadas--StatusChip-6.png",
+      "caja": {
+        "x": 1376,
+        "y": 1991,
+        "width": 73,
+        "height": 20
+      },
+      "raicesDom": 1,
+      "etiqueta": "span",
+      "clases": "inline-flex items-center gap-1.5 whitespace-nowrap rounded-full font-medium px-2 py-0.5 text-xs text-retardo bg-retardo-bg"
+    },
+    {
+      "componente": "RegistrarJustificanteForm",
+      "instancia": 1,
+      "archivo": "crops/54-alumno-e260024-justificadas--RegistrarJustificanteForm.png",
+      "caja": {
+        "x": 576,
+        "y": 2276,
+        "width": 490,
+        "height": 416
+      },
+      "raicesDom": 1,
+      "etiqueta": "section",
+      "clases": "rounded-xl border border-border bg-card p-5"
+    },
+    {
+      "componente": "MisJustificantes",
+      "instancia": 1,
+      "archivo": "crops/54-alumno-e260024-justificadas--MisJustificantes.png",
+      "caja": {
+        "x": 1078,
+        "y": 2276,
+        "width": 490,
+        "height": 409
+      },
+      "raicesDom": 1,
+      "etiqueta": "section",
+      "clases": "rounded-xl border border-border bg-card p-5"
+    },
+    {
+      "componente": "FilaModulos",
+      "instancia": 1,
+      "archivo": "crops/54-alumno-e260024-justificadas--FilaModulos.png",
+      "caja": {
+        "x": 576,
+        "y": 2732,
+        "width": 992,
+        "height": 262
+      },
+      "raicesDom": 1,
+      "etiqueta": "section",
+      "clases": ""
+    },
+    {
+      "componente": "ModuloCard",
+      "instancia": 1,
+      "archivo": "crops/54-alumno-e260024-justificadas--ModuloCard.png",
+      "caja": {
+        "x": 576,
+        "y": 2798,
+        "width": 186,
+        "height": 196
+      },
+      "raicesDom": 1,
+      "etiqueta": "a",
+      "clases": "group/tarjeta flex h-full min-h-[12.25rem] w-full flex-col overflow-hidden rounded-xl border border-border bg-card text-left transition-[border-color,background-color] duration-150 hover:border-input hover:bg-accent/30 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/30"
+    },
+    {
+      "componente": "TarjetaPortada",
+      "instancia": 1,
+      "archivo": "crops/54-alumno-e260024-justificadas--TarjetaPortada.png",
+      "caja": {
+        "x": 576,
+        "y": 2798,
+        "width": 186,
+        "height": 196
+      },
+      "raicesDom": 1,
+      "etiqueta": "a",
+      "clases": "group/tarjeta flex h-full min-h-[12.25rem] w-full flex-col overflow-hidden rounded-xl border border-border bg-card text-left transition-[border-color,background-color] duration-150 hover:border-input hover:bg-accent/30 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/30"
+    },
+    {
+      "componente": "FilaModulos",
+      "instancia": 2,
+      "archivo": "crops/54-alumno-e260024-justificadas--FilaModulos-2.png",
+      "caja": {
+        "x": 576,
+        "y": 3034,
+        "width": 992,
+        "height": 262
+      },
+      "raicesDom": 1,
+      "etiqueta": "section",
+      "clases": ""
+    },
+    {
+      "componente": "ModuloCard",
+      "instancia": 2,
+      "archivo": "crops/54-alumno-e260024-justificadas--ModuloCard-2.png",
+      "caja": {
+        "x": 576,
+        "y": 3100,
+        "width": 186,
+        "height": 196
+      },
+      "raicesDom": 1,
+      "etiqueta": "a",
+      "clases": "group/tarjeta flex h-full min-h-[12.25rem] w-full flex-col overflow-hidden rounded-xl border border-border bg-card text-left transition-[border-color,background-color] duration-150 hover:border-input hover:bg-accent/30 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/30"
+    },
+    {
+      "componente": "TarjetaPortada",
+      "instancia": 2,
+      "archivo": "crops/54-alumno-e260024-justificadas--TarjetaPortada-2.png",
+      "caja": {
+        "x": 576,
+        "y": 3100,
+        "width": 186,
+        "height": 196
+      },
+      "raicesDom": 1,
+      "etiqueta": "a",
+      "clases": "group/tarjeta flex h-full min-h-[12.25rem] w-full flex-col overflow-hidden rounded-xl border border-border bg-card text-left transition-[border-color,background-color] duration-150 hover:border-input hover:bg-accent/30 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/30"
+    },
+    {
+      "componente": "ModuloCard",
+      "instancia": 3,
+      "archivo": "crops/54-alumno-e260024-justificadas--ModuloCard-3.png",
+      "caja": {
+        "x": 778,
+        "y": 3100,
+        "width": 186,
+        "height": 196
+      },
+      "raicesDom": 1,
+      "etiqueta": "a",
+      "clases": "group/tarjeta flex h-full min-h-[12.25rem] w-full flex-col overflow-hidden rounded-xl border border-border bg-card text-left transition-[border-color,background-color] duration-150 hover:border-input hover:bg-accent/30 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/30"
+    },
+    {
+      "componente": "TarjetaPortada",
+      "instancia": 3,
+      "archivo": "crops/54-alumno-e260024-justificadas--TarjetaPortada-3.png",
+      "caja": {
+        "x": 778,
+        "y": 3100,
+        "width": 186,
+        "height": 196
+      },
+      "raicesDom": 1,
+      "etiqueta": "a",
+      "clases": "group/tarjeta flex h-full min-h-[12.25rem] w-full flex-col overflow-hidden rounded-xl border border-border bg-card text-left transition-[border-color,background-color] duration-150 hover:border-input hover:bg-accent/30 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/30"
+    },
+    {
+      "componente": "ModuloCard",
+      "instancia": 4,
+      "archivo": "crops/54-alumno-e260024-justificadas--ModuloCard-4.png",
+      "caja": {
+        "x": 979,
+        "y": 3100,
+        "width": 186,
+        "height": 196
+      },
+      "raicesDom": 1,
+      "etiqueta": "a",
+      "clases": "group/tarjeta flex h-full min-h-[12.25rem] w-full flex-col overflow-hidden rounded-xl border border-border bg-card text-left transition-[border-color,background-color] duration-150 hover:border-input hover:bg-accent/30 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/30"
+    },
+    {
+      "componente": "TarjetaPortada",
+      "instancia": 4,
+      "archivo": "crops/54-alumno-e260024-justificadas--TarjetaPortada-4.png",
+      "caja": {
+        "x": 979,
+        "y": 3100,
+        "width": 186,
+        "height": 196
+      },
+      "raicesDom": 1,
+      "etiqueta": "a",
+      "clases": "group/tarjeta flex h-full min-h-[12.25rem] w-full flex-col overflow-hidden rounded-xl border border-border bg-card text-left transition-[border-color,background-color] duration-150 hover:border-input hover:bg-accent/30 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/30"
+    }
+  ]
+}

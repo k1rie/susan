@@ -1,0 +1,176 @@
+{
+  "pantalla": "45-pase-manual-5c",
+  "ruta": "/docente/sesiones/115?pasar-lista=1",
+  "cuenta": "docente1",
+  "sistemaDeCoordenadas": "px CSS de la página completa (en escritorio, con el panel blanco desenrollado); multiplicar por el deviceScaleFactor (2 escritorio, 3 móvil) para px del .full.png",
+  "componentes": [
+    {
+      "componente": "PageHeader",
+      "instancia": 1,
+      "archivo": "crops/45-pase-manual-5c--PageHeader.png",
+      "caja": {
+        "x": 576,
+        "y": 119,
+        "width": 992,
+        "height": 85
+      },
+      "raicesDom": 1,
+      "etiqueta": "header",
+      "clases": "mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between"
+    },
+    {
+      "componente": "StatusChip",
+      "instancia": 1,
+      "archivo": "crops/45-pase-manual-5c--StatusChip.png",
+      "caja": {
+        "x": 1403,
+        "y": 176,
+        "width": 79,
+        "height": 28
+      },
+      "raicesDom": 1,
+      "etiqueta": "span",
+      "clases": "inline-flex items-center gap-1.5 whitespace-nowrap rounded-full font-medium px-2.5 py-1 text-sm text-justificado bg-justificado-bg"
+    },
+    {
+      "componente": "StatusChip",
+      "instancia": 2,
+      "archivo": "crops/45-pase-manual-5c--StatusChip-2.png",
+      "caja": {
+        "x": 1489,
+        "y": 176,
+        "width": 79,
+        "height": 28
+      },
+      "raicesDom": 1,
+      "etiqueta": "span",
+      "clases": "inline-flex items-center gap-1.5 whitespace-nowrap rounded-full font-medium px-2.5 py-1 text-sm text-pendiente bg-pendiente-bg"
+    },
+    {
+      "componente": "GuiaPasarLista",
+      "instancia": 1,
+      "archivo": "crops/45-pase-manual-5c--GuiaPasarLista.png",
+      "caja": {
+        "x": 576,
+        "y": 228,
+        "width": 992,
+        "height": 117
+      },
+      "raicesDom": 1,
+      "etiqueta": "section",
+      "clases": "rounded-xl border border-border bg-card p-4 sm:p-5"
+    },
+    {
+      "componente": "PaseListaManual",
+      "instancia": 1,
+      "archivo": "crops/45-pase-manual-5c--PaseListaManual.png",
+      "caja": {
+        "x": 576,
+        "y": 361,
+        "width": 992,
+        "height": 1874
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "flex flex-col gap-4 outline-none focus-visible:ring-4 focus-visible:ring-ring/30"
+    },
+    {
+      "componente": "Alert",
+      "instancia": 1,
+      "archivo": "crops/45-pase-manual-5c--Alert.png",
+      "caja": {
+        "x": 576,
+        "y": 361,
+        "width": 992,
+        "height": 72
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "flex items-start gap-3 rounded-xl border p-3.5 text-sm border-info/25 text-info bg-justificado-bg"
+    },
+    {
+      "componente": "StatusChip",
+      "instancia": 3,
+      "archivo": "crops/45-pase-manual-5c--StatusChip-3.png",
+      "caja": {
+        "x": 717,
+        "y": 497,
+        "width": 77,
+        "height": 20
+      },
+      "raicesDom": 1,
+      "etiqueta": "span",
+      "clases": "inline-flex items-center gap-1.5 whitespace-nowrap rounded-full font-medium px-2 py-0.5 text-xs text-presente bg-presente-bg"
+    },
+    {
+      "componente": "AccionesPaseLista",
+      "instancia": 1,
+      "archivo": "crops/45-pase-manual-5c--AccionesPaseLista.png",
+      "caja": {
+        "x": 576,
+        "y": 533,
+        "width": 992,
+        "height": 48
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "flex flex-col gap-2"
+    },
+    {
+      "componente": "Table",
+      "instancia": 1,
+      "archivo": "crops/45-pase-manual-5c--Table.png",
+      "caja": {
+        "x": 576,
+        "y": 597,
+        "width": 992,
+        "height": 1638
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "overflow-x-auto rounded-xl border border-border bg-card"
+    },
+    {
+      "componente": "StatusChip",
+      "instancia": 4,
+      "archivo": "crops/45-pase-manual-5c--StatusChip-4.png",
+      "caja": {
+        "x": 1438,
+        "y": 698,
+        "width": 69,
+        "height": 20
+      },
+      "raicesDom": 1,
+      "etiqueta": "span",
+      "clases": "inline-flex items-center gap-1.5 whitespace-nowrap rounded-full font-medium px-2 py-0.5 text-xs text-pendiente bg-pendiente-bg"
+    },
+    {
+      "componente": "StatusChip",
+      "instancia": 5,
+      "archivo": "crops/45-pase-manual-5c--StatusChip-5.png",
+      "caja": {
+        "x": 1438,
+        "y": 763,
+        "width": 69,
+        "height": 20
+      },
+      "raicesDom": 1,
+      "etiqueta": "span",
+      "clases": "inline-flex items-center gap-1.5 whitespace-nowrap rounded-full font-medium px-2 py-0.5 text-xs text-pendiente bg-pendiente-bg"
+    },
+    {
+      "componente": "StatusChip",
+      "instancia": 6,
+      "archivo": "crops/45-pase-manual-5c--StatusChip-6.png",
+      "caja": {
+        "x": 1438,
+        "y": 828,
+        "width": 69,
+        "height": 20
+      },
+      "raicesDom": 1,
+      "etiqueta": "span",
+      "clases": "inline-flex items-center gap-1.5 whitespace-nowrap rounded-full font-medium px-2 py-0.5 text-xs text-pendiente bg-pendiente-bg"
+    }
+  ]
+}

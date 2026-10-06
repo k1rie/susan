@@ -1,0 +1,36 @@
+{
+  "pantalla": "03-activar-cuenta",
+  "ruta": "/activar-cuenta",
+  "cuenta": null,
+  "sistemaDeCoordenadas": "px CSS de la página completa (en escritorio, con el panel blanco desenrollado); multiplicar por el deviceScaleFactor (2 escritorio, 3 móvil) para px del .full.png",
+  "componentes": [
+    {
+      "componente": "CambiarContrasenaForm",
+      "instancia": 1,
+      "archivo": "crops/03-activar-cuenta--CambiarContrasenaForm.png",
+      "caja": {
+        "x": 672,
+        "y": 240,
+        "width": 576,
+        "height": 130
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "flex flex-col gap-4"
+    },
+    {
+      "componente": "Alert",
+      "instancia": 1,
+      "archivo": "crops/03-activar-cuenta--Alert.png",
+      "caja": {
+        "x": 672,
+        "y": 240,
+        "width": 576,
+        "height": 70
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "flex items-start gap-3 rounded-xl border p-3.5 text-sm border-destructive/25 text-ausente bg-ausente-bg"
+    }
+  ]
+}

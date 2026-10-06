@@ -1,0 +1,120 @@
+{
+  "pantalla": "02-recuperar",
+  "ruta": "/recuperar",
+  "cuenta": null,
+  "sistemaDeCoordenadas": "px CSS de la página completa (en escritorio, con el panel blanco desenrollado); multiplicar por el deviceScaleFactor (2 escritorio, 3 móvil) para px del .full.png",
+  "componentes": [
+    {
+      "componente": "RecuperarForm",
+      "instancia": 1,
+      "archivo": "crops/02-recuperar--RecuperarForm.png",
+      "caja": {
+        "x": 244,
+        "y": 553,
+        "width": 416,
+        "height": 180
+      },
+      "raicesDom": 1,
+      "etiqueta": "form",
+      "clases": "flex flex-col gap-4"
+    },
+    {
+      "componente": "PanelProducto",
+      "instancia": 1,
+      "archivo": "crops/02-recuperar--PanelProducto.png",
+      "caja": {
+        "x": 907,
+        "y": 20,
+        "width": 993,
+        "height": 1040
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "relative hidden min-h-0 flex-1 flex-col justify-between gap-8 overflow-hidden rounded-2xl border border-border/70 bg-muted/60 p-8 lg:flex xl:p-12"
+    },
+    {
+      "componente": "StatusChip",
+      "instancia": 1,
+      "archivo": "crops/02-recuperar--StatusChip.png",
+      "caja": {
+        "x": 1538,
+        "y": 366,
+        "width": 69,
+        "height": 20
+      },
+      "raicesDom": 1,
+      "etiqueta": "span",
+      "clases": "inline-flex items-center gap-1.5 whitespace-nowrap rounded-full font-medium px-2 py-0.5 text-xs text-justificado bg-justificado-bg"
+    },
+    {
+      "componente": "StatusChip",
+      "instancia": 2,
+      "archivo": "crops/02-recuperar--StatusChip-2.png",
+      "caja": {
+        "x": 1527,
+        "y": 438,
+        "width": 76,
+        "height": 18
+      },
+      "raicesDom": 1,
+      "etiqueta": "span",
+      "clases": "inline-flex items-center gap-1.5 whitespace-nowrap rounded-full font-medium px-2 py-0.5 text-xs text-pendiente bg-pendiente-bg"
+    },
+    {
+      "componente": "StatusChip",
+      "instancia": 3,
+      "archivo": "crops/02-recuperar--StatusChip-3.png",
+      "caja": {
+        "x": 1530,
+        "y": 437,
+        "width": 77,
+        "height": 20
+      },
+      "raicesDom": 1,
+      "etiqueta": "span",
+      "clases": "inline-flex items-center gap-1.5 whitespace-nowrap rounded-full font-medium px-2 py-0.5 text-xs text-presente bg-presente-bg"
+    },
+    {
+      "componente": "StatusChip",
+      "instancia": 4,
+      "archivo": "crops/02-recuperar--StatusChip-4.png",
+      "caja": {
+        "x": 1527,
+        "y": 476,
+        "width": 76,
+        "height": 18
+      },
+      "raicesDom": 1,
+      "etiqueta": "span",
+      "clases": "inline-flex items-center gap-1.5 whitespace-nowrap rounded-full font-medium px-2 py-0.5 text-xs text-pendiente bg-pendiente-bg"
+    },
+    {
+      "componente": "StatusChip",
+      "instancia": 5,
+      "archivo": "crops/02-recuperar--StatusChip-5.png",
+      "caja": {
+        "x": 1530,
+        "y": 475,
+        "width": 77,
+        "height": 20
+      },
+      "raicesDom": 1,
+      "etiqueta": "span",
+      "clases": "inline-flex items-center gap-1.5 whitespace-nowrap rounded-full font-medium px-2 py-0.5 text-xs text-presente bg-presente-bg"
+    },
+    {
+      "componente": "StatusChip",
+      "instancia": 6,
+      "archivo": "crops/02-recuperar--StatusChip-6.png",
+      "caja": {
+        "x": 1527,
+        "y": 514,
+        "width": 76,
+        "height": 18
+      },
+      "raicesDom": 1,
+      "etiqueta": "span",
+      "clases": "inline-flex items-center gap-1.5 whitespace-nowrap rounded-full font-medium px-2 py-0.5 text-xs text-pendiente bg-pendiente-bg"
+    }
+  ]
+}

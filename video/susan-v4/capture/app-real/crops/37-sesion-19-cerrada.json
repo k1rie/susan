@@ -1,0 +1,260 @@
+{
+  "pantalla": "37-sesion-19-cerrada",
+  "ruta": "/docente/sesiones/19",
+  "cuenta": "docente1",
+  "sistemaDeCoordenadas": "px CSS de la página completa (en escritorio, con el panel blanco desenrollado); multiplicar por el deviceScaleFactor (2 escritorio, 3 móvil) para px del .full.png",
+  "componentes": [
+    {
+      "componente": "PageHeader",
+      "instancia": 1,
+      "archivo": "crops/37-sesion-19-cerrada--PageHeader.png",
+      "caja": {
+        "x": 576,
+        "y": 119,
+        "width": 992,
+        "height": 85
+      },
+      "raicesDom": 1,
+      "etiqueta": "header",
+      "clases": "mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between"
+    },
+    {
+      "componente": "StatusChip",
+      "instancia": 1,
+      "archivo": "crops/37-sesion-19-cerrada--StatusChip.png",
+      "caja": {
+        "x": 1371,
+        "y": 176,
+        "width": 86,
+        "height": 28
+      },
+      "raicesDom": 1,
+      "etiqueta": "span",
+      "clases": "inline-flex items-center gap-1.5 whitespace-nowrap rounded-full font-medium px-2.5 py-1 text-sm text-muted-foreground bg-muted"
+    },
+    {
+      "componente": "StatusChip",
+      "instancia": 2,
+      "archivo": "crops/37-sesion-19-cerrada--StatusChip-2.png",
+      "caja": {
+        "x": 1464,
+        "y": 176,
+        "width": 104,
+        "height": 28
+      },
+      "raicesDom": 1,
+      "etiqueta": "span",
+      "clases": "inline-flex items-center gap-1.5 whitespace-nowrap rounded-full font-medium px-2.5 py-1 text-sm text-justificado bg-justificado-bg"
+    },
+    {
+      "componente": "ResumenSesion",
+      "instancia": 1,
+      "archivo": "crops/37-sesion-19-cerrada--ResumenSesion.png",
+      "caja": {
+        "x": 576,
+        "y": 228,
+        "width": 992,
+        "height": 1632
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "flex flex-col gap-4"
+    },
+    {
+      "componente": "GraficaAsistenciaSesion",
+      "instancia": 1,
+      "archivo": "crops/37-sesion-19-cerrada--GraficaAsistenciaSesion.png",
+      "caja": {
+        "x": 576,
+        "y": 228,
+        "width": 488,
+        "height": 410
+      },
+      "raicesDom": 1,
+      "etiqueta": "figure",
+      "clases": "m-0 flex flex-col rounded-xl border border-border bg-card p-5"
+    },
+    {
+      "componente": "TarjetaGrafica",
+      "instancia": 1,
+      "archivo": "crops/37-sesion-19-cerrada--TarjetaGrafica.png",
+      "caja": {
+        "x": 576,
+        "y": 228,
+        "width": 488,
+        "height": 410
+      },
+      "raicesDom": 1,
+      "etiqueta": "figure",
+      "clases": "m-0 flex flex-col rounded-xl border border-border bg-card p-5"
+    },
+    {
+      "componente": "AnilloEstados",
+      "instancia": 1,
+      "archivo": "crops/37-sesion-19-cerrada--AnilloEstados.png",
+      "caja": {
+        "x": 597,
+        "y": 311,
+        "width": 446,
+        "height": 306
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "@container w-full min-w-0 @min-[26rem]:flex-1"
+    },
+    {
+      "componente": "StatCard",
+      "instancia": 1,
+      "archivo": "crops/37-sesion-19-cerrada--StatCard.png",
+      "caja": {
+        "x": 1080,
+        "y": 228,
+        "width": 238,
+        "height": 120
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "group/stat flex min-h-[7.5rem] flex-col rounded-xl border border-border bg-card p-4"
+    },
+    {
+      "componente": "StatCard",
+      "instancia": 2,
+      "archivo": "crops/37-sesion-19-cerrada--StatCard-2.png",
+      "caja": {
+        "x": 1330,
+        "y": 228,
+        "width": 238,
+        "height": 120
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "group/stat flex min-h-[7.5rem] flex-col rounded-xl border border-border bg-card p-4"
+    },
+    {
+      "componente": "StatCard",
+      "instancia": 3,
+      "archivo": "crops/37-sesion-19-cerrada--StatCard-3.png",
+      "caja": {
+        "x": 1080,
+        "y": 360,
+        "width": 238,
+        "height": 120
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "group/stat flex min-h-[7.5rem] flex-col rounded-xl border border-border bg-card p-4"
+    },
+    {
+      "componente": "StatCard",
+      "instancia": 4,
+      "archivo": "crops/37-sesion-19-cerrada--StatCard-4.png",
+      "caja": {
+        "x": 1330,
+        "y": 360,
+        "width": 238,
+        "height": 120
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "group/stat flex min-h-[7.5rem] flex-col rounded-xl border border-border bg-card p-4"
+    },
+    {
+      "componente": "StatCard",
+      "instancia": 5,
+      "archivo": "crops/37-sesion-19-cerrada--StatCard-5.png",
+      "caja": {
+        "x": 1080,
+        "y": 492,
+        "width": 238,
+        "height": 120
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "group/stat flex min-h-[7.5rem] flex-col rounded-xl border border-border bg-card p-4"
+    },
+    {
+      "componente": "TablaAlumnosSesion",
+      "instancia": 1,
+      "archivo": "crops/37-sesion-19-cerrada--TablaAlumnosSesion.png",
+      "caja": {
+        "x": 576,
+        "y": 654,
+        "width": 992,
+        "height": 1206
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "overflow-x-auto rounded-xl border border-border bg-card"
+    },
+    {
+      "componente": "Table",
+      "instancia": 1,
+      "archivo": "crops/37-sesion-19-cerrada--Table.png",
+      "caja": {
+        "x": 576,
+        "y": 654,
+        "width": 992,
+        "height": 1206
+      },
+      "raicesDom": 1,
+      "etiqueta": "div",
+      "clases": "overflow-x-auto rounded-xl border border-border bg-card"
+    },
+    {
+      "componente": "StatusChip",
+      "instancia": 3,
+      "archivo": "crops/37-sesion-19-cerrada--StatusChip-3.png",
+      "caja": {
+        "x": 922,
+        "y": 746,
+        "width": 77,
+        "height": 20
+      },
+      "raicesDom": 1,
+      "etiqueta": "span",
+      "clases": "inline-flex items-center gap-1.5 whitespace-nowrap rounded-full font-medium px-2 py-0.5 text-xs text-presente bg-presente-bg"
+    },
+    {
+      "componente": "StatusChip",
+      "instancia": 4,
+      "archivo": "crops/37-sesion-19-cerrada--StatusChip-4.png",
+      "caja": {
+        "x": 1229,
+        "y": 746,
+        "width": 95,
+        "height": 20
+      },
+      "raicesDom": 1,
+      "etiqueta": "span",
+      "clases": "inline-flex items-center gap-1.5 whitespace-nowrap rounded-full font-medium px-2 py-0.5 text-xs text-justificado bg-justificado-bg"
+    },
+    {
+      "componente": "StatusChip",
+      "instancia": 5,
+      "archivo": "crops/37-sesion-19-cerrada--StatusChip-5.png",
+      "caja": {
+        "x": 1453,
+        "y": 746,
+        "width": 70,
+        "height": 20
+      },
+      "raicesDom": 1,
+      "etiqueta": "span",
+      "clases": "inline-flex items-center gap-1.5 whitespace-nowrap rounded-full font-medium px-2 py-0.5 text-xs text-presente bg-presente-bg"
+    },
+    {
+      "componente": "StatusChip",
+      "instancia": 6,
+      "archivo": "crops/37-sesion-19-cerrada--StatusChip-6.png",
+      "caja": {
+        "x": 922,
+        "y": 793,
+        "width": 77,
+        "height": 20
+      },
+      "raicesDom": 1,
+      "etiqueta": "span",
+      "clases": "inline-flex items-center gap-1.5 whitespace-nowrap rounded-full font-medium px-2 py-0.5 text-xs text-presente bg-presente-bg"
+    }
+  ]
+}
