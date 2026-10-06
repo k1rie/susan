@@ -88,8 +88,11 @@
 .s05-dia-critico-toma-p>span{grid-area:1/1;text-align:center}
 .s05-dia-critico-toma-oculto{visibility:hidden}
 .s05-dia-critico-toma-pct{padding-left:4.8px}
-/* anillo real del día crítico, 6.4 px por fuera del borde (rect a 3.2 px del borde, radio 59.2), trazado con pathLength 100 */
-.s05-dia-critico-toma-anillo{position:absolute;left:-6.4px;top:-6.4px;width:460.8px;height:316.8px;overflow:visible}
+/* anillo real del día crítico, 6.4 px por fuera del borde, trazado con pathLength 100. La caja del SVG va en px enteros (Chrome
+   ajusta al pixel la caja de un <svg>: con -6.4 px el anillo quedaba 0.4 px corrido y dejaba un hilo claro contra la casilla) y el
+   viewBox corre el origen 0.6 px para que las coordenadas sigan siendo las de antes. El trazo pasa 1 px por DEBAJO del relleno
+   (rect a 3.7 px, radio 58.7, ancho 7.4): por fuera sigue siendo el anillo de 6.4 px y no hay costura, igual que el borde del cuadro 6 */
+.s05-dia-critico-toma-anillo{position:absolute;left:-7px;top:-7px;width:462px;height:318px;overflow:visible}
 /* «Vie» 38 px 500 gris, centro (960, 776) */
 #s05-dia-critico-toma-dia{position:absolute;left:0;top:751px;width:1920px;height:50px;line-height:50px;text-align:center;
  font-size:38px;font-weight:500;color:#6F6A65;transform-origin:960px 25px}
@@ -155,13 +158,13 @@
     <div id="s05-dia-critico-toma">
       <div id="s05-dia-critico-toma-rig">
         <div id="s05-dia-critico-toma-cas">
-          <div class="s05-dia-critico-toma-relleno"></div>
-          <div class="s05-dia-critico-toma-cifra"><span>2</span><span>1</span><span class="s05-dia-critico-toma-p"><span>.</span><span class="s05-dia-critico-toma-oculto"> </span></span><span>8</span><span class="s05-dia-critico-toma-pct"><span class="s05-dia-critico-u">%</span></span></div>
-          <svg class="s05-dia-critico-toma-anillo" viewBox="0 0 460.8 316.8" aria-hidden="true" data-chart>
-            <path id="s05-dia-critico-anillo-trazo" d="M230.4 3.2 H398.4 A59.2 59.2 0 0 1 457.6 62.4 V254.4 A59.2 59.2 0 0 1 398.4 313.6 H62.4 A59.2 59.2 0 0 1 3.2 254.4 V62.4 A59.2 59.2 0 0 1 62.4 3.2 Z"
-              pathLength="100" fill="none" stroke="rgba(179,38,30,.7)" stroke-width="6.4" stroke-linecap="butt" stroke-linejoin="round"
+          <svg class="s05-dia-critico-toma-anillo" viewBox="-0.6 -0.6 462 318" aria-hidden="true" data-chart>
+            <path id="s05-dia-critico-anillo-trazo" d="M230.4 3.7 H398.4 A58.7 58.7 0 0 1 457.1 62.4 V254.4 A58.7 58.7 0 0 1 398.4 313.1 H62.4 A58.7 58.7 0 0 1 3.7 254.4 V62.4 A58.7 58.7 0 0 1 62.4 3.7 Z"
+              pathLength="100" fill="none" stroke="rgba(179,38,30,.7)" stroke-width="7.4" stroke-linecap="butt" stroke-linejoin="round"
               stroke-dasharray="100 100" stroke-dashoffset="100" />
           </svg>
+          <div class="s05-dia-critico-toma-relleno"></div>
+          <div class="s05-dia-critico-toma-cifra"><span>2</span><span>1</span><span class="s05-dia-critico-toma-p"><span>.</span><span class="s05-dia-critico-toma-oculto"> </span></span><span>8</span><span class="s05-dia-critico-toma-pct"><span class="s05-dia-critico-u">%</span></span></div>
         </div>
       </div>
       <div id="s05-dia-critico-toma-dia">Vie</div>
@@ -227,7 +230,7 @@
             llegaFin: 5.95,               // la toma llega de 0.88 a 1 y de 8 a 0 px
             meta: 5.55, metaFin: 5.85,    // «32 ausencias en 6 sesiones» desde el desenfoque
             anillo: 5.75, anilloFin: 6.15, // 5.75 draw (inicio del trazo)
-            latido: 6.15, latidoFin: 6.35, // 6.15 pop-1: la casilla late al cerrarse su anillo; quieto desde 6.35 (handoff_out)
+            latido: 6.15, latidoFin: 6.40, // 6.15 pop-1: la casilla late al cerrarse su anillo; quieto desde 6.40 (handoff_out; la vuelta dura 0.17 s para que el medidor la vea)
             D: 7.2
         };
         // Atravesar (DINAMISMO F5): la cámara de la estación empuja con origen en la casilla Vie (1320, 590) y la lleva a (960, 560).
@@ -495,7 +498,7 @@
         readMark(tl, T.llegaFin, 'Vie 21.8 % · 32 ausencias en 6 sesiones');
 
         // al cerrarse el anillo la casilla late una vez (1 -> 1.04 -> 1 desde su centro, sin sobreimpulso: va y vuelve a su escala)
-        // y queda quieta desde 6.35 s, 0.17 s antes de «viernes»
+        // y queda quieta desde 6.40 s, 0.12 s antes de «viernes»
         var subida = 0.08;
         tl.fromTo($('toma-cas'), { scale: 1 }, { scale: 1.04, duration: subida, ease: 'power2.out', immediateRender: false }, T.latido);
         tl.fromTo($('toma-cas'), { scale: 1.04 }, { scale: 1, duration: T.latidoFin - T.latido - subida, ease: 'power2.inOut', immediateRender: false }, T.latido + subida);
