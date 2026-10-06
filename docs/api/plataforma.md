@@ -65,7 +65,7 @@ biometría, índice FAISS y jobs. Aquí solo se fijan los puntos de apoyo que es
 
 | Marcador | Elemento | Componente | RF |
 |---|---|---|---|
-| 1 | Barra institucional: escudo UNACH + nombre del sistema; sin opción de registro | `AuthCard` -> `BrandMark` | RF-20 |
+| 1 | Barra de marca: nombre del sistema; sin opción de registro | `AuthCard` -> `BrandMark` | RF-20 |
 | 2 | Correo institucional | `LoginForm` -> `Input type="email"` | RF-20 |
 | 3 | Contraseña con mostrar/ocultar y "¿Olvidaste tu contraseña?" | `PasswordInput`; enlace a `/recuperar` | RF-20 |
 | 4 | Botón "Iniciar sesión": autentica y abre el portal del rol | `LoginForm`; `iniciarSesion` + `api_yo` + redirección a `me.home` | RF-20, RF-19 |
@@ -365,7 +365,7 @@ La verificación de calidad de la foto (un rostro, frontal, iluminada: P-06 marc
 
 | Componente | Props | Comportamiento |
 |---|---|---|
-| `BrandMark` | `variant: 'full' \| 'compact'` ('full'), `showFca: boolean` (true en `full`, false en `compact`) | Escudo UNACH (`/brand/unach-escudo.png`, alt "Escudo de la UNACH", 40x40) y nombre "SUSAN"; en `full` añade el subtítulo "Registro de asistencia" y el escudo FCA (`/brand/fca-escudo.png`, alt "Escudo de la FCA C-I"). Usa `next/image` con `width`/`height` fijos (espacio reservado, sin salto de layout). Es el espacio fijo de logotipo pedido en la spec |
+| `BrandMark` | `variant: 'full' \| 'compact'` ('full') | Nombre «SUSAN»; en `full` añade el subtítulo "Registro de asistencia". Sin imágenes ni escudos: no hay logotipos de terceros en la interfaz |
 | `AppShell` | `me: Me`, `relojSimulado?: boolean`, `children` | Ver §2.5 |
 | `Sidebar` | `items: { href: string, label: string, icon: LucideIcon }[]`, `pathname: string`, `open: boolean`, `onClose: () => void` | `<nav aria-label="Principal">`; ítem activo con `aria-current="page"` |
 | `Topbar` | `me: Me`, `onMenu: () => void` | Ver §2.5 |
