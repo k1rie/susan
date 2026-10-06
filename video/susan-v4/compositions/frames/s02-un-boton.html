@@ -17,28 +17,30 @@
 .s02-un-boton-nube-rubor{background:radial-gradient(closest-side,rgba(251,230,226,.6),rgba(251,230,226,0))}
 .s02-un-boton-grano{position:absolute;inset:0;pointer-events:none;mix-blend-mode:multiply;opacity:.04;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
 #s02-un-boton-grano-cielo{opacity:.10}
+/* Dos tomas en la misma pista: el empuje (tarjeta a E = 2.4 + marca) y la toma de cerca (tarjeta a E = 3.2).
+   El desenfoque va en la capa de toma; la cámara, en su hija (nunca filtro y escala en el mismo elemento). */
+.s02-un-boton-toma{position:absolute;inset:0}
+.s02-un-boton-cam{position:absolute;inset:0}
 /* «SUSAN»: el BrandMark de la app ampliado (Hanken 600, 136 px, -0.025em), sin escudo y sin subrayado (BRIEF, ajuste del 2026-10-06).
-   Su caja la pone el script: mayúsculas centradas en la altura de la tarjeta y el par marca + tarjeta centrado en x = 960. */
+   Su caja la pone el script: mayúsculas centradas en la altura de la tarjeta y el par marca + tarjeta centrado en x = 960.
+   Vive en la cámara del empuje: sale por la izquierda con él. */
 #s02-un-boton-marca{position:absolute;left:0;top:0;font-size:136px;font-weight:600;letter-spacing:-0.025em;line-height:1;white-space:nowrap;color:#1E1919}
 .s02-un-boton-letra{display:inline-block}
-/* escena: sombras en capa aparte, superficie (tarjeta -> cámara), botón (la ficha estirada) y brillo */
-/* rig del objeto flotante y sombras: origen en el centro del botón (lo pone el script) */
+/* rig del objeto flotante: solo el despegue de 8 px; las sombras no lo siguen (se leen como altura) */
 .s02-un-boton-rig{position:absolute;inset:0}
-/* las sombras escalan con el rig (mismo origen) pero no siguen su despegue en y: así se leen como altura */
 #s02-un-boton-sombras{position:absolute;inset:0}
 .s02-un-boton-sombra-cielo-crece{position:absolute}
-#s02-un-boton-sombra-cielo{position:absolute;inset:0;border-radius:28px;transform-origin:0 0;
+#s02-un-boton-sombra-cielo{position:absolute;inset:0;border-radius:28px;
  box-shadow:0 40px 120px rgba(29,95,209,.14),0 8px 24px rgba(29,95,209,.08)}
-#s02-un-boton-sombra-tinta{position:absolute;left:880px;top:200px;width:900px;height:506px;border-radius:28px;transform-origin:0 0;
- box-shadow:0 40px 120px rgba(30,25,25,.14)}
-/* La superficie se maqueta en la caja que cubre tarjeta y cámara (la calcula el script); el clip-path recorta la forma visible. */
+/* La superficie se maqueta en la caja de la tarjeta; el clip-path recorta la forma visible (crece desde el botón). */
 #s02-un-boton-superficie{position:absolute}
 #s02-un-boton-sup-borde{position:absolute;inset:0;background:#E7E2DC}
 #s02-un-boton-sup-fondo{position:absolute;inset:0;background:#FFFFFF}
 #s02-un-boton-tarjeta{position:absolute;left:0;top:0}
-/* E = 2.4: la tarjeta es el héroe del cuadro (852 px, 44 % del ancho; 46 % con el acercamiento de 1.04) */
+/* E = 2.4 en la toma del empuje (852 px, 44 % del ancho); E = 3.2 en la toma de cerca (1136 px) */
 .s02-un-boton-ui{zoom:2.4;position:relative}
-/* PasarListaHero en su anatomía móvil (px de la app; E = 2.4 por zoom). 355 x 290 css = 852 x 696 en video. */
+.s02-un-boton-ui.s02-un-boton-ui-cerca{zoom:3.2}
+/* PasarListaHero en su anatomía móvil (px de la app; E por zoom). 355 x 290 css. */
 .s02-un-boton-card{width:355px;height:290px;box-sizing:border-box;padding:20px 20px 19px;display:flex;flex-direction:column}
 .s02-un-boton-cab{display:flex;align-items:center;justify-content:space-between;gap:12px;height:36px;flex:none}
 .s02-un-boton-cab-izq{display:flex;align-items:center;gap:10px;font-size:14px;line-height:20px;font-weight:500;color:#6F6A65}
@@ -48,25 +50,23 @@
 .s02-un-boton-chip{grid-area:1/1;display:inline-flex;align-items:center;gap:6px;padding:2px 8px;border-radius:999px;font-size:12px;line-height:16px;font-weight:500;white-space:nowrap}
 .s02-un-boton-chip i{width:6px;height:6px;border-radius:50%;background:currentColor;display:block;flex:none}
 .s02-un-boton-chip-programada{background:#EEEBE6;color:#5B5651}
-.s02-un-boton-chip-abierta{background:#E1EDFA;color:#1F5FA8}
+.s02-un-boton-chip-abierta{background:#E1EDFA;color:#1F5FA8;opacity:0}
 .s02-un-boton-titulo{margin-top:16px;font-size:20px;line-height:25px;font-weight:600;letter-spacing:-0.025em;white-space:nowrap}
 .s02-un-boton-detalle{margin-top:4px;font-size:14px;line-height:20px;color:#6F6A65;white-space:nowrap}
 .s02-un-boton-camara{margin-top:10px;display:flex;align-items:center;gap:8px;font-size:14px;line-height:20px;white-space:nowrap}
-.s02-un-boton-camara-ico{position:relative;width:16px;height:16px;color:#1F7A47;flex:none}
+.s02-un-boton-camara-ico{width:16px;height:16px;color:#1F7A47;flex:none}
 .s02-un-boton-camara-ico svg{width:16px;height:16px;display:block}
-#s02-un-boton-pulso{position:absolute;left:-16px;top:-16px;width:48px;height:48px;overflow:visible}
 .s02-un-boton-hueco{margin-top:16px;height:48px;flex:none}
 .s02-un-boton-enlace{margin-top:16px;height:40px;display:flex;align-items:center;gap:4px;font-size:14px;font-weight:500;color:#0061FE;white-space:nowrap}
 .s02-un-boton-enlace svg{width:16px;height:16px;display:block}
 /* VistaCamara: chips oscuros en inset 12 (24 px en video), alto 44 */
-.s02-un-boton-camchip{position:absolute;top:24px;height:44px;box-sizing:border-box;display:inline-flex;align-items:center;gap:12px;padding:0 20px;
+.s02-un-boton-camchip{position:absolute;top:224px;height:44px;box-sizing:border-box;display:inline-flex;align-items:center;gap:12px;padding:0 20px;
  border-radius:999px;background:rgba(30,25,25,.8);color:#FFFFFF;font-size:24px;line-height:44px;font-weight:500;white-space:nowrap}
 .s02-un-boton-camchip svg{width:24px;height:24px;display:block}
-/* Botón «Abrir y pasar lista» = la ficha del botón central estirada. Su caja (ancho del botón x 168, centrada en el botón)
-   cubre disco y botón; todas sus medidas salen de E en el script. */
+/* Botón «Abrir y pasar lista» de la toma del empuje = la ficha del botón central estirada. Su caja (ancho del botón x 168,
+   centrada en el botón) cubre disco y botón; todas sus medidas salen de E en el script. */
 #s02-un-boton-boton{position:absolute}
 #s02-un-boton-ficha-sombra{position:absolute;top:-15px;width:198px;height:198px;border-radius:50%;box-shadow:0 30px 90px rgba(30,25,25,.18);transform-origin:50% 50%}
-#s02-un-boton-foco{position:absolute;left:0;box-shadow:0 0 0 8px rgba(0,97,254,.3)}
 #s02-un-boton-anillo{position:absolute;left:-15px;top:-15px;height:198px;background:#FFFFFF}
 #s02-un-boton-sup{position:absolute;inset:0;background:#1E1919;color:#FFFFFF}
 /* scan-face se maqueta a 72 px (el del cuadro 1, idéntico al píxel en el corte) y se asienta a 20 px de la app (48 a E 2.4) */
@@ -75,8 +75,28 @@
 #s02-un-boton-rotulo-texto{font-weight:500;white-space:nowrap}
 #s02-un-boton-flecha{display:block}
 #s02-un-boton-flecha svg{width:100%;height:100%;display:block}
-#s02-un-boton-brillo-caja{position:absolute;left:0;overflow:hidden;pointer-events:none}
-#s02-un-boton-brillo{position:absolute;inset:0;background:linear-gradient(105deg,rgba(255,255,255,0) 42%,rgba(255,255,255,.55) 50%,rgba(255,255,255,0) 58%)}
+/* ---- Toma de cerca (E = 3.2). Cajas en px del video; las pone el script desde la geometría. ---- */
+/* sombra-cielo de la toma: el token a la escala con la que llega la del empuje (x 1.25), para que el corte no se vea */
+#s02-un-boton-cerca-sombra{position:absolute;box-shadow:0 50px 150px rgba(29,95,209,.14),0 10px 30px rgba(29,95,209,.08)}
+#s02-un-boton-cerca-sombra-tinta{position:absolute;left:880px;top:200px;width:900px;height:506px;border-radius:28px;transform-origin:0 0;
+ box-shadow:0 40px 120px rgba(30,25,25,.14)}
+#s02-un-boton-cerca-tarjeta{position:absolute;background:#E7E2DC}
+#s02-un-boton-cerca-tarjeta-fondo{position:absolute;inset:3px;background:#FFFFFF}
+#s02-un-boton-cerca-contenido{position:absolute;left:0;top:0}
+/* el pulsador lleva todo lo que se comprime con el toque (halo, tinta, brillo, rótulo); su origen es el centro del botón */
+.s02-un-boton-pulsador{position:absolute;inset:0}
+#s02-un-boton-cerca-foco{position:absolute}
+/* la tinta se maqueta en la caja que cubre botón y cámara; el clip-path recorta el botón y luego el marco de la cámara */
+#s02-un-boton-cerca-tinta{position:absolute;background:#1E1919}
+#s02-un-boton-cerca-brillo-caja{position:absolute;overflow:hidden;pointer-events:none}
+#s02-un-boton-cerca-brillo{position:absolute;inset:0;background:linear-gradient(105deg,rgba(255,255,255,0) 42%,rgba(255,255,255,.55) 50%,rgba(255,255,255,0) 58%)}
+#s02-un-boton-cerca-rotulo{position:absolute}
+/* contenido del botón lg en px de la app (icono 20 · 8 · texto · 8 · flecha 16), en el mismo sitio que el del empuje */
+.s02-un-boton-btn{position:relative;width:315px;height:48px;color:#FFFFFF}
+.s02-un-boton-btn-ico{position:absolute;left:75.5px;top:14px;width:20px;height:20px;display:block}
+.s02-un-boton-btn-rot{position:absolute;left:103.5px;top:14px;height:20px;display:flex;align-items:center;gap:8px;font-size:14px;line-height:20px;font-weight:500;white-space:nowrap}
+.s02-un-boton-btn-flecha{width:16px;height:16px;display:block}
+.s02-un-boton-btn-flecha svg{width:16px;height:16px;display:block}
 </style>
 <div id="root" data-composition-id="s02-un-boton" data-start="0" data-duration="6.05" data-width="1920" data-height="1080">
 
@@ -85,13 +105,12 @@
     <div class="s02-un-boton-grano"></div>
   </div>
 
-  <!-- pista 1: E1 cielo crema; la marca vive en esta capa y se va con ella -->
+  <!-- pista 1: E1 cielo crema (no viaja con el empuje: R3 mueve solo la capa de contenido) -->
   <div id="s02-un-boton-cielo" class="clip s02-un-boton-capa" data-start="0" data-duration="6.05" data-track-index="1">
     <div id="s02-un-boton-nube-lejos" class="s02-un-boton-nube s02-un-boton-nube-rubor" data-layout-allow-overflow style="left:440px;top:-70px;width:640px;height:320px"></div>
     <div id="s02-un-boton-nube-medio" class="s02-un-boton-nube s02-un-boton-nube-calida" data-layout-allow-overflow style="left:1060px;top:-330px;width:1000px;height:500px"></div>
     <div id="s02-un-boton-nube-cerca" class="s02-un-boton-nube s02-un-boton-nube-fria" data-layout-allow-overflow style="left:-280px;top:-40px;width:1160px;height:580px"></div>
     <div id="s02-un-boton-grano-cielo" class="s02-un-boton-grano"></div>
-    <div id="s02-un-boton-marca" aria-label="SUSAN" data-layout-allow-occlusion><span class="s02-un-boton-letra">S</span><span class="s02-un-boton-letra">U</span><span class="s02-un-boton-letra">S</span><span class="s02-un-boton-letra">A</span><span class="s02-un-boton-letra">N</span></div>
   </div>
 
   <!-- pista 2: E3 con halo azul de cámara; sube ENCIMA del cielo (el cielo nunca baja a 0) -->
@@ -99,71 +118,123 @@
     <div class="s02-un-boton-grano"></div>
   </div>
 
-  <!-- pista 3: el objeto flotante -->
+  <!-- pista 3: el objeto flotante, en dos tomas -->
   <div id="s02-un-boton-escena" class="clip s02-un-boton-capa" data-start="0" data-duration="6.05" data-track-index="3">
-    <div id="s02-un-boton-sombras" data-layout-allow-overflow>
-      <div id="s02-un-boton-sombra-crece" class="s02-un-boton-sombra-cielo-crece"><div id="s02-un-boton-sombra-cielo"></div></div>
-      <div id="s02-un-boton-sombra-tinta"></div>
-    </div>
 
-    <!-- rig del objeto flotante (sin zoom): despegue y acercamiento; las sombras escalan con él pero no despegan (se leen como altura) -->
-    <div id="s02-un-boton-rig" class="s02-un-boton-rig" data-layout-allow-overflow>
-    <div id="s02-un-boton-superficie">
-      <div id="s02-un-boton-sup-borde"></div>
-      <div id="s02-un-boton-sup-fondo">
-        <div id="s02-un-boton-tarjeta">
-          <div class="s02-un-boton-ui">
-            <div class="s02-un-boton-card">
-              <div class="s02-un-boton-cab">
-                <div id="s02-un-boton-cab-izq" class="s02-un-boton-cab-izq">
-                  <span class="s02-un-boton-ficha"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" data-lucide="scan-face" aria-hidden="true"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><path d="M9 9h.01"/><path d="M15 9h.01"/></svg></span>
-                  <span>Pasar lista</span>
-                </div>
-                <div id="s02-un-boton-estado" class="s02-un-boton-estado">
-                  <span id="s02-un-boton-programada" class="s02-un-boton-chip s02-un-boton-chip-programada"><i></i>Programada</span>
-                  <span id="s02-un-boton-abierta" class="s02-un-boton-chip s02-un-boton-chip-abierta"><i></i>Abierta</span>
+    <!-- toma 1 (0-3.30 s): tarjeta a E = 2.4 y marca; la cámara atraviesa hacia el botón -->
+    <div id="s02-un-boton-empuje" class="s02-un-boton-toma">
+      <div id="s02-un-boton-empuje-cam" class="s02-un-boton-cam" data-layout-allow-overflow>
+        <div id="s02-un-boton-marca" aria-label="SUSAN" data-layout-allow-overflow><span class="s02-un-boton-letra">S</span><span class="s02-un-boton-letra">U</span><span class="s02-un-boton-letra">S</span><span class="s02-un-boton-letra">A</span><span class="s02-un-boton-letra">N</span></div>
+        <div id="s02-un-boton-sombras" data-layout-allow-overflow>
+          <div id="s02-un-boton-sombra-crece" class="s02-un-boton-sombra-cielo-crece"><div id="s02-un-boton-sombra-cielo"></div></div>
+        </div>
+        <div id="s02-un-boton-rig" class="s02-un-boton-rig" data-layout-allow-overflow>
+          <div id="s02-un-boton-superficie">
+            <div id="s02-un-boton-sup-borde"></div>
+            <div id="s02-un-boton-sup-fondo">
+              <div id="s02-un-boton-tarjeta">
+                <div class="s02-un-boton-ui">
+                  <div class="s02-un-boton-card">
+                    <div class="s02-un-boton-cab">
+                      <div id="s02-un-boton-cab-izq" class="s02-un-boton-cab-izq">
+                        <span class="s02-un-boton-ficha"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" data-lucide="scan-face" aria-hidden="true"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><path d="M9 9h.01"/><path d="M15 9h.01"/></svg></span>
+                        <span>Pasar lista</span>
+                      </div>
+                      <div id="s02-un-boton-estado" class="s02-un-boton-estado">
+                        <span class="s02-un-boton-chip s02-un-boton-chip-programada"><i></i>Programada</span>
+                        <span class="s02-un-boton-chip s02-un-boton-chip-abierta"><i></i>Abierta</span>
+                      </div>
+                    </div>
+                    <div id="s02-un-boton-titulo" class="s02-un-boton-titulo">Administración Financiera (3A)</div>
+                    <div id="s02-un-boton-detalle" class="s02-un-boton-detalle">07:00 - 08:00 · Aula A-12</div>
+                    <div id="s02-un-boton-camara-fila" class="s02-un-boton-camara">
+                      <span class="s02-un-boton-camara-ico"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" data-lucide="camera" aria-hidden="true"><path d="M13.997 4a2 2 0 0 1 1.76 1.05l.486.9A2 2 0 0 0 18.003 7H20a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h1.997a2 2 0 0 0 1.759-1.048l.489-.904A2 2 0 0 1 10.004 4z"/><circle cx="12" cy="13" r="3"/></svg></span>
+                      <span>Cámara del aula lista</span>
+                    </div>
+                    <div class="s02-un-boton-hueco"></div>
+                    <div id="s02-un-boton-enlace" class="s02-un-boton-enlace">
+                      <span>Otras sesiones de hoy (1)</span>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" data-lucide="arrow-right" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                    </div>
+                  </div>
                 </div>
               </div>
-              <div id="s02-un-boton-titulo" class="s02-un-boton-titulo">Administración Financiera (3A)</div>
-              <div id="s02-un-boton-detalle" class="s02-un-boton-detalle">07:00 - 08:00 · Aula A-12</div>
-              <div id="s02-un-boton-camara-fila" class="s02-un-boton-camara">
-                <span class="s02-un-boton-camara-ico">
-                  <svg id="s02-un-boton-pulso" viewBox="0 0 48 48" aria-hidden="true">
-                    <circle id="s02-un-boton-pulso-1" cx="24" cy="24" r="8" fill="none" stroke="#27A06A" stroke-width="1.5" />
-                    <circle id="s02-un-boton-pulso-2" cx="24" cy="24" r="8" fill="none" stroke="#27A06A" stroke-width="1.5" />
-                  </svg>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" data-lucide="camera" aria-hidden="true"><path d="M13.997 4a2 2 0 0 1 1.76 1.05l.486.9A2 2 0 0 0 18.003 7H20a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h1.997a2 2 0 0 0 1.759-1.048l.489-.904A2 2 0 0 1 10.004 4z"/><circle cx="12" cy="13" r="3"/></svg>
-                </span>
-                <span>Cámara del aula lista</span>
-              </div>
-              <div class="s02-un-boton-hueco"></div>
-              <div id="s02-un-boton-enlace" class="s02-un-boton-enlace">
-                <span>Otras sesiones de hoy (1)</span>
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" data-lucide="arrow-right" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            </div>
+          </div>
+
+          <div id="s02-un-boton-boton">
+            <div id="s02-un-boton-ficha-sombra"></div>
+            <div id="s02-un-boton-anillo"></div>
+            <div id="s02-un-boton-sup">
+              <svg id="s02-un-boton-ico" xmlns="http://www.w3.org/2000/svg" width="72" height="72" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" data-lucide="scan-face" aria-hidden="true"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><path d="M9 9h.01"/><path d="M15 9h.01"/></svg>
+              <div id="s02-un-boton-rotulo">
+                <span id="s02-un-boton-rotulo-texto">Abrir y pasar lista</span>
+                <span id="s02-un-boton-flecha"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" data-lucide="arrow-right" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span>
               </div>
             </div>
           </div>
         </div>
-        <!-- VistaCamara vacía: el destino del morph (relevo con el cuadro 3) -->
-        <div id="s02-un-boton-reconociendo" class="s02-un-boton-camchip"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" data-lucide="scan-face" aria-hidden="true"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><path d="M9 9h.01"/><path d="M15 9h.01"/></svg>Reconociendo</div>
-        <div id="s02-un-boton-frente" class="s02-un-boton-camchip">Cámara frente</div>
       </div>
     </div>
 
-    <div id="s02-un-boton-boton">
-      <div id="s02-un-boton-ficha-sombra"></div>
-      <div id="s02-un-boton-foco"></div>
-      <div id="s02-un-boton-anillo"></div>
-      <div id="s02-un-boton-sup">
-        <svg id="s02-un-boton-ico" xmlns="http://www.w3.org/2000/svg" width="72" height="72" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" data-lucide="scan-face" aria-hidden="true"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><path d="M9 9h.01"/><path d="M15 9h.01"/></svg>
-        <div id="s02-un-boton-rotulo">
-          <span id="s02-un-boton-rotulo-texto">Abrir y pasar lista</span>
-          <span id="s02-un-boton-flecha"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" data-lucide="arrow-right" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span>
+    <!-- toma 2 (3.30-6.05 s): la misma PasarListaHero a E = 3.2; el toque y la apertura de la cámara -->
+    <div id="s02-un-boton-cerca" class="s02-un-boton-toma">
+      <div id="s02-un-boton-cerca-cam" class="s02-un-boton-cam" data-layout-allow-overflow>
+        <div id="s02-un-boton-cerca-sombra"></div>
+        <div id="s02-un-boton-cerca-sombra-tinta"></div>
+        <div id="s02-un-boton-cerca-tarjeta" data-layout-allow-overflow>
+          <div id="s02-un-boton-cerca-tarjeta-fondo"></div>
+          <div id="s02-un-boton-cerca-contenido">
+            <div class="s02-un-boton-ui s02-un-boton-ui-cerca">
+              <div class="s02-un-boton-card">
+                <div class="s02-un-boton-cab">
+                  <div class="s02-un-boton-cab-izq">
+                    <span class="s02-un-boton-ficha"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" data-lucide="scan-face" aria-hidden="true"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><path d="M9 9h.01"/><path d="M15 9h.01"/></svg></span>
+                    <span>Pasar lista</span>
+                  </div>
+                  <div class="s02-un-boton-estado">
+                    <span id="s02-un-boton-cerca-programada" class="s02-un-boton-chip s02-un-boton-chip-programada"><i></i>Programada</span>
+                    <span id="s02-un-boton-cerca-abierta" class="s02-un-boton-chip s02-un-boton-chip-abierta"><i></i>Abierta</span>
+                  </div>
+                </div>
+                <div class="s02-un-boton-titulo">Administración Financiera (3A)</div>
+                <div class="s02-un-boton-detalle">07:00 - 08:00 · Aula A-12</div>
+                <div class="s02-un-boton-camara">
+                  <span class="s02-un-boton-camara-ico"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" data-lucide="camera" aria-hidden="true"><path d="M13.997 4a2 2 0 0 1 1.76 1.05l.486.9A2 2 0 0 0 18.003 7H20a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h1.997a2 2 0 0 0 1.759-1.048l.489-.904A2 2 0 0 1 10.004 4z"/><circle cx="12" cy="13" r="3"/></svg></span>
+                  <span>Cámara del aula lista</span>
+                </div>
+                <div class="s02-un-boton-hueco"></div>
+                <div class="s02-un-boton-enlace">
+                  <span>Otras sesiones de hoy (1)</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" data-lucide="arrow-right" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
+
+        <div id="s02-un-boton-cerca-pulsador" class="s02-un-boton-pulsador" data-layout-allow-overflow>
+          <div id="s02-un-boton-cerca-foco"></div>
+          <div id="s02-un-boton-cerca-tinta"></div>
+          <!-- brillo de la CTA: recortado a la forma del botón, sobre la tinta (en el blanco de la tarjeta no se vería) -->
+          <div id="s02-un-boton-cerca-brillo-caja"><div id="s02-un-boton-cerca-brillo" data-layout-allow-overflow></div></div>
+          <div id="s02-un-boton-cerca-rotulo">
+            <div class="s02-un-boton-ui s02-un-boton-ui-cerca">
+              <div class="s02-un-boton-btn">
+                <svg class="s02-un-boton-btn-ico" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" data-lucide="scan-face" aria-hidden="true"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><path d="M9 9h.01"/><path d="M15 9h.01"/></svg>
+                <div class="s02-un-boton-btn-rot">
+                  <span>Abrir y pasar lista</span>
+                  <span id="s02-un-boton-cerca-flecha" class="s02-un-boton-btn-flecha"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" data-lucide="arrow-right" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- VistaCamara vacía: el destino del morph (relevo con el cuadro 3) -->
+        <div id="s02-un-boton-reconociendo" class="s02-un-boton-camchip" style="left:904px"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" data-lucide="scan-face" aria-hidden="true"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><path d="M9 9h.01"/><path d="M15 9h.01"/></svg>Reconociendo</div>
+        <div id="s02-un-boton-frente" class="s02-un-boton-camchip" style="right:164px">Cámara frente</div>
       </div>
-      <!-- brillo de la CTA: recortado a la forma final del botón, sobre la tinta (en el blanco de la tarjeta no se vería) -->
-      <div id="s02-un-boton-brillo-caja"><div id="s02-un-boton-brillo" data-layout-allow-overflow></div></div>
-    </div>
     </div>
   </div>
 </div>
@@ -176,86 +247,115 @@
         window.__timelines = window.__timelines || {};
         var tl = gsap.timeline({ paused: true });
 
-        // Tiempos del cuadro (los de sfx_cues son contrato: el tween nombrado empieza o termina ahí).
+        // Tiempos del cuadro (los de sfx_cues son contrato: el tween nombrado empieza, termina o tiene su pico ahí).
         var T = {
             cielo: 0.10,        // soft-in: el fondo pasa de crema a cielo
             ficha: 0.10,        // la ficha viaja y se estira (whoosh-s en su pico, 0.40)
-            rotulo: 0.52,       // cuando el icono ya despejó su lugar (≈0.525), dentro de la ventana 0.45-0.75
+            rotulo: 0.52,       // cuando el icono ya despejó su lugar (≈0.525)
             tarjeta: 0.55,      // la superficie crece alrededor del botón (termina en 1.15: pop-2)
             contenido: 0.75,
             marca: 1.15,
-            despegue: 1.95,     // la tarjeta sube a su lugar mientras la voz dice «susan» (el hueco que dejó el subrayado)
-            brillo: 2.80,       // sheen-s: primer fotograma visible del brillo
-            pulso: 3.50,
-            acercar: 3.65,      // la cámara se acerca al botón con «la sesión con un solo…» (gesto de 0.8 s)
-            ACERCAR_D: 0.8,     // se asienta 0.33 s antes del halo de foco y de «botón»
+            despegue: 1.95,     // la tarjeta sube a su lugar mientras la voz dice «susan»
+            empuje: 2.85,       // R3a: la cámara atraviesa hacia el botón (power2.in: la velocidad máxima llega en el corte)
+            nubla: 3.05,        // la capa del empuje se desenfoca 0 -> 6 px
+            marcaSale: 3.12,    // «SUSAN» se apaga mientras viaja (no desaparece de golpe en el corte)
+            corte: 3.30,        // whoosh-l: tl.set cambia la toma del empuje por la toma de cerca
+            LLEGA_D: 0.50,      // la toma de cerca llega 0.94 -> 1 y 6 -> 0 px (expo.out)
+            brillo: 3.95,       // sheen-s: primer fotograma visible del brillo
             foco: 4.78,
             presion: 4.95,      // tap
             estado: 5.00,       // click-soft2
-            camara: 5.30,       // morph a la cámara (whoosh-m en su pico, 5.60)
+            camara: 5.30,       // morph botón -> cámara (whoosh-m en su pico, 5.60)
             DESPEGUE: 8,
-            ACERCA: 1.04,
             D: 6.05
         };
 
         // Desenfoque como función pura del tiempo: blur(px) mientras > 0.05, «none» en reposo (PILOTO 3a).
-        function desenfoque(el, at, dur, desde, curva) {
+        function desenfoque(el, at, dur, desde, curva) {            // desde -> 0 px
             var st = { d: desde };
             function aplicar() { el.style.filter = st.d < 0.05 ? 'none' : 'blur(' + st.d.toFixed(2) + 'px)'; }
             aplicar();
             tl.fromTo(st, { d: desde }, { d: 0, duration: dur, ease: curva, onUpdate: aplicar, immediateRender: false }, at);
         }
+        function desenfocar(el, at, dur, hasta, curva) {             // 0 -> hasta px (DINAMISMO 2.0, driver inverso)
+            var st = { d: 0 };
+            function aplicar() { el.style.filter = st.d < 0.05 ? 'none' : 'blur(' + st.d.toFixed(2) + 'px)'; }
+            aplicar();
+            tl.fromTo(st, { d: 0 }, { d: hasta, duration: dur, ease: curva, onUpdate: aplicar, immediateRender: false }, at);
+        }
 
-        // ---------- Geometría: una sola fuente de números (E, caja de la tarjeta y caja de la cámara del relevo con el cuadro 3) ----------
-        var E = 2.4;                                   // escala de la UI (zoom de .ui)
+        // ---------- Geometría: una sola fuente de números ----------
+        function px(v) { return (Math.round(v * 100) / 100) + 'px'; }
+        function inset(c, r) { return 'inset(' + px(c[0]) + ' ' + px(c[1]) + ' ' + px(c[2]) + ' ' + px(c[3]) + ' round ' + px(r) + ')'; }
+        function mas(c, d) { return [c[0] + d, c[1] + d, c[2] + d, c[3] + d]; }
+        function caja(el, x, y, w, h) { el.style.left = px(x); el.style.top = px(y); if (w !== null) { el.style.width = px(w); } if (h !== null) { el.style.height = px(h); } }
+
+        // Toma del empuje: E = 2.4
+        var E = 2.4;
         var CW = 355 * E, CH = 290 * E;                // tarjeta: 852 x 696
         var CL = 838, CT = 191.6;                      // x 838-1690, y 191.6-887.6 (centro 1264, 539.6)
-        var CAM = { x: 880, y: 200, w: 900, h: 506 };  // handoff_out: marco de la cámara (contrato con el cuadro 3)
         var BX = CL + 20 * E, BY = CT + 167 * E;       // hueco del botón en la tarjeta (padding 20, 167 px de la app desde arriba)
         var BW = 315 * E, BH = 48 * E;                 // 756 x 115.2
         var BCX = BX + BW / 2, BCY = BY + BH / 2;      // centro del botón: (1264, 650)
-        var RB = 8 * E;                                // radio del botón (8 px de la app)
+        var RB = 8 * E, RT = 14 * E;                   // radios del botón y de la tarjeta (app x E)
         var FICHA = { x: 960, y: 500 };                // handoff_in: centro de la ficha del cuadro 1
-        // superficie: la caja que cubre tarjeta y cámara
-        var SL = Math.min(CL, CAM.x), ST = Math.min(CT, CAM.y);
-        var SR = Math.max(CL + CW, CAM.x + CAM.w), SB = Math.max(CT + CH, CAM.y + CAM.h);
-        function px(v) { return (Math.round(v * 100) / 100) + 'px'; }
-        function cajaEn(x0, y0, x1, y1) { return [y0 - ST, SR - x1, SB - y1, x0 - SL]; }
-        // Cajas en coordenadas de la superficie: inset(arriba derecha abajo izquierda round r).
-        function inset(c, r) { return 'inset(' + px(c[0]) + ' ' + px(c[1]) + ' ' + px(c[2]) + ' ' + px(c[3]) + ' round ' + px(r) + ')'; }
-        function mas(c, d) { return [c[0] + d, c[1] + d, c[2] + d, c[3] + d]; }
-        var LINEA = cajaEn(BX, BCY, BX + BW, BCY);                     // eje del botón, alto 0 (no se ve hasta crecer)
-        var TARJETA = cajaEn(CL, CT, CL + CW, CT + CH);
-        var CAMARA = cajaEn(CAM.x, CAM.y, CAM.x + CAM.w, CAM.y + CAM.h);
+        // superficie = caja de la tarjeta; cajas en sus coordenadas: [arriba, derecha, abajo, izquierda]
+        function cajaT(x0, y0, x1, y1) { return [y0 - CT, CL + CW - x1, CT + CH - y1, x0 - CL]; }
+        var LINEA = cajaT(BX, BCY, BX + BW, BCY);      // eje del botón, alto 0 (no se ve hasta crecer)
+        var TARJETA = [0, 0, 0, 0];
         // contenido del botón (app: icono 20 · 8 · texto 112 · 8 · flecha 16 = 164 px, centrado)
         // (redondeado a px enteros: scan-face nace a 72 px en el centro del disco y debe coincidir al píxel con el cuadro 1)
         var CONT = 164 * E, C0 = Math.round((BW - CONT) / 2);
         var ICO_CX = C0 + 10 * E;                      // centro final de scan-face dentro de la caja del botón (205)
         var RIN = (BW - 168) / 2, RINA = (BW + 30 - 198) / 2, VIN = (168 - BH) / 2;
 
-        function caja(el, x, y, w, h) { el.style.left = px(x); el.style.top = px(y); if (w !== null) { el.style.width = px(w); } if (h !== null) { el.style.height = px(h); } }
-        caja($('superficie'), SL, ST, SR - SL, SB - ST);
-        caja($('tarjeta'), CL - SL, CT - ST, CW, CH);
-        $('reconociendo').style.left = px(CAM.x - SL + 24); $('reconociendo').style.top = px(CAM.y - ST + 24);
-        $('frente').style.right = px(SR - CAM.x - CAM.w + 24); $('frente').style.top = px(CAM.y - ST + 24);
+        // Toma de cerca: la misma tarjeta a E2 = 3.2, centrada en x = 960, con el botón en (960, 687.2).
+        var E2 = 3.2;
+        var K = { x: 392, y: 76, w: 355 * E2, h: 290 * E2 };                    // 1136 x 928: x 392-1528, y 76-1004
+        var KB = { x: K.x + 20 * E2, y: K.y + 167 * E2, w: 315 * E2, h: 48 * E2 }; // x 456-1464, y 610.4-764
+        var KBC = { x: KB.x + KB.w / 2, y: KB.y + KB.h / 2 };                    // (960, 687.2)
+        var RB2 = 8 * E2, RT2 = 14 * E2;                                          // 25.6 y 44.8
+        var CAM = { x: 880, y: 200, w: 900, h: 506 };  // handoff_out: marco de la cámara (contrato con el cuadro 3)
+        // Empuje: escala 1.25 con origen en el botón, que viaja a su sitio en la toma de cerca. La toma llega de 0.94:
+        // en el corte el botón mide 756 x 1.25 = 945 y 1008 x 0.94 = 947.5 px, y el centro de la tarjeta queda en y ≈ 549 en las dos.
+        var EMP = 1.25, LLEGA = 0.94;
+        var DX = KBC.x - BCX, DY = KBC.y - BCY;        // -304, +37.2
+        // tinta de la toma de cerca: caja que cubre botón y cámara; recortes en sus coordenadas
+        var U = { x0: Math.min(KB.x, CAM.x), y0: Math.min(KB.y, CAM.y), x1: Math.max(KB.x + KB.w, CAM.x + CAM.w), y1: Math.max(KB.y + KB.h, CAM.y + CAM.h) };
+        function cajaU(x0, y0, x1, y1) { return [y0 - U.y0, U.x1 - x1, U.y1 - y1, x0 - U.x0]; }
+        var BOTON2 = cajaU(KB.x, KB.y, KB.x + KB.w, KB.y + KB.h);
+        var CAMARA2 = cajaU(CAM.x, CAM.y, CAM.x + CAM.w, CAM.y + CAM.h);
+
+        // -- maquetación de la toma del empuje --
+        caja($('superficie'), CL, CT, CW, CH);
         caja($('boton'), BX, BCY - 84, BW, 168);
         $('boton').style.transformOrigin = px(BW / 2) + ' 84px';
         $('ficha-sombra').style.left = px((BW - 198) / 2);
-        caja($('foco'), 0, VIN, BW, BH); $('foco').style.borderRadius = px(RB);
         $('anillo').style.width = px(BW + 30);
-        caja($('brillo-caja'), 0, VIN, BW, BH); $('brillo-caja').style.borderRadius = px(RB);
         $('ico').style.left = px(ICO_CX - 36);
         caja($('rotulo'), Math.round(C0 + 28 * E), 84 - 10 * E, null, 20 * E); $('rotulo').style.gap = px(8 * E);
         $('rotulo-texto').style.fontSize = px(14 * E); $('rotulo-texto').style.lineHeight = px(20 * E);
         caja($('flecha'), 0, 0, 16 * E, 16 * E); $('flecha').style.position = 'relative';
         $('rig').style.transformOrigin = px(BCX) + ' ' + px(BCY);
-        $('sombras').style.transformOrigin = px(BCX) + ' ' + px(BCY);
         caja($('sombra-crece'), CL, CT, CW, CH); $('sombra-crece').style.transformOrigin = px(BCX - CL) + ' ' + px(BCY - CT);
+        $('sombra-cielo').style.borderRadius = px(RT);
+        $('empuje-cam').style.transformOrigin = px(BCX) + ' ' + px(BCY);
         // «SUSAN»: tinta de 401 px (136 px, medida en el cuadro 8) a 4 px del borde de su caja; mayúsculas de 95 px con la línea
         // base a 115.5 px del borde superior. El par marca + tarjeta queda centrado en x = 960 y las mayúsculas en la altura
         // del centro de la tarjeta.
         var MARCA_X = 2 * 960 - (CL + CW) - 4, MARCA_Y = (CT + CH / 2) + 47.5 - 115.5;
         caja($('marca'), MARCA_X, MARCA_Y, null, null);
+
+        // -- maquetación de la toma de cerca --
+        caja($('cerca-sombra'), K.x, K.y, K.w, K.h); $('cerca-sombra').style.borderRadius = px(RT2);
+        caja($('cerca-tarjeta'), K.x, K.y, K.w, K.h); $('cerca-tarjeta').style.borderRadius = px(RT2);
+        $('cerca-tarjeta-fondo').style.borderRadius = px(RT2 - 3);
+        caja($('cerca-foco'), KB.x, KB.y, KB.w, KB.h); $('cerca-foco').style.borderRadius = px(RB2);
+        caja($('cerca-tinta'), U.x0, U.y0, U.x1 - U.x0, U.y1 - U.y0);
+        caja($('cerca-brillo-caja'), KB.x, KB.y, KB.w, KB.h); $('cerca-brillo-caja').style.borderRadius = px(RB2);
+        caja($('cerca-rotulo'), KB.x, KB.y, KB.w, KB.h);
+        $('cerca-cam').style.transformOrigin = px(KBC.x) + ' ' + px(KBC.y);
+        $('cerca-pulsador').style.transformOrigin = px(KBC.x) + ' ' + px(KBC.y);
 
         // ---------- Escena 1 (0.0-1.3 s): la ficha se vuelve el botón y la tarjeta se arma a su alrededor ----------
         // El fondo pasa de la crema al cielo (la capa nueva sube encima).
@@ -269,7 +369,6 @@
         var MORPH = { duration: 0.6, ease: 'power3.inOut' };
         var boton = $('boton');
         var rig = $('rig');
-        var sombras = $('sombras');
         tl.fromTo(boton, { x: FICHA.x - BCX, y: FICHA.y - BCY }, { x: 0, y: 0, duration: MORPH.duration, ease: MORPH.ease }, T.ficha);
         // El objeto flotante se posa 8 px por debajo de su lugar (la sombra no baja con él) y despega a su sitio
         // cuando la voz ya dijo el nombre (Escena 2): un solo gesto finito, sin vuelta.
@@ -280,8 +379,7 @@
         tl.fromTo($('anillo'), { clipPath: inset([0, RINA, 0, RINA], 99) },
             { clipPath: inset([VIN, 0, VIN, 0], RB + 15), duration: MORPH.duration, ease: MORPH.ease }, T.ficha);
         tl.fromTo($('anillo'), { opacity: 1 }, { opacity: 0, duration: 0.45, ease: 'power2.in' }, T.ficha);
-        // La sombra de tinta de la ficha (la del cuadro 1: círculo de 198 px bajo el anillo) sigue al anillo
-        // (el botón más 15 px por lado al final) y cede el paso a la sombra-cielo de la tarjeta.
+        // La sombra de tinta de la ficha (la del cuadro 1) sigue al anillo y cede el paso a la sombra-cielo de la tarjeta.
         tl.fromTo($('ficha-sombra'), { scaleX: 1, scaleY: 1 }, { scaleX: (BW + 30) / 198, scaleY: (BH + 30) / 198, duration: MORPH.duration, ease: MORPH.ease }, T.ficha);
         tl.fromTo($('ficha-sombra'), { opacity: 1 }, { opacity: 0, duration: 0.45, ease: 'power1.in' }, T.ficha);
         // scan-face 72 -> 20 px de la app (48 a E 2.4) y del centro del disco a su lugar en el botón.
@@ -294,9 +392,6 @@
 
         // center-outward-expansion: la superficie de la tarjeta crece desde el botón (expo.out) con su borde de 2 px y su sombra.
         var CRECE = { duration: 0.6, ease: 'expo.out' };
-        // Radio de la tarjeta: 14 px de la app (33.6 a E 2.4); borde de 2 px.
-        var RT = 14 * E;
-        $('sombra-cielo').style.borderRadius = px(RT);
         tl.fromTo($('sup-borde'), { clipPath: inset(LINEA, RB) }, { clipPath: inset(TARJETA, RT), duration: CRECE.duration, ease: CRECE.ease }, T.tarjeta);
         tl.fromTo($('sup-fondo'), { clipPath: inset(mas(LINEA, 2), RB - 2) }, { clipPath: inset(mas(TARJETA, 2), RT - 2), duration: CRECE.duration, ease: CRECE.ease }, T.tarjeta);
         tl.fromTo($('sombra-crece'), { scaleX: BW / CW, scaleY: 0.05, opacity: 0 }, { scaleX: 1, scaleY: 1, opacity: 1, duration: CRECE.duration, ease: CRECE.ease }, T.tarjeta);
@@ -314,60 +409,71 @@
             tl.fromTo(letras[i], { opacity: 0, y: 40.8 }, { opacity: 1, y: 0, duration: 0.5, ease: 'power4.out' }, at);
             desenfoque(letras[i], at, 0.5, 12, 'power4.out');
         }
-        // Presentación del producto: con la marca ya asentada (1.83) y la voz en «susan», la tarjeta despega 8 px a su lugar
+        // Con la marca ya asentada (1.83) y la voz en «susan», la tarjeta despega 8 px a su lugar
         // (power3.out, 0.45 s; las sombras se quedan, así que se lee como altura).
         tl.fromTo(rig, { y: T.DESPEGUE }, { y: 0, duration: 0.45, ease: 'power3.out', immediateRender: false }, T.despegue);
 
-        // ---------- Escena 3 (2.8-4.9 s): brillo de la CTA, pulso de la cámara y halo de foco ----------
-        // El brillo cruza una vez el botón de tinta. Arranca ya dentro del borde izquierdo (xPercent -52: la mitad delantera de la
-        // banda asoma) para que el primer fotograma visible sea 2.80, el ancla de sheen-s; antes de 2.80 no existe (opacidad 0).
-        tl.set($('brillo'), { opacity: 0 }, 0);
-        tl.set($('brillo'), { opacity: 1 }, T.brillo);
-        tl.fromTo($('brillo'), { xPercent: -52 }, { xPercent: 120, duration: 0.5, ease: 'power2.inOut' }, T.brillo);
-        // «Abres la sesión con un solo botón…»: la cámara se acerca al botón (escala 1 -> 1.04 con origen en su centro) en un gesto
-        // decidido de 0.8 s que parte en dos la espera entre el brillo y el toque (ninguna quietud llega a 1.0 s), se asienta antes
-        // de «botón» y vuelve a 1 dentro del morph a la cámara. BRIEF: el toque se cuenta con «cámara que se acerca».
-        // Las sombras escalan con el mismo origen para que la tarjeta no se despegue de su sombra.
-        tl.fromTo([rig, sombras], { scale: 1 }, { scale: T.ACERCA, duration: T.ACERCAR_D, ease: 'power3.inOut' }, T.acercar);
-        [['pulso-1', 0], ['pulso-2', 0.10]].forEach(function (p) {
-            var c = $(p[0]);
-            tl.fromTo(c, { attr: { r: 8 } }, { attr: { r: 22 }, duration: 0.45, ease: 'power2.out' }, T.pulso + p[1]);
-            tl.fromTo(c, { opacity: 0 }, { opacity: 0.9, duration: 0.05, ease: 'none' }, T.pulso + p[1]);
-            tl.fromTo(c, { opacity: 0.9 }, { opacity: 0, duration: 0.40, ease: 'power1.in', immediateRender: false }, T.pulso + p[1] + 0.05);
-        });
-        // Halo de foco nativo (0 0 0 8px rgba(0,97,254,.3)) 0.15 s antes de la compresión; la flecha avanza 2 px como en hover.
-        tl.fromTo($('foco'), { opacity: 0 }, { opacity: 1, duration: 0.15, ease: 'power2.out' }, T.foco);
-        tl.fromTo($('flecha'), { x: 0 }, { x: 2, duration: 0.15, ease: 'power2.out' }, T.foco);
+        // ---------- Escena 3 (2.85-4.9 s): atravesar hacia el botón (R3a) y toma de cerca ----------
+        // Empuje: la cámara de la toma (marca, sombras y rig; nunca el cielo) va de 1 a 1.25 con origen en el botón y lo lleva
+        // a su sitio en la toma de cerca; power2.in: la velocidad máxima llega en el corte. La capa se desenfoca en el último
+        // cuarto de segundo y «SUSAN», que sale por la izquierda con el empuje (queda en x < 170), se apaga mientras viaja.
+        var EMPUJE_D = T.corte - T.empuje;
+        tl.fromTo($('empuje-cam'), { scale: 1, x: 0, y: 0 }, { scale: EMP, x: DX, y: DY, duration: EMPUJE_D, ease: 'power2.in' }, T.empuje);
+        desenfocar($('empuje'), T.nubla, T.corte - T.nubla, 6, 'power2.in');
+        tl.fromTo($('marca'), { opacity: 1 }, { opacity: 0, duration: T.corte - T.marcaSale, ease: 'power1.in' }, T.marcaSale);
+        // Corte bajo el desenfoque: la toma de cerca, ya maquetada a E = 3.2, entra en el mismo instante que la otra se apaga.
+        gsap.set($('cerca'), { autoAlpha: 0 });
+        tl.set($('empuje'), { autoAlpha: 0 }, T.corte);
+        tl.set($('cerca'), { autoAlpha: 1 }, T.corte);
+        // Llegada: 0.94 -> 1 con origen en el botón y desenfoque 6 -> 0 (expo.out); la sombra-cielo viaja en la misma cámara.
+        tl.fromTo($('cerca-cam'), { scale: LLEGA }, { scale: 1, duration: T.LLEGA_D, ease: 'expo.out' }, T.corte);
+        desenfoque($('cerca'), T.corte, T.LLEGA_D, 6, 'expo.out');
 
-        // ---------- Escena 4 (4.9-6.05 s): toque sin cursor y la tarjeta se abre en la cámara ----------
-        // press-release-spring: compresión lineal a 0.96 (primario a #3A3433) y liberación back.out(1.4) por adyacencia.
-        tl.fromTo(boton, { scale: 1 }, { scale: 0.96, duration: 0.09, ease: 'power1.in' }, T.presion);
-        tl.fromTo(boton, { scale: 0.96 }, { scale: 1, duration: 0.25, ease: 'back.out(1.4)', immediateRender: false }, T.presion + 0.09);
-        tl.fromTo($('sup'), { backgroundColor: '#1E1919' }, { backgroundColor: '#3A3433', duration: 0.09, ease: 'power1.in' }, T.presion);
-        tl.fromTo($('sup'), { backgroundColor: '#3A3433' }, { backgroundColor: '#1E1919', duration: 0.25, ease: 'power3.out', immediateRender: false }, T.presion + 0.09);
-        // Cambio de estado: «Programada» -> «Abierta» (tokens de justificado) y el halo de foco se abre una vez.
-        // Relevo en secuencia (los dos rótulos nunca se enciman): «Programada» sale en 0.04 s y «Abierta» entra justo después.
-        tl.fromTo($('programada'), { opacity: 1 }, { opacity: 0, duration: 0.04, ease: 'power1.in' }, T.estado);
-        tl.fromTo($('abierta'), { opacity: 0, scale: 0.92 }, { opacity: 1, scale: 1, duration: 0.18, ease: 'power3.out' }, T.estado + 0.04);
-        tl.fromTo($('foco'), { boxShadow: '0 0 0 8px rgba(0,97,254,0.3)' }, { boxShadow: '0 0 0 28px rgba(0,97,254,0)', duration: 0.5, ease: 'power2.out' }, T.estado);
+        // El brillo cruza una vez el botón grande. Arranca ya dentro del borde izquierdo (xPercent -52: la mitad delantera de la
+        // banda asoma) para que el primer fotograma visible sea 3.95, el ancla de sheen-s; antes no existe (opacidad 0).
+        tl.set($('cerca-brillo'), { opacity: 0 }, 0);
+        tl.set($('cerca-brillo'), { opacity: 1 }, T.brillo);
+        tl.fromTo($('cerca-brillo'), { xPercent: -52 }, { xPercent: 120, duration: 0.5, ease: 'power2.inOut' }, T.brillo);
+        // Halo de foco nativo (ring 4 px de la app = 12.8 px a E 3.2, rgba(0,97,254,.3)) 0.17 s antes de la compresión, sobre
+        // «botón»; la flecha avanza 2 px de la app como en hover.
+        var FOCO = 4 * E2;
+        tl.fromTo($('cerca-foco'), { opacity: 0, boxShadow: '0 0 0 ' + px(FOCO) + ' rgba(0,97,254,0.3)' },
+            { opacity: 1, duration: 0.15, ease: 'power2.out' }, T.foco);
+        tl.fromTo($('cerca-flecha'), { x: 0 }, { x: 2, duration: 0.15, ease: 'power2.out' }, T.foco);
 
-        // card-morph-anchor con constantes: la superficie va de la caja de la tarjeta a la de la cámara (clip-path, sin escala)
-        // y de blanco a tinta como pintura; el contenido sale antes del 40 % y los chips entran después del 60 %.
+        // ---------- Escena 4 (4.9-6.05 s): toque sin cursor y el botón de tinta se abre en el marco de la cámara ----------
+        // press-release-spring: compresión a 0.96 (primario a #3A3433) y liberación back.out(1.4) por adyacencia.
+        var pulsador = $('cerca-pulsador');
+        var tinta = $('cerca-tinta');
+        tl.fromTo(pulsador, { scale: 1 }, { scale: 0.96, duration: 0.09, ease: 'power1.in' }, T.presion);
+        tl.fromTo(pulsador, { scale: 0.96 }, { scale: 1, duration: 0.25, ease: 'back.out(1.4)', immediateRender: false }, T.presion + 0.09);
+        tl.fromTo(tinta, { backgroundColor: '#1E1919' }, { backgroundColor: '#3A3433', duration: 0.09, ease: 'power1.in' }, T.presion);
+        tl.fromTo(tinta, { backgroundColor: '#3A3433' }, { backgroundColor: '#1E1919', duration: 0.25, ease: 'power3.out', immediateRender: false }, T.presion + 0.09);
+        // Cambio de estado: «Programada» -> «Abierta» (tokens de justificado), en secuencia (nunca se enciman),
+        // y el halo de foco se abre una vez.
+        tl.fromTo($('cerca-programada'), { opacity: 1 }, { opacity: 0, duration: 0.04, ease: 'power1.in' }, T.estado);
+        tl.fromTo($('cerca-abierta'), { opacity: 0, scale: 0.92 }, { opacity: 1, scale: 1, duration: 0.18, ease: 'power3.out' }, T.estado + 0.04);
+        tl.fromTo($('cerca-foco'), { boxShadow: '0 0 0 ' + px(FOCO) + ' rgba(0,97,254,0.3)' },
+            { boxShadow: '0 0 0 40px rgba(0,97,254,0)', duration: 0.5, ease: 'power2.out', immediateRender: false }, T.estado);
+
+        // card-morph-anchor con constantes (R5): la tinta del botón se abre en el marco de la cámara por clip-path, sin escala;
+        // el rótulo sale antes del 40 %, la tarjeta blanca y su sombra también, y los chips de la cámara entran después del 60 %.
         var VIAJE = { duration: 0.6, ease: 'power3.inOut' };
-        tl.fromTo($('sup-borde'), { clipPath: inset(TARJETA, RT), backgroundColor: '#E7E2DC' },
-            { clipPath: inset(CAMARA, 28), backgroundColor: '#1E1919', duration: VIAJE.duration, ease: VIAJE.ease, immediateRender: false }, T.camara);
-        tl.fromTo($('sup-fondo'), { clipPath: inset(mas(TARJETA, 2), RT - 2), backgroundColor: '#FFFFFF' },
-            { clipPath: inset(mas(CAMARA, 2), 26), backgroundColor: '#1E1919', duration: VIAJE.duration, ease: VIAJE.ease, immediateRender: false }, T.camara);
-        tl.fromTo([rig, sombras], { scale: T.ACERCA }, { scale: 1, duration: VIAJE.duration, ease: VIAJE.ease, immediateRender: false }, T.camara);
-        tl.fromTo($('tarjeta'), { opacity: 1 }, { opacity: 0, duration: 0.24, ease: 'power1.in' }, T.camara);
-        tl.fromTo(boton, { opacity: 1 }, { opacity: 0, duration: 0.24, ease: 'power1.in' }, T.camara);
+        tl.fromTo(tinta, { clipPath: inset(BOTON2, RB2) },
+            { clipPath: inset(CAMARA2, 28), duration: VIAJE.duration, ease: VIAJE.ease }, T.camara);
+        tl.fromTo($('cerca-rotulo'), { opacity: 1 }, { opacity: 0, duration: 0.18, ease: 'power1.in' }, T.camara);
+        tl.fromTo([$('cerca-tarjeta'), $('cerca-sombra')], { opacity: 1 }, { opacity: 0, duration: 0.22, ease: 'power1.in' }, T.camara);
+        // Los chips viajan pegados a sus esquinas del recorte (a tamaño nativo, mismo ease y duración) para no asomar fuera de la
+        // tinta mientras aparecen: «Reconociendo» con la esquina superior izquierda y «Cámara frente» con la superior derecha.
+        tl.fromTo($('reconociendo'), { x: KB.x - CAM.x, y: KB.y - CAM.y }, { x: 0, y: 0, duration: VIAJE.duration, ease: VIAJE.ease }, T.camara);
+        tl.fromTo($('frente'), { x: (KB.x + KB.w) - (CAM.x + CAM.w), y: KB.y - CAM.y }, { x: 0, y: 0, duration: VIAJE.duration, ease: VIAJE.ease }, T.camara);
         tl.fromTo([$('reconociendo'), $('frente')], { opacity: 0 }, { opacity: 1, duration: 0.24, ease: 'power1.out' }, T.camara + 0.36);
-        // La sombra pasa de azulada (caja de la tarjeta) a tinta (caja de la cámara) siguiendo la misma caja.
-        tl.fromTo($('sombra-cielo'), { x: 0, y: 0, scaleX: 1, scaleY: 1, opacity: 1 },
-            { x: CAM.x - CL, y: CAM.y - CT, scaleX: CAM.w / CW, scaleY: CAM.h / CH, opacity: 0, duration: VIAJE.duration, ease: VIAJE.ease }, T.camara);
-        tl.fromTo($('sombra-tinta'), { x: CL - CAM.x, y: CT - CAM.y, scaleX: CW / CAM.w, scaleY: CH / CAM.h, opacity: 0 },
-            { x: 0, y: 0, scaleX: 1, scaleY: 1, opacity: 1, duration: VIAJE.duration, ease: VIAJE.ease }, T.camara);
-        // theme-crossfade-morph bajo el ancla: el lienzo E3 con halo azul sube encima del cielo y se lleva la marca.
+        // La sombra de tinta sigue la caja del recorte (mismo ease y duración; lineales en el progreso, como el inset) y aparece en la
+        // segunda mitad: maquetada en la caja de la cámara, parte de la del botón. Quieta en la caja de la cámara desde 5.90.
+        tl.fromTo($('cerca-sombra-tinta'), { x: KB.x - CAM.x, y: KB.y - CAM.y, scaleX: KB.w / CAM.w, scaleY: KB.h / CAM.h },
+            { x: 0, y: 0, scaleX: 1, scaleY: 1, duration: VIAJE.duration, ease: VIAJE.ease }, T.camara);
+        tl.fromTo($('cerca-sombra-tinta'), { opacity: 0 }, { opacity: 1, duration: 0.30, ease: 'power1.out' }, T.camara + 0.30);
+        // theme-crossfade-morph bajo el ancla: el lienzo E3 con halo azul sube encima del cielo (que nunca baja a 0).
         tl.fromTo($('lienzo'), { opacity: 0 }, { opacity: 1, duration: 0.6, ease: 'power2.inOut' }, T.camara);
 
         tl.set({}, {}, T.D);

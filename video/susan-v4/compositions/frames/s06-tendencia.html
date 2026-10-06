@@ -15,46 +15,37 @@
 .s06-tendencia-grano{position:absolute;inset:0;pointer-events:none;mix-blend-mode:multiply;opacity:.04;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
 
 .s06-tendencia-abs{position:absolute}
-/* camara de la estacion: hereda del cuadro 5 el empuje hacia el viernes (escala 1.05, origen 1320, 540) y regresa a 1 mientras
-   la tarjeta crece a la grafica semanal (0.05-0.75 s, la misma curva del recorte): del dia al semestre */
-#s06-tendencia-camara{position:absolute;inset:0;transform-origin:1320px 540px}
 .s06-tendencia-gris{color:#6F6A65}
 
-/* ---------- PageHeader y selector de grupo (heredados del cuadro 5) ---------- */
+/* ---------- PageHeader y selector de grupo (vuelven con opacidad tras el atravesar del cuadro 5) ---------- */
 .s06-tendencia-h1{left:140px;top:128px;height:64px;line-height:64px;font-size:52px;font-weight:500;letter-spacing:-0.025em;white-space:nowrap}
-/* selector escrito como en el cuadro 5 (px de la app con zoom 2) para que el corte sea invisible */
+/* selector escrito como en el cuadro 5 (px de la app con zoom 2) */
 .s06-tendencia-selector{right:140px;top:120px;height:80px;display:flex;align-items:center}
 .s06-tendencia-ui{zoom:2;position:relative}
 .s06-tendencia-sel{display:inline-flex;align-items:center;gap:8px;height:40px;box-sizing:border-box;padding:0 12px 0 18px;border:1px solid #D8D2CA;
  border-radius:999px;background:#FFFFFF;font-size:14px;font-weight:500;line-height:1;white-space:nowrap}
 .s06-tendencia-sel svg{display:block;width:16px;height:16px;color:#6F6A65;flex:none}
 
-/* ---------- tarjeta: superficie maquetada en su caja FINAL (x 140-1780, y 210-900); el morph es solo clip-path ---------- */
+/* ---------- tarjeta: superficie maquetada en su caja FINAL (x 140-1780, y 210-900); el morph es solo clip-path ----------
+   En t = 0 el recorte es la casilla Vie de la toma del viernes (x 736-1184, y 408-712, radio 56, relleno X 63) y la capa del
+   borde, 6.4 px mas grande, es el anillo real rgba(179,38,30,.7); se apaga al borde de 2 px #E7E2DC mientras la tarjeta se abre */
 .s06-tendencia-caja{left:140px;top:210px;width:1640px;height:690px}
-.s06-tendencia-borde{background:#E7E2DC}
-.s06-tendencia-sup{background:#FFFFFF}
+.s06-tendencia-borde{background:rgba(179,38,30,.7);clip-path:inset(191.6px 589.6px 181.6px 589.6px round 62.4px)}
+.s06-tendencia-sup{background:color-mix(in oklab,#DE4D44 63%,#F0EDE8);clip-path:inset(198px 596px 188px 596px round 56px)}
 
-/* contenido viejo: TarjetaGrafica de dias (TiraSemana a E 2.5) */
-.s06-tendencia-dias-t{left:300px;top:340px;height:40px;line-height:40px;font-size:32px;font-weight:600;letter-spacing:-0.025em;white-space:nowrap}
-.s06-tendencia-cas{top:495px;width:280px;height:190px}
-.s06-tendencia-cas-fondo{position:absolute;inset:0;border-radius:35px}
-/* cifra como en el cuadro 5: una columna por caracter, centro en y=580, el % al 0.7em con 3 px de aire */
-.s06-tendencia-cas-cifra{position:absolute;left:0;right:0;top:58px;height:54px;display:flex;justify-content:center;font-size:44px;font-weight:600;line-height:54px;letter-spacing:0}
-.s06-tendencia-cas-col{display:block;height:54px;overflow:hidden}
-.s06-tendencia-cas-col>span{display:block}
-.s06-tendencia-cas-col>span>span{display:block;height:54px;line-height:54px;text-align:center;white-space:pre}
-.s06-tendencia-cas-cifra .s06-tendencia-cas-pct{padding-left:3px}
-.s06-tendencia-cas-cifra .s06-tendencia-u{font-size:.7em;font-weight:500}
-.s06-tendencia-dia{top:710px;width:160px;height:30px;line-height:30px;text-align:center;font-size:24px;font-weight:500;color:#6F6A65}
-.s06-tendencia-meta{left:920px;top:755px;width:800px;height:30px;display:flex;justify-content:center;column-gap:6px;line-height:30px;font-size:24px;font-weight:400;color:#6F6A65;white-space:nowrap}
-.s06-tendencia-meta span{display:inline-block}
-.s06-tendencia-critico-caja{left:1020px;top:419px;width:600px;height:64px;display:flex;justify-content:center}
-.s06-tendencia-critico{height:64px;padding:0 28px;border-radius:999px;background:#1E1919;color:#FFFFFF;font-size:28px;font-weight:500;line-height:64px;white-space:nowrap}
+/* contenido viejo: la toma del viernes (TiraSemana a E = 4), con los numeros del handoff del cuadro 5 */
+.s06-tendencia-v-cifra{left:736px;top:501px;width:448px;height:86px;line-height:86px;text-align:center;font-size:70px;font-weight:600;letter-spacing:0;white-space:nowrap}
+.s06-tendencia-v-cifra .s06-tendencia-u{font-size:.7em;font-weight:500;padding-left:5px}
+.s06-tendencia-v-dia{left:736px;top:753px;width:448px;height:46px;line-height:46px;text-align:center;font-size:38px;font-weight:500;color:#6F6A65}
+.s06-tendencia-v-meta{left:0;top:810px;width:1920px;height:40px;line-height:40px;text-align:center;font-size:30px;font-weight:400;color:#6F6A65;white-space:nowrap}
+/* pildora de tinta recta «Dia critico: Viernes»: alto 82, centro x=960 y=340 */
+.s06-tendencia-critico-caja{left:0;top:299px;width:1920px;height:82px;display:flex;justify-content:center}
+.s06-tendencia-critico{height:82px;padding:0 36px;border-radius:41px;background:#1E1919;color:#FFFFFF;font-size:36px;font-weight:500;line-height:82px;white-space:nowrap}
 
 /* contenido nuevo: TarjetaGrafica «Ausentismo semanal» (GraficaLinea a E 2) */
 .s06-tendencia-titulo{left:200px;top:242px;height:40px;line-height:40px;font-size:32px;font-weight:600;letter-spacing:-0.025em;white-space:nowrap}
 .s06-tendencia-sub{left:200px;top:285px;height:30px;line-height:30px;font-size:24px;font-weight:400;color:#6F6A65;white-space:nowrap}
-.s06-tendencia-sub span{display:inline-block;margin-right:0.26em}
+.s06-tendencia-sub span{display:inline-block;margin-right:0.26em;opacity:0}
 .s06-tendencia-leyenda{right:200px;top:247px;height:30px;display:flex;align-items:center;gap:28px;font-size:22px;color:#6F6A65;white-space:nowrap}
 .s06-tendencia-ley{display:flex;align-items:center;gap:10px}
 .s06-tendencia-mu-punto{width:18px;height:18px;border-radius:50%;background:#1E1919}
@@ -103,37 +94,20 @@
 
   <div id="s06-tendencia-escena" class="clip" data-start="0" data-duration="7.45" data-track-index="1">
 
-    <div id="s06-tendencia-camara">
-    <!-- cabecera de la pantalla Analitica (se apaga en el relevo final) -->
+    <!-- latigo R1: envoltorio externo = salida (x y opacidad); hoja interior = estela (filtro). La camara queda en 1 todo el cuadro -->
+    <div id="s06-tendencia-latigo" class="s06-tendencia-capa">
+    <div id="s06-tendencia-hoja" class="s06-tendencia-capa">
+
+    <!-- cabecera de la pantalla Analitica -->
     <div id="s06-tendencia-cabecera" class="s06-tendencia-capa">
       <div class="s06-tendencia-abs s06-tendencia-h1">Analítica de ausentismo</div>
       <div class="s06-tendencia-abs s06-tendencia-selector"><div class="s06-tendencia-ui"><div class="s06-tendencia-sel">Administración Financiera (3A)<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" data-lucide="chevrons-up-down" aria-hidden="true"><path d="m7 15 5 5 5-5"/><path d="m7 9 5-5 5 5"/></svg></div></div></div>
     </div>
 
-    <!-- la tarjeta y todo lo que vive en ella (se apaga en el relevo final) -->
+    <!-- la tarjeta y todo lo que vive en ella -->
     <div id="s06-tendencia-tarjeta" class="s06-tendencia-capa">
       <div id="s06-tendencia-borde" class="s06-tendencia-abs s06-tendencia-caja s06-tendencia-borde"></div>
       <div id="s06-tendencia-sup" class="s06-tendencia-abs s06-tendencia-caja s06-tendencia-sup"></div>
-
-      <!-- contenido viejo: dias de la semana -->
-      <div id="s06-tendencia-dias-t" class="s06-tendencia-abs s06-tendencia-dias-t">Ausentismo por día de la semana</div>
-      <div class="s06-tendencia-abs s06-tendencia-cas" style="left:460px;opacity:.55">
-        <div id="s06-tendencia-cas-lun" class="s06-tendencia-cas-fondo" style="background:color-mix(in oklab,#DE4D44 51%,#F0EDE8)"></div>
-        <div id="s06-tendencia-cif-lun" class="s06-tendencia-cas-cifra"><span class="s06-tendencia-cas-col"><span><span>1</span><span> </span></span></span><span class="s06-tendencia-cas-col"><span><span>7</span><span> </span></span></span><span class="s06-tendencia-cas-col"><span><span>.</span><span> </span></span></span><span class="s06-tendencia-cas-col"><span><span>7</span><span> </span></span></span><span class="s06-tendencia-cas-col s06-tendencia-cas-pct"><span><span><span class="s06-tendencia-u">%</span></span><span> </span></span></span></div>
-      </div>
-      <div class="s06-tendencia-abs s06-tendencia-cas" style="left:820px;opacity:.55">
-        <div id="s06-tendencia-cas-mie" class="s06-tendencia-cas-fondo" style="background:color-mix(in oklab,#DE4D44 47%,#F0EDE8)"></div>
-        <div id="s06-tendencia-cif-mie" class="s06-tendencia-cas-cifra"><span class="s06-tendencia-cas-col"><span><span>1</span><span> </span></span></span><span class="s06-tendencia-cas-col"><span><span>6</span><span> </span></span></span><span class="s06-tendencia-cas-col"><span><span>.</span><span> </span></span></span><span class="s06-tendencia-cas-col"><span><span>4</span><span> </span></span></span><span class="s06-tendencia-cas-col s06-tendencia-cas-pct"><span><span><span class="s06-tendencia-u">%</span></span><span> </span></span></span></div>
-      </div>
-      <!-- Vie: escala 1.06 fija (CSS) sobre la caja; GSAP solo mueve a sus hijos -->
-      <div class="s06-tendencia-abs s06-tendencia-cas" style="left:1180px;transform:scale(1.06)">
-        <div id="s06-tendencia-cas-vie" class="s06-tendencia-cas-fondo" style="background:color-mix(in oklab,#DE4D44 63%,#F0EDE8);box-shadow:0 0 0 4px rgba(179,38,30,.7)"></div>
-        <div id="s06-tendencia-cif-vie" class="s06-tendencia-cas-cifra"><span class="s06-tendencia-cas-col"><span><span>2</span><span> </span></span></span><span class="s06-tendencia-cas-col"><span><span>1</span><span> </span></span></span><span class="s06-tendencia-cas-col"><span><span>.</span><span> </span></span></span><span class="s06-tendencia-cas-col"><span><span>8</span><span> </span></span></span><span class="s06-tendencia-cas-col s06-tendencia-cas-pct"><span><span><span class="s06-tendencia-u">%</span></span><span> </span></span></span></div>
-      </div>
-      <div id="s06-tendencia-dia-lun" class="s06-tendencia-abs s06-tendencia-dia" style="left:520px;opacity:.55">Lun</div>
-      <div id="s06-tendencia-dia-mie" class="s06-tendencia-abs s06-tendencia-dia" style="left:880px;opacity:.55">Mié</div>
-      <div id="s06-tendencia-dia-vie" class="s06-tendencia-abs s06-tendencia-dia" style="left:1240px">Vie</div>
-      <div id="s06-tendencia-meta" class="s06-tendencia-abs s06-tendencia-meta"><span>32</span><span>ausencias</span><span>en</span><span>6</span><span>sesiones</span></div>
 
       <!-- contenido nuevo: Ausentismo semanal -->
       <div id="s06-tendencia-titulo" class="s06-tendencia-abs s06-tendencia-titulo">Ausentismo semanal</div>
@@ -144,7 +118,7 @@
         <div id="s06-tendencia-ley-3" class="s06-tendencia-ley"><span class="s06-tendencia-mu-disc"></span>Proyección</div>
         <div id="s06-tendencia-ley-4" class="s06-tendencia-ley"><span class="s06-tendencia-mu-banda"></span>Intervalo 95 %</div>
       </div>
-      <!-- lineas de cuadricula: en reposo son las de 60 / 40 / 20 / 0 %; las tres primeras nacen de las casillas colapsadas -->
+      <!-- lineas de cuadricula de 60 / 40 / 20 / 0 %: se trazan de izquierda a derecha despues del 60 % del morph -->
       <div id="s06-tendencia-rej-60" class="s06-tendencia-abs s06-tendencia-rejilla" style="top:343px"></div>
       <div id="s06-tendencia-rej-40" class="s06-tendencia-abs s06-tendencia-rejilla" style="top:495px"></div>
       <div id="s06-tendencia-rej-20" class="s06-tendencia-abs s06-tendencia-rejilla" style="top:647px"></div>
@@ -182,12 +156,18 @@
       </div>
       <div id="s06-tendencia-hint" class="s06-tendencia-abs s06-tendencia-hint"><svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" data-lucide="trending-up" aria-hidden="true"><path d="M16 7h6v6"/><path d="m22 7-8.5 8.5-5-5L2 17"/></svg>+4.2 pp vs. semana previa</div>
 
-      <!-- la pildora «Dia critico: Viernes» se condensa en el punto de tinta que sera la cabeza de la guia -->
+      <!-- contenido viejo: la toma del viernes (encima de todo: se apaga antes del 40 % del morph) -->
+      <div id="s06-tendencia-v-cifra" class="s06-tendencia-abs s06-tendencia-v-cifra">21.8<span class="s06-tendencia-u">%</span></div>
+      <div id="s06-tendencia-v-dia" class="s06-tendencia-abs s06-tendencia-v-dia">Vie</div>
+      <div id="s06-tendencia-v-meta" class="s06-tendencia-abs s06-tendencia-v-meta">32 ausencias en 6 sesiones</div>
+      <!-- la pildora «Dia critico» suelta su texto y se condensa en el punto de tinta que sera la cabeza de la guia -->
       <div class="s06-tendencia-abs s06-tendencia-critico-caja"><div id="s06-tendencia-critico" class="s06-tendencia-critico"><span id="s06-tendencia-critico-t">Día crítico: Viernes</span></div></div>
+    </div>
+
     </div>
     </div>
 
-    <!-- tooltip recto de tinta que se vuelve la pildora de personas (no se apaga: es el heroe del handoff) -->
+    <!-- tooltip recto de tinta que se vuelve la pildora de personas (fuera del latigo: es el heroe del handoff) -->
     <div id="s06-tendencia-pildora" class="s06-tendencia-abs s06-tendencia-pildora">
       <div id="s06-tendencia-tip" class="s06-tendencia-tip">Semana 15 · 24.8 %</div>
       <div class="s06-tendencia-riesgo">
@@ -199,13 +179,16 @@
     </div>
   </div>
 
-  <!-- filtros de estela vertical (uno por columna que rueda), region ajustada al eje del movimiento -->
+  <!-- filtros de estela: vertical por columna que rueda; horizontal para el latigo (region ajustada al eje del movimiento) -->
   <svg width="0" height="0" data-chart aria-hidden="true" style="position:absolute">
     <filter id="s06-tendencia-mb-lect" x="-10%" y="-6%" width="120%" height="112%" color-interpolation-filters="sRGB">
       <feGaussianBlur id="s06-tendencia-mb-lect-g" stdDeviation="0 0" />
     </filter>
     <filter id="s06-tendencia-mb-nueve" x="-10%" y="-6%" width="120%" height="112%" color-interpolation-filters="sRGB">
       <feGaussianBlur id="s06-tendencia-mb-nueve-g" stdDeviation="0 0" />
+    </filter>
+    <filter id="s06-tendencia-mb-latigo" x="-6%" y="-1%" width="112%" height="102%" color-interpolation-filters="sRGB">
+      <feGaussianBlur id="s06-tendencia-mb-latigo-g" stdDeviation="0 0" />
     </filter>
   </svg>
 </div>
@@ -220,6 +203,12 @@
         var NS = 'http://www.w3.org/2000/svg';
         function $(s) { return document.getElementById(ID + '-' + s); }
         function lim(v, a, b) { return Math.max(a, Math.min(b, v)); }
+        function px(v) { return v.toFixed(2) + 'px'; }
+        // velocidad normalizada de una curva (diferencia central), como en el piloto
+        function velocidad(ease, p, dur) {
+            var h = 0.002, a = Math.max(0, p - h), b = Math.min(1, p + h);
+            return (ease(b) - ease(a)) / (b - a) / dur;
+        }
 
         // ---------------- datos (frame.md 10) y geometria: area de trazo x 660-1700, 0 % en y 800, 60 % en y 344 ----------------
         var OBS = [13.3, 20.0, 22.0, 15.3, 16.7, 20.8];
@@ -277,54 +266,63 @@
 
         var tl = gsap.timeline({ paused: true });
 
-        // ================= Escena 1 (0.00-0.85): relevo barras -> lineas con constantes =================
-        // la camara llega del cuadro 5 en 1.05 (empuje hacia el viernes) y regresa a 1 con la misma curva y tiempo del recorte de
-        // la tarjeta: del dia critico a la tendencia del semestre
-        tl.fromTo($('camara'), { scale: 1.05 }, { scale: 1, duration: 0.70, ease: 'power3.inOut' }, 0.05);
-        var fondosCas = [$('cas-lun'), $('cas-mie'), $('cas-vie')];
-        // las casillas colapsan a su linea de cima (Vie conserva su escala 1.06 en la caja exterior)
-        tl.fromTo(fondosCas, { scaleY: 1, transformOrigin: '50% 0%' }, { scaleY: 0.02, duration: 0.30, ease: 'power2.in' }, 0);
-        tl.fromTo([$('cif-lun'), $('cif-mie'), $('cif-vie')], { opacity: 1, y: 0 }, { opacity: 0, y: -14, duration: 0.18, ease: 'power1.in' }, 0);
-        // la meta, las etiquetas de dia y el titulo viejo se desvanecen con el colapso (antes del 40 % del morph)
-        tl.to([$('dia-lun'), $('dia-mie'), $('dia-vie'), $('meta'), $('dias-t')], { opacity: 0, duration: 0.25, ease: 'power1.in' }, 0.02);
-        tl.set(fondosCas, { opacity: 0 }, 0.30);
+        // ================= Escena 1 (0.00-0.85): la casilla del viernes se abre en la grafica semanal (R5 morph) =================
+        // Corte invisible sobre la toma del viernes: t = 0 es el handoff del cuadro 5 al numero. Camara en 1 todo el cuadro.
+        var T_M = 0.05, D_M = 0.70;
+        var easeM = gsap.parseEase('power3.inOut');
+        // la superficie ya esta en la caja final de la TarjetaGrafica; el recorte (radio fijo, sin escala: aspectos distintos) va
+        // de la casilla (inset 198 596 188 596, radio 56) a la tarjeta (inset 2, radio 26). El borde es la capa de abajo con el
+        // mismo recorte agrandado: 6.4 px (el anillo real) que se adelgazan a 2 px (el borde de la tarjeta, radio 28)
+        var CAS = [198, 596, 188, 596];
+        var sup = $('sup'), borde = $('borde');
+        var morf = { p: 0 };
+        function aplicarMorf() {
+            var e = easeM(morf.p);
+            var w = 6.4 + (2 - 6.4) * e;
+            var r = 56 + (26 - 56) * e;
+            var ins = CAS.map(function (v) { return v + (2 - v) * e; });
+            sup.style.clipPath = 'inset(' + ins.map(px).join(' ') + ' round ' + px(r) + ')';
+            borde.style.clipPath = 'inset(' + ins.map(function (v) { return px(v - w); }).join(' ') + ' round ' + px(r + w) + ')';
+        }
+        aplicarMorf();
+        tl.fromTo(morf, { p: 0 }, { p: 1, duration: D_M, ease: 'none', onUpdate: aplicarMorf, immediateRender: false }, T_M);
+        // el relleno pasa de salmon (X 63) a blanco como pintura; el anillo se apaga al gris del borde antes del 40 %
+        tl.fromTo(sup, { backgroundColor: 'rgb(235,141,129)' }, { backgroundColor: 'rgb(255,255,255)', duration: 0.40, ease: 'power2.inOut' }, T_M);
+        tl.fromTo(borde, { backgroundColor: 'rgba(179,38,30,0.7)' }, { backgroundColor: 'rgba(231,226,220,1)', duration: 0.25, ease: 'power1.inOut' }, T_M);
+        // «21.8 %», «Vie» y «32 ausencias en 6 sesiones» se apagan de 0.05 a 0.30
+        tl.fromTo($('v-cifra'), { opacity: 1, y: 0 }, { opacity: 0, y: -12, duration: 0.25, ease: 'power1.in' }, T_M);
+        tl.fromTo([$('v-dia'), $('v-meta')], { opacity: 1, y: 0 }, { opacity: 0, y: 8, duration: 0.25, ease: 'power1.in' }, T_M);
 
-        // ...y esas lineas se estiran hasta ser la cuadricula de 60 / 40 / 20 % (constantes del relevo)
-        var REJ = [
-            { x: 600 - 1180, y: 496.9 - 344, sx: 280 / 1080, sy: 1.9, c: 'rgba(238,160,148,0.55)' },
-            { x: 960 - 1180, y: 496.9 - 496, sx: 280 / 1080, sy: 1.9, c: 'rgba(239,166,155,0.55)' },
-            { x: 1320 - 1180, y: 491.3 - 648, sx: 296.8 / 1080, sy: 2.015, c: 'rgba(235,141,129,1)' }
-        ];
-        var rejillas = [$('rej-60'), $('rej-40'), $('rej-20')];
-        function deRej(k) { return function (i) { return REJ[i][k]; }; }
-        gsap.set(rejillas, { opacity: 0 });
-        tl.fromTo(rejillas, { x: deRej('x'), y: deRej('y'), scaleX: deRej('sx'), scaleY: deRej('sy'), backgroundColor: deRej('c') },
-            { x: 0, y: 0, scaleX: 1, scaleY: 1, backgroundColor: 'rgba(231,226,220,0.8)', duration: 0.50, ease: 'power3.inOut' }, 0.25);
-        tl.set(rejillas, { opacity: 1 }, 0.30);
+        // la pildora «Dia critico» suelta su texto antes del 40 % y se condensa en el punto r 7 que sera la cabeza de la guia (S1).
+        // El recorte va en calc(): no depende del ancho de la pildora (su texto a 36 px)
+        tl.fromTo($('critico-t'), { opacity: 1 }, { opacity: 0, duration: 0.20, ease: 'power1.in' }, T_M);
+        var critico = $('critico');
+        var cond = { p: 0 };
+        function aplicarCond() {
+            var e = easeM(cond.p);
+            critico.style.clipPath = 'inset(' + px(34 * e) + ' calc(' + e.toFixed(4) + ' * (50% - 7px)) round ' + px(41 - 34 * e) + ')';
+        }
+        aplicarCond();
+        tl.fromTo(cond, { p: 0 }, { p: 1, duration: D_M, ease: 'none', onUpdate: aplicarCond, immediateRender: false }, T_M);
+        tl.fromTo(critico, { x: 0, y: 0 }, { x: X(1) - 960, y: Y(OBS[0]) - 340, duration: D_M, ease: 'power3.inOut' }, T_M);
+        // estado inicial escrito en linea desde el arranque: al rebobinar, los set dejan el mismo estilo que al avanzar
+        gsap.set(critico, { opacity: 1 });
+        gsap.set($('cabeza'), { opacity: 0 });
+        gsap.set($('tip'), { opacity: 1 });
+        tl.set(critico, { opacity: 0 }, T_M + D_M);
+        tl.set($('cabeza'), { opacity: 1 }, T_M + D_M);
 
-        // la tarjeta crece en su sitio: superficie maquetada en la caja final y recorte de radio fijo (sin escala: aspectos
-        // distintos); el borde de 2 px es la capa de abajo con el mismo recorte, 2 px mas grande
-        var RECORTE = [['inset(90px 100px 80px 100px round 28px)', 'inset(0px 0px 0px 0px round 28px)'],
-            ['inset(92px 102px 82px 102px round 26px)', 'inset(2px 2px 2px 2px round 26px)']];
-        tl.fromTo([$('borde'), $('sup')], { clipPath: function (i) { return RECORTE[i][0]; } },
-            { clipPath: function (i) { return RECORTE[i][1]; }, duration: 0.70, ease: 'power3.inOut' }, 0.05);
-
-        // la pildora «Dia critico» suelta su texto antes del 40 % y se condensa en el punto r 7 que sera la cabeza de la guia (S1)
-        tl.fromTo($('critico-t'), { opacity: 1 }, { opacity: 0, duration: 0.20, ease: 'power1.in' }, 0.05);
-        // (recorte en %: la pildora mide lo que su texto, ~293 px, como en el cuadro 5; queda un punto de 14 x 14)
-        tl.fromTo($('critico'), { x: 0, y: 0, clipPath: 'inset(0% 0% 0% 0% round 32px)' },
-            { x: X(1) - 1320, y: Y(OBS[0]) - 451, clipPath: 'inset(39.0625% 47.614% 39.0625% 47.614% round 7px)', duration: 0.70, ease: 'power3.inOut' }, 0.05);
-        tl.set($('critico'), { opacity: 0 }, 0.75);
-        tl.set($('cabeza'), { opacity: 1 }, 0.75);
-
-        // despues del 60 %: titulo, leyenda, marcas y la linea de 0 %
+        // PageHeader y selector vuelven con opacidad (0.45-0.75)
+        tl.fromTo($('cabecera'), { opacity: 0 }, { opacity: 1, duration: 0.30, ease: 'power1.out' }, 0.45);
+        // despues del 60 %: titulo, leyenda, marcas y cuadricula (trazada de izquierda a derecha)
         tl.fromTo($('titulo'), { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.40, ease: 'power3.out' }, 0.47);
         tl.fromTo([$('ley-1'), $('ley-2'), $('ley-3'), $('ley-4')], { opacity: 0, y: 10 },
             { opacity: 1, y: 0, duration: 0.35, ease: 'power3.out', stagger: 0.05 }, 0.50);
+        tl.fromTo([$('rej-60'), $('rej-40'), $('rej-20'), $('rej-0')], { scaleX: 0, transformOrigin: '0% 50%' },
+            { scaleX: 1, duration: 0.45, ease: 'power3.out', stagger: 0.04 }, 0.47);
         tl.fromTo([$('ey-60'), $('ey-40'), $('ey-20'), $('ey-0')], { opacity: 0, x: 10 },
             { opacity: 1, x: 0, duration: 0.30, ease: 'power3.out', stagger: 0.03 }, 0.52);
         tl.fromTo($('ejex').children, { opacity: 0, y: -8 }, { opacity: 1, y: 0, duration: 0.30, ease: 'power3.out', stagger: 0.02 }, 0.52);
-        tl.fromTo($('rej-0'), { opacity: 0 }, { opacity: 1, duration: 0.30, ease: 'power1.out' }, 0.50);
 
         // ================= Escena 2 (0.65-2.90): puntos, ajuste, guia S1 -> S6 y lectura por indice =================
         // los puntos brotan en ola (scale .3 -> 1) desde su propio centro
@@ -383,18 +381,17 @@
         function sumaPasos(t) { var sm = 0; for (var q = 0; q < PASOS.length; q++) { sm += easePaso(lim((t - PASOS[q]) / D_PASO, 0, 1)); } return sm; }
         var tira = $('tira'), mbLect = $('mb-lect-g');
         var tk = { t: PASOS[0] };
+        var T_TK1 = PASOS[PASOS.length - 1] + D_PASO;
         function aplicarLectura() {
             var t = tk.t;
             tira.style.transform = 'translate(0px,' + (-sumaPasos(t) * H_LECT).toFixed(2) + 'px)';
-            // fuera del tramo que rueda la velocidad es 0: la diferencia central en PASOS[0] mira el arranque del paso 1 (pendiente
-            // maxima de power3.out) y dejaria «13.3» corrido mientras se lee quieto (frame.md 5.6: estela solo mientras gira).
-            // Holgura de 1e-4 s: GSAP redondea tk.t a 6 decimales y, al volver hacia atras, lo deja apenas por encima de PASOS[0]
+            // fuera del tramo que rueda la velocidad es 0 (frame.md 5.6: estela solo mientras gira). Holgura de 1e-4 s: GSAP
+            // redondea tk.t a 6 decimales y, al volver hacia atras, lo deja apenas por encima de PASOS[0]
             var v = (t <= PASOS[0] + 1e-4 || t >= T_TK1 - 1e-4) ? 0 : Math.abs(sumaPasos(t + 0.002) - sumaPasos(t - 0.002)) / 0.004 * H_LECT;
             var sg = Math.min(12, 0.29 * v * OBT);
             mbLect.setAttribute('stdDeviation', '0 ' + sg.toFixed(2));
             tira.style.filter = sg < 0.3 ? 'none' : 'url(#' + ID + '-mb-lect)';
         }
-        var T_TK1 = PASOS[PASOS.length - 1] + D_PASO;
         aplicarLectura();
         tl.fromTo(tk, { t: PASOS[0] }, { t: T_TK1, duration: T_TK1 - PASOS[0], ease: 'none', onUpdate: aplicarLectura, immediateRender: false }, PASOS[0]);
 
@@ -435,14 +432,49 @@
         tl.fromTo(banda, { opacity: 0 }, { opacity: 1, duration: 0.30, ease: 'power1.out' }, 3.80);
         tl.fromTo(bA, { p: 0 }, { p: 1, duration: 0.65, ease: 'power2.inOut', onUpdate: aplicarBanda, immediateRender: false }, 3.80);
 
-        // 4.15-4.55: el subtitulo real entra desde el desenfoque, palabra por palabra (BlurText)
-        var palabras = $('sub').children;
-        tl.fromTo(palabras, { opacity: 0, y: -12, filter: 'blur(10px)' },
-            { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.28, ease: 'power3.out', stagger: 0.02 }, 4.15);
-        tl.set(palabras, { filter: 'none' }, 4.56);
+        // 4.15-4.55: el subtitulo real entra desde el desenfoque, palabra por palabra (BlurText). Driver puro del tiempo: el
+        // desenfoque es funcion del instante (seek-safe) y queda en filter none fuera del tramo
+        var palabras = [].slice.call($('sub').children);
+        var T_SUB = 4.15, D_PAL = 0.28, ESC_PAL = 0.02;
+        var easePal = gsap.parseEase('power3.out');
+        var sb = { t: T_SUB };
+        function aplicarSub() {
+            for (var q = 0; q < palabras.length; q++) {
+                var p = lim((sb.t - (T_SUB + ESC_PAL * q)) / D_PAL, 0, 1), e = easePal(p);
+                var bl = 10 * (1 - e);
+                palabras[q].style.opacity = e.toFixed(3);
+                palabras[q].style.transform = 'translate(0px,' + (-12 * (1 - e)).toFixed(2) + 'px)';
+                palabras[q].style.filter = (p <= 0 || bl < 0.05) ? 'none' : 'blur(' + bl.toFixed(2) + 'px)';
+            }
+        }
+        aplicarSub();
+        var T_SUB1 = T_SUB + ESC_PAL * (palabras.length - 1) + D_PAL;
+        tl.fromTo(sb, { t: T_SUB }, { t: T_SUB1, duration: T_SUB1 - T_SUB, ease: 'none', onUpdate: aplicarSub, immediateRender: false }, T_SUB);
 
         // ================= Escena 4 (4.85-7.45): relevo de la cifra a las personas =================
-        tl.fromTo([$('tarjeta'), $('cabecera')], { opacity: 1 }, { opacity: 0, duration: 0.60, ease: 'power1.inOut', immediateRender: false }, 4.85);
+        // Latigo R1: la grafica, la lectura, el selector y el PageHeader salen por la izquierda en una sola capa (x 0 -> -900,
+        // power2.in 0.40 s: la velocidad maxima llega al final), con estela horizontal ligada a la velocidad (tope 16, filtro en la
+        // hoja interior) y opacidad -> 0 en el ultimo 40 %; autoAlpha 0 a 5.25. El tooltip ya no vive en esa capa.
+        var T_SAL = 4.85, D_SAL = 0.40, DX_SAL = -900;
+        var latigo = $('latigo'), hoja = $('hoja'), mbLat = $('mb-latigo-g');
+        var easeSal = gsap.parseEase('power2.in');
+        var sal = { p: 0 };
+        function aplicarSalida() {
+            var p = sal.p;
+            latigo.style.transform = 'translate(' + (DX_SAL * easeSal(p)).toFixed(2) + 'px,0px)';
+            var v = (p <= 1e-4 || p >= 1 - 1e-4) ? 0 : Math.abs(DX_SAL) * velocidad(easeSal, p, D_SAL);
+            var sg = Math.min(16, 0.29 * v * OBT);
+            mbLat.setAttribute('stdDeviation', sg.toFixed(2) + ' 0');
+            hoja.style.filter = sg < 0.3 ? 'none' : 'url(#' + ID + '-mb-latigo)';
+        }
+        aplicarSalida();
+        tl.fromTo(sal, { p: 0 }, { p: 1, duration: D_SAL, ease: 'none', onUpdate: aplicarSalida, immediateRender: false }, T_SAL);
+        // autoAlpha en el mismo tween (no un tl.set aparte): al rebobinar, el set guardaria opacidad 0 como inicio y dejaria la
+        // capa en visibility hidden; asi opacidad y visibilidad vuelven juntas
+        // (immediateRender: el estado inicial queda escrito desde el arranque, igual que tras rebobinar)
+        tl.fromTo(latigo, { autoAlpha: 1 }, { autoAlpha: 0, duration: 0.16, ease: 'power1.in' }, T_SAL + D_SAL - 0.16);
+
+        // el halo cruza de violeta a rosa mientras el tooltip viaja
         tl.fromTo($('halo-rosa'), { opacity: 0 }, { opacity: 1, duration: 0.80, ease: 'power1.inOut' }, 4.85);
         // el tooltip se despega y crece como pintura hasta la pildora 620 x 112 (radio 56) en el centro
         tl.fromTo(pil, { x: tipCx - 960, y: tipCy - 470, clipPath: clipTip },
@@ -458,7 +490,7 @@
         function aplicarNueve() {
             var p = rueda.p;
             colTira.style.transform = 'translate(0px,' + (-DIST9 * easeRueda(p)).toFixed(2) + 'px)';
-            var v = (p <= 0 || p >= 1) ? 0 : (easeRueda(Math.min(1, p + 0.002)) - easeRueda(Math.max(0, p - 0.002))) / 0.004 / 0.50 * DIST9;
+            var v = (p <= 1e-4 || p >= 1 - 1e-4) ? 0 : DIST9 * velocidad(easeRueda, p, 0.50);
             var sg = Math.min(16, 0.29 * v * OBT);
             mbNueve.setAttribute('stdDeviation', '0 ' + sg.toFixed(2));
             colTira.style.filter = sg < 0.3 ? 'none' : 'url(#' + ID + '-mb-nueve)';

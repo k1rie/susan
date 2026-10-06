@@ -10,9 +10,12 @@
 .s03-camara-e3{position:absolute;inset:0;background:radial-gradient(55% 60% at 1330px 450px,var(--halo) 0%,rgba(247,245,242,0) 72%),
  radial-gradient(120% 90% at 50% 40%,#F7F5F2 55%,#F3F1ED 100%)}
 .s03-camara-grano{position:absolute;inset:0;pointer-events:none;mix-blend-mode:multiply;opacity:.04;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
-/* ---- VistaCamara (objeto de escena): marco de tinta 900 × 506, radio 28; sombra de tinta en capa aparte ---- */
-.s03-camara-sombra{position:absolute;left:880px;top:200px;width:900px;height:506px;border-radius:28px;box-shadow:0 40px 120px rgba(30,25,25,.14)}
-.s03-camara-vista{position:absolute;left:880px;top:200px;width:900px;height:506px;border-radius:28px;background:#1E1919;overflow:hidden}
+/* ---- VistaCamara (objeto de escena): marco de tinta 900 × 506, radio 28; sombra de tinta en capa aparte ----
+   Se abre a pantalla completa (R3 b): origen 0 0, x/y/escala y el radio por clip-path (sin border-radius, que escalaría con la
+   vista y dejaría esquinas crema). El desenfoque va en la hoja interior, nunca en la vista que escala. */
+.s03-camara-sombra{position:absolute;left:880px;top:200px;width:900px;height:506px;border-radius:28px;box-shadow:0 40px 120px rgba(30,25,25,.14);transform-origin:0 0}
+.s03-camara-vista{position:absolute;left:880px;top:200px;width:900px;height:506px;background:#1E1919;clip-path:inset(0px round 28px);transform-origin:0 0}
+.s03-camara-hoja{position:absolute;inset:0}
 .s03-camara-cara{position:absolute;width:84px;height:84px}
 .s03-camara-cara-mov{position:absolute;inset:0}
 .s03-camara-av{display:block;width:84px;height:84px;border-radius:50%}
@@ -41,12 +44,26 @@
 .s03-camara-chip-presente{background:#E3F4EA;color:#1F7A47}
 .s03-camara-chip-retardo{background:#FBEFD2;color:#9A6408}
 .s03-camara-chip-pendiente{background:#EEEBE6;color:#5B5651}
-/* chips oscuros de la cámara (handoff: alto 44, texto e icono de 24) */
-.s03-camara-camchip{position:absolute;left:24px;top:24px;height:44px;display:inline-flex;align-items:center;gap:12px;padding:0 20px;border-radius:999px;
+/* chips oscuros de la cámara (handoff: alto 44, texto e icono de 24). Viven FUERA de la vista, en coordenadas del lienzo: al abrirse
+   la vista no escalan, viajan con sus esquinas (margen 24 → 48). Ancla = posición (driver); hoja interior = desenfoque. */
+.s03-camara-ancla{position:absolute;left:0;top:0;width:1920px;height:1080px;pointer-events:none}
+.s03-camara-camchip{position:absolute;left:904px;top:224px;height:44px;display:inline-flex;align-items:center;gap:12px;padding:0 20px;border-radius:999px;
  background:rgba(30,25,25,.8);color:#FFFFFF;font-size:24px;font-weight:500;line-height:32px;white-space:nowrap}
 .s03-camara-ico{display:block;width:24px;height:24px;flex:none}
-.s03-camara-frente{position:absolute;right:24px;top:24px;height:44px;display:inline-flex;align-items:center;padding:0 20px;border-radius:999px;
+.s03-camara-frente{position:absolute;right:164px;top:224px;height:44px;display:inline-flex;align-items:center;padding:0 20px;border-radius:999px;
  background:rgba(30,25,25,.8);color:#FFFFFF;font-size:24px;font-weight:500;line-height:32px;white-space:nowrap}
+/* chip del rostro central, anclado bajo su marco a tamaño nativo: (1298, 522) = vista (880, 200) + marco 11 (418, 322) */
+.s03-camara-chip-ancla{position:absolute;left:1298px;top:522px;width:0;height:0}
+.s03-camara-chip-ancla .s03-camara-chip-pos{top:0}
+/* ---- PageHeader real de la sesión (columna izquierda, layout angosto de la app: chips debajo) ----
+   h1 26/500 tight × E = 52; p mt-1 text-sm gris × E = 28 en dos renglones; chips md (px-2.5 py-1 text-sm, punto 6) × E con gap-2. */
+.s03-camara-enc{position:absolute;left:140px;top:236px;width:680px}
+.s03-camara-enc-t{font-size:52px;font-weight:500;line-height:65px;letter-spacing:-0.025em;white-space:nowrap}
+.s03-camara-enc-d{margin-top:8px;font-size:28px;font-weight:400;line-height:40px;color:#6F6A65;white-space:nowrap;letter-spacing:0}
+.s03-camara-enc-chips{margin-top:24px;display:flex;gap:16px}
+.s03-camara-chip-md{display:inline-flex;align-items:center;gap:12px;height:56px;padding:0 20px;border-radius:999px;font-size:28px;font-weight:500;line-height:40px;
+ white-space:nowrap;letter-spacing:0;background:#E1EDFA;color:#1F5FA8}
+.s03-camara-chip-md::before{content:"";width:12px;height:12px;border-radius:50%;background:currentColor;flex:none}
 /* ---- columna izquierda: ventana de la cifra (ResumenPaseLista a escala de héroe) ---- */
 .s03-camara-rotulo{position:absolute;left:140px;top:236px;font-size:32px;font-weight:500;line-height:40px;color:#6F6A65;white-space:nowrap}
 .s03-camara-cifra{position:absolute;left:140px;top:300px;height:176px;width:720px}
@@ -86,8 +103,40 @@
     <div class="s03-camara-grano"></div>
   </div>
   <div id="s03-camara-escena" class="clip s03-camara-capa" data-start="0" data-duration="9" data-track-index="1">
+    <!-- PageHeader real de la sesión (calco de capture/assets: sesion-encabezado-abierta-automatico, sin «Volver al panel»): abre la columna
+         izquierda y recoge el «Abierta» del cuadro 2; la vista, al abrirse por encima, lo tapa y se apaga ya cubierto -->
+    <div id="s03-camara-enc" class="s03-camara-enc">
+      <div id="s03-camara-enc-t" class="s03-camara-enc-t">Pasar lista</div>
+      <div id="s03-camara-enc-d" class="s03-camara-enc-d">Administración Financiera (3A)<br />14 sep 2026 · 07:00 a 08:00 · Aula A-12</div>
+      <div id="s03-camara-enc-chips" class="s03-camara-enc-chips"><span class="s03-camara-chip-md">Abierta</span><span class="s03-camara-chip-md">Automático</span></div>
+    </div>
+    <!-- columna «Asistencia ahora» (assets/sesion-resumen-0-de-24.png): DEBAJO de la vista, que la revela al volver a su caja -->
+    <div id="s03-camara-ultima" class="s03-camara-ultima">Última captura: <b>23</b> rostros · <b>22</b> válidos</div>
+    <div id="s03-camara-rotulo" class="s03-camara-rotulo">Asistencia ahora</div>
+    <div id="s03-camara-cifra" class="s03-camara-cifra">
+      <div id="s03-camara-fila19" class="s03-camara-fila">
+        <span class="s03-camara-col s03-camara-col-19"><span id="s03-camara-tira-d19" class="s03-camara-tira"><span> </span><span>1</span></span></span><span class="s03-camara-col s03-camara-col-19"><span id="s03-camara-tira-u19" class="s03-camara-tira"><span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span></span></span>
+        <span class="s03-camara-suf19">de 24 presentes</span>
+      </div>
+    </div>
+    <div id="s03-camara-barra" class="s03-camara-barra"><div class="s03-camara-segs"><span id="s03-camara-seg-p" class="s03-camara-seg" style="width:528.83px;background:#27A06A"></span><span id="s03-camara-seg-r" class="s03-camara-seg" style="width:55.67px;background:#C98100"></span><span id="s03-camara-seg-s" class="s03-camara-seg" style="width:55.67px;background:#DE4D44"></span><span id="s03-camara-seg-pe" class="s03-camara-seg" style="width:27.83px;background:#8F8A82"></span></div></div>
+    <div id="s03-camara-detalle" class="s03-camara-detalle"><span id="s03-camara-pal-0" class="s03-camara-pal">2</span> <span id="s03-camara-pal-1" class="s03-camara-pal">con</span> <span id="s03-camara-pal-2" class="s03-camara-pal">retardo</span> <span id="s03-camara-pal-3" class="s03-camara-pal">·</span> <span id="s03-camara-pal-4" class="s03-camara-pal">2</span> <span id="s03-camara-pal-5" class="s03-camara-pal">sin</span> <span id="s03-camara-pal-6" class="s03-camara-pal">registro</span> <span id="s03-camara-pal-7" class="s03-camara-pal">·</span> <span id="s03-camara-pal-8" class="s03-camara-pal">1</span> <span id="s03-camara-pal-9" class="s03-camara-pal">por</span> <span id="s03-camara-pal-10" class="s03-camara-pal">revisar</span></div>
+    <div id="s03-camara-tanque" class="s03-camara-tanque">
+      <div id="s03-camara-liquido" class="s03-camara-liquido"></div>
+      <div class="s03-camara-marcas"></div>
+    </div>
+    <div class="s03-camara-medtxt">
+      <div id="s03-camara-pct" class="s03-camara-pct">
+        <div id="s03-camara-fila88" class="s03-camara-fila">
+          <span class="s03-camara-col s03-camara-col-88"><span id="s03-camara-tira-d88" class="s03-camara-tira"><span> </span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span></span></span><span class="s03-camara-col s03-camara-col-88"><span id="s03-camara-tira-u88" class="s03-camara-tira"><span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span></span></span><span class="s03-camara-suf88">&nbsp;%</span>
+        </div>
+      </div>
+      <div id="s03-camara-med-et" class="s03-camara-med-et">Presentes ahora</div>
+      <div id="s03-camara-med-desc" class="s03-camara-med-desc">21 de 24 inscritos</div>
+    </div>
     <div id="s03-camara-sombra" class="s03-camara-sombra"></div>
     <div id="s03-camara-vista" class="s03-camara-vista">
+      <div id="s03-camara-hoja" class="s03-camara-hoja">
       <div class="s03-camara-cara" style="left:26px;top:84px"><div id="s03-camara-mov-0" class="s03-camara-cara-mov"><img id="s03-camara-av-0" class="s03-camara-av" src="assets/avatars/avatar-01-xr.svg" alt="" /></div></div>
       <div class="s03-camara-cara" style="left:133px;top:86px"><div id="s03-camara-mov-1" class="s03-camara-cara-mov"><img id="s03-camara-av-1" class="s03-camara-av" src="assets/avatars/avatar-02-mg.svg" alt="" /></div></div>
       <div class="s03-camara-cara" style="left:232px;top:88px"><div id="s03-camara-mov-2" class="s03-camara-cara-mov"><img id="s03-camara-av-2" class="s03-camara-av" src="assets/avatars/avatar-11-xt.svg" alt="" /></div></div>
@@ -122,7 +171,7 @@
       <div id="s03-camara-marco-8" class="s03-camara-marco" style="left:60px;top:230px"><div id="s03-camara-me-8" class="s03-camara-me"><div id="s03-camara-velo-8" class="s03-camara-velo s03-camara-velo-verde"></div><div id="s03-camara-eb-8" class="s03-camara-esq s03-camara-esq-blanca"><i class="s03-camara-tl"></i><i class="s03-camara-tr"></i><i class="s03-camara-bl"></i><i class="s03-camara-br"></i></div><div id="s03-camara-ec-8" class="s03-camara-esq s03-camara-esq-verde"><i class="s03-camara-tl"></i><i class="s03-camara-tr"></i><i class="s03-camara-bl"></i><i class="s03-camara-br"></i></div></div></div>
       <div id="s03-camara-marco-9" class="s03-camara-marco" style="left:159px;top:229px"><div id="s03-camara-me-9" class="s03-camara-me"><div id="s03-camara-velo-9" class="s03-camara-velo s03-camara-velo-verde"></div><div id="s03-camara-eb-9" class="s03-camara-esq s03-camara-esq-blanca"><i class="s03-camara-tl"></i><i class="s03-camara-tr"></i><i class="s03-camara-bl"></i><i class="s03-camara-br"></i></div><div id="s03-camara-ec-9" class="s03-camara-esq s03-camara-esq-verde"><i class="s03-camara-tl"></i><i class="s03-camara-tr"></i><i class="s03-camara-bl"></i><i class="s03-camara-br"></i></div></div></div>
       <div id="s03-camara-marco-10" class="s03-camara-marco" style="left:269px;top:227px"><div id="s03-camara-me-10" class="s03-camara-me"><div id="s03-camara-velo-10" class="s03-camara-velo s03-camara-velo-verde"></div><div id="s03-camara-eb-10" class="s03-camara-esq s03-camara-esq-blanca"><i class="s03-camara-tl"></i><i class="s03-camara-tr"></i><i class="s03-camara-bl"></i><i class="s03-camara-br"></i></div><div id="s03-camara-ec-10" class="s03-camara-esq s03-camara-esq-verde"><i class="s03-camara-tl"></i><i class="s03-camara-tr"></i><i class="s03-camara-bl"></i><i class="s03-camara-br"></i></div></div></div>
-      <div id="s03-camara-marco-11" class="s03-camara-marco" style="left:372px;top:228px"><div id="s03-camara-me-11" class="s03-camara-me"><div id="s03-camara-velo-11" class="s03-camara-velo s03-camara-velo-verde"></div><div id="s03-camara-eb-11" class="s03-camara-esq s03-camara-esq-blanca"><i class="s03-camara-tl"></i><i class="s03-camara-tr"></i><i class="s03-camara-bl"></i><i class="s03-camara-br"></i></div><div id="s03-camara-ec-11" class="s03-camara-esq s03-camara-esq-verde"><i class="s03-camara-tl"></i><i class="s03-camara-tr"></i><i class="s03-camara-bl"></i><i class="s03-camara-br"></i></div></div><div class="s03-camara-chip-pos"><div id="s03-camara-chip-central" class="s03-camara-chip-pila"><span id="s03-camara-chip-c-pen" class="s03-camara-chip s03-camara-chip-pendiente">Pendiente</span><span id="s03-camara-chip-c-pre" class="s03-camara-chip s03-camara-chip-presente">Presente</span></div></div></div>
+      <div id="s03-camara-marco-11" class="s03-camara-marco" style="left:372px;top:228px"><div id="s03-camara-me-11" class="s03-camara-me"><div id="s03-camara-velo-11" class="s03-camara-velo s03-camara-velo-verde"></div><div id="s03-camara-eb-11" class="s03-camara-esq s03-camara-esq-blanca"><i class="s03-camara-tl"></i><i class="s03-camara-tr"></i><i class="s03-camara-bl"></i><i class="s03-camara-br"></i></div><div id="s03-camara-ec-11" class="s03-camara-esq s03-camara-esq-verde"><i class="s03-camara-tl"></i><i class="s03-camara-tr"></i><i class="s03-camara-bl"></i><i class="s03-camara-br"></i></div></div></div>
       <div id="s03-camara-marco-12" class="s03-camara-marco" style="left:472px;top:230px"><div id="s03-camara-me-12" class="s03-camara-me"><div id="s03-camara-velo-12" class="s03-camara-velo s03-camara-velo-verde"></div><div id="s03-camara-eb-12" class="s03-camara-esq s03-camara-esq-blanca"><i class="s03-camara-tl"></i><i class="s03-camara-tr"></i><i class="s03-camara-bl"></i><i class="s03-camara-br"></i></div><div id="s03-camara-ec-12" class="s03-camara-esq s03-camara-esq-verde"><i class="s03-camara-tl"></i><i class="s03-camara-tr"></i><i class="s03-camara-bl"></i><i class="s03-camara-br"></i></div></div></div>
       <div id="s03-camara-marco-13" class="s03-camara-marco" style="left:581px;top:228px"><div id="s03-camara-me-13" class="s03-camara-me"><div id="s03-camara-velo-13" class="s03-camara-velo s03-camara-velo-verde"></div><div id="s03-camara-eb-13" class="s03-camara-esq s03-camara-esq-blanca"><i class="s03-camara-tl"></i><i class="s03-camara-tr"></i><i class="s03-camara-bl"></i><i class="s03-camara-br"></i></div><div id="s03-camara-ec-13" class="s03-camara-esq s03-camara-esq-verde"><i class="s03-camara-tl"></i><i class="s03-camara-tr"></i><i class="s03-camara-bl"></i><i class="s03-camara-br"></i></div></div></div>
       <div id="s03-camara-marco-14" class="s03-camara-marco" style="left:681px;top:228px"><div id="s03-camara-me-14" class="s03-camara-me"><div id="s03-camara-velo-14" class="s03-camara-velo s03-camara-velo-ambar"></div><div id="s03-camara-eb-14" class="s03-camara-esq s03-camara-esq-blanca"><i class="s03-camara-tl"></i><i class="s03-camara-tr"></i><i class="s03-camara-bl"></i><i class="s03-camara-br"></i></div><div id="s03-camara-ec-14" class="s03-camara-esq s03-camara-esq-ambar"><i class="s03-camara-tl"></i><i class="s03-camara-tr"></i><i class="s03-camara-bl"></i><i class="s03-camara-br"></i></div></div><div class="s03-camara-chip-pos"><span id="s03-camara-chip-14" class="s03-camara-chip s03-camara-chip-retardo">Retardo</span></div></div>
@@ -134,32 +183,12 @@
       <div id="s03-camara-marco-20" class="s03-camara-marco" style="left:510px;top:374px"><div id="s03-camara-me-20" class="s03-camara-me"><div id="s03-camara-velo-20" class="s03-camara-velo s03-camara-velo-verde"></div><div id="s03-camara-eb-20" class="s03-camara-esq s03-camara-esq-blanca"><i class="s03-camara-tl"></i><i class="s03-camara-tr"></i><i class="s03-camara-bl"></i><i class="s03-camara-br"></i></div><div id="s03-camara-ec-20" class="s03-camara-esq s03-camara-esq-verde"><i class="s03-camara-tl"></i><i class="s03-camara-tr"></i><i class="s03-camara-bl"></i><i class="s03-camara-br"></i></div></div></div>
       <div id="s03-camara-marco-21" class="s03-camara-marco" style="left:609px;top:378px"><div id="s03-camara-me-21" class="s03-camara-me"><div id="s03-camara-velo-21" class="s03-camara-velo s03-camara-velo-verde"></div><div id="s03-camara-eb-21" class="s03-camara-esq s03-camara-esq-blanca"><i class="s03-camara-tl"></i><i class="s03-camara-tr"></i><i class="s03-camara-bl"></i><i class="s03-camara-br"></i></div><div id="s03-camara-ec-21" class="s03-camara-esq s03-camara-esq-verde"><i class="s03-camara-tl"></i><i class="s03-camara-tr"></i><i class="s03-camara-bl"></i><i class="s03-camara-br"></i></div></div></div>
       <div id="s03-camara-marco-22" class="s03-camara-marco" style="left:717px;top:377px"><div id="s03-camara-me-22" class="s03-camara-me"><div id="s03-camara-eb-22" class="s03-camara-esq s03-camara-esq-blanca"><i class="s03-camara-tl"></i><i class="s03-camara-tr"></i><i class="s03-camara-bl"></i><i class="s03-camara-br"></i></div></div></div>
-      <div id="s03-camara-reconociendo" class="s03-camara-camchip"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" data-lucide="scan-face" id="s03-camara-ico-scan" class="s03-camara-ico" aria-hidden="true"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><path d="M9 9h.01"/><path d="M15 9h.01"/></svg><span>Reconociendo</span></div>
-      <div id="s03-camara-frente" class="s03-camara-frente">Cámara frente</div>
-    </div>
-    <div id="s03-camara-ultima" class="s03-camara-ultima">Última captura: <b>23</b> rostros · <b>22</b> válidos</div>
-    <div id="s03-camara-rotulo" class="s03-camara-rotulo">Asistencia ahora</div>
-    <div id="s03-camara-cifra" class="s03-camara-cifra">
-      <div id="s03-camara-fila19" class="s03-camara-fila">
-        <span class="s03-camara-col s03-camara-col-19"><span id="s03-camara-tira-d19" class="s03-camara-tira"><span> </span><span>1</span></span></span><span class="s03-camara-col s03-camara-col-19"><span id="s03-camara-tira-u19" class="s03-camara-tira"><span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span></span></span>
-        <span class="s03-camara-suf19">de 24 presentes</span>
       </div>
     </div>
-    <div id="s03-camara-barra" class="s03-camara-barra"><div class="s03-camara-segs"><span id="s03-camara-seg-p" class="s03-camara-seg" style="width:528.83px;background:#27A06A"></span><span id="s03-camara-seg-r" class="s03-camara-seg" style="width:55.67px;background:#C98100"></span><span id="s03-camara-seg-s" class="s03-camara-seg" style="width:55.67px;background:#DE4D44"></span><span id="s03-camara-seg-pe" class="s03-camara-seg" style="width:27.83px;background:#8F8A82"></span></div></div>
-    <div id="s03-camara-detalle" class="s03-camara-detalle"><span id="s03-camara-pal-0" class="s03-camara-pal">2</span> <span id="s03-camara-pal-1" class="s03-camara-pal">con</span> <span id="s03-camara-pal-2" class="s03-camara-pal">retardo</span> <span id="s03-camara-pal-3" class="s03-camara-pal">·</span> <span id="s03-camara-pal-4" class="s03-camara-pal">2</span> <span id="s03-camara-pal-5" class="s03-camara-pal">sin</span> <span id="s03-camara-pal-6" class="s03-camara-pal">registro</span> <span id="s03-camara-pal-7" class="s03-camara-pal">·</span> <span id="s03-camara-pal-8" class="s03-camara-pal">1</span> <span id="s03-camara-pal-9" class="s03-camara-pal">por</span> <span id="s03-camara-pal-10" class="s03-camara-pal">revisar</span></div>
-    <div id="s03-camara-tanque" class="s03-camara-tanque">
-      <div id="s03-camara-liquido" class="s03-camara-liquido"></div>
-      <div class="s03-camara-marcas"></div>
-    </div>
-    <div class="s03-camara-medtxt">
-      <div id="s03-camara-pct" class="s03-camara-pct">
-        <div id="s03-camara-fila88" class="s03-camara-fila">
-          <span class="s03-camara-col s03-camara-col-88"><span id="s03-camara-tira-d88" class="s03-camara-tira"><span> </span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span></span></span><span class="s03-camara-col s03-camara-col-88"><span id="s03-camara-tira-u88" class="s03-camara-tira"><span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span></span></span><span class="s03-camara-suf88">&nbsp;%</span>
-        </div>
-      </div>
-      <div id="s03-camara-med-et" class="s03-camara-med-et">Presentes ahora</div>
-      <div id="s03-camara-med-desc" class="s03-camara-med-desc">21 de 24 inscritos</div>
-    </div>
+    <!-- cromo de la vista: no escala; viaja con las esquinas y bajo su rostro (driver de la vista) -->
+    <div id="s03-camara-ancla-rec" class="s03-camara-ancla"><div id="s03-camara-reconociendo" class="s03-camara-camchip"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" data-lucide="scan-face" id="s03-camara-ico-scan" class="s03-camara-ico" aria-hidden="true"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><path d="M9 9h.01"/><path d="M15 9h.01"/></svg><span>Reconociendo</span></div></div>
+    <div id="s03-camara-ancla-fre" class="s03-camara-ancla"><div id="s03-camara-frente" class="s03-camara-frente">Cámara frente</div></div>
+    <div id="s03-camara-ancla-chip" class="s03-camara-chip-ancla"><div class="s03-camara-chip-pos"><div id="s03-camara-chip-central" class="s03-camara-chip-pila"><span id="s03-camara-chip-c-pen" class="s03-camara-chip s03-camara-chip-pendiente">Pendiente</span><span id="s03-camara-chip-c-pre" class="s03-camara-chip s03-camara-chip-presente">Presente</span></div></div></div>
   </div>
   <!-- estela vertical de los odómetros: un filtro por columna, región ajustada al eje (PILOTO §3c) -->
   <svg width="0" height="0" aria-hidden="true" style="position:absolute">
@@ -220,11 +249,70 @@
             aplicar();
             tl.fromTo(st, { p: 0 }, { p: 1, duration: o.dur, ease: 'none', onUpdate: aplicar, immediateRender: false }, o.at);
         }
-        /* ---------- Escena 1 (0.0–1.3 s): el marco vacío se puebla y entra la columna izquierda ---------- */
+        /* ---------- R3 b · la vista se abre a pantalla completa (2.45–2.95) y vuelve a su caja (4.40–4.90) ----------
+           Un solo driver puro del tiempo (ease none) calcula la apertura e(t) con expo.inOut en los dos tramos: x 0 → −880,
+           y 0 → −200, escala 1 → 2.135 (1921.5 × 1080.3 px: sin hilo crema), origen 0 0; radio 28 → 0 por clip-path y la sombra se
+           apaga. Desenfoque ligado a la velocidad, ≤ 4 px en pantalla (en la hoja: 4 / escala), > 0.3 px solo de 2.61 a 2.79 y de
+           4.56 a 4.74; filter none en reposo. El cromo (Reconociendo, Cámara frente y el chip del rostro central) no escala: viaja
+           con sus esquinas (margen 24 → 48) o anclado bajo su rostro, con la misma curva y el mismo desenfoque. */
+        var ABRE = 2.45, VUELVE = 4.40, DUR_AB = 0.50;
+        var VX = 880, VY = 200, VW = 900, RADIO = 28, S_PANTALLA = 2.135, BLUR_MAX = 4;
+        var REC0 = { x: 904, y: 224 }, FRE0 = { x: 1756, y: 224 }, CHIP0 = { x: 1298, y: 522 };
+        var expoIO = gsap.parseEase('expo.inOut');
+        var VMAX = velocidad(expoIO, 0.5, 1);
+        var vista = $('vista'), hoja = $('hoja'), sombra = $('sombra');
+        var ancRec = $('ancla-rec'), ancFre = $('ancla-fre'), ancChip = $('ancla-chip');
+        var cromo = [$('reconociendo'), $('frente'), $('chip-central')];
+        var vistaE = 0, vistaS = 1;
+        // Punto bajo el marco del rostro central (coordenadas de la vista); aplicarMov lo actualiza con el seguimiento.
+        var ancla = { x: CHIP0.x - VX, y: CHIP0.y - VY };
+        function aperturaVista(t) {
+            var p, e = 0, v = 0;
+            if (t > ABRE && t < ABRE + DUR_AB) {
+                p = (t - ABRE) / DUR_AB; e = expoIO(p);
+                if (p > 1e-4 && p < 1 - 1e-4) v = velocidad(expoIO, p, 1) / VMAX;
+            } else if (t >= ABRE + DUR_AB && t <= VUELVE) {
+                e = 1;
+            } else if (t > VUELVE && t < VUELVE + DUR_AB) {
+                p = (t - VUELVE) / DUR_AB; e = 1 - expoIO(p);
+                if (p > 1e-4 && p < 1 - 1e-4) v = velocidad(expoIO, p, 1) / VMAX;
+            }
+            return { e: e, v: Math.min(1, v) };
+        }
+        function aplicarCromo() {
+            var e = vistaE, s = vistaS;
+            var L = VX - VX * e, T = VY - VY * e, R = L + VW * s, m = 24 + 24 * e;
+            ancRec.style.transform = 'translate(' + (L + m - REC0.x).toFixed(2) + 'px,' + (T + m - REC0.y).toFixed(2) + 'px)';
+            ancFre.style.transform = 'translate(' + (R - m - FRE0.x).toFixed(2) + 'px,' + (T + m - FRE0.y).toFixed(2) + 'px)';
+            ancChip.style.transform = 'translate(' + (L + ancla.x * s - CHIP0.x).toFixed(2) + 'px,' + (T + ancla.y * s - CHIP0.y).toFixed(2) + 'px)';
+        }
+        var ab = { t: ABRE };
+        function aplicarVista() {
+            var st = aperturaVista(ab.t), e = st.e, s = 1 + (S_PANTALLA - 1) * e;
+            var tr = 'translate(' + (-VX * e).toFixed(2) + 'px,' + (-VY * e).toFixed(2) + 'px) scale(' + s.toFixed(5) + ')';
+            var r = (RADIO * (1 - e) / s).toFixed(3) + 'px';
+            vista.style.transform = tr;
+            vista.style.clipPath = 'inset(0px round ' + r + ')';
+            sombra.style.transform = tr;
+            sombra.style.borderRadius = r;
+            sombra.style.opacity = (1 - e).toFixed(4);
+            var b = BLUR_MAX * st.v;
+            hoja.style.filter = b < 0.3 ? 'none' : 'blur(' + (b / s).toFixed(2) + 'px)';
+            for (var j = 0; j < cromo.length; j++) cromo[j].style.filter = b < 0.3 ? 'none' : 'blur(' + b.toFixed(2) + 'px)';
+            vistaE = e; vistaS = s;
+            aplicarCromo();
+        }
+        aplicarVista();
+        tl.fromTo(ab, { t: ABRE }, { t: VUELVE + DUR_AB, duration: VUELVE + DUR_AB - ABRE, ease: 'none', onUpdate: aplicarVista, immediateRender: false }, ABRE);
+        /* ---------- Escena 1 (0.0–1.3 s): el marco vacío se puebla y entra el encabezado real de la sesión ---------- */
         // 23 avatares en tres filas (8, 8, 7): opacidad y escala 0.92 → 1, escalonado por índice entre 0.10 y 0.50 s.
         tl.fromTo(av, { opacity: 0, scale: 0.92 }, { opacity: 1, scale: 1, duration: 0.20, ease: 'power3.out', stagger: { each: 0.20 / (N - 1) } }, 0.10);
-        // Columna izquierda con los tiempos de la app (StaggerList: y 14 → 0 de la app × E, +60 ms).
-        tl.fromTo([$('rotulo'), $('cifra'), $('barra')], { y: 28, opacity: 0 }, { y: 0, opacity: 1, duration: 0.38, ease: 'power4.out', stagger: 0.06 }, 0.45);
+        // 0.45–0.95 s: PageHeader con los tiempos de la app (StaggerList: y 14 → 0 de la app × E, +60 ms): título, sesión y chips.
+        tl.fromTo([$('enc-t'), $('enc-d'), $('enc-chips')], { y: 28, opacity: 0 }, { y: 0, opacity: 1, duration: 0.38, ease: 'power4.out', stagger: 0.06 }, 0.45);
+        // 2.95 s: la vista, por encima en z, ya lo tapó al crecer (≈ 2.67–2.74 s): se apaga cubierto, sin viajar.
+        tl.set($('enc'), { autoAlpha: 0 }, ABRE + DUR_AB);
+        // 4.55–5.00 s: al volver la vista, la columna «Asistencia ahora · 0 de 24 presentes» se revela por debajo desde la izquierda.
+        tl.fromTo([$('rotulo'), $('cifra'), $('barra')], { x: -60, opacity: 0 }, { x: 0, opacity: 1, duration: 0.45, ease: 'power3.out' }, 4.55);
         // La cifra muestra «0» alineada a x = 140: la columna de decenas (vacía) queda a la izquierda hasta que rueda.
         tl.fromTo($('fila19'), { x: -84.8 }, { x: 0, duration: 0.56, ease: 'expo.out' }, 5.05);
         /* La clase sigue: un solo driver mueve cada rostro (seno lento con fase propia) y DERIVA su marco del rostro en el mismo
@@ -236,6 +324,7 @@
             FX.push(0.42 + 0.24 * a); FY.push((0.42 + 0.24 * a) * 1.37); PX.push(DOS_PI * b); PY.push(DOS_PI * c2); AX.push(3 + 0.75 * (k % 3));
         }
         var MOV0 = 0.6, MOV1 = 8.3;
+        var MARCO_C = { x: parseFloat(marco[central.k].style.left), y: parseFloat(marco[central.k].style.top) };
         function envolvente(t) { return Math.min(sstep((t - MOV0) / 0.8), 1 - sstep((t - 6.8) / (MOV1 - 6.8))); }
         var mov = { t: MOV0 };
         function aplicarMov() {
@@ -250,7 +339,10 @@
                 marco[k].style.width = w.toFixed(2) + 'px';
                 marco[k].style.height = h.toFixed(2) + 'px';
                 marco[k].style.transform = 'translate(' + (dx - (w - 92) / 2).toFixed(2) + 'px,' + (dy - (h - 92) / 2).toFixed(2) + 'px)';
+                // el chip del rostro central (fuera de la vista) sigue al centro inferior de su marco + 2 px
+                if (k === central.k) { ancla.x = MARCO_C.x + 46 + dx; ancla.y = MARCO_C.y + dy + (h + 92) / 2 + 2; }
             }
+            aplicarCromo();
         }
         aplicarMov();
         tl.fromTo(mov, { t: MOV0 }, { t: MOV1, duration: MOV1 - MOV0, ease: 'none', onUpdate: aplicarMov, immediateRender: false }, MOV0);
@@ -262,10 +354,10 @@
         tl.fromTo(me[visita.k], { scale: 1.22, opacity: 0 }, { scale: 1, opacity: 0.3, duration: 0.30, ease: 'power3.out' }, 1.60);
         // 1.60–1.90 s: StatusChip sm «Pendiente» bajo el rostro más centrado (estado de partida).
         tl.fromTo($('chip-central'), { y: 8, opacity: 0 }, { y: 0, opacity: 1, duration: 0.30, ease: 'power3.out' }, 1.60);
-        // 2.75–3.00 s: las esquinas laten una vez (1 → 1.06 → 1) mientras siguen a los rostros.
+        // 3.25–3.50 s, con la clase a pantalla completa: las esquinas laten una vez (1 → 1.06 → 1) mientras siguen a los rostros.
         var todosMe = alumnos().map(function (c) { return me[c.k]; });
-        tl.fromTo(todosMe, { scale: 1 }, { scale: 1.06, duration: 0.08, ease: 'power2.out', immediateRender: false }, 2.75);
-        tl.fromTo(todosMe, { scale: 1.06 }, { scale: 1, duration: 0.17, ease: 'power2.inOut', immediateRender: false }, 2.83);
+        tl.fromTo(todosMe, { scale: 1 }, { scale: 1.06, duration: 0.08, ease: 'power2.out', immediateRender: false }, 3.25);
+        tl.fromTo(todosMe, { scale: 1.06 }, { scale: 1, duration: 0.17, ease: 'power2.inOut', immediateRender: false }, 3.33);
         // 3.85–4.15 s: el icono scan-face del chip «Reconociendo» late una vez (pulso de escala + opacidad, como animate-pulse).
         var ico = $('ico-scan');
         var pulso = { p: 0 };

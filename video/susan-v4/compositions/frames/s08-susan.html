@@ -123,6 +123,11 @@
             return (ease(b) - ease(a)) / (b - a) / dur;
         }
 
+        // Reposo con margen (DINAMISMO §2.0.4): GSAP redondea el progreso a 6 decimales, así que al buscar el contacto
+        // (1.00 s) p puede quedar en 0.999999 con la velocidad máxima de power2.in; sin margen la ficha posada conservaría
+        // la estela y los fantasmas.
+        function enReposo(p) { return p <= 1e-4 || p >= 1 - 1e-4; }
+
         // Movimiento con estela direccional: σ = 0.29 · v · OBT (caja del obturador → gaussiana), filter:none en reposo.
         function conRastro(o) {
             var ease = gsap.parseEase(o.curva);
@@ -132,7 +137,7 @@
                 var p = st.p;
                 var e = ease(p);
                 o.pos(e, p);
-                var v = (p <= 0 || p >= 1) ? 0 : Math.abs(o.dist) * velocidad(ease, p, o.dur);
+                var v = enReposo(p) ? 0 : Math.abs(o.dist) * velocidad(ease, p, o.dur);
                 var s = Math.min(o.max, 0.29 * v * OBT);
                 o.nodo.setAttribute('stdDeviation', o.eje === 'x' ? s.toFixed(2) + ' 0' : '0 ' + s.toFixed(2));
                 o.el.style.filter = s < 0.3 ? 'none' : filtro;
@@ -153,7 +158,7 @@
             pos: function (e) { gsap.set(mov, { y: DESDE * (1 - e) }); },
             extra: function (p, v, ease) {
                 var e = ease(p);
-                var fuerza = (p <= 0 || p >= 1) ? 0 : Math.min(1, v / 2500);
+                var fuerza = enReposo(p) ? 0 : Math.min(1, v / 2500);
                 var p1 = Math.max(0, p - OBT / DUR_CAIDA);
                 var p2 = Math.max(0, p - 2 * OBT / DUR_CAIDA);
                 gsap.set(f1, { y: DESDE * (e - ease(p1)), opacity: 0.32 * fuerza });

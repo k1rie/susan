@@ -10,8 +10,8 @@
  radial-gradient(120% 90% at 50% 40%,#F7F5F2 55%,#F3F1ED 100%)}
 .s07-a-tiempo-grano{position:absolute;inset:0;pointer-events:none;mix-blend-mode:multiply;opacity:.04;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
 #s07-a-tiempo-escena{position:absolute;inset:0}
-/* La cámara escala con origen en el centro de la caja del «2» (452, 544): la cifra focal no se traslada nunca. */
-#s07-a-tiempo-camara{position:absolute;inset:0;transform-origin:452px 544px}
+/* Cámara en escala 1 todo el cuadro (ronda de dinamismo: se retiraron el acercamiento 1.07 y su regreso). */
+#s07-a-tiempo-camara{position:absolute;inset:0}
 
 /* ---- ranking «Mayor riesgo»: maquetado en su caja final 1400 × 700 (centro 960, 520); la píldora es un recorte ---- */
 #s07-a-tiempo-rig{position:absolute;inset:0;transform-origin:960px 520px}
@@ -64,36 +64,52 @@
 .s07-a-tiempo-chip svg{width:28px;height:28px;flex:none}
 #s07-a-tiempo-divisor{position:absolute;left:48px;top:160px;width:1104px;height:2px;background:#E7E2DC}
 
+/* Cuerpo de la tarjeta bajo el divisor (y local 162–600): caja recortada con desvanecido de 24 px arriba y abajo, como la
+   máscara del odómetro. El relevo vertical (R2) ocurre aquí dentro; el encabezado y el divisor no se mueven. Las posiciones de
+   las secciones son relativas a esta caja (y del cuerpo = y local − 162). */
+#s07-a-tiempo-cuerpo{position:absolute;left:0;top:162px;width:1200px;height:438px;overflow:hidden;
+ -webkit-mask-image:linear-gradient(180deg,transparent 0,#000 24px,#000 calc(100% - 24px),transparent 100%);
+ mask-image:linear-gradient(180deg,transparent 0,#000 24px,#000 calc(100% - 24px),transparent 100%)}
+/* Envoltorios: externo = salida, interno = entrada; el filtro de la estela va en la hoja interior. */
+#s07-a-tiempo-seca-sal,#s07-a-tiempo-seca{position:absolute;left:0;top:0;width:1200px;height:438px}
+/* Sección A centrada en el cuerpo como la B (contenido visible ≈ y local 298–458: 140 px de aire arriba y abajo). */
 .s07-a-tiempo-rotulo{position:absolute;font-size:26px;font-weight:500;color:#6F6A65;line-height:1.3;white-space:nowrap}
-#s07-a-tiempo-rot-restantes{left:48px;top:192px}
-#s07-a-tiempo-rot-faltas{left:376px;top:192px}
+#s07-a-tiempo-rot-restantes{left:48px;top:142px}
+#s07-a-tiempo-rot-faltas{left:376px;top:142px}
 /* odómetro de un renglón: ventana enmascarada (la estela no termina en un corte duro; en reposo la cifra no se toca) */
-#s07-a-tiempo-odo{position:absolute;left:44px;top:232px;width:96px;height:144px;overflow:hidden;
+#s07-a-tiempo-odo{position:absolute;left:44px;top:182px;width:96px;height:144px;overflow:hidden;
  -webkit-mask-image:linear-gradient(180deg,transparent 0%,#000 16%,#000 84%,transparent 100%);
  mask-image:linear-gradient(180deg,transparent 0%,#000 16%,#000 84%,transparent 100%)}
 #s07-a-tiempo-odo-tira{display:block}
 #s07-a-tiempo-odo-tira span{display:block;height:144px;line-height:144px;font-size:120px;font-weight:600;letter-spacing:-0.03em;text-align:left}
-#s07-a-tiempo-valor{position:absolute;right:48px;top:186px;display:flex;align-items:baseline;gap:10px;white-space:nowrap;line-height:1.2}
+#s07-a-tiempo-valor{position:absolute;right:48px;top:136px;display:flex;align-items:baseline;gap:10px;white-space:nowrap;line-height:1.2}
 .s07-a-tiempo-valor-n{font-size:32px;font-weight:600;letter-spacing:-0.025em}
 .s07-a-tiempo-valor-p{font-size:26px;color:#6F6A65}
-#s07-a-tiempo-barra{position:absolute;left:376px;top:240px;width:776px;height:100px}
+#s07-a-tiempo-barra{position:absolute;left:376px;top:190px;width:776px;height:100px}
 #s07-a-tiempo-lim-chip{position:absolute;left:517px;top:6px;width:0;display:flex;justify-content:center}
 .s07-a-tiempo-lim{border-radius:999px;background:rgba(179,38,30,.1);color:#B3261E;font-size:22px;font-weight:500;line-height:1.2;padding:4px 16px;white-space:nowrap}
 #s07-a-tiempo-pista-f{position:absolute;left:0;top:56px;width:776px;height:20px;border-radius:999px;background:#F0EDE8}
 #s07-a-tiempo-relleno-f{position:absolute;left:2px;top:2px;bottom:2px;width:383px;border-radius:999px;background:#DE4D44}
 #s07-a-tiempo-lim-linea{position:absolute;left:516px;top:40px;width:0;height:48px;border-left:2px dashed rgba(179,38,30,.7)}
-#s07-a-tiempo-cruce{position:absolute;left:376px;top:360px;display:inline-flex;align-items:center;gap:12px;padding:10px 24px 10px 18px;
+/* Sección B (≈ 190 px: píldora 54 + 32 de aire + fila 104) centrada en el cuerpo, 124 px arriba y abajo:
+   píldora en y local 286–340 (cuerpo 124) y fila de la acción en y local 372–476 (cuerpo 210). */
+#s07-a-tiempo-cruce-ent{position:absolute;left:48px;top:124px;height:54px}
+#s07-a-tiempo-cruce{display:inline-flex;align-items:center;gap:12px;height:54px;box-sizing:border-box;padding:0 24px 0 18px;
  border-radius:999px;background:#F0EDE8;font-size:26px;font-weight:500;line-height:1.25;white-space:nowrap}
 #s07-a-tiempo-cruce svg{width:28px;height:28px;flex:none;color:#6F6A65}
 
-#s07-a-tiempo-accion-halo{position:absolute;left:48px;top:448px;width:1104px;height:104px;border-radius:20px;box-shadow:0 0 0 8px rgba(0,97,254,.3)}
-#s07-a-tiempo-accion-fondo{position:absolute;left:48px;top:448px;width:1104px;height:104px;border-radius:20px;background:#F7F5F2}
+#s07-a-tiempo-accion-ent,#s07-a-tiempo-accion{position:absolute;left:0;top:0;width:1104px;height:104px}
+#s07-a-tiempo-accion-ent{left:48px;top:210px}
+#s07-a-tiempo-accion-halo{position:absolute;left:0;top:0;width:1104px;height:104px;border-radius:20px;box-shadow:0 0 0 8px rgba(0,97,254,.3)}
+#s07-a-tiempo-accion-fondo{position:absolute;left:0;top:0;width:1104px;height:104px;border-radius:20px;background:#F7F5F2}
 /* ficha del kit .su-ficha a E = 2: 72 × 72, radio 20, icono 40 (36 / r10 / 20 en la app); 20 px hasta el texto */
-#s07-a-tiempo-accion-a{position:absolute;left:68px;top:462px;width:420px;height:76px}
+#s07-a-tiempo-accion-a{position:absolute;left:20px;top:14px;width:420px;height:76px}
 .s07-a-tiempo-ficha{position:absolute;left:0;top:2px;width:72px;height:72px;border-radius:20px;background:#FBE6E2;color:#C2410C;display:flex;align-items:center;justify-content:center}
 .s07-a-tiempo-ficha svg{width:40px;height:40px}
 .s07-a-tiempo-accion-rot{position:absolute;left:92px;top:0;font-size:24px;font-weight:500;color:#6F6A65;line-height:1.25;white-space:nowrap}
-#s07-a-tiempo-accion-b{position:absolute;left:160px;top:496px;font-size:32px;font-weight:500;line-height:1.25;white-space:nowrap}
+#s07-a-tiempo-accion-b{position:absolute;left:112px;top:48px;font-size:32px;font-weight:500;line-height:1.25;white-space:nowrap}
+/* BlurText de la app por palabra (direction bottom: +0.5em → 0, blur 10 → 0); el espacio va dentro de cada palabra */
+.s07-a-tiempo-pal{display:inline-block;white-space:pre}
 </style>
 <div id="root" data-composition-id="s07-a-tiempo" data-start="0" data-duration="8.1" data-width="1920" data-height="1080">
   <!-- fondo a sangre: lienzo E3 con halo rosa y grano al 4 % (pista 0, todo el cuadro) -->
@@ -179,35 +195,59 @@
             </div>
             <div id="s07-a-tiempo-divisor"></div>
 
-            <div id="s07-a-tiempo-rot-restantes" class="s07-a-tiempo-rotulo">Faltas restantes</div>
-            <div id="s07-a-tiempo-odo" data-layout-allow-overflow><span id="s07-a-tiempo-odo-tira" data-layout-allow-overflow><span>&#8199;</span><span>2</span></span></div>
+            <!-- cuerpo recortado: la sección A sube y sale, la sección B sube desde abajo (relevo vertical R2) -->
+            <div id="s07-a-tiempo-cuerpo" data-layout-allow-overflow>
+              <!-- sección A: faltas restantes, barra frente al límite y «7 (14.9 %)» -->
+              <div id="s07-a-tiempo-seca-sal" data-layout-allow-overflow>
+                <div id="s07-a-tiempo-seca">
+                  <div id="s07-a-tiempo-rot-restantes" class="s07-a-tiempo-rotulo">Faltas restantes</div>
+                  <div id="s07-a-tiempo-odo" data-layout-allow-overflow><span id="s07-a-tiempo-odo-tira" data-layout-allow-overflow><span>&#8199;</span><span>2</span></span></div>
 
-            <div id="s07-a-tiempo-rot-faltas" class="s07-a-tiempo-rotulo">Faltas</div>
-            <div id="s07-a-tiempo-valor"><span class="s07-a-tiempo-valor-n">7</span><span class="s07-a-tiempo-valor-p">(14.9&nbsp;%)</span></div>
-            <div id="s07-a-tiempo-barra">
-              <div id="s07-a-tiempo-pista-f"><div id="s07-a-tiempo-relleno-f"></div></div>
-              <div id="s07-a-tiempo-lim-linea"></div>
-              <div id="s07-a-tiempo-lim-chip"><span class="s07-a-tiempo-lim">Límite 20&nbsp;%</span></div>
-            </div>
-            <div id="s07-a-tiempo-cruce"><svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" data-lucide="calendar-days" aria-hidden="true"><path d="M8 2v3"/><path d="M16 2v3"/><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M8 13h.01"/><path d="M12 13h.01"/><path d="M16 13h.01"/><path d="M8 17h.01"/><path d="M12 17h.01"/><path d="M16 17h.01"/></svg>Cruce estimado: semana 9</div>
+                  <div id="s07-a-tiempo-rot-faltas" class="s07-a-tiempo-rotulo">Faltas</div>
+                  <div id="s07-a-tiempo-valor"><span class="s07-a-tiempo-valor-n">7</span><span class="s07-a-tiempo-valor-p">(14.9&nbsp;%)</span></div>
+                  <div id="s07-a-tiempo-barra">
+                    <div id="s07-a-tiempo-pista-f"><div id="s07-a-tiempo-relleno-f"></div></div>
+                    <div id="s07-a-tiempo-lim-linea"></div>
+                    <div id="s07-a-tiempo-lim-chip"><span class="s07-a-tiempo-lim">Límite 20&nbsp;%</span></div>
+                  </div>
+                </div>
+              </div>
 
-            <div id="s07-a-tiempo-accion-halo"></div>
-            <div id="s07-a-tiempo-accion-fondo"></div>
-            <div id="s07-a-tiempo-accion-a">
-              <span class="s07-a-tiempo-ficha"><svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" data-lucide="calendar-check" aria-hidden="true"><path d="M8 2v3"/><path d="M16 2v3"/><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="m9 15 2 2 4-4"/></svg></span>
-              <span class="s07-a-tiempo-accion-rot">Acción sugerida</span>
+              <!-- sección B: píldora del cruce estimado y fila de la acción sugerida -->
+              <div id="s07-a-tiempo-cruce-ent" data-layout-allow-overflow>
+                <div id="s07-a-tiempo-cruce"><svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" data-lucide="calendar-days" aria-hidden="true"><path d="M8 2v3"/><path d="M16 2v3"/><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M8 13h.01"/><path d="M12 13h.01"/><path d="M16 13h.01"/><path d="M8 17h.01"/><path d="M12 17h.01"/><path d="M16 17h.01"/></svg>Cruce estimado: semana 9</div>
+              </div>
+              <div id="s07-a-tiempo-accion-ent" data-layout-allow-overflow>
+                <div id="s07-a-tiempo-accion">
+                  <div id="s07-a-tiempo-accion-halo"></div>
+                  <div id="s07-a-tiempo-accion-fondo"></div>
+                  <div id="s07-a-tiempo-accion-a">
+                    <span class="s07-a-tiempo-ficha"><svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" data-lucide="calendar-check" aria-hidden="true"><path d="M8 2v3"/><path d="M16 2v3"/><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="m9 15 2 2 4-4"/></svg></span>
+                    <span class="s07-a-tiempo-accion-rot">Acción sugerida</span>
+                  </div>
+                  <div id="s07-a-tiempo-accion-b"><span class="s07-a-tiempo-pal">Contactar </span><span class="s07-a-tiempo-pal">al </span><span class="s07-a-tiempo-pal">alumno </span><span class="s07-a-tiempo-pal">esta </span><span class="s07-a-tiempo-pal">semana</span></div>
+                </div>
+              </div>
             </div>
-            <div id="s07-a-tiempo-accion-b">Contactar al alumno esta semana</div>
           </div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- estela vertical del odómetro (feGaussianBlur en un eje, ligada a la velocidad; filter:none en reposo) -->
+  <!-- estelas verticales (feGaussianBlur en un eje, ligadas a la velocidad; filter:none en reposo): una por driver -->
   <svg width="0" height="0" aria-hidden="true" style="position:absolute">
     <filter id="s07-a-tiempo-mb" x="-10%" y="-6%" width="120%" height="112%" color-interpolation-filters="sRGB">
       <feGaussianBlur id="s07-a-tiempo-mb-g" stdDeviation="0 0" />
+    </filter>
+    <filter id="s07-a-tiempo-mb-a" x="-2%" y="-10%" width="104%" height="120%" color-interpolation-filters="sRGB">
+      <feGaussianBlur id="s07-a-tiempo-mb-a-g" stdDeviation="0 0" />
+    </filter>
+    <filter id="s07-a-tiempo-mb-cruce" x="-4%" y="-60%" width="108%" height="220%" color-interpolation-filters="sRGB">
+      <feGaussianBlur id="s07-a-tiempo-mb-cruce-g" stdDeviation="0 0" />
+    </filter>
+    <filter id="s07-a-tiempo-mb-accion" x="-2%" y="-40%" width="104%" height="180%" color-interpolation-filters="sRGB">
+      <feGaussianBlur id="s07-a-tiempo-mb-accion-g" stdDeviation="0 0" />
     </filter>
   </svg>
 </div>
@@ -230,13 +270,13 @@
             abre: 1.75,       // la fila se abre en la tarjeta (pico de velocidad 2.075: whoosh-s 2.07)
             cascada: 2.15,
             faltas: 2.45,     // fill: el relleno arranca
-            odo: 2.60,        // la cifra «2» rueda un renglón (tick al asentarse, 2.85)
+            odo: 2.60,        // la cifra «2» rueda un renglón (tick al asentarse, 2.85); quieta hasta 3.95
             valor: 2.80,
-            cruce: 4.10,      // pop-2
-            accion: 5.05,     // soft-in
+            salA: 3.95,       // R2: la sección A sube y sale (0.30 s), ya en la pausa «…»; whoosh-s 4.20 sobre el cambio
+            cruce: 4.15,      // R2: la píldora del cruce sube desde abajo (0.50 s)
+            accion: 4.40,     // pop-2: la fila de la acción sube con la misma receta (0.50 s)
+            texto: 5.20,      // soft-in: «Contactar al alumno esta semana» entra desde el desenfoque (0.40 s), 0.33 s antes de «tiempo»
             halo: 6.45,
-            empuje: 3.45,     // cámara: empuje anclado en el «2», después de que la voz dice «dos» (3.21)
-            regreso: 5.00,    // cámara: vuelve a escala 1 a 5.90 s, quieta antes de «tiempo» (5.93)
             fin: 7.6
         };
 
@@ -250,6 +290,7 @@
             return (ease(b) - ease(a)) / (b - a) / dur;
         }
         // Movimiento con estela direccional: sigma = 0.29 · v · OBT, filter:none en reposo.
+        // v = 0 en p ≤ 1e-4 y p ≥ 1 − 1e-4: GSAP redondea el progreso a 6 decimales (hallazgo de s06, DINAMISMO §2.0.4).
         function conRastro(o) {
             var ease = gsap.parseEase(o.curva);
             var st = { p: 0 };
@@ -257,7 +298,7 @@
             function aplicar() {
                 var p = st.p;
                 o.pos(ease(p), p);
-                var v = (p <= 0 || p >= 1) ? 0 : Math.abs(o.dist) * velocidad(ease, p, o.dur);
+                var v = (p <= 1e-4 || p >= 1 - 1e-4) ? 0 : Math.abs(o.dist) * velocidad(ease, p, o.dur);
                 var s = Math.min(o.max, 0.29 * v * OBT);
                 o.nodo.setAttribute('stdDeviation', o.eje === 'x' ? s.toFixed(2) + ' 0' : '0 ' + s.toFixed(2));
                 o.el.style.filter = s < 0.3 ? 'none' : filtro;
@@ -352,7 +393,7 @@
             { opacity: 1, y: 0, duration: 0.3, ease: 'power3.out', stagger: 0.05 }, T.cascada);
         tl.fromTo($('divisor'), { opacity: 0 }, { opacity: 1, duration: 0.3, ease: 'power1.out' }, 2.30);
 
-        // ---------- Escena 3 (2.45–4.45): la barra frente al límite y «2» faltas restantes ----------
+        // ---------- Escena 3 (2.45–4.40): sección A, la barra frente al límite y «2» faltas restantes ----------
         // La fila «Faltas» entra como StaggerList (y 20 → 0); pista, línea discontinua y chip «Límite 20 %» llegan juntos a 2.45 s.
         tl.fromTo([$('barra'), $('rot-faltas'), $('rot-restantes')], { opacity: 0, y: 20 },
             { opacity: 1, y: 0, duration: 0.4, ease: 'power3.out', stagger: 0.06 }, T.faltas);
@@ -363,34 +404,57 @@
             pos: function (e) { gsap.set(tira, { y: -144 * e }); } });
         tl.addLabel('read:faltas-restantes#0', T.odo + 0.25);
         tl.fromTo($('valor'), { opacity: 0 }, { opacity: 1, duration: 0.4, ease: 'power1.out' }, T.valor);
-        tl.fromTo($('cruce'), { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.35, ease: 'power3.out' }, T.cruce);
 
-        // ---------- Escena 4 (4.45–7.6): la acción sugerida y su halo de foco ----------
-        var accA = $('accion-a'), accB = $('accion-b');
-        tl.fromTo($('accion-fondo'), { opacity: 0 }, { opacity: 1, duration: 0.3, ease: 'power2.out' }, T.accion);
-        var bA = { d: 10 }, bB = { d: 10 };
-        pintarBlur([accA], 10);
-        pintarBlur([accB], 10);
-        blurTramo(bA, [accA], T.accion, 0.36, 10, 0, 'power2.out', true);
-        blurTramo(bB, [accB], T.accion + 0.09, 0.36, 10, 0, 'power2.out', true);
-        tl.fromTo(accA, { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.36, ease: 'power3.out' }, T.accion);
-        tl.fromTo(accB, { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.36, ease: 'power3.out' }, T.accion + 0.09);
-        tl.addLabel('read:accion-sugerida#1', T.accion + 0.45);
+        // Relevo vertical R2 (DINAMISMO §2.2), recortado por el cuerpo con desvanecido de 24 px. El «2» queda quieto de 2.85 a
+        // 3.95 s («dos» a 3.21) y la sección sale ya en la pausa «…» (la frase «dos faltas» termina hacia 3.85 s).
+        // Salida: y 0 → −140, power2.in 0.30 s (velocidad máxima al final), estela vertical ≤ 10 en la hoja interior,
+        // opacidad → 0 en el último 40 % y autoAlpha 0 al terminar (envoltorio externo = salida).
+        var secaSal = $('seca-sal'), seca = $('seca');
+        conRastro({ el: seca, nodo: $('mb-a-g'), at: T.salA, dur: 0.30, curva: 'power2.in', dist: 140, eje: 'y', max: 10,
+            pos: function (e) { gsap.set(secaSal, { y: -140 * e }); } });
+        tl.fromTo(seca, { opacity: 1 }, { opacity: 0, duration: 0.12, ease: 'power1.in', immediateRender: false }, T.salA + 0.18);
+        tl.set(secaSal, { autoAlpha: 0 }, T.salA + 0.30);
+
+        // Entrada: y +140 → 0, power3.out 0.50 s, opacidad 0 → 1 en 0.15 s, estela ≤ 10 (envoltorio interno = entrada; filtro
+        // en la hoja). Se solapa 0.10 s con la salida: los dos picos de velocidad se tocan hacia 4.20 s (whoosh-s).
+        function subir(ent, hoja, nodo, at) {
+            tl.fromTo(ent, { opacity: 0 }, { opacity: 1, duration: 0.15, ease: 'power1.out' }, at);
+            conRastro({ el: hoja, nodo: nodo, at: at, dur: 0.50, curva: 'power3.out', dist: 140, eje: 'y', max: 10,
+                pos: function (e) { gsap.set(ent, { y: 140 * (1 - e) }); } });
+        }
+        subir($('cruce-ent'), $('cruce'), $('mb-cruce-g'), T.cruce);
+
+        // ---------- Escena 4 (4.40–7.6): la acción sugerida y su halo de foco ----------
+        // La fila (ficha calendar-check + «Acción sugerida») sube con la misma receta 0.25 s después de la píldora.
+        subir($('accion-ent'), $('accion'), $('mb-accion-g'), T.accion);
+
+        // «Contactar al alumno esta semana» con el BlurText de la app, por palabra (direction bottom, para no romper la dirección
+        // única hacia arriba): blur 10 → 0, y +0.5em → 0 y opacidad, curva de salida de la app; 0.28 s por palabra, +0.03 s.
+        // Un solo driver puro del tiempo: cada palabra se calcula de su progreso local; filter:none en reposo.
+        var palabras = $('accion-b').querySelectorAll('.s07-a-tiempo-pal');
+        var BT = { dur: 0.40, pal: 0.28, paso: 0.03, sube: 16, blur: 10 };
+        var eBT = gsap.parseEase('power4.out');
+        var bt = { p: 0 };
+        function pintarTexto() {
+            var t = bt.p * BT.dur;
+            for (var k = 0; k < palabras.length; k++) {
+                var q = Math.min(1, Math.max(0, (t - k * BT.paso) / BT.pal));
+                var e = q <= 1e-4 ? 0 : (q >= 1 - 1e-4 ? 1 : eBT(q));
+                var b = BT.blur * (1 - e);
+                gsap.set(palabras[k], { opacity: e, y: BT.sube * (1 - e) });
+                palabras[k].style.filter = b < 0.05 ? 'none' : 'blur(' + b.toFixed(2) + 'px)';
+            }
+        }
+        pintarTexto();
+        tl.fromTo(bt, { p: 0 }, { p: 1, duration: BT.dur, ease: 'none', onUpdate: pintarTexto, immediateRender: false }, T.texto);
+        tl.addLabel('read:accion-sugerida#1', T.texto + BT.dur);
+
         // Halo de foco nativo (sin cursor ni pulsación): es lo siguiente que hace la docente.
         // El anillo se enciende como el foco nativo (casi de golpe, al final del tramo) y la fila toma el fondo activo #EFECE7.
         tl.fromTo($('accion-halo'), { opacity: 0 }, { opacity: 1, duration: 0.2, ease: 'power3.in' }, T.halo);
-        tl.fromTo($('accion-fondo'), { backgroundColor: '#F7F5F2' }, { backgroundColor: '#EFECE7', duration: 0.2, ease: 'power3.in', immediateRender: false }, T.halo);
+        tl.fromTo($('accion-fondo'), { backgroundColor: '#F7F5F2' }, { backgroundColor: '#EFECE7', duration: 0.2, ease: 'power3.in' }, T.halo);
 
-        // ---------- Cámara de lectura (debajo de las escenas 3 y 4) ----------
-        // Un empuje y su regreso, los dos power3.inOut de 0.9 s con origen en el «2» (CSS de la cámara): la cifra no se
-        // traslada desde que se asienta (2.85 s) hasta el final, y «dos» (3.21) cae con todo quieto. El empuje acompaña
-        // «…faltas» y termina antes de que entre el cruce (4.10–4.45), que se lee quieto; el regreso acompaña la llegada de la
-        // acción y deja la tarjeta a escala 1 a 5.90 s, antes de «tiempo». Única espera a 1.07: 0.65 s. Desde 5.90 la cámara
-        // no se mueve (handoff quieto a 6.65 s); la energía del cierre la pone el halo (6.45–6.65).
-        var cam = $('camara');
-        tl.fromTo(cam, { scale: 1 }, { scale: 1.07, duration: 0.9, ease: 'power3.inOut' }, T.empuje);
-        tl.fromTo(cam, { scale: 1.07 }, { scale: 1, duration: 0.9, ease: 'power3.inOut', immediateRender: false }, T.regreso);
-
+        // Cámara en escala 1 todo el cuadro: sin empuje ni regreso (los acercamientos de adorno se retiraron; DINAMISMO §0).
         // Cuadro quieto deliberado desde 6.65 s; la duración la fija este ancla.
         tl.set({}, {}, T.fin);
 
