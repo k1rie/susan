@@ -75,3 +75,12 @@ voz» (guion con tiempos amarrados a cada escena).
 - Reglas del repo: iconos Lucide, sin emojis, sin rostros reales (avatares abstractos), textos en español (México),
   datos de demostración coherentes.
 - La v3 (`video/susan-presentacion`, 56 s, efectos + voz «Antonio») se conserva intacta.
+- Indicación tras ver el borrador completo (2026-10-06, la persona dueña se fue a dormir; modo autónomo hasta la entrega):
+  «el video está bien en sí, solo que hazlo más dinámico, muchas veces solo se queda estático con la misma escena varios
+  segundos; me gustaría que fuera más dinámico sin perder el efecto smooth y blur (recuerda que hoy en día casi no hay
+  retención)». Esto SUSTITUYE las reglas anteriores que pedían lecturas quietas largas y prohibían la deriva de cámara: ahora
+  ninguna escena se queda igual más de ~0.6 s; la cámara siempre viaja (empujes, paneos, punch-ins a la cifra, rack focus
+  con desenfoque y estela en los movimientos rápidos), cada cuadro se parte en 2-3 planos y el ritmo se sostiene hasta el
+  final. Se conservan: duración (55 s), anclas de voz, datos, decisiones previas (sin cursor, sin número de muestras, sin
+  subrayado, tooltip recto, inclinación suave plana al leer) y suavidad (eases largas, sin saltos ni parpadeos).
+

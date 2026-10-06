@@ -18,26 +18,28 @@
 .s02-un-boton-grano{position:absolute;inset:0;pointer-events:none;mix-blend-mode:multiply;opacity:.04;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
 #s02-un-boton-grano-cielo{opacity:.10}
 /* «SUSAN»: el BrandMark de la app ampliado (Hanken 600, 136 px, -0.025em), sin escudo y sin subrayado (BRIEF, ajuste del 2026-10-06).
-   Línea base en y = 540 (ascenso medido: 115 px). */
-#s02-un-boton-marca{position:absolute;left:136px;top:425px;font-size:136px;font-weight:600;letter-spacing:-0.025em;line-height:1;white-space:nowrap;color:#1E1919}
+   Su caja la pone el script: mayúsculas centradas en la altura de la tarjeta y el par marca + tarjeta centrado en x = 960. */
+#s02-un-boton-marca{position:absolute;left:0;top:0;font-size:136px;font-weight:600;letter-spacing:-0.025em;line-height:1;white-space:nowrap;color:#1E1919}
 .s02-un-boton-letra{display:inline-block}
 /* escena: sombras en capa aparte, superficie (tarjeta -> cámara), botón (la ficha estirada) y brillo */
-.s02-un-boton-rig{position:absolute;inset:0;transform-origin:1340px 592px}
+/* rig del objeto flotante y sombras: origen en el centro del botón (lo pone el script) */
+.s02-un-boton-rig{position:absolute;inset:0}
 /* las sombras escalan con el rig (mismo origen) pero no siguen su despegue en y: así se leen como altura */
-#s02-un-boton-sombras{position:absolute;inset:0;transform-origin:1340px 592px}
-.s02-un-boton-sombra-cielo-crece{position:absolute;left:984px;top:209px;width:712px;height:582px;transform-origin:356px 383px}
+#s02-un-boton-sombras{position:absolute;inset:0}
+.s02-un-boton-sombra-cielo-crece{position:absolute}
 #s02-un-boton-sombra-cielo{position:absolute;inset:0;border-radius:28px;transform-origin:0 0;
  box-shadow:0 40px 120px rgba(29,95,209,.14),0 8px 24px rgba(29,95,209,.08)}
 #s02-un-boton-sombra-tinta{position:absolute;left:880px;top:200px;width:900px;height:506px;border-radius:28px;transform-origin:0 0;
  box-shadow:0 40px 120px rgba(30,25,25,.14)}
-/* La superficie se maqueta en la caja que cubre tarjeta y cámara (x 880-1780, y 200-791); el clip-path recorta la forma visible. */
-#s02-un-boton-superficie{position:absolute;left:880px;top:200px;width:900px;height:591px}
+/* La superficie se maqueta en la caja que cubre tarjeta y cámara (la calcula el script); el clip-path recorta la forma visible. */
+#s02-un-boton-superficie{position:absolute}
 #s02-un-boton-sup-borde{position:absolute;inset:0;background:#E7E2DC}
 #s02-un-boton-sup-fondo{position:absolute;inset:0;background:#FFFFFF}
-#s02-un-boton-tarjeta{position:absolute;left:104px;top:9px;width:712px;height:582px}
-.s02-un-boton-ui{zoom:2;position:relative}
-/* PasarListaHero en su anatomía móvil (px de la app; E = 2 por zoom). 356 x 291 css = 712 x 582 en video. */
-.s02-un-boton-card{width:356px;height:291px;box-sizing:border-box;padding:20.5px 20px 19.5px;display:flex;flex-direction:column}
+#s02-un-boton-tarjeta{position:absolute;left:0;top:0}
+/* E = 2.4: la tarjeta es el héroe del cuadro (852 px, 44 % del ancho; 46 % con el acercamiento de 1.04) */
+.s02-un-boton-ui{zoom:2.4;position:relative}
+/* PasarListaHero en su anatomía móvil (px de la app; E = 2.4 por zoom). 355 x 290 css = 852 x 696 en video. */
+.s02-un-boton-card{width:355px;height:290px;box-sizing:border-box;padding:20px 20px 19px;display:flex;flex-direction:column}
 .s02-un-boton-cab{display:flex;align-items:center;justify-content:space-between;gap:12px;height:36px;flex:none}
 .s02-un-boton-cab-izq{display:flex;align-items:center;gap:10px;font-size:14px;line-height:20px;font-weight:500;color:#6F6A65}
 .s02-un-boton-ficha{width:36px;height:36px;border-radius:10px;background:#E6EEFC;color:#1D5FD1;display:grid;place-items:center;flex:none}
@@ -60,21 +62,20 @@
 .s02-un-boton-camchip{position:absolute;top:24px;height:44px;box-sizing:border-box;display:inline-flex;align-items:center;gap:12px;padding:0 20px;
  border-radius:999px;background:rgba(30,25,25,.8);color:#FFFFFF;font-size:24px;line-height:44px;font-weight:500;white-space:nowrap}
 .s02-un-boton-camchip svg{width:24px;height:24px;display:block}
-#s02-un-boton-reconociendo{left:24px}
-#s02-un-boton-frente{right:24px}
-/* Botón «Abrir y pasar lista» = la ficha del botón central estirada. Caja 632 x 168 centrada en (1340, 592) que cubre disco y botón. */
-#s02-un-boton-boton{position:absolute;left:1024px;top:508px;width:632px;height:168px;transform-origin:316px 84px}
-#s02-un-boton-ficha-sombra{position:absolute;left:217px;top:-15px;width:198px;height:198px;border-radius:50%;box-shadow:0 30px 90px rgba(30,25,25,.18);transform-origin:50% 50%}
-#s02-un-boton-foco{position:absolute;left:0;top:36px;width:632px;height:96px;border-radius:16px;box-shadow:0 0 0 8px rgba(0,97,254,.3)}
-#s02-un-boton-anillo{position:absolute;left:-15px;top:-15px;width:662px;height:198px;background:#FFFFFF}
+/* Botón «Abrir y pasar lista» = la ficha del botón central estirada. Su caja (ancho del botón x 168, centrada en el botón)
+   cubre disco y botón; todas sus medidas salen de E en el script. */
+#s02-un-boton-boton{position:absolute}
+#s02-un-boton-ficha-sombra{position:absolute;top:-15px;width:198px;height:198px;border-radius:50%;box-shadow:0 30px 90px rgba(30,25,25,.18);transform-origin:50% 50%}
+#s02-un-boton-foco{position:absolute;left:0;box-shadow:0 0 0 8px rgba(0,97,254,.3)}
+#s02-un-boton-anillo{position:absolute;left:-15px;top:-15px;height:198px;background:#FFFFFF}
 #s02-un-boton-sup{position:absolute;inset:0;background:#1E1919;color:#FFFFFF}
-/* scan-face se maqueta a 72 px (el del cuadro 1, idéntico al píxel en el corte) y se asienta a 40 px con escala 40/72 */
-#s02-un-boton-ico{position:absolute;left:136px;top:48px;width:72px;height:72px;display:block;transform-origin:50% 50%}
-#s02-un-boton-rotulo{position:absolute;left:208px;top:64px;height:40px;display:flex;align-items:center;gap:16px}
-#s02-un-boton-rotulo-texto{font-size:28px;line-height:40px;font-weight:500;white-space:nowrap}
-#s02-un-boton-flecha{display:block;width:32px;height:32px}
-#s02-un-boton-flecha svg{width:32px;height:32px;display:block}
-#s02-un-boton-brillo-caja{position:absolute;left:0;top:36px;width:632px;height:96px;border-radius:16px;overflow:hidden;pointer-events:none}
+/* scan-face se maqueta a 72 px (el del cuadro 1, idéntico al píxel en el corte) y se asienta a 20 px de la app (48 a E 2.4) */
+#s02-un-boton-ico{position:absolute;top:48px;width:72px;height:72px;display:block;transform-origin:50% 50%}
+#s02-un-boton-rotulo{position:absolute;display:flex;align-items:center}
+#s02-un-boton-rotulo-texto{font-weight:500;white-space:nowrap}
+#s02-un-boton-flecha{display:block}
+#s02-un-boton-flecha svg{width:100%;height:100%;display:block}
+#s02-un-boton-brillo-caja{position:absolute;left:0;overflow:hidden;pointer-events:none}
 #s02-un-boton-brillo{position:absolute;inset:0;background:linear-gradient(105deg,rgba(255,255,255,0) 42%,rgba(255,255,255,.55) 50%,rgba(255,255,255,0) 58%)}
 </style>
 <div id="root" data-composition-id="s02-un-boton" data-start="0" data-duration="6.05" data-width="1920" data-height="1080">
@@ -205,12 +206,56 @@
             tl.fromTo(st, { d: desde }, { d: 0, duration: dur, ease: curva, onUpdate: aplicar, immediateRender: false }, at);
         }
 
-        // Cajas en coordenadas de la superficie (origen x 880, y 200; 900 x 591): inset(arriba derecha abajo izquierda round r).
-        function inset(c, r) { return 'inset(' + c[0] + 'px ' + c[1] + 'px ' + c[2] + 'px ' + c[3] + 'px round ' + r + 'px)'; }
+        // ---------- Geometría: una sola fuente de números (E, caja de la tarjeta y caja de la cámara del relevo con el cuadro 3) ----------
+        var E = 2.4;                                   // escala de la UI (zoom de .ui)
+        var CW = 355 * E, CH = 290 * E;                // tarjeta: 852 x 696
+        var CL = 838, CT = 191.6;                      // x 838-1690, y 191.6-887.6 (centro 1264, 539.6)
+        var CAM = { x: 880, y: 200, w: 900, h: 506 };  // handoff_out: marco de la cámara (contrato con el cuadro 3)
+        var BX = CL + 20 * E, BY = CT + 167 * E;       // hueco del botón en la tarjeta (padding 20, 167 px de la app desde arriba)
+        var BW = 315 * E, BH = 48 * E;                 // 756 x 115.2
+        var BCX = BX + BW / 2, BCY = BY + BH / 2;      // centro del botón: (1264, 650)
+        var RB = 8 * E;                                // radio del botón (8 px de la app)
+        var FICHA = { x: 960, y: 500 };                // handoff_in: centro de la ficha del cuadro 1
+        // superficie: la caja que cubre tarjeta y cámara
+        var SL = Math.min(CL, CAM.x), ST = Math.min(CT, CAM.y);
+        var SR = Math.max(CL + CW, CAM.x + CAM.w), SB = Math.max(CT + CH, CAM.y + CAM.h);
+        function px(v) { return (Math.round(v * 100) / 100) + 'px'; }
+        function cajaEn(x0, y0, x1, y1) { return [y0 - ST, SR - x1, SB - y1, x0 - SL]; }
+        // Cajas en coordenadas de la superficie: inset(arriba derecha abajo izquierda round r).
+        function inset(c, r) { return 'inset(' + px(c[0]) + ' ' + px(c[1]) + ' ' + px(c[2]) + ' ' + px(c[3]) + ' round ' + px(r) + ')'; }
         function mas(c, d) { return [c[0] + d, c[1] + d, c[2] + d, c[3] + d]; }
-        var LINEA = [392, 124, 199, 144];     // eje del botón: x 1024-1656 en y = 592, alto 0 (no se ve hasta crecer)
-        var TARJETA = [9, 84, 0, 104];        // x 984-1696, y 209-791
-        var CAMARA = [0, 0, 85, 0];           // x 880-1780, y 200-706
+        var LINEA = cajaEn(BX, BCY, BX + BW, BCY);                     // eje del botón, alto 0 (no se ve hasta crecer)
+        var TARJETA = cajaEn(CL, CT, CL + CW, CT + CH);
+        var CAMARA = cajaEn(CAM.x, CAM.y, CAM.x + CAM.w, CAM.y + CAM.h);
+        // contenido del botón (app: icono 20 · 8 · texto 112 · 8 · flecha 16 = 164 px, centrado)
+        // (redondeado a px enteros: scan-face nace a 72 px en el centro del disco y debe coincidir al píxel con el cuadro 1)
+        var CONT = 164 * E, C0 = Math.round((BW - CONT) / 2);
+        var ICO_CX = C0 + 10 * E;                      // centro final de scan-face dentro de la caja del botón (205)
+        var RIN = (BW - 168) / 2, RINA = (BW + 30 - 198) / 2, VIN = (168 - BH) / 2;
+
+        function caja(el, x, y, w, h) { el.style.left = px(x); el.style.top = px(y); if (w !== null) { el.style.width = px(w); } if (h !== null) { el.style.height = px(h); } }
+        caja($('superficie'), SL, ST, SR - SL, SB - ST);
+        caja($('tarjeta'), CL - SL, CT - ST, CW, CH);
+        $('reconociendo').style.left = px(CAM.x - SL + 24); $('reconociendo').style.top = px(CAM.y - ST + 24);
+        $('frente').style.right = px(SR - CAM.x - CAM.w + 24); $('frente').style.top = px(CAM.y - ST + 24);
+        caja($('boton'), BX, BCY - 84, BW, 168);
+        $('boton').style.transformOrigin = px(BW / 2) + ' 84px';
+        $('ficha-sombra').style.left = px((BW - 198) / 2);
+        caja($('foco'), 0, VIN, BW, BH); $('foco').style.borderRadius = px(RB);
+        $('anillo').style.width = px(BW + 30);
+        caja($('brillo-caja'), 0, VIN, BW, BH); $('brillo-caja').style.borderRadius = px(RB);
+        $('ico').style.left = px(ICO_CX - 36);
+        caja($('rotulo'), Math.round(C0 + 28 * E), 84 - 10 * E, null, 20 * E); $('rotulo').style.gap = px(8 * E);
+        $('rotulo-texto').style.fontSize = px(14 * E); $('rotulo-texto').style.lineHeight = px(20 * E);
+        caja($('flecha'), 0, 0, 16 * E, 16 * E); $('flecha').style.position = 'relative';
+        $('rig').style.transformOrigin = px(BCX) + ' ' + px(BCY);
+        $('sombras').style.transformOrigin = px(BCX) + ' ' + px(BCY);
+        caja($('sombra-crece'), CL, CT, CW, CH); $('sombra-crece').style.transformOrigin = px(BCX - CL) + ' ' + px(BCY - CT);
+        // «SUSAN»: tinta de 401 px (136 px, medida en el cuadro 8) a 4 px del borde de su caja; mayúsculas de 95 px con la línea
+        // base a 115.5 px del borde superior. El par marca + tarjeta queda centrado en x = 960 y las mayúsculas en la altura
+        // del centro de la tarjeta.
+        var MARCA_X = 2 * 960 - (CL + CW) - 4, MARCA_Y = (CT + CH / 2) + 47.5 - 115.5;
+        caja($('marca'), MARCA_X, MARCA_Y, null, null);
 
         // ---------- Escena 1 (0.0-1.3 s): la ficha se vuelve el botón y la tarjeta se arma a su alrededor ----------
         // El fondo pasa de la crema al cielo (la capa nueva sube encima).
@@ -220,27 +265,27 @@
         tl.fromTo($('nube-medio'), { x: 0 }, { x: -45, duration: 2.6, ease: 'sine.out' }, T.cielo);
         tl.fromTo($('nube-cerca'), { x: 0 }, { x: -80, duration: 2.6, ease: 'sine.out' }, T.cielo);
 
-        // card-morph-anchor con constantes: viaje (960, 500) -> (1340, 592) y círculo 168 -> rectángulo 632 x 96 r 16, sin escala.
+        // card-morph-anchor con constantes: viaje de la ficha (960, 500) al centro del botón y círculo 168 -> rectángulo del botón, sin escala.
         var MORPH = { duration: 0.6, ease: 'power3.inOut' };
         var boton = $('boton');
         var rig = $('rig');
         var sombras = $('sombras');
-        tl.fromTo(boton, { x: -380, y: -92 }, { x: 0, y: 0, duration: MORPH.duration, ease: MORPH.ease }, T.ficha);
+        tl.fromTo(boton, { x: FICHA.x - BCX, y: FICHA.y - BCY }, { x: 0, y: 0, duration: MORPH.duration, ease: MORPH.ease }, T.ficha);
         // El objeto flotante se posa 8 px por debajo de su lugar (la sombra no baja con él) y despega a su sitio
         // cuando la voz ya dijo el nombre (Escena 2): un solo gesto finito, sin vuelta.
         tl.fromTo(rig, { y: 0 }, { y: T.DESPEGUE, duration: MORPH.duration, ease: MORPH.ease }, T.ficha);
-        tl.fromTo($('sup'), { clipPath: 'inset(0px 232px 0px 232px round 84px)' },
-            { clipPath: 'inset(36px 0px 36px 0px round 16px)', duration: MORPH.duration, ease: MORPH.ease }, T.ficha);
+        tl.fromTo($('sup'), { clipPath: inset([0, RIN, 0, RIN], 84) },
+            { clipPath: inset([VIN, 0, VIN, 0], RB), duration: MORPH.duration, ease: MORPH.ease }, T.ficha);
         // El anillo blanco sigue la forma 15 px por fuera mientras se apaga.
-        tl.fromTo($('anillo'), { clipPath: 'inset(0px 232px 0px 232px round 99px)' },
-            { clipPath: 'inset(36px 0px 36px 0px round 31px)', duration: MORPH.duration, ease: MORPH.ease }, T.ficha);
+        tl.fromTo($('anillo'), { clipPath: inset([0, RINA, 0, RINA], 99) },
+            { clipPath: inset([VIN, 0, VIN, 0], RB + 15), duration: MORPH.duration, ease: MORPH.ease }, T.ficha);
         tl.fromTo($('anillo'), { opacity: 1 }, { opacity: 0, duration: 0.45, ease: 'power2.in' }, T.ficha);
         // La sombra de tinta de la ficha (la del cuadro 1: círculo de 198 px bajo el anillo) sigue al anillo
-        // (662 x 126 al final) y cede el paso a la sombra-cielo de la tarjeta.
-        tl.fromTo($('ficha-sombra'), { scaleX: 1, scaleY: 1 }, { scaleX: 662 / 198, scaleY: 126 / 198, duration: MORPH.duration, ease: MORPH.ease }, T.ficha);
+        // (el botón más 15 px por lado al final) y cede el paso a la sombra-cielo de la tarjeta.
+        tl.fromTo($('ficha-sombra'), { scaleX: 1, scaleY: 1 }, { scaleX: (BW + 30) / 198, scaleY: (BH + 30) / 198, duration: MORPH.duration, ease: MORPH.ease }, T.ficha);
         tl.fromTo($('ficha-sombra'), { opacity: 1 }, { opacity: 0, duration: 0.45, ease: 'power1.in' }, T.ficha);
-        // scan-face 72 -> 40 px y del centro del disco a su lugar en el botón.
-        tl.fromTo($('ico'), { x: 144, scale: 1 }, { x: 0, scale: 40 / 72, duration: MORPH.duration, ease: MORPH.ease }, T.ficha);
+        // scan-face 72 -> 20 px de la app (48 a E 2.4) y del centro del disco a su lugar en el botón.
+        tl.fromTo($('ico'), { x: BW / 2 - ICO_CX, scale: 1 }, { x: 0, scale: 20 * E / 72, duration: MORPH.duration, ease: MORPH.ease }, T.ficha);
         // «Abrir y pasar lista» y la flecha entran desde el desenfoque cuando scan-face ya llegó a su sitio (no lo pisan).
         tl.fromTo($('rotulo-texto'), { opacity: 0, y: -14 }, { opacity: 1, y: 0, duration: 0.22, ease: 'power4.out' }, T.rotulo);
         desenfoque($('rotulo-texto'), T.rotulo, 0.22, 10, 'power4.out');
@@ -249,9 +294,12 @@
 
         // center-outward-expansion: la superficie de la tarjeta crece desde el botón (expo.out) con su borde de 2 px y su sombra.
         var CRECE = { duration: 0.6, ease: 'expo.out' };
-        tl.fromTo($('sup-borde'), { clipPath: inset(LINEA, 16) }, { clipPath: inset(TARJETA, 28), duration: CRECE.duration, ease: CRECE.ease }, T.tarjeta);
-        tl.fromTo($('sup-fondo'), { clipPath: inset(mas(LINEA, 2), 14) }, { clipPath: inset(mas(TARJETA, 2), 26), duration: CRECE.duration, ease: CRECE.ease }, T.tarjeta);
-        tl.fromTo($('sombra-crece'), { scaleX: 632 / 712, scaleY: 0.05, opacity: 0 }, { scaleX: 1, scaleY: 1, opacity: 1, duration: CRECE.duration, ease: CRECE.ease }, T.tarjeta);
+        // Radio de la tarjeta: 14 px de la app (33.6 a E 2.4); borde de 2 px.
+        var RT = 14 * E;
+        $('sombra-cielo').style.borderRadius = px(RT);
+        tl.fromTo($('sup-borde'), { clipPath: inset(LINEA, RB) }, { clipPath: inset(TARJETA, RT), duration: CRECE.duration, ease: CRECE.ease }, T.tarjeta);
+        tl.fromTo($('sup-fondo'), { clipPath: inset(mas(LINEA, 2), RB - 2) }, { clipPath: inset(mas(TARJETA, 2), RT - 2), duration: CRECE.duration, ease: CRECE.ease }, T.tarjeta);
+        tl.fromTo($('sombra-crece'), { scaleX: BW / CW, scaleY: 0.05, opacity: 0 }, { scaleX: 1, scaleY: 1, opacity: 1, duration: CRECE.duration, ease: CRECE.ease }, T.tarjeta);
         // Contenido con los tiempos de la app (StaggerList: 14 -> 0, 0.5 s, +60 ms), del botón hacia afuera:
         // lo de arriba sube desde el botón y el enlace baja desde él.
         var piezas = [['camara-fila', 14], ['enlace', -14], ['detalle', 14], ['titulo', 14], ['cab-izq', 14], ['estado', 14]];
@@ -306,9 +354,9 @@
         // card-morph-anchor con constantes: la superficie va de la caja de la tarjeta a la de la cámara (clip-path, sin escala)
         // y de blanco a tinta como pintura; el contenido sale antes del 40 % y los chips entran después del 60 %.
         var VIAJE = { duration: 0.6, ease: 'power3.inOut' };
-        tl.fromTo($('sup-borde'), { clipPath: inset(TARJETA, 28), backgroundColor: '#E7E2DC' },
+        tl.fromTo($('sup-borde'), { clipPath: inset(TARJETA, RT), backgroundColor: '#E7E2DC' },
             { clipPath: inset(CAMARA, 28), backgroundColor: '#1E1919', duration: VIAJE.duration, ease: VIAJE.ease, immediateRender: false }, T.camara);
-        tl.fromTo($('sup-fondo'), { clipPath: inset(mas(TARJETA, 2), 26), backgroundColor: '#FFFFFF' },
+        tl.fromTo($('sup-fondo'), { clipPath: inset(mas(TARJETA, 2), RT - 2), backgroundColor: '#FFFFFF' },
             { clipPath: inset(mas(CAMARA, 2), 26), backgroundColor: '#1E1919', duration: VIAJE.duration, ease: VIAJE.ease, immediateRender: false }, T.camara);
         tl.fromTo([rig, sombras], { scale: T.ACERCA }, { scale: 1, duration: VIAJE.duration, ease: VIAJE.ease, immediateRender: false }, T.camara);
         tl.fromTo($('tarjeta'), { opacity: 1 }, { opacity: 0, duration: 0.24, ease: 'power1.in' }, T.camara);
@@ -316,8 +364,8 @@
         tl.fromTo([$('reconociendo'), $('frente')], { opacity: 0 }, { opacity: 1, duration: 0.24, ease: 'power1.out' }, T.camara + 0.36);
         // La sombra pasa de azulada (caja de la tarjeta) a tinta (caja de la cámara) siguiendo la misma caja.
         tl.fromTo($('sombra-cielo'), { x: 0, y: 0, scaleX: 1, scaleY: 1, opacity: 1 },
-            { x: -104, y: -9, scaleX: 900 / 712, scaleY: 506 / 582, opacity: 0, duration: VIAJE.duration, ease: VIAJE.ease }, T.camara);
-        tl.fromTo($('sombra-tinta'), { x: 104, y: 9, scaleX: 712 / 900, scaleY: 582 / 506, opacity: 0 },
+            { x: CAM.x - CL, y: CAM.y - CT, scaleX: CAM.w / CW, scaleY: CAM.h / CH, opacity: 0, duration: VIAJE.duration, ease: VIAJE.ease }, T.camara);
+        tl.fromTo($('sombra-tinta'), { x: CL - CAM.x, y: CT - CAM.y, scaleX: CW / CAM.w, scaleY: CH / CAM.h, opacity: 0 },
             { x: 0, y: 0, scaleX: 1, scaleY: 1, opacity: 1, duration: VIAJE.duration, ease: VIAJE.ease }, T.camara);
         // theme-crossfade-morph bajo el ancla: el lienzo E3 con halo azul sube encima del cielo y se lleva la marca.
         tl.fromTo($('lienzo'), { opacity: 0 }, { opacity: 1, duration: 0.6, ease: 'power2.inOut' }, T.camara);

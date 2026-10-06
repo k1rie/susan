@@ -157,8 +157,14 @@ Además, cada worker paga ~1.4 s fijos de arranque (Chrome + carga + fuentes).
   - Entrada `fromTo({rotationX: 8, rotationY: -10, z: -160, y: 40}, {0, 0, 0, 0, duration: 1.0, ease: 'power3.out'})` +
     opacidad 0 → 1 en 0.3 s. Plana (0°) antes de cualquier lectura y en cada borde de cuadro.
   - Sombra: hermana detrás de la tarjeta, mismo tamaño y radio, `box-shadow` **estático** (sobre cielo
-    `0 40px 120px rgba(29,95,209,.14), 0 8px 24px rgba(29,95,209,.08)`), animada solo con `x 40 → 0`, `y 70 → 0`,
-    `scale .9 → 1`, `opacity` en el mismo tween que la tarjeta.
+    `0 40px 120px rgba(29,95,209,.14), 0 8px 24px rgba(29,95,209,.08)`). **Corregido en la construcción (2026-10-06,
+    cuadros 4 y 7)**: la receta original (`x 40 → 0`, `y 70 → 0`, `scale .9 → 1` con la opacidad en el mismo tween) deja
+    un **doble borde fantasma** mientras la tarjeta está inclinada: la sombra plana no coincide con la silueta en
+    perspectiva. La sombra hace **el mismo tween 3D que la tarjeta** (mismos `rotationX/Y`, `z`, `y`, `scale`, misma caja,
+    mismo `transform-origin`, misma curva y duración; si la tarjeta crece por `clip-path`, la sombra crece con la misma
+    curva y un origen que haga coincidir su caja con el recorte) y su opacidad sube **solo al final del aterrizaje**
+    (≈ los últimos 0.25–0.35 s, `power2.out`, ya casi plana). El desplazamiento «contra la inclinación» lo da solo el
+    offset propio del `box-shadow`.
   - Holograma: capa `inset: -30%` con los 4 radiales del `DEGRADADO` + cónico, `opacity .75`, movida solo con
     `rotation 0 → 8` y `xPercent −4 → 4` (`ease: 'none'`); brillo `linear-gradient(105deg, …, rgba(255,255,255,.55) 50%, …)`
     con `xPercent −120 → 120`, 0.7 s `power2.inOut`, una vez al aterrizar. Sin `mix-blend-mode` ni `filter` dentro.

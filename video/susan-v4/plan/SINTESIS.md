@@ -85,7 +85,8 @@ describe la v1 (L §1.1) [crít.].
     `tabular-nums`; cifra héroe 120–180 px; ejes ≥ 22 px. Serif EB Garamond solo en 1–2 momentos (saludo del Home y, a lo
     sumo, un titular). *Fuente: D §1.5/§2.0, R1 §1.6, R2 §3.3 [crít.: R2 corregido de 700 a 600].*
 12. **Color.** Tinta `#1E1919` = único acento estructural (botón primario, tooltip, bloque resaltado); oro `#A8842C` =
-    chispa de marca, **un solo elemento de oro por cuadro**, nunca texto < 48 px ni junto a un chip «Retardo»; azul
+    chispa de marca, **a lo sumo un elemento de oro por cuadro** (nunca bajo «SUSAN»: BRIEF, ajuste del 2026-10-06; en la v4
+    ningún cuadro lleva oro), nunca texto < 48 px ni junto a un chip «Retardo»; azul
     `#0061FE` solo enlaces y halo de foco; colores de estado solo con su etiqueta. Holograma = `DEGRADADO` real de la
     portada «Pasar lista» (`#FF6AA9 #FFB36B #8BE3B5 #6BB8FF`), solo en la tarjeta héroe y el brillo de la marca, nunca en
     datos. *Fuente: D §1.1/§1.3/§3.3, R2 §4.0 [crít.: R1 corregido, los `gradient-a..d` de la v3 no existen en la app].*
@@ -108,8 +109,8 @@ describe la v1 (L §1.1) [crít.].
     (nunca `box-shadow` animado), teñida (azul `rgba(29,95,209,.14)` sobre cielo, tinta sobre crema). Vidrio **falso**
     (copia recortada del cielo + velo blanco 72 %); `backdrop-filter` solo en piezas pequeñas y estáticas. *Fuente: D §1.7/§3.7,
     R1 T6, P §4.*
-17. **Marca sin logo.** Cierre por defecto: wordmark **A** «SUSAN» Hanken 600 a 200 px con el subrayado dorado de
-    `Resaltado`; llegada opcional **C** (la ficha circular de tinta con `scan-face`, el botón central del BottomNav, cae con
+17. **Marca sin logo.** Cierre por defecto: wordmark **A** «SUSAN» Hanken 600 (136 px en la v4), **sin subrayado** (el
+    subrayado dorado de `Resaltado` lo retiró la persona dueña: BRIEF, ajuste del 2026-10-06; nada lo reemplaza); llegada opcional **C** (la ficha circular de tinta con `scan-face`, el botón central del BottomNav, cae con
     estela y squash de volumen constante, sin rebote, y se resuelve en A). B (serif) solo como alternativa en la hoja.
     Cierre **solo con el nombre** (lema opcional, a decidir); sin escudos UNACH/FCA salvo dentro de la UI fiel. *Fuente: D
     §4, R2 M6, L §3.6.*
