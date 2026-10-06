@@ -84,11 +84,12 @@
 
 #s07-a-tiempo-accion-halo{position:absolute;left:48px;top:448px;width:1104px;height:104px;border-radius:20px;box-shadow:0 0 0 8px rgba(0,97,254,.3)}
 #s07-a-tiempo-accion-fondo{position:absolute;left:48px;top:448px;width:1104px;height:104px;border-radius:20px;background:#F7F5F2}
+/* ficha del kit .su-ficha a E = 2: 72 × 72, radio 20, icono 40 (36 / r10 / 20 en la app); 20 px hasta el texto */
 #s07-a-tiempo-accion-a{position:absolute;left:68px;top:462px;width:420px;height:76px}
-.s07-a-tiempo-ficha{position:absolute;left:0;top:6px;width:64px;height:64px;border-radius:16px;background:#FBE6E2;color:#C2410C;display:flex;align-items:center;justify-content:center}
-.s07-a-tiempo-ficha svg{width:32px;height:32px}
-.s07-a-tiempo-accion-rot{position:absolute;left:84px;top:0;font-size:24px;font-weight:500;color:#6F6A65;line-height:1.25;white-space:nowrap}
-#s07-a-tiempo-accion-b{position:absolute;left:152px;top:496px;font-size:32px;font-weight:500;line-height:1.25;white-space:nowrap}
+.s07-a-tiempo-ficha{position:absolute;left:0;top:2px;width:72px;height:72px;border-radius:20px;background:#FBE6E2;color:#C2410C;display:flex;align-items:center;justify-content:center}
+.s07-a-tiempo-ficha svg{width:40px;height:40px}
+.s07-a-tiempo-accion-rot{position:absolute;left:92px;top:0;font-size:24px;font-weight:500;color:#6F6A65;line-height:1.25;white-space:nowrap}
+#s07-a-tiempo-accion-b{position:absolute;left:160px;top:496px;font-size:32px;font-weight:500;line-height:1.25;white-space:nowrap}
 </style>
 <div id="root" data-composition-id="s07-a-tiempo" data-start="0" data-duration="7.6" data-width="1920" data-height="1080">
   <!-- fondo a sangre: lienzo E3 con halo rosa y grano al 4 % (pista 0, todo el cuadro) -->
@@ -189,7 +190,7 @@
             <div id="s07-a-tiempo-accion-halo"></div>
             <div id="s07-a-tiempo-accion-fondo"></div>
             <div id="s07-a-tiempo-accion-a">
-              <span class="s07-a-tiempo-ficha"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" data-lucide="calendar-check" aria-hidden="true"><path d="M8 2v3"/><path d="M16 2v3"/><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="m9 15 2 2 4-4"/></svg></span>
+              <span class="s07-a-tiempo-ficha"><svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" data-lucide="calendar-check" aria-hidden="true"><path d="M8 2v3"/><path d="M16 2v3"/><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="m9 15 2 2 4-4"/></svg></span>
               <span class="s07-a-tiempo-accion-rot">Acción sugerida</span>
             </div>
             <div id="s07-a-tiempo-accion-b">Contactar al alumno esta semana</div>
@@ -327,8 +328,13 @@
         // Relevo de contenido dentro de la tarjeta: la fila fuera antes del 40 %, el marco al final.
         tl.fromTo($('fila-copia'), { opacity: 1 }, { opacity: 0, duration: 0.24, ease: 'power1.in' }, T.abre);
         tl.fromTo($('marco'), { opacity: 0 }, { opacity: 1, duration: 0.2, ease: 'power1.out' }, 2.20);
-        // El ranking retrocede detrás: sus filas quedan al 12 % (0.35 × 0.343) y escala 0.97.
+        // El ranking retrocede detrás: su contenido queda al 12 % (0.35 × 0.343) y escala 0.97.
         tl.fromTo($('rig'), { opacity: 1, scale: 1 }, { opacity: 0.12 / 0.35, scale: 0.97, duration: 0.65, ease: 'power3.inOut' }, T.abre);
+        // Con la tarjeta ya abierta encima, las columnas de nombres y cifras, el subtítulo y la leyenda solo asomaban como
+        // letras cortadas a los lados: se apagan (12 % → 0) y detrás queda el panel con su título «Mayor riesgo».
+        var asoman = [$('subtitulo'), $('leyenda')];
+        for (var a = 0; a < 8; a++) { if (a !== 2) { asoman.push(filas[a]); } }
+        tl.fromTo(asoman, { opacity: 0.35 }, { opacity: 0, duration: 0.3, ease: 'power1.out', immediateRender: false }, 2.40);
 
         // Cascada (2.15–2.65): avatar, nombre, matrícula, nivel y tendencia.
         tl.fromTo([$('avatar'), $('nombre-ivan'), $('matricula'), $('chip-nivel'), $('chip-alza')], { opacity: 0, y: 20 },
