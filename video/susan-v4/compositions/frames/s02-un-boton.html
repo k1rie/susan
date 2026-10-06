@@ -22,6 +22,7 @@
 .s02-un-boton-letra{display:inline-block}
 #s02-un-boton-subrayado{position:absolute;left:139px;top:543px;width:404px;height:40px;overflow:visible}
 /* escena: sombras en capa aparte, superficie (tarjeta -> cámara), botón (la ficha estirada) y brillo */
+.s02-un-boton-rig{position:absolute;inset:0;transform-origin:1340px 592px}
 .s02-un-boton-sombra-cielo-crece{position:absolute;left:984px;top:209px;width:712px;height:582px;transform-origin:356px 383px}
 #s02-un-boton-sombra-cielo{position:absolute;inset:0;border-radius:28px;transform-origin:0 0;
  box-shadow:0 40px 120px rgba(29,95,209,.14),0 8px 24px rgba(29,95,209,.08)}
@@ -104,6 +105,8 @@
     <div id="s02-un-boton-sombra-crece" class="s02-un-boton-sombra-cielo-crece"><div id="s02-un-boton-sombra-cielo"></div></div>
     <div id="s02-un-boton-sombra-tinta"></div>
 
+    <!-- rig del objeto flotante (sin zoom): despegue y acercamiento; las sombras quedan fuera y se leen como altura -->
+    <div id="s02-un-boton-rig" class="s02-un-boton-rig">
     <div id="s02-un-boton-superficie">
       <div id="s02-un-boton-sup-borde"></div>
       <div id="s02-un-boton-sup-fondo">
@@ -160,6 +163,7 @@
     </div>
 
     <div id="s02-un-boton-brillo-caja"><div id="s02-un-boton-brillo"></div></div>
+    </div>
   </div>
 </div>
 <!-- GSAP local: el CDN responde 403 en esta máquina (frame.md 1) -->
