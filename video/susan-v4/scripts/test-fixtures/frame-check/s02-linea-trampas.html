@@ -1,0 +1,48 @@
+<template>
+<!-- Borrador ROTO a proposito para scripts/test-frame-check.mjs: cada linea marcada con TRAMPA debe salir como error o aviso. -->
+<style>
+#root{position:absolute;inset:0;overflow:hidden}
+#s02-linea-bg{position:absolute;inset:0;background:#EEE9F7}
+/* TRAMPA css-transition */
+#s02-linea-world{position:absolute;inset:0;transition:opacity .3s}
+/* TRAMPA 3d-aplanado (opacity < 1 en un ancestro de preserve-3d) */
+#s02-linea-velo{position:absolute;inset:0;opacity:.9}
+#s02-linea-escena{position:absolute;inset:0;transform-style:preserve-3d;perspective:1200px}
+/* TRAMPA transform-css (GSAP anima x y rotationY sobre la tarjeta) y TRAMPA peso (700) */
+#s02-linea-card{position:absolute;left:120px;top:90px;width:720px;height:340px;border-radius:28px;background:#FFFFFF;transform:translateX(10px);font-weight:700}
+</style>
+<div id="root" data-composition-id="s02-linea" data-start="0" data-duration="3" data-width="960" data-height="540">
+  <div id="s02-linea-bg" class="clip" data-start="0" data-duration="3" data-track-index="0"></div>
+  <div id="s02-linea-world">
+    <div id="s02-linea-velo"><div id="s02-linea-escena"><div id="s02-linea-card"></div></div></div>
+    <!-- TRAMPA cursor (y recurso inexistente) -->
+    <img id="s02-linea-puntero" src="assets/icons/mouse-pointer-2.svg" alt="" style="position:absolute;left:10px;top:10px;width:40px">
+    <!-- TRAMPA id sin prefijo -->
+    <div id="fuera-de-prefijo"></div>
+  </div>
+</div>
+<!-- TRAMPA gsap-cdn -->
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+<script>
+(function () {
+    var tl = gsap.timeline({ paused: true });
+    var card = document.getElementById('s02-linea-card');
+    var world = document.getElementById('s02-linea-world');
+    // TRAMPA pose-3d (rotationY 14 > 10), pose-plana (termina en 6 grados) y sobreimpulso (back.out)
+    tl.fromTo(card, { rotationY: 14, opacity: 0 }, { rotationY: 6, opacity: 1, duration: 0.8, ease: 'back.out(1.7)' }, 0.05);
+    // TRAMPA fromTo-repetido (x dos veces sin immediateRender:false)
+    tl.fromTo(card, { x: -40 }, { x: 0, duration: 0.5 }, 1.0);
+    tl.fromTo(card, { x: 0 }, { x: 30, duration: 0.5 }, 2.0);
+    // TRAMPA giro-plano en la camara
+    tl.fromTo(world, { rotation: 0 }, { rotation: 4, duration: 1 }, 1.2);
+    // TRAMPA blur animado > 24 px
+    tl.fromTo(card, { filter: 'blur(30px)' }, { filter: 'blur(0px)', duration: 0.6 }, 0.05);
+    // TRAMPA exit: el mundo se apaga en un cuadro que no es el final
+    tl.to(world, { opacity: 0, duration: 0.4 }, 2.55);
+    // TRAMPA determinismo
+    var semilla = Math.random();
+    tl.set({}, {}, 3);
+    window.__timelines['s02-linea'] = tl;
+})();
+</script>
+</template>

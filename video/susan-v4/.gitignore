@@ -22,3 +22,12 @@ capture/app-real/video/_tmp/
 capture/app-real/**/*.png
 capture/app-real/**/*.webm
 capture/app-real/dom/
+
+# salidas regenerables de los scripts de sonido y revisión (scripts/README.md §7)
+datos/eventos.json
+datos/verify-sfx*.json
+datos/sfx-efectivo.json
+
+# piloto de costo de render (plan/PILOTO.md): renders y fotogramas regenerables
+piloto/renders/
+piloto/snapshots/

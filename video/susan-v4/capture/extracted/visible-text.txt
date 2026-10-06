@@ -1,0 +1,149 @@
+SUSAN — texto visible real de la app y del brief (fuente: plan/CONTENIDO.md §1–§4, BRIEF.md y capture/app-real/dom/*.html)
+Uso: el storyboard y los cuadros solo ponen en pantalla palabras de esta hoja (etiquetas reales de la UI, cifras de la hoja de datos, kickers ≤ 8 palabras). Nunca la frase de la locución. Todas las cifras de la demo salen de CONTENIDO §3; las afirmaciones, solo de las secciones «Problema» y «Privacidad» de esta hoja.
+
+== BRIEF ==
+Producto: SUSAN, sistema centralizado de registro digital de asistencia académica con análisis numérico del ausentismo. UNACH · FCA C-I (Facultad de Contaduría y Administración, Campus I), Chiapas, México.
+Audiencia: docentes de la UNACH FCA C-I. Tono de lanzamiento de producto, cálido y seguro.
+Mensaje (lema): Pasa lista en segundos y entiende la asistencia de tus grupos
+Ángulo: del pase de lista que roba clase al análisis que detecta el ausentismo a tiempo.
+Marca: wordmark tipográfico «SUSAN» (Hanken Grotesk 600 con subrayado dorado); no hay logo. Cierre: la ficha redonda de tinta del botón central «Pasar lista» cae y se resuelve en el wordmark con el lema debajo.
+Sin cursor. Sin rostros reales (avatares abstractos). Iconos Lucide. Sin emojis. Español de México.
+
+== FRASE DE PRODUCTO (Home del docente, bajo el saludo) ==
+Buenos días, Patricia
+Pasa lista en segundos y entiende la asistencia de tus grupos.
+Docente · FCA C-I
+¿Qué quieres hacer hoy?  ⌘ K
+
+== PROBLEMA (afirmaciones permitidas; con su fuente) ==
+Alrededor de 5 minutos por sesión (spec §3.2)
+5 min × 3 sesiones por semana × 16 semanas = 4 h de clase por grupo al semestre (spec §1.1)
+Unas 20 h por semestre con cinco grupos — estimación, no un dato institucional (en pantalla: «unas 20 h» + «estimación»)
+Hasta el cierre del periodo el alumno no conoce cuántas faltas acumula
+Cualquier compañero puede contestar por el ausente
+Más del 20 % de faltas = sin derecho a examen · 3 retardos = 1 falta
+Impacto en tiempo de clase · 95 min · Unas 1.6 h recuperadas. · Estimación, no una medición.
+(Prohibido: cronómetros como «listo en 6 s», «ahorra 20 h» como hecho, «anti-suplantación», «cifrado», «la IA aprende», «te avisa por correo», «100 % preciso», «app» para el alumno.)
+
+== PANEL DEL DOCENTE (/docente) ==
+Pasar lista · Programada
+Administración Financiera (3A)
+07:00 - 08:00 · Aula A-12
+Cámara del aula lista
+Abrir y pasar lista
+Otras sesiones de hoy (1)
+Registros pendientes de revisión · 8 · Esperan tu revisión
+Justificantes por resolver · 4 · Esperan tu resolución
+Todas las sesiones de hoy
+Alertas de asistencia · 3 sin derecho · 2 al límite
+Faltas vs límite · Faltas equivalentes de los alumnos en alerta · Límite 20 %
+Mis grupos · 24 alumnos
+Hoy: 2026-09-14
+Riel: Panel · Buscar · Pasar lista · Asistencia: Revisión, Reportes · Análisis: Analítica · Módulos
+Barra inferior móvil: Panel · Revisión · Pasar lista (botón central redondo de tinta) · Reportes · Analítica
+Cuenta: PO · Patricia Ortega Salinas · Docente
+
+== PASAR LISTA EN VIVO (/docente/sesiones/19?pasar-lista=1) — instantánea de las 07:12 ==
+Pasar lista · Administración Financiera (3A) · 14 sep 2026 · 07:00 a 08:00 · Aula A-12 · Abierta · Automático
+Así se pasa lista: Sesión abierta · La clase ya está en curso. → Apunta la cámara al grupo · Que se vean los rostros; el sistema reconoce solo. → Revisa y cierra · Al terminar la tolerancia, cierra el pase de lista.
+Pase de lista con cámara
+Chips de la cámara: Reconociendo · En pausa · Fuera de la ventana · Cámara frente
+Asistencia ahora · 19 de 24 presentes · 2 con retardo · 2 sin registro · 1 por revisar
+Última captura: 23 rostros · 22 válidos · +1 registro · hace 4 s
+Inscritos 24 · Presentes 19 · Retardos 2 · Sin registro 2
+Presentes ahora · 88 % · 21 de 24 inscritos
+Ventana de tolerancia · Minuto 12.0 de 20 · Retardo · Presente hasta min 10 · Retardo hasta min 20
+Tabla: Estado · Lecturas · Mejor score · Origen · Hora
+Fila de un presente: Presente · 3/3 · 0.94 · Automático · 07:02:15
+Lecturas que suben: 1/3 → 2/3 → 3/3 · Pendiente → Presente
+Retardos: Carmen Jiménez Ibarra (07:11:10) · Andrés Martínez Velasco (07:10:25)
+Por revisar: Renata Gómez Medina · Lecturas 2/3 · Pendiente
+Sin registro: Paola Hernández Peña · Mauricio González Campos
+Cerrar pase de lista (deshabilitado hasta el minuto 20) · Registrar manualmente
+El cierre se habilita al terminar la tolerancia: faltan 8 min.
+(No mostrar el cierre de esta sesión.)
+
+== REVISIÓN (/docente/revision) ==
+Revisión · Casos por decidir de tus grupos
+Pendientes (8) · Justificantes (4) · Correcciones (0)
+Ramírez Núñez Emilio · E260003 · Administración Financiera · 3A · Pendiente
+Sesión del 2026-09-12, 09:00 a 10:00 · Quedan 2 h 48 min
+Lecturas válidas: 2/3
+Score por lectura · 89 % · 93 % · Válida
+Lectura 1 · 9:02:00 a.m. · Cámara frontal · Score 0.893 · Válida · min 2.0
+Lectura 2 · 9:08:00 a.m. · Score 0.927 · Válida · min 8.0
+Resolver como Presente (Sugerido) · Resolver como Retardo · Resolver como Ausente
+Tras resolver: Pendiente → Presente · Pendientes (8) → (7)
+
+== ANALÍTICA DE AUSENTISMO (/analitica, grupo 3A) ==
+Analítica de ausentismo · Tendencia, proyección y riesgo por grupo.
+Ausentismo actual · 20.8 % · +4.2 pp vs. semana previa
+Proyección al cierre · 24.8 % · Semana 15
+Alumnos en riesgo · 9   (nunca «9 de 25»)
+Ausentismo semanal · Tendencia al alza: +0.59 pp por semana. Proyección con intervalo de 95 %.
+Series: Observada · Ajuste · Proyección · Intervalo 95 % · EMA
+S1 13.3 % · S2 20.0 % · S3 22.0 % · S4 15.3 % · S5 16.7 % · S6 20.8 % · proyección S15 24.8 %
+Ausentismo por día de la semana · Día crítico: Viernes
+Lun 17.7 % · Mié 16.4 % · Vie 21.8 %   (solo Lun · Mié · Vie)
+Info: Viernes concentra la mayor tasa de ausencia (21.8 %).
+Faltas acumuladas (promedio por alumno): S1 0.9 % → S6 8.2 % · Cruce: No cruza dentro del periodo
+Distribución por nivel · 9 en riesgo · Bajo 16 · Medio 6 · Alto 3
+Mayor riesgo · Los 8 de mayor puntaje (de 9): González Campos Mauricio 70 · Mendoza Ríos Héctor 66 · Cruz Rojas Iván 64 · Díaz Castro Miguel 51 · Aguilar Ramos Luis 49 · Hernández Peña Paola 47 · Rodríguez Domínguez Daniela 43 · Flores Cortés Sofía 42
+Leyenda: Alto · Medio
+(La marca «Límite 20 %» nunca junto a la tasa semanal 20.8 %: va en faltas acumuladas, barras por alumno o la fila de Iván.)
+
+== ALUMNO EN RIESGO (tabla de riesgo) ==
+Columnas: Alumno · Riesgo · Tendencia · Faltas · Restantes · Cruce (sem.)
+Cruz Rojas Iván · E260017 · Alto · 64 / 100 · Al alza · 7 (14.9 %) · 2 · 9
+Faltas restantes: 2. Cruce estimado: semana 9.
+Acción sugerida: Contactar al alumno esta semana y acordar un plan de asistencia; revisar si hay justificantes por registrar.
+Lo que ve él: Te quedan 2 faltas antes del límite.
+Límite 20 %
+Reparto de apoyo (3A): Díaz Castro Miguel · E260001 · A una falta del límite · 19.1 % de 20 % · Mendoza Ríos Héctor · E260020 · En el límite · 19.1 % · González Campos Mauricio · E260014 · Sin derecho a examen · 29.8 % de 20 %
+
+== REPORTES (/reportes, grupo 3A) ==
+Reporte de asistencia · Asistencia acumulada y derecho a examen.
+Exportar CSV · Imprimir / PDF
+Sesiones cerradas 19 / 47 de las programadas
+Asistencia promedio 80.58 % en sesiones cerradas
+Alumnos en el límite 2 · Sin derecho a examen 1
+Estados de asistencia · 81 % Asistencia · Presentes 330 (72 %) · Retardos 31 (7 %) · Ausencias 83 (18 %) · Justificadas 4 (1 %) · Pendientes 8 (2 %)
+asistencia_2026-2_adm301-3a_20260914.csv
+
+== MI ASISTENCIA (alumno, portal web responsivo) ==
+Mi asistencia · Tu avance frente al límite de faltas.
+Te quedan 2 faltas antes del límite.
+Estás en el límite: una falta más y pierdes el derecho a examen.
+Los pendientes de revisión no cuentan hasta que el docente los resuelva.
+
+== PRIVACIDAD Y CONFIANZA (afirmaciones permitidas) ==
+Sin consentimiento firmado y vigente, no hay reconocimiento: ese alumno se registra a mano.
+Sin consentimiento, no hay reconocimiento
+La base de datos no guarda fotos ni rasgos faciales.  (chip: Sin fotos en la base de datos)
+Las imágenes solo se abren con enlaces que caducan en 5 minutos.
+Los recortes de rostro se borran solos a los 7 días.
+Cada consulta queda registrada en la bitácora.  (chip: Cada consulta, en bitácora)
+Tú ves solo tus grupos; cada alumno, solo su asistencia.
+Una sola lectura no decide: hacen falta tres, y lo dudoso lo decides tú.
+Sin cámara, el pase de lista manual sigue funcionando.
+
+== ACCESO Y BIENVENIDA (login /login y onboarding /bienvenida) ==
+Inicia sesión · Usa tu cuenta institucional.  (en el login, «sesión» lleva el subrayado dorado)
+Pasa lista en segundos  (titular serif del panel de producto del login)
+La cámara reconoce a cada alumno y SUSAN registra la asistencia por ti.
+Así funciona SUSAN para ti · Esto es lo más importante que podrás hacer con tu cuenta.
+Pasa lista con la cámara · Abre la sesión de tu clase y SUSAN reconoce a tus alumnos con consentimiento vigente. Sin cámara, pase manual.
+Revisa solo lo dudoso · Los reconocimientos con poca certeza llegan a tu cola de revisión: confirmas o corriges en un clic y queda en bitácora.
+Anticípate al ausentismo · La analítica proyecta cuándo un alumno cruzará el 20 % de faltas y explica el cálculo paso a paso.
+Aviso de privacidad. El rostro es un dato personal sensible: solo se usa para registrar tu asistencia si tienes un consentimiento firmado y vigente. Sin consentimiento, tu asistencia se registra con pase de lista manual.
+
+== ETIQUETAS DE ESTADO (siempre texto + color) ==
+Asistencia: Presente · Retardo · Ausente · Pendiente · Justificado · Sin lecturas · Sin registro (en la sesión)
+Sesión: Programada · Abierta · Cerrada · Suspendida
+Origen: Automático · Manual · Corrección
+Consentimiento: Vigente · Revocado · Vencido
+Derecho: A una falta del límite · En el límite · Sin derecho a examen
+
+== CIERRE ==
+SUSAN
+Pasa lista en segundos y entiende la asistencia de tus grupos

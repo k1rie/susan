@@ -1,0 +1,37 @@
+<template>
+<style>
+#root{position:absolute;inset:0;overflow:hidden}
+#s03-cierre-bg{position:absolute;inset:0;background:#E5F3EE}
+#s03-cierre-world{position:absolute;inset:0}
+#s03-cierre-panel{position:absolute;left:300px;top:90px;width:360px;height:360px;border:2px solid #E7E2DC;border-radius:36px;background:#FFFFFF}
+#s03-cierre-tanque{position:absolute;left:60px;top:60px;width:120px;height:240px;border-radius:48px;background:#F0EDE8;overflow:hidden}
+#s03-cierre-agua{position:absolute;left:0;bottom:0;width:120px;height:210px;background:#27A06A;transform-origin:50% 100%}
+#s03-cierre-ok{position:absolute;left:210px;top:140px;width:96px;height:96px;border-radius:48px;background:#1F7A47}
+</style>
+<div id="root" data-composition-id="s03-cierre" data-start="0" data-duration="3" data-width="960" data-height="540">
+  <div id="s03-cierre-bg" class="clip" data-start="0" data-duration="3" data-track-index="0"></div>
+  <div id="s03-cierre-world">
+    <div id="s03-cierre-panel">
+      <div id="s03-cierre-tanque"><div id="s03-cierre-agua"></div></div>
+      <div id="s03-cierre-ok"></div>
+    </div>
+  </div>
+</div>
+<script src="assets/vendor/gsap.min.js"></script>
+<script>
+(function () {
+    var T = { panel: 0.3, llenado: 0.9, ok: 1.6 };
+    var D = 3;
+    var $ = function (n) { return document.getElementById('s03-cierre-' + n); };
+    var tl = gsap.timeline({ paused: true });
+    // soft-in @0.30
+    tl.fromTo($('panel'), { y: 36, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: 'power3.out' }, T.panel);
+    // fill @0.90 (anclaje inicio): el tanque se llena
+    tl.fromTo($('agua'), { scaleY: 0 }, { scaleY: 1, duration: 1.0, ease: 'power2.inOut' }, T.llenado);
+    // impact-lite -6dB + check @1.60: la palomita llega en un hueco de la voz
+    tl.fromTo($('ok'), { scale: 0.3, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.3, ease: 'power3.out' }, T.ok);
+    tl.set({}, {}, D);
+    window.__timelines['s03-cierre'] = tl;
+})();
+</script>
+</template>
