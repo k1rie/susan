@@ -55,7 +55,7 @@ Solo observaciones propias; las capturas no se versionan.
 3. La **fila "Ver todo (n) →"** y las **etiquetas suaves junto al título** (Nuevo / Pronto) se adoptan tal cual en `ModuloCard` y `FilaModulos`.
 4. **Filtros en píldora con contenedor gris** para categorías de módulos (Asistencia · Análisis · Administración · Pronto).
 5. Login: **titulares que rotan** (3) y **panel derecho que demuestra el producto** (lista de alumnos que pasan a *presente*, barra de riesgo que sube, reporte que se genera). Reglas de contraseña visibles en "Activar mi cuenta" y "Cambiar contraseña".
-6. El **avatar + nombre al fondo del riel** reemplaza el menú de usuario arriba a la derecha en escritorio (en móvil sigue en la barra superior).
+6. El **avatar + nombre al fondo del riel** reemplaza el menú de usuario arriba a la derecha en escritorio (en móvil vive al pie del cajón que abre «Más»).
 
 ## Medidas reales de SchoolAI (Chrome del usuario, 2026-10-03; `app.schoolai.com/discover`, computed styles)
 

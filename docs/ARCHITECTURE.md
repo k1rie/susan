@@ -289,7 +289,7 @@ y registro de módulos en [`docs/design/MODULOS.md`](design/MODULOS.md).
   (`font-display`, solo saludo/titulares de acceso) y Geist Mono.
 - **Capas de componentes**: `components/shadcn/` = primitivas vendorizadas (CLI `shadcn`); `components/ui/` = API estable de SUSAN que usan las pantallas (Button, Card, Tabs, Pills, TarjetaPortada, TarjetaFila,
   Avatar, StatusChip…); `components/motion/` = BlurText, CountUp, Reveal, SpotlightCard, StaggerList; `components/home/` = Resaltado, ModuloCard, FilaModulos, CampoComando, HomeRol, CatalogoModulos;
-  `components/layout/` = AppShell (riel + panel flotante + barra móvil + paleta ⌘K), Sidebar, MenuCuenta, TopbarMovil, BottomNav; `components/auth/` = pantalla dividida con PanelProducto y el asistente `Onboarding`.
+  `components/layout/` = AppShell (riel + panel flotante + barra inferior móvil + paleta ⌘K), Sidebar, MenuCuenta, BottomNav; `components/auth/` = pantalla dividida con PanelProducto y el asistente `Onboarding`.
 - **Registro de módulos** (`lib/modulos.js`): fuente única del Home por rol, `/modulos`, `/modulos/[id]`, la paleta y la sección «Próximamente» del riel. Los componentes cliente lo importan (las entradas llevan
   componentes de icono y no cruzan de servidor a cliente como props).
 - **Preferencias de perfil** (`lib/perfil.js`): color del avatar y marcas del onboarding en `localStorage` por usuario (sin columna en la base; sin datos sensibles).

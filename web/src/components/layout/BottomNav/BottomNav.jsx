@@ -5,7 +5,7 @@ import { Ellipsis, Search } from 'lucide-react';
 import Link from 'next/link';
 import { itemActivo } from '../Sidebar/navItems.js';
 
-// Destinos que caben a los lados del botón central. Con más, se muestran (MAX_DESTINOS - 1) y «Más» (abre el cajón del riel).
+// Lugares a los lados del botón central, «Más» incluido.
 const MAX_DESTINOS = 4;
 
 const BASE_DESTINO =
@@ -16,7 +16,11 @@ const FICHA_CENTRAL = 'grid size-14 place-items-center rounded-full bg-primary t
 
 // Barra inferior para teléfonos (< 1024 px), flotante como la de «Fitness» de Mobbin: una píldora separada de los bordes, con sombra y
 // desenfoque, y un botón redondo en el centro que sobresale. El destino activo lleva un fondo suave, el icono más grueso y la etiqueta
-// en negrita (no solo color). Con un solo destino no se muestra (no aporta). Respeta el área segura de iOS.
+// en negrita (no solo color). Respeta el área segura de iOS.
+//
+// «Más» (`onMas`) abre el cajón del riel, que en teléfono es el único lugar de la búsqueda, los módulos y la cuenta (no hay barra
+// superior), así que con `onMas` siempre está, a la derecha, y los destinos se recortan a (MAX_DESTINOS - 1). Con un solo destino la
+// barra solo se muestra si tiene «Más»; sin él no aporta.
 //
 // Botón central (`accionCentral`, se configura por rol en Sidebar/navItems.js):
 //   { href, label, icon }  enlace con el icono y la etiqueta VISIBLE debajo (p. ej. «Pasar lista» del docente); no se repite como
@@ -24,7 +28,7 @@ const FICHA_CENTRAL = 'grid size-14 place-items-center rounded-full bg-primary t
 //   sin accionCentral      botón por omisión «Buscar o ir a» (abre la paleta de comandos), solo si hay `onBuscar`.
 // Sin acción ni `onBuscar` no hay botón central y la píldora queda solo con los destinos.
 export default function BottomNav({ items, pathname, onMas, onBuscar, accionCentral = null }) {
-    if (!items || items.length < 2) return null;
+    if (!items || items.length === 0 || (items.length < 2 && !onMas)) return null;
     const ruta = pathname || '';
     const central = accionCentral ?? (onBuscar ? { label: 'Buscar o ir a', icon: Search, onClick: onBuscar } : null);
     const centralEnlace = Boolean(central?.href);
@@ -32,11 +36,11 @@ export default function BottomNav({ items, pathname, onMas, onBuscar, accionCent
 
     // Si la acción central ya es un destino de la navegación, no se repite a los lados.
     const laterales = centralEnlace ? items.filter((i) => i.href !== central.href) : items;
-    const hayMas = laterales.length > MAX_DESTINOS;
-    const directos = hayMas ? laterales.slice(0, MAX_DESTINOS - 1) : laterales;
+    const hayMas = Boolean(onMas);
+    const directos = laterales.slice(0, hayMas ? MAX_DESTINOS - 1 : MAX_DESTINOS);
     // En la ruta del botón central no se enciende ningún destino lateral (por ejemplo «Panel», que comparte prefijo).
     const activo = centralActiva ? null : itemActivo(laterales, ruta);
-    const activoOculto = hayMas && activo && !directos.some((i) => i.href === activo);
+    const activoOculto = Boolean(activo) && !directos.some((i) => i.href === activo);
 
     // «Más» siempre cierra la derecha; el botón central reparte los destinos por mitades (la izquierda se queda con el que sobre).
     const destinos = [...directos.map((it) => ({ clave: it.href, it })), ...(hayMas ? [{ clave: '__mas__', mas: true }] : [])];
