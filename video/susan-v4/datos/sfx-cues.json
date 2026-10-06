@@ -1,5 +1,5 @@
 {
- "generado": "2026-10-06T07:43:33.547Z",
+ "generado": "2026-10-06T08:40:08.358Z",
  "proyecto": "/home/user/susan/video/susan-v4",
  "duracion": 55,
  "cuadros": {
@@ -772,9 +772,9 @@
    "frame": 7,
    "n": 6,
    "nombre": "whoosh-s",
-   "texto": "4.20 whoosh-s -6dB",
-   "tLocal": 4.2,
-   "t": 45.6,
+   "texto": "4.25 whoosh-s -6dB",
+   "tLocal": 4.25,
+   "t": 45.65,
    "gananciaDb": -6,
    "categoria": "whoosh",
    "anclaje": "pico"
@@ -785,9 +785,9 @@
    "frame": 7,
    "n": 7,
    "nombre": "pop-2",
-   "texto": "4.40 pop-2 -6dB",
-   "tLocal": 4.4,
-   "t": 45.8,
+   "texto": "4.55 pop-2 -6dB",
+   "tLocal": 4.55,
+   "t": 45.95,
    "gananciaDb": -6,
    "categoria": "pop",
    "anclaje": "hit"

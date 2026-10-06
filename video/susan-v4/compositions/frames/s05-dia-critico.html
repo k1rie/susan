@@ -516,11 +516,13 @@
         // T.anilloFin (0.40 s de trazado visible, como antes) y el resto, ~0.12 s, es el solape invisible.
         var durA = (T.anilloFin - T.anillo) / (1 - Math.cbrt(1 - CIERRE));
         var stA = { p: 0 };
-        // con remates redondos un guion de largo 0 pintaría un punto: oculto mientras no hay trazo
+        // con remates redondos un guion de largo 0 pintaría un punto: oculto mientras no hay trazo. Al mostrarlo se HEREDA la
+        // visibilidad (nunca 'visible'): 'visible' vence al visibility:hidden con que el runtime oculta el cuadro inactivo, y el
+        // anillo se transparentaba en la blur-crossfade F7 → F8 (ensamblado, 49.0–49.5 s)
         function anillo() {
             var largo = 100 * easeA(stA.p);
             trazo.setAttribute('stroke-dasharray', largo.toFixed(3) + ' 200');
-            trazo.setAttribute('visibility', largo < 0.01 ? 'hidden' : 'visible');
+            trazo.setAttribute('visibility', largo < 0.01 ? 'hidden' : 'inherit');
         }
         anillo();
         tl.fromTo(stA, { p: 0 }, { p: 1, duration: durA, ease: 'none', onUpdate: anillo, immediateRender: false }, T.anillo);
