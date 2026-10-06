@@ -89,7 +89,7 @@ worker solo lee además `frame.md`) **[código]**: el orquestador debe pegar un 
 | `poster` | parser | segundos para la miniatura, después de la entrada: `4.8s` | paso 3/4 |
 | `transition_in` (alias `transition`) | `transitions.mjs` | `crossfade` · `blur-crossfade` · `push-slide [LEFT\|RIGHT\|UP\|DOWN]` · `zoom-through` · `squeeze`, más una duración opcional (`0.4s`); `cut`/`none`/vacío = corte seco. En el cuadro 1 se ignora | paso 3 (el 4 no la toca) |
 | `status` | parser, assemble | `outline` → `built` (boceto confirmado) → `animated` (HTML final). Cualquier otro valor da un aviso y se toma como `outline` | orquestador |
-| `src` | todos | `compositions/frames/NN-nombre.html`; **su basename es el `frame_id`** = `data-composition-id` = clave en `window.__timelines` = `id="el-<frame_id>"` en el índice | paso 3 |
+| `src` | todos | `compositions/frames/sNN-nombre.html` (**v4: prefijo con letra**, p. ej. `s05-tendencia.html`; los scripts no exigen dígito inicial, sus propias pruebas usan `frame-01.html`/`scene-1.html`, y así se evitan los 480 avisos `id_requires_css_escape` de la v3, LECCIONES §2.3.6); **su basename es el `frame_id`** = `data-composition-id` = clave en `window.__timelines` = `id="el-<frame_id>"` en el índice | paso 3 |
 | `type` | humano, blueprints | `hook`·`pain_point`·`product_intro`·`feature_showcase`·`benefit_highlight`·`social_proof`·`branding`·`cta` | paso 3 |
 | `persuasion` / `beat` | humano | movimiento concreto (Pain agitation, Show-don't-tell proof…) / emoción concreta (`tension → relief`) | paso 3 |
 | `blueprint` | packets: incrusta `blueprints/<id>.md` | **exactamente** `<id>`, `<id> (Reproduce)`, `<id> (Adapt)` o `compose`. Si el id no existe, `frame-packets` falla | 3 (candidato), 4 (confirma) |
@@ -107,6 +107,11 @@ Debajo de las claves va la narrativa libre: `narrativeRole:`, `keyMessage:`, la 
 toma como **metadato** y desaparece de la narrativa **[código]**.
 
 ### 1.4 Ejemplo completo (estilo v3, contenido v4)
+
+> **Solo formato.** Las cifras, los nombres y el `src` con dígito inicial de este ejemplo son ilustrativos: los datos
+> reales están en `CONTENIDO.md` §3 (p. ej. la gráfica del 3A es S1–S6 con 20.8 % y «9 alumnos en riesgo», y la marca
+> «Límite 20 %» **no** va sobre la tasa semanal, CONTENIDO §3.11.4), los SFX se nombran con `assets/sfx/CATALOG.json`
+> (SINTESIS) y el `src` de la v4 lleva prefijo de letra (`s05-tendencia.html`).
 
 ````markdown
 ## Frame 5 — Quién empieza a faltar
@@ -200,7 +205,7 @@ node $S/scripts/frame-packets.mjs --project . --storyboard ./STORYBOARD.md --out
 # SCRIPT — susan-v4
 
 **Voice:** (pendiente) ElevenLabs — voz masculina es-MX (v3: «Antonio»)
-**Voice settings:** stability 0.40 · similarity 0.75 · style 0.15
+**Voice settings:** stability 0.35 · similarity 0.8 · style 0.45 · seed 1037 · eleven_multilingual_v2 (los probados en la v3, LECCIONES §5)
 **Voice direction:** Cálida, segura, sin prisa; lanzamiento de producto para docentes.
 
 ---
@@ -283,8 +288,9 @@ Fallas prohibidas: **diapositiva** (volcar y congelar), **salvapantallas** (much
 
 Preferencias registradas de la persona dueña que siguen vigentes: **sin cursor** (BRIEF v4), iconos Lucide, sin emojis,
 sin rostros reales, es-MX. La v3 había pedido "ninguna rotación de cámara ni tarjetas inclinadas"; el BRIEF v4 pide de
-forma explícita una "inclinación 3D suave". Por eso: inclinación de 6–12° como mucho, nada de giro en Z de la cámara, y
-enderezar a plano antes de cada lectura importante.
+forma explícita una "inclinación 3D suave". Por eso: entrada con |rotationX| ≤ 8° y |rotationY| ≤ 10°, reposo en 0–3° (tope
+unificado con DISENO-APP §3.7 y SINTESIS), nada de giro en Z (cámara ni tarjetas), y enderezar a plano antes de cada
+lectura importante. Se enseña en la hoja de bocetos con su alternativa plana: es una excepción al veto de la v2.3.
 
 ### 3.2 Blueprints por papel narrativo (KB = peso que suman al paquete)
 
@@ -393,7 +399,7 @@ izquierda), y las costuras internas siguen esa dirección (cut-the-curve hacia l
 | `viewport-change` | un solo envoltorio `.world` con `translate(x,y) scale(S)`; objeto `cam` + `applyCamera()` como único escritor; contra-traslación `T = −offset × S` | `overflow:hidden` y el fondo en `.scene` (no en `.world`); `transform-origin:50% 50%`; maquetar el mundo a 1× y **abrir acercado** (nunca escalar hacia abajo a 0.1–0.25: el texto queda ilegible); medir el objetivo una vez, después de `fonts.ready` | sí, con un `fromTo` inicial + `applyCamera()` al montar |
 | `coordinate-target-zoom` | el exterior escala y el interior traslada (`T = −offset`) | escala y traslación con la misma duración y ease en la misma posición; offset medido una vez y fijado; el objetivo ≤ ~88 % del lienzo en el pico | sí |
 | `multi-phase-camera` | fases (alejar → enfocar → empujar) más una micro-deriva sinusoidal finita (relación de frecuencias ≈ 1.3) | la cámara envuelve TODO; un solo escritor; el héroe se revela después del primer alejamiento | sí (deriva finita, nunca en la segunda mitad como "vida") |
-| 3D / perspectiva (`3d-camera-flight`, `split-tilt-cards`, `3d-page-scroll`, `orbit-3d-entry`) | `perspective` (800–1200 px) en un `.stage` estático, `preserve-3d` en `.world`, orden `translate3d → rotateX → rotateY`; una tarjeta inclinada = `rotationX/Y` en la tarjeta | **nada de `filter`, `opacity < 1`, `overflow`, `clip-path` ni `mask` en `.world` ni en los envoltorios intermedios** (aplanan el 3D): el DoF va en las tarjetas hoja y los fundidos en los hijos; \|rx\| ≤ 65°, \|ry\| ≤ 30° (v4: 6–12°); se lee en las llegadas, casi en plano; `data-layout-allow-overflow` en `.world` | sí; poses fijadas, la primera etapa con `fromTo` |
+| 3D / perspectiva (`3d-camera-flight`, `split-tilt-cards`, `3d-page-scroll`, `orbit-3d-entry`) | `perspective` (800–1200 px) en un `.stage` estático, `preserve-3d` en `.world`, orden `translate3d → rotateX → rotateY`; una tarjeta inclinada = `rotationX/Y` en la tarjeta | **nada de `filter`, `opacity < 1`, `overflow`, `clip-path` ni `mask` en `.world` ni en los envoltorios intermedios** (aplanan el 3D): el DoF va en las tarjetas hoja y los fundidos en los hijos; \|rx\| ≤ 65°, \|ry\| ≤ 30° (v4: rx ≤ 8°, ry ≤ 10° de entrada; reposo 0–3°); se lee en las llegadas, casi en plano; `data-layout-allow-overflow` en `.world` | sí; poses fijadas, la primera etapa con `fromTo` |
 | Rack focus (`depth-of-field-blur`) | `filter: blur(var(--dof))` + atenuación por capa; se interpola `--dof` en el timeline | desenfocar capas chicas o agrupadas, ≤ ~24 px en superficies grandes; la atenuación hace la mitad del trabajo; el foco en 0 y por encima (z-index); `will-change: filter` solo mientras anima; **volver a nitidez antes de entregar el corte** | sí |
 | `motion-blur-streak` / motion blur | desenfoque o estela direccional que culmina en la velocidad máxima | solo en 1 a 3 golpes (llegada, barrido); nunca en texto que se debe leer; no en derivas lentas | sí |
 
@@ -428,7 +434,7 @@ Forma del archivo (esqueleto mínimo):
 ```html
 <template>
 <style>
-@font-face{font-family:"Hanken Grotesk";font-weight:400 700;font-display:block;src:url("assets/fonts/HankenGrotesk-var.woff2") format("woff2");}
+@font-face{font-family:"Hanken Grotesk";font-weight:100 900;font-display:block;src:url("assets/fonts/HankenGrotesk-var.woff2") format("woff2");}
 #root{position:absolute;inset:0;overflow:hidden;font-family:"Hanken Grotesk",sans-serif}
 [id="05-tendencia-bg"]{position:absolute;inset:0;background:/* token canvas de frame.md, en hex */}
 </style>
@@ -456,7 +462,8 @@ Forma del archivo (esqueleto mínimo):
 - La raíz lleva `data-composition-id` = `frame_id` (el basename de `src`). **Se estiliza con `#root`, nunca con una clase**
   (con una clase se renderiza sin estilos, aunque Studio se vea bien). `width/height:100%`, nunca 1920px fijos en `#root`.
   Si faltan `data-width`/`data-height`, el ensamblador los inyecta **[código]**.
-- **Ids y clases con el prefijo `<frame_id>-`**. Como el prefijo empieza con un dígito, `#05-tendencia-card` no es un
+- **Ids y clases con el prefijo `<frame_id>-`**. Con el `frame_id` de la v4 (`s05-tendencia`, ver §1.3) los selectores
+  `#s05-tendencia-card` son válidos tal cual. Si un `frame_id` empezara con dígito, `#05-tendencia-card` no sería un
   selector válido ni en CSS ni en GSAP: usa `[id="05-tendencia-card"]`, `getElementById`, o escapes CSS
   (`#\30 5-tendencia-card`; la v3 usaba `.\0000304-intro-…`).
 - **Un timeline pausado**, registrado en `window.__timelines["<frame_id>"]` cuando ya está completo. Nunca `tl.play()`,

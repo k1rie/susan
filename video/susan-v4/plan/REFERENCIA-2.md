@@ -259,7 +259,7 @@ completo: un objeto solo → la superficie se arma a su alrededor → acción �
 | Tinta | Casi negro y dos grises | `#1E1919` / `--muted-foreground #6F6A65` / `#D8D2CA` |
 | **Acento** | **Un solo verde neón**, solo en la acción (START, check confirmado) | **`--brand-gold #A8842C`** como «chispa» (§4.0); el botón principal sigue en tinta, como en la app |
 | Secundario | Punto azul diminuto | Ícono `camera` en `presente` **con su texto** «Cámara del aula lista», como en la app real |
-| Tipografía | Cifra héroe heavy; valores 500–600; rótulos 400 gris; unidades del mismo tamaño en gris claro | Hanken Grotesk variable 700 (héroe) / 600 / 500 / 400, con `tabular-nums` |
+| Tipografía | Cifra héroe heavy; valores 500–600; rótulos 400 gris; unidades del mismo tamaño en gris claro | Hanken Grotesk 600 (héroe; **tope de la app**, nunca 700+, DISENO-APP §1.5) / 500 / 400, con `tabular-nums`. El peso del reel no se traslada |
 | Escala a 1080 | Héroe ≈ 140, título y valores ≈ 40, rótulos ≈ 24 px | Igual. En panel, REFERENCIA §1.6 (rótulo 30, cifra 48–64) |
 | Iconos | Hugeicons stroke-rounded | Lucide de 1.5–1.75 (`assets/icons/`). **Falta `pencil.svg`**: hay que agregarlo con el script de Lucide de la v3 |
 | Densidad | Un componente por plano en el aislamiento; superficie completa una sola vez | Igual |
@@ -315,7 +315,9 @@ El de `hyperframes-animation/rules-index.md` (ya resumido en REFERENCIA §2):
 - sin `Math.random` ni `Date.now`;
 - solo `transform`, `opacity`, `filter`, `clip-path` y atributos SVG, **nunca** `width`/`height`/`top`/`left`;
 - sin `transition` de CSS;
-- **sin rotación** (la persona dueña la vetó en la v2.3; LECCIONES §5).
+- **sin rotación en el plano** (`rotation`/rotationZ: la persona dueña la vetó en la v2.3; LECCIONES §3.6). La pose 3D
+  suave de tarjetas flotantes (`rotationX/Y` ≤ 8–10°, reposo 0–3°) es otra cosa: la pide el BRIEF y se decide en la hoja
+  de bocetos (SINTESIS).
 
 Los IDs llevan prefijo de letra por escena (LECCIONES §5), porque los filtros SVG se referencian por `id` y las
 sub-composiciones comparten documento.
@@ -388,7 +390,8 @@ function llegadaConRastro(tl, el, nodo, { at, dur, desde, eje = 'y', curva = 'ex
 ### 3.2 M2 · Odómetro con desenfoque vertical
 
 ```html
-<!-- «21 / 24 presentes»: solo ruedan las columnas de «21»; «/ 24» y el rótulo son estáticos -->
+<!-- «19 de 24 presentes» (formato real de la app; dato canónico de CONTENIDO §3.4): solo ruedan las columnas de «19»;
+     «de 24» y el rótulo son estáticos -->
 <span class="odo" style="--h: 112px">
     <span class="odo-col"><span class="odo-tira" id="e-odo-d">0<br>1<br>…<br>9<br>0<br>…</span></span>
     <span class="odo-col"><span class="odo-tira" id="e-odo-u">…</span></span>
@@ -397,7 +400,7 @@ function llegadaConRastro(tl, el, nodo, { at, dur, desde, eje = 'y', curva = 'ex
 ```
 
 ```css
-.odo { font-variant-numeric: tabular-nums; font-weight: 700; letter-spacing: -0.03em; }
+.odo { font-variant-numeric: tabular-nums; font-weight: 600; letter-spacing: -0.03em; }
 .odo-col { display: inline-block; height: var(--h); overflow: hidden; line-height: var(--h); vertical-align: top; }
 .odo-tira { display: block; will-change: transform; }
 ```
@@ -424,8 +427,8 @@ function rodarColumna(tl, tira, nodo, { at, dur, de, a, vueltas = 1, H, curva = 
 }
 
 // Odómetro clásico: las unidades giran más que las decenas y las dos columnas aterrizan casi juntas.
-rodarColumna(tl, tiraD, nodoD, { at: T, dur: 0.75, de: 0, a: 2, vueltas: 1, H: 112 });
-rodarColumna(tl, tiraU, nodoU, { at: T + 0.04, dur: 0.75, de: 0, a: 1, vueltas: 2, H: 112 });
+rodarColumna(tl, tiraD, nodoD, { at: T, dur: 0.75, de: 0, a: 1, vueltas: 1, H: 112 });
+rodarColumna(tl, tiraU, nodoU, { at: T + 0.04, dur: 0.75, de: 0, a: 9, vueltas: 2, H: 112 });
 // Cambio de estado de UN renglón (el «2 → 1» del selector): de: 2, a: 1, vueltas: 0, dur 0.35.
 ```
 
@@ -710,7 +713,8 @@ catálogo tiene 386 piezas. Las búsquedas pedidas son las 8 primeras; se añadi
   en fundidos, derivas lentas ni texto que haya que leer en ese instante.
 - **Texto escalado:** no se deja quieto en pantalla. Al terminar un FLIP se cambia por su gemelo sin escala.
 - **Constantes:** las medidas del morph y la altura H del odómetro van como constantes de CSS (montaje multi-escena).
-- **Rotación:** vetada. El cambio de icono va con escala y desenfoque, sin giro.
+- **Rotación en el plano:** vetada. El cambio de icono va con escala y desenfoque, sin giro. (La pose 3D suave de
+  tarjetas es una decisión aparte, ver SINTESIS.)
 - **Sonido:**
   - un whoosh corto por cada movimiento desenfocado (en el pico de velocidad);
   - un tic por columna al asentarse;
@@ -754,10 +758,10 @@ una cifra resaltada de cierre. Con la tinta como acento estructural del reel 1 (
 | Técnica | Uso en SUSAN (datos de la v3, a validar con el guion y `capture/app-real/`) |
 |---|---|
 | **M1** desenfoque direccional | En todas las llegadas rápidas: el sting, el check que viaja y se vuelve el botón, las columnas del odómetro, las tarjetas de la pila y el relevo entre dos componentes aislados. Máximo 3 por escena; ningún titular o cifra aterriza desenfocado |
-| **M2** odómetro | **Sesión en vivo:** «**21** / 24 presentes». Solo rueda «21», con «/ 24» fijo y el rótulo «presentes» en `muted-foreground` con un punto `presente`; puede ir junto al `ui/MedidorLiquido`, que la app reserva para la sesión en vivo. **Resumen de la sesión:** héroe «**88 %**» (21/24) y rejilla de 2 × 3 con Inscritos 24 · Presentes 21 · Retardos 2 · Sin registro 1 · Hora de cierre · Tiempo de pase de lista (cifra por definir en el guion). **Estado de un renglón:** «Pendiente → Presente» en una fila |
+| **M2** odómetro | **Sesión en vivo:** «**19** de 24 presentes» (datos canónicos de CONTENIDO §3.4; corregido por la crítica). Solo rueda «19», con «de 24» fijo y el rótulo «presentes» en `muted-foreground` con un punto `presente`; puede ir junto al `ui/MedidorLiquido`, que la app reserva para la sesión en vivo. **Resumen en vivo (sin cerrar la sesión, CONTENIDO §3.4):** héroe «**88 %**» «Presentes ahora» (= 21 de 24: 19 presentes + 2 retardos) y rejilla de 2 × 3 con Inscritos 24 · Presentes 19 · Retardos 2 · Sin registro 2 · Por revisar 1 · «Minuto 12.0» de la ventana de tolerancia. Nada de «hora de cierre» ni «tiempo de pase de lista» (no hay cronómetro con respaldo). **Estado de un renglón:** «Pendiente → Presente» en una fila |
 | **M3** aislamiento | Componentes solos en el centro óptico: (1) la píldora de la sesión «3A · 07:00 · A-12» con lápiz; (2) el botón redondo «Pasar lista»; (3) un `StatusChip` «Presente»; (4) el chip «Sin derecho» de la analítica; (5) la ficha del wordmark. Uno por plano y ≥ 60 % de lienzo vacío |
-| **M4** morph | **Producto:** la píldora «3A · 07:00 ✎» se despliega en un selector `[Administración Financiera (3A)] [07:00 – 08:00] [Aula A-12] [✓]`. Al confirmar, el check viaja hacia abajo y **se vuelve el botón redondo central «Pasar lista»** de la barra móvil real, mientras el selector se comprime en la etiqueta «3A · 07:00–08:00 · A-12» bajo el botón. **Alternativa para el gancho del problema:** la píldora «2 h 30 min / semana» (10 min × 3 grupos × 5 días, cifra de la v3) se despliega, la hora rueda de 2 a 0 y los minutos a la cifra de SUSAN, y vuelve a colapsar como «[x] min» (la cifra está por definir) |
-| **M5** cascada | «Sesiones recientes» (o «Todas las sesiones de hoy»): 3 tarjetas `TarjetaFila` blancas con filete. La **miniatura de mapa se cambia por un `AnilloEstados` mini**; después van fecha y grupo y tres datos: «21/24 presentes», «2 retardos» y «88 %». Las cifras de cada tarjeta ruedan al asentarse. Variante: «Alumnos en riesgo» en la analítica, con avatares abstractos |
+| **M4** morph | **Producto:** la píldora «3A · 07:00 ✎» se despliega en un selector `[Administración Financiera (3A)] [07:00 – 08:00] [Aula A-12] [✓]`. Al confirmar, el check viaja hacia abajo y **se vuelve el botón redondo central «Pasar lista»** de la barra móvil real, mientras el selector se comprime en la etiqueta «3A · 07:00–08:00 · A-12» bajo el botón. **Alternativa para el gancho del problema:** la píldora «5 min por sesión» se despliega en `[5 min] × [3 sesiones] × [16 semanas]` y rueda a «4 h por grupo al semestre» (spec §1.1; la cifra de la v3 «10 min × 3 × 5 = 2 h 30» se retiró, CONTENIDO §6). No inventar «la cifra de SUSAN» en minutos |
+| **M5** cascada | «Sesiones recientes» (o «Todas las sesiones de hoy»): 3 tarjetas `TarjetaFila` blancas con filete. La **miniatura de mapa se cambia por un `AnilloEstados` mini**; después van fecha y grupo y tres datos **reales de sesiones cerradas** (p. ej. `dom/29-sesion-cerrada-18.html`: «vie 11 sep · 3A · 15 presentes · 1 retardo · 8 ausencias · 67 %», un viernes, el día crítico). Las cifras de cada tarjeta ruedan al asentarse. Variante: «Alumnos en riesgo» en la analítica, con avatares abstractos |
 | **M6** sting | El **wordmark «SUSAN»** en una ficha redondeada de tinta (radio ≈ 22 % del lado, ≈ 180 px), en Hanken 600 crema, con el **subrayado de oro** que llega al final. Se usa en la **bisagra entre el problema y el producto**, a los ~6–8 s («lanzar la app», como en el reel) y se **repite en el cierre** como lockup con el mensaje. Como no hay logo, la ficha es una **propuesta que decide la persona dueña**; si no se aprueba, cae el wordmark solo con la misma estela y el mismo squash |
 | **M7** superficie de acción | La pantalla móvil «Pasar lista» se arma alrededor del botón redondo central. Es **UI real**: la barra inferior de la captura móvil (**Panel · Revisión · Pasar lista · Reportes · Analítica**) ya tiene el botón circular de tinta con `scan-face`, el análogo exacto de «Run/START». Satélites: `camera` «Cámara del aula lista» (en `presente`, con texto y pulso; hace de punto azul) y `users-round` «24 inscritos». Placa: el Home real pre-desenfocado, con máscara radial. **Se recorta el banner «Reloj de demostración»**, que es solo de desarrollo. Pulsación sin cursor: anillo de foco, compresión y aro de oro |
 | **M8** relevo | Es el esqueleto del tramo de producto: sting → píldora → selector → botón → contador en vivo → resumen → historial, sin cortes dentro del tramo |
@@ -772,8 +776,8 @@ El reel hace el bucle en ~12 s. Con voz y para docentes conviene ~1.6× más len
 | B | 2.4 s | M3 + M4 | Mismo centro: la ficha cede el lugar a la píldora de la sesión, que se despliega en el selector |
 | C | 2.0 s | M4 + M1 | Confirmar: el check viaja y se vuelve el botón «Pasar lista»; el selector se vuelve la etiqueta |
 | D | 2.6 s | M7 | La superficie móvil se arma; anillo de foco, compresión y aro de oro |
-| E | 4–5 s | M2 (+ T1 en el cambio de mundo) | Sesión en vivo: «21 / 24 presentes» rueda; avatares abstractos en `StatusChip` |
-| F | 3.0 s | M2 | Resumen: «88 %» y la rejilla de 2 × 3; los rótulos entran en el eje contrario |
+| E | 4–5 s | M2 (+ T1 en el cambio de mundo) | Sesión en vivo: «19 de 24 presentes» rueda; avatares abstractos en `StatusChip` |
+| F | 3.0 s | M2 | Resumen en vivo: «88 %» «Presentes ahora» y la rejilla de 2 × 3 (sin cerrar la sesión); los rótulos entran en el eje contrario |
 | G | 3.0 s | M5 | Historial: 3 tarjetas en cascada con sus cifras rodando |
 
 Total: ≈ 19–20 s. Encaja con LECCIONES §5: 7–9 escenas de 5–8 s con tiempos internos de 2–3 s, la app en pantalla hacia
@@ -789,12 +793,12 @@ los 6–8 s y las cifras clave quietas ≥ 1.2 s.
 - La velocidad del reel aplicada al video entero.
 - El comp cuadrado.
 - Los iconos Hugeicons (se usa Lucide).
-- La rotación.
+- La rotación en el plano (el cambio de icono va sin giro).
 - El destello blanco de impacto de `logo-sting`.
 
 ### 4.4 Cruces con `plan/REFERENCIA.md` (notas; ese archivo no se tocó)
 
-- **§5 (look & feel) y T7** todavía describen «un cursor toca la pestaña». El BRIEF (2026-10-05) dice **SIN CURSOR**. La
+- **§5 (look & feel) y T7** describían «un cursor toca la pestaña» (ya corregido por la crítica en REFERENCIA.md). El BRIEF (2026-10-05) dice **SIN CURSOR**. La
   pulsación se cuenta como en §3.7: anillo de foco, compresión y aro.
 - **T2** recomienda el componente `motion-blur` sin advertir que, según el encabezado de `extended-keyframe`, la copia DOM
   no es segura dentro de clips temporizados. Hay que verificarlo en las sub-composiciones o usar `attachMotionBlurFilter`

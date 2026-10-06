@@ -191,9 +191,9 @@
 | Acento | Un solo oscuro casi negro: tooltip, bloque, serie principal, botón «+», cursor | `--primary` `#1E1919`, que ya es el botón primario de SUSAN |
 | Escalera de grises | Tinta / gris medio / gris claro | `#1E1919` / `#6F6A65` / `#D8D2CA`–`#E7E2DC` |
 | Lienzo de datos | Gris neutro muy claro | Crema `#F7F5F2` |
-| Paneles | Blanco, radio 24–36, sombra ambiental muy difusa | Blanco, radio 14 (tarjetas) / 18 (panel). Sombra solo en el objeto **flotante** del video, nunca en las tarjetas internas (decisión abierta, ver LECCIONES-V3 §5) |
+| Paneles | Blanco, radio 24–36, sombra ambiental muy difusa | Blanco, radio de la app × E: 14 × E (tarjetas; 28 px a E = 2) / 18 × E (panel; 36 px a E = 2), ver DISENO-APP §1.6. Sombra solo en el objeto **flotante** del video, nunca en las tarjetas internas (decisión abierta, ver LECCIONES-V3 §5) |
 | Color semántico | Verde ingreso / rojo transferencia, diminuto y con texto | Estados de SUSAN **con etiqueta**: `presente #1F7A47`, `retardo #9A6408`, `ausente #B3261E`, `justificado #1F5FA8` |
-| Momento héroe | Cielo cian + holograma rosa-coral-ámbar-lila | Cielo `tono-azul #E6EEFC` → crema. Holograma = `gradient-a..d` de la v3 (`#8FB6FF #B79CF5 #F5A3C7 #FFC89A`) |
+| Momento héroe | Cielo cian + holograma rosa-coral-ámbar-lila | Cielo `tono-azul #E6EEFC` → crema. Holograma = `DEGRADADO` real de la portada «Pasar lista» (`TarjetaPortada.jsx`: `#FF6AA9 #FFB36B #8BE3B5 #6BB8FF`, DISENO-APP §1.3/§3.3). **No** los `gradient-a..d` de la v3, que no existen en la app |
 | Iconos | Línea fina de 1.5 px | Lucide 1.5–1.75 (`assets/icons/`) |
 | Densidad | 3–8 palabras por pantalla y una cifra protagonista | Igual: ≤ 8 palabras por bloque, una cifra por plano |
 
@@ -215,7 +215,7 @@ explícito (`immediateRender:false` cuando se retoma un objetivo), sin `Math.ran
 | T4 | Superficie holográfica + barrido especular | 02, 03, 05 | `ambient-glow-bloom` (sheen de una pasada) | `gloss-sweep`, `shimmer-sweep`, `light-sweep-pass`, `mesh-gradient-bg` | Bajo–medio |
 | T5 | Fondo de cielo pastel con paralaje (+ grano) | 03, 05 | `device-surface-showcase` («drifting mesh-gradient backdrop») | `mesh-gradient-bg`, `mk-background`, `grain-overlay` | Bajo |
 | T6 | Panel de vidrio + hoja que sube + filas escalonadas | 05 | `anchored-layout-expand`, `waterfall-entry`, `grid-card-assemble` | `sheet-spring-up`, `share-sheet-carousel`, `device-frame-stage` | **Alto** con `backdrop-filter`; bajo con vidrio falso |
-| T7 | Cursor que llega y toca la barra de pestañas | 05 | `cursor-click-ripple`, `physics-press-reaction`, `cursor-ui-demo` | `press-ripple`, `tabs-slide-indicator`, `oversized-cursor` | Bajo |
+| T7 | ~~Cursor que llega y toca la barra de pestañas~~ → **pulso sin cursor** (BRIEF: SIN CURSOR) | 05 | `press-release-spring`, `physics-press-reaction` (solo el objetivo); ✗ `cursor-click-ripple`, ✗ `cursor-ui-demo` | `tabs-slide-indicator` | Bajo |
 | T8 | Cifra protagonista con rodillo de dígitos + delta | 04, 01 | `vertical-spring-ticker`, `counting-dynamic-scale`, `dataviz-countup` | `number-wheel`, `number-pop-in`, `count-up` | Bajo |
 | T9 | Texto que entra desde el desenfoque | 01 | `transitions/css-blur.md`, `techniques.md §10` | `soft-blur-in`, `blur-in`, `blur-out-up` | Bajo |
 | T10 | Barras finas en rampa con barrido + bloque resaltado | 04 | `stat-bars-and-fills` | `animated-bar-chart`, `chart-story`, `data-chart` | Bajo |
@@ -263,7 +263,11 @@ explícito (`immediateRender:false` cuando se retoma un objetivo), sin `Math.ran
   leer en ese momento. Usarla de 1 a 3 veces por composición, en los golpes que «se clavan».
 - **Coste.** Cada objetivo cuesta N+1 copias de su subárbol y N+1 seeks por fotograma (16 por defecto; con 8 se reduce a la
   mitad). Máximo ~3 objetivos por escena. La opción `motionBlur` del motor desenfoca todo el cuadro y no se ve en la vista
-  previa: dejarla como último recurso.
+  previa; en la 0.8.134 no tiene bandera en `render --help` (REFERENCIA-2 §3.1): no planear con ella.
+- **Ojo en sub-composiciones** (nota de la crítica, ver REFERENCIA-2 §3.1): según el encabezado de `extended-keyframe`,
+  la copia DOM de `motion-blur` no es segura dentro de clips temporizados. Antes de usarla en un cuadro, verificar con
+  `snapshot` en los bordes del clip; si falla, usar `attachMotionBlurFilter` o la estela SVG ligada a la velocidad de
+  REFERENCIA-2 §3.1.
 - **HyperFrames.**
   - `hyperframes-animation/references/motion-blur.md` y la regla `motion-blur-streak` (forma eco/fantasma, más barata).
   - `motion-blur`: componente de obturador estilo AE, medido contra un export real.
@@ -278,8 +282,9 @@ explícito (`immediateRender:false` cuando se retoma un objetivo), sin `Math.ran
   inclinadas** (LECCIONES-V3 §3.6). Hay que enseñarlo en la hoja de bocetos antes de construirlo.
 - **Receta.**
   - Escena con `perspective: 1600px` y tarjeta con `transform-style: preserve-3d`.
-  - Entrada: `rotationX 10 → 0`, `rotationY −8 → 0`, `z −160 → 0`, `y 40 → 0` en 1.0 s, `power3.out`.
-  - La pose termina en 0° o en ≤ 4° de reposo.
+  - Entrada: `rotationX 8 → 0`, `rotationY −10 → 0`, `z −160 → 0`, `y 40 → 0` en 1.0 s, `power3.out` (topes
+    unificados con DISENO-APP §3.7: |rotationX| ≤ 8°, |rotationY| ≤ 10°).
+  - La pose termina en 0° o en ≤ 3° de reposo.
   - Reposo (solo si la toma dura > 2 s sin otro movimiento): un único tween `ease: "none"` desde el final de la entrada
     hasta el corte, cuyo `onUpdate` escribe `rotationY = 1.2·sin(2πt/3.2)` e `y = 3·sin(…)` (`sine-wave-loop`, amplitud
     baja).
@@ -302,8 +307,9 @@ explícito (`immediateRender:false` cuando se retoma un objetivo), sin `Math.ran
 
 - **Receta.**
   - **Base:** `rgba(255,255,255,.62)` más un borde interior de 1 px `rgba(255,255,255,.9)`.
-  - **Capa `.holo`:** al 160 % del tamaño, con 3–4 `radial-gradient` de `gradient-a..d` y un `conic-gradient` suave, a
-    opacidad 0.75.
+  - **Capa `.holo`:** al 160 % del tamaño, con 3–4 `radial-gradient` de los cortes del `DEGRADADO` de «Pasar lista»
+    (`#FF6AA9 #FFB36B #8BE3B5 #6BB8FF`; receta completa en DISENO-APP §3.3) y un `conic-gradient` suave, a opacidad
+    0.75.
   - **Movimiento del holograma:** rotar y trasladar la capa (`rotation 0 → 8°`, `xPercent −4 → 4`) a lo largo de la toma y
     atarlo a la pose de T3. Usar `transform`, no `background-position`.
   - **Brillo:** una banda diagonal blanca al 20–25 % (`linear-gradient`) que cruza **una vez** en 0.6–0.8 s
@@ -361,24 +367,26 @@ explícito (`immediateRender:false` cuando se retoma un objetivo), sin `Math.ran
   - Solo para estudiar: `liquid-glass-widgets` y `liquid-glass-notification`. Son vidrio sobre fondo shader aurora: ni el
     estilo ni el coste encajan.
 
-### T7 · Cursor que llega y toca la barra de pestañas (ref-05)
+### T7 · Toque en la barra de pestañas (ref-05) — **SIN CURSOR** (BRIEF 2026-10-05)
 
-- **Receta.**
-  - **Cursor:** Lucide `mouse-pointer-2` relleno en tinta, contorno blanco de 2 px, 40–48 px, `z-index` alto.
-  - **Trayectoria curva:** `x` en `power2.inOut` e `y` en `power3.out`, con la misma duración (0.6–0.8 s); así sale un
-    arco.
-  - **Clic:** 0.12–0.2 s después de llegar. Presión: cursor 0.85 / pestaña 0.95, 0.08 s con yoyo.
-  - **Pestaña activa:** cambia en clic + 0.04 s (icono a tinta, etiqueta a 600) y el indicador se desliza en 0.3 s
-    (`power3.out`).
+> Corrección de la crítica: la primera versión de esta técnica usaba un cursor. El BRIEF lo prohíbe («lo del cursor no
+> es necesario»). Lo que se traslada es solo la **causa → efecto** del clic; el toque se cuenta con estados de la propia
+> UI (DISENO-APP §2.20, REFERENCIA-2 §3.7).
+
+- **Receta (sin puntero).**
+  - **Anticipación:** el destino recibe el halo de foco nativo de la app (`ring-4 ring-ring/30`, 8 px a E = 2) 0.15–0.2 s
+    antes del «toque».
+  - **Presión:** el destino se comprime (`scale` 0.95–0.97 en 0.08–0.09 s) y se recupera en 0.3 s `power3.out`
+    (`press-release-spring`).
+  - **Pestaña activa:** cambia en el instante de la presión + 0.04 s (fondo `#EFECE7`, icono a tinta con trazo 2, etiqueta a
+    600) y el indicador se desliza en 0.3 s (`power3.out`).
   - **Onda opcional y sobria:** un anillo, escala 3, 0.5 s (`power2.out`), opacidad 0.25 → 0.
-  - **El clic dispara el relevo** (T13/T14) 0.1–0.2 s después: causa y efecto.
+  - **La presión dispara el relevo** (T13/T14) 0.1–0.2 s después: causa y efecto.
 - **HyperFrames.**
-  - Reglas `cursor-click-ripple` (valores de referencia: 0.5 s de movimiento, clic +0.2 s, presión 0.08 s) y
-    `physics-press-reaction`.
-  - Blueprint `cursor-ui-demo`.
-  - `press-ripple`: el cursor desacelera, presiona junto con el objetivo y suelta con dos anillos.
+  - Reglas `press-release-spring` y `physics-press-reaction` (solo la mitad «objetivo»).
+  - ✗ `cursor-click-ripple`, ✗ blueprint `cursor-ui-demo`, ✗ `press-ripple`, ✗ `oversized-cursor`: dependen de un
+    puntero visible. Sus tiempos (0.5 s de llegada, toque +0.2 s, presión 0.08 s) sirven solo como referencia de ritmo.
   - `tabs-slide-indicator`: píldora que se desliza entre pestañas.
-  - `oversized-cursor`: flecha macOS a 3.5×. No es Lucide; sirve solo como referencia de timing.
 - **Sonido:** `click-soft2` (pestaña) o `tap`, exactamente al presionar; `whoosh-s` en el pico de velocidad del relevo.
 
 ### T8 · Cifra protagonista con rodillo de dígitos + delta (ref-04, ref-01)
@@ -388,8 +396,8 @@ explícito (`immediateRender:false` cuando se retoma un objetivo), sin `Math.ran
   - El rodillo va de derecha a izquierda (las unidades dan más vueltas): 0.9–1.2 s, `power3.out`, escalonado de 0.04 s,
     con `tabular-nums`.
   - Sufijo y decimales en `--muted-foreground` (dos tonos, como «.75»).
-  - Delta: chip con Lucide `trending-up`/`trending-down` + «4.9 %» + «vs. semana pasada». Entra 0.2 s después con blur-in
-    (T9). Nunca «▲» como texto.
+  - Delta: chip con Lucide `trending-up`/`trending-down` + el texto real de la app («+4.2 pp vs. semana previa»,
+    CONTENIDO §2.2/§3.7). Entra 0.2 s después con blur-in (T9). Nunca «▲» como texto.
   - En un morph (T13) el rodillo va del valor viejo al nuevo; no reinicia desde 0.
 - **HyperFrames.**
   - Regla `vertical-spring-ticker`: columna enmascarada, items de alto exacto, `tabular-nums`. Usar pasos sin rebote.
@@ -422,11 +430,11 @@ explícito (`immediateRender:false` cuando se retoma un objetivo), sin `Math.ran
   - Rampa (forma) y aclarado de izquierda a derecha: `mask-image`.
   - Barrido de izquierda a derecha: `clip-path: inset(0 100% 0 0) → inset(0 0 0 0)` en 0.8 s, `power2.inOut`.
   - Ola de altura: `scaleY` del contenedor 0.6 → 1 con origen abajo.
-- **Receta con datos reales:** 5 días × 24 barras = 120 `<rect>` SVG con `scaleY` escalonado (`{each: 0.005}`, 0.6 s). Es
+- **Receta con datos reales:** el 3A solo tiene clase Lun · Mié · Vie (CONTENIDO §3.7), p. ej. 3 días × 40 barras = 120 `<rect>` SVG con `scaleY` escalonado (`{each: 0.005}`, 0.6 s). Es
   un barrido intencional, no un grupo que llega, así que el tope de 0.5 s se puede pasar a propósito.
 - **Bloque resaltado:** `scaleY 0 → 1` con origen abajo, 0.35 s, `power3.out`, 0.1 s después de que termina el barrido.
   Después va el tooltip (T11).
-- **Ejes:** las etiquetas «Lun…Vie» entran con un fundido de 0.3 s.
+- **Ejes:** las etiquetas «Lun · Mié · Vie» entran con un fundido de 0.3 s (Sáb/Dom de reposición no se muestran).
 - **HyperFrames.**
   - Regla `stat-bars-and-fills` (`scaleY` escalonado y barrido con `clip-path`) y blueprint `dataviz-countup`.
   - `animated-bar-chart`.
@@ -499,6 +507,11 @@ explícito (`immediateRender:false` cuando se retoma un objetivo), sin `Math.ran
   - `parallax-zoom` (el inverso) y `page-slide`.
 
 ### T14 · Empuje con velocidad igualada + desenfoque (cambio de mundo, ref-05 → ref-04)
+
+> Nota de la crítica: «cut the curve», «zoom-through» e «inverse zoom» de `cut-catalog.md` son **costuras dentro de un
+> cuadro** (las construye el worker). Entre cuadros solo valen los 5 `transition_in` del registro
+> (`crossfade`, `blur-crossfade`, `push-slide`, `zoom-through`, `squeeze`; PLAYBOOK §3.5) o un corte con
+> `handoff_out`/`handoff_in` idénticos. Si el cambio de mundo debe verse como esta receta, va **dentro** de un cuadro.
 
 - **Receta (`cut-catalog.md`).**
   - **Cut the curve:** salida en `power4.in` (0.3 s, `y 0 → −230` o `scale 1 → 1.35`), entrada en `power4.out` con la
@@ -653,7 +666,8 @@ zonas distintas.
   la cifra quieta. Un movimiento grande por tiempo interno; nunca mientras la voz dice la palabra clave de esa cifra (la
   cifra llega **antes** de nombrarse y se queda quieta mientras se nombra).
 - **Texto.** ≤ 8 palabras por bloque, que complementen la voz (etiquetas, cifras, kickers) y no la repitan. Cifra héroe de
-  120–160 px; etiquetas UI ≥ 26 px. El contenido clave queda arriba de y = 940 para dejar sitio a subtítulos futuros.
+  120–160 px; etiquetas UI ≥ 26 px. El contenido clave queda en y ≤ 900 px (banda reservada del contrato del worker, PLAYBOOK §4) para dejar sitio a
+  subtítulos futuros.
 - **Sonido.**
   - ~0.8–1 evento/s de 2–3 capas (≈ 1–2 SFX/s en total, frente a los 4.0/s de la v3) y grupos de 3–4 capas solo en las
     costuras.
@@ -675,7 +689,7 @@ zonas distintas.
   de dinero ($, ingresos, gastos, transferencias).
 - Las nubes pintadas tipo anime y cualquier foto de cielo; los rostros reales (avatares abstractos de
   `assets/avatars/`).
-- La flecha de cursor macOS (usar Lucide `mouse-pointer-2`), el «▲/▼» como texto (usar Lucide `trending-up`/`down`) y
+- **Cualquier cursor o mano** (BRIEF: SIN CURSOR; ni la flecha macOS ni `mouse-pointer-2`), el «▲/▼» como texto (usar Lucide `trending-up`/`down`) y
   los iconos de línea que no sean Lucide.
 - El fleco cromático y los bordes repetidos tal cual: son artefactos del desenfoque de AE con pocas muestras y de la
   foto. Si hay estela, que sea la del componente `motion-blur`, limpia.
@@ -694,16 +708,16 @@ zonas distintas.
 
 **Traducción de elementos (referencia → SUSAN):**
 
-| Referencia | SUSAN (datos de demostración de la v3, a validar con `capture/app-real/`) |
+| Referencia | SUSAN (datos canónicos: `CONTENIDO.md` §3; corregido por la crítica, ver `SINTESIS.md`) |
 |---|---|
-| Pantalla «Cards» + tarjeta holográfica «Zenvest» | Tarjeta del grupo «3A · Administración Financiera · 24 inscritos». Holograma `gradient-a..d` (el «degradado arcoíris del módulo destacado» de SUSAN). Wordmark «SUSAN» en lugar del logo; ficha de icono Lucide (`scan-face`/`users`) en lugar del chip |
-| «Order a card» | Botón primario «Pasar lista» (tinta, radio 8, Lucide `camera`) |
+| Pantalla «Cards» + tarjeta holográfica «Zenvest» | Tarjeta del grupo «3A · Administración Financiera · 24 inscritos». Holograma = `DEGRADADO` de la portada «Pasar lista» (`#FF6AA9 #FFB36B #8BE3B5 #6BB8FF`, DISENO-APP §3.3). Wordmark «SUSAN» en lugar del logo; ficha de icono Lucide (`scan-face`/`users`) en lugar del chip |
+| «Order a card» | Botón primario real «Abrir y pasar lista» (tinta, radio 8 × E, Lucide `scan-face` + `arrow-right`; DISENO-APP §2.5) |
 | Panel de cuenta + «Send / Received» + «+» | Cabecera del grupo con «Presentes / Ausentes» y acción circular |
 | Hoja «Transactions», filas con logo + monto + estado | Lista de asistencia: avatar abstracto + nombre + hora + `StatusChip` (Presente / Retardo / Ausente, siempre con texto) |
-| Barra de pestañas Home / Statistic / Card… | Barra inferior móvil real de SUSAN (4–5 destinos + «Más»; tomarla de la captura) |
-| «My Income» con barras Sun…Sat + bloque + tooltip | Patrón semanal (`ui/TiraSemana`): rayas Lun…Vie; el bloque marca el día con más faltas; tooltip «8 faltas» |
-| «My Expenses» con 3 líneas + guía + tooltip | `ui/GraficaLinea`: evolución del ausentismo por semana (S1…S12), 3 grupos o 1 grupo + límite 20 %; la guía lee «% ausentismo» |
-| Cifra «$2,4799.00» + «▲ 6.9 % From last week» | Cifra «88 %» de asistencia o «9 en riesgo», con chip `trending-up/down` «vs. semana pasada» |
+| Barra de pestañas Home / Statistic / Card… | Barra inferior móvil real: **Panel · Revisión · [Pasar lista] · Reportes · Analítica**, con el botón central circular de tinta `scan-face` (`capture/app-real/mobile/10-docente-home.png`; DISENO-APP §2.2) |
+| «My Income» con barras Sun…Sat + bloque + tooltip | Patrón semanal (`ui/TiraSemana`): solo **Lun · Mié · Vie** (horario del 3A); el bloque marca el día crítico; tooltip «Vie · 21.8 %» / «Día crítico: Viernes» (CONTENIDO §3.7) |
+| «My Expenses» con 3 líneas + guía + tooltip | `ui/GraficaLinea` real de Analítica 3A: Observada S1–S6 (13.3 → 20.8 %), Ajuste, Proyección a S15 (24.8 %) con banda del 95 % y EMA dorada; la guía lee «Semana N · x %». **Sin** la marca «Límite 20 %» en esta gráfica (es tasa semanal, no faltas acumuladas: trampa 4 de CONTENIDO §3.11) |
+| Cifra «$2,4799.00» + «▲ 6.9 % From last week» | Cifra «20.8 %» con chip `trending-up` «+4.2 pp vs. semana previa» (Analítica), o «88 %» «Presentes ahora» (sesión en vivo), o «9 alumnos en riesgo» |
 | Lista Food / Healthcare / Electricity | Top de alumnos o grupos en riesgo (`ui/TarjetaFila`), con icono en una ficha pastel `tono-*` |
 | Cielo cian | Cielo `tono-azul` → crema; solo en los momentos héroe (apertura, tarjeta del grupo, cierre) |
 | Lienzo gris de datos | Lienzo crema `#F7F5F2` con el panel blanco de la app |
@@ -721,10 +735,10 @@ zonas distintas.
 
 Motion graphics de UI limpia y luminosa, con el pulso de un reel de After Effects. Las pantallas de SUSAN se reconstruyen
 en HTML y flotan sobre el lienzo crema; en tres momentos héroe (la apertura, la tarjeta del grupo y el cierre) flotan
-sobre un cielo pastel que va del azul tenue a la crema, con el degradado holográfico azul-lila-rosa-durazno reservado para
-la tarjeta. Cada escena es un plano continuo. El rack focus abre desde el desenfoque total mientras la cámara se aleja; la
-tarjeta aterriza con una estela breve y un solo destello de luz; la pantalla se encoge a panel; la hoja sube; un cursor
-toca la pestaña y ese clic provoca el siguiente estado; las barras se vuelven líneas. Los relevos se hacen con elementos
+sobre un cielo pastel que va del azul tenue a la crema, con el degradado holográfico rosa-durazno-menta-azul de la portada «Pasar lista»
+reservado para la tarjeta. Cada escena es un plano continuo. El rack focus abre desde el desenfoque total mientras la cámara se aleja; la
+tarjeta aterriza con una estela breve y un solo destello de luz; la pantalla se encoge a panel; la hoja sube; sin cursor,
+la pestaña se enciende (halo de foco y compresión) y ese pulso provoca el siguiente estado; las barras se vuelven líneas. Los relevos se hacen con elementos
 compartidos y empujes con velocidad igualada, no con disoluciones, y se usan 2–3 transiciones firma en todo el video. Las
 curvas son largas y suaves (`power3`/`expo.out` para llegar, `power3/expo.inOut` para viajar, 0.5–0.9 s), sin rebotes,
 salvo la píldora del tooltip. Los datos se mueven con sentido: las cifras ruedan, las líneas se dibujan y una guía las

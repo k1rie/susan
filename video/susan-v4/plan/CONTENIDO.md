@@ -264,6 +264,10 @@ resolver; alertas «**3 sin derecho · 2 al límite**» (en 3A: 1 sin derecho, 2
 | Ventana de tolerancia | «Minuto 12.0 · Retardo» (presente antes del min 10, retardo del 10 al 20) | [REAL · RN-03; texto de `VentanaTolerancia`] |
 | Cierre | «Cerrar pase de lista» deshabilitado hasta el minuto 20 | [REAL] |
 
+Regla verificada en la captura real (crítica): «N de 24 presentes» cuenta solo presentes, y el medidor «Presentes ahora»
+cuenta presentes + retardos («Presentes y retardos sobre inscritos»; `dom/39-escalonados-final.html`: 16 presentes + 8
+retardos → «24 de 24 inscritos»). Por eso 19 + 2 → «21 de 24 inscritos» · 88 %.
+
 Nota de coherencia: **no mostrar el cierre de esta sesión**. Si se cierra, los «sin registro» pasan a ausente y cambian
 los acumulados de §3.6–3.9 (que son los de la semilla antes de hoy). Los 2 «sin registro» no están frente a la cámara: por
 eso la captura cuenta 23 rostros (22 alumnos + 1 visita) y 22 válidos.
@@ -432,13 +436,20 @@ etiqueta) y no repite la frase hablada.
 
 ---
 
-## 7. Capturas reales disponibles para calcar (a 2026-10-05, `capture/app-real/`)
+## 7. Capturas reales disponibles para calcar (actualizado por la crítica con `capture/app-real/INVENTORY.md`, 2026-10-06 00:13 UTC)
 
-| Función | Captura (desktop PNG + DOM) |
+| Función | Captura (desktop PNG `.clean.png` + DOM; `mobile/` donde se indica) |
 |---|---|
-| Panel del docente | `10-docente-home` (+ `.mobile`) |
+| Panel del docente | `10-docente-home` (+ mobile) |
+| Barra inferior móvil (Panel · Revisión · Pasar lista · Reportes · Analítica) | `mobile/10-docente-home.png`, `13-docente-nav-movil` |
 | Reporte de periodo / grupo 3A / alumno | `17-reportes-periodo`, `19-reportes-grupo-3a`, `20-reportes-alumno` |
-| Analítica 3A / procedimiento / 5C | `21-analitica-3a` (+ `.mobile`), `22-analitica-3a-procedimiento`, `23-analitica-5c` |
-| Revisión: pendientes, caso, justificantes, correcciones | `24-…` a `28-…` (DOM; PNG según avance de la captura) |
-| Sesión cerrada | `29-sesion-cerrada-18` |
-| Sesión en vivo con cámara y portal del alumno | **sin captura todavía**: reconstruir con los textos de §2.1/§2.8 y `DEMO-CAMARA.md` («Recorrido exacto») |
+| Analítica 3A / procedimiento / 5C | `21-analitica-3a` (+ mobile), `22-analitica-3a-procedimiento`, `23-analitica-5c` |
+| Revisión: pendientes, caso, justificantes, correcciones | `24-…` a `28-…` (24 también mobile) |
+| **Sesión en vivo con cámara** | `30-pasar-lista-inicio` (0 de 24) → `31-pasar-lista-fotograma1` (24 por revisar) → `32-…fotograma2` / `33-…presentes` (24 de 24) → `34-…simulacion-completa` (25 rostros · 24 válidos) · `35-…fuera-de-ventana` · `38/39-escalonados` (16 presentes + 8 retardos) · `36-cierre-dialogo` · `37-sesion-19-cerrada`; mobile 30, 31, 33; video `video/01-pasar-lista-camara-simulada.webm` |
+| Sesión cerrada (histórica) | `29-sesion-cerrada-18` |
+| Pase manual 5C | `45-pase-manual-5c` |
+| **Portal del alumno** | `50-alumno-e260001-limite` (+ mobile), `51-…-sin-derecho` (+ mobile), `52/53-…-justificante/justificar`, `54-…-justificadas`, `56-alumno-paleta` |
+
+Uso de las capturas de la sesión en vivo: **solo como referencia de maquetación, textos y tokens**. Sus cifras (0 → 24 de
+24, cierre de la sesión 19 con 100 %) salen de la cámara simulada y **no** son las del video: el video usa la instantánea
+de §3.4 y no muestra el cierre. La vista de cámara simulada (cuadros magenta) nunca se calca.

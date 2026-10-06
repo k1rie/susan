@@ -544,7 +544,9 @@ referencia y para la placa de tinta (§3.6):
   - Entrada: `stroke-dasharray 0 → largo`, 0.9 s `EASE.salida`, +0.09 s por arco.
   - **Datos vivos**: 0.5 s `dasharray` + `dashoffset`, sin reiniciar.
   - Escena nativa perfecta para el video, del recorte 31 → 32: anillo gris «24 Inscritos / Pendientes 24» → verde
-    «Presentes 24». El arco gris se encoge mientras el verde crece en horario, en 3–4 pasos de 0.5 s.
+    «Presentes 24». El arco gris se encoge mientras el verde crece en horario, en 3–4 pasos de 0.5 s. **Con los datos
+    canónicos** (CONTENIDO §3.4) el anillo no llega a 24: termina en Presentes 19 · Retardos 2 · Pendientes 1 · Sin
+    registro 2.
 - **Con E = 2**: lado 240–392, cifra 60, leyenda 28.
 
 ### 2.14 BarrasPildora
@@ -639,7 +641,8 @@ referencia y para la placa de tinta (§3.6):
 - **Texto a la derecha** (separación 20):
   - Cifra 36/600 tight con `CountUp` de 1.3 s («100 %»).
   - Etiqueta 14/500 «Presentes ahora».
-  - Descripción 14 gris «24 de 24 inscritos».
+  - Descripción 14 gris «24 de 24 inscritos» en la captura; en el video, «21 de 24 inscritos» · 88 % (presentes +
+    retardos, CONTENIDO §3.4).
   - Límite opcional: línea discontinua de tinta al 70 % + etiqueta 11/500 gris.
 - **Física apta para seek**:
   - `nivel(t) = N·(1 − e^(−t/0.35)·cos(2π·t/0.9))`
@@ -671,7 +674,8 @@ Feedback nativo:
 - Ítem del riel o destino del BottomNav: fondo `#EBE8E3`/`#EFECE7` + 500/600 + trazo 2.
 
 **Receta**: `scale 1 → .97 → 1` (0.18 s) + cambio de color de hover y halo de foco de 8 px (× E) que entra en 0.15 s y
-sale en 0.4 s. Suena `click`.
+sale en 0.4 s. Suena `click-soft2` o `tap` (nombres de `assets/sfx/CATALOG.json`; el `click` crudo no se monta,
+LECCIONES-V3 §2.1).
 
 ### 2.21 Movimiento de la app → GSAP
 
@@ -741,7 +745,7 @@ desde los tokens).
 - **Sombra sobre el cielo**: teñida de azul, `rgba(29,95,209,.14)` (sale de `tono-azul-fg`), nunca gris de tinta (sobre
   azul ensucia).
 - **Dónde va**:
-  - Apertura y gancho (rack focus desde blur 32 px, `scale 1.15 → 1`).
+  - Apertura y gancho (rack focus con placa pre-desenfocada o blur animado ≤ 24 px, `scale 1.15 → 1`; §3.7).
   - Presentación del producto (la tarjeta Pasar lista aterriza sobre el cielo).
   - Cierre (la marca sobre el cielo, que se aclara hacia la crema).
   - Un máximo de **3 apariciones**, y nunca bajo una gráfica.
@@ -846,7 +850,9 @@ del escenario cuenta en qué parte de SUSAN estamos, igual que las portadas.
   - Sin pose en los momentos de lectura de cifras.
   - La persona dueña vetó la rotación en la v2.3: hay que enseñarla en bocetos con alternativa plana.
 - **Desenfoque**:
-  - Rack focus de cuadro: 32 → 0 px en 0.8–1.0 s `expo.out` (solo apertura y un cambio de mundo).
+  - Rack focus de cuadro: animado ≤ 24 px → 0 en superficies grandes (tope de la regla `depth-of-field-blur`), o placa
+    pre-desenfocada (σ 18–32, imagen) que se funde sobre la capa nítida (REFERENCIA T1), 0.8–1.0 s `expo.out` (solo
+    apertura y un cambio de mundo).
   - Planos de fondo: 8–14 px.
   - Texto que se va a leer: 0 px.
   - El `filter: blur` a pantalla completa es caro: usarlo ≤ 1.2 s por toma.
@@ -861,7 +867,8 @@ del escenario cuenta en qué parte de SUSAN estamos, igual que las portadas.
   - Entrada: `scale .6 → 1`, 0.35 s `back.out(1.4)` (uno de los 1–2 rebotes del video).
   - Inclinación opcional de −6° con alternativa recta (veto v2.3).
   - Se voltea al otro lado de la guía cerca del borde (como `posicionTooltip`).
-- **Radios**: UI con los de la app × E. Objeto de escenario: 36–56. Nunca radios de 24–36 en tarjetas internas.
+- **Radios**: UI con los de la app × E (tarjeta 14 × E = 28 a E = 2; panel 18 × E = 36). Objeto de escenario: 36–56.
+  Nunca radios «de reel» fijos (24–36 px independientes de E) en tarjetas internas: siempre el de la app × E.
 - **Densidad**: ≤ 8 palabras por bloque en pantalla, una cifra protagonista por plano y cada cifra clave quieta ≥ 1.2 s
   (REFERENCIA §5).
 
@@ -996,11 +1003,12 @@ Todo wordmark del video debe poder leerse como **esta misma marca, ampliada**.
 4. **Sombra del objeto de escenario**: se desvía de la regla «sin sombra» de la app, aunque tiene el precedente de
    `shadow-lift` en el login y el BottomNav.
 5. **Conseguir EB Garamond 500** (variable OFL) o aceptar 400.
-6. **Un solo juego de datos**: las capturas del Home difieren entre escritorio (8 pendientes, 4 justificantes) y
-   teléfono (3 pendientes).
-   - Fijar los datos de demostración en el plan (los de LECCIONES-V3 §5 o los de la captura de escritorio) y
-     recrearlos todos con ese juego.
-   - Ocultar «Reloj simulado».
+6. **Un solo juego de datos** (resuelto por la crítica): el DOM de escritorio y el de teléfono dicen lo mismo
+   («Registros pendientes de revisión 8», `dom/10-docente-home.html` y `.mobile.html`); el «3» venía de un PNG tomado a
+   mitad del `CountUp` (0 → 8). La hoja canónica es `CONTENIDO.md` §3 (semilla real + instantánea de las 07:12); las
+   cifras de LECCIONES-V3 §5 se retiraron.
+   - Ocultar «Reloj simulado: …» y la tarjeta «Reloj de demostración (solo desarrollo)». La línea «Hoy: 2026-09-14» sí
+     es UI real (`PanelDocente.jsx`) y puede quedarse.
 7. **Iconos que faltan** en `assets/icons/` (§1.8): extraerlos y verificarlos antes de construir.
 8. **Implementación de la escala**: probar `zoom: 2` contra el recorte `crops/21-analitica-3a--StatCard.png` en un
    snapshot. Si no empata, pasar al kit multiplicado.
