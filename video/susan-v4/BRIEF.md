@@ -81,8 +81,10 @@ voz» (guion con tiempos amarrados a cada escena).
   retención)». Y aclaró: «no me refiero a zooms innecesarios, sino que se muestre algo diferente, por ejemplo que lo que
   está apareciendo se vaya con motion blur a otro lado y aparezca otro elemento, zooms que sean transiciones, etc.».
   Regla resultante (SUSTITUYE las reglas anteriores de lecturas quietas largas):
-  - DINAMISMO = CAMBIO DE CONTENIDO, no movimiento de cámara. Cada ~1–1.5 s aparece algo nuevo en pantalla (otro elemento
-    de la UI real, otra cifra, otro estado); ninguna composición se queda igual más de ~1.5 s.
+  - DINAMISMO = CAMBIO DE CONTENIDO, no movimiento de cámara, y CON MEDIDA («sin exagerar, que sea cada tanto, si no, se va
+    a saturar»): algo nuevo aparece cada ~2–3 s (otro elemento de la UI real, otra cifra, otro estado); ninguna composición
+    se queda igual más de ~3 s; un solo relevo a la vez; las cifras clave conservan su momento de lectura. Mejor pocos
+    relevos limpios que muchos.
   - El relevo típico: el elemento actual SALE con estela de movimiento direccional (motion blur) hacia un lado o hacia
     arriba/abajo, y el siguiente ENTRA desde el lado opuesto, también con estela, asentándose suave. Las salidas dentro de
     un cuadro ya están permitidas.
