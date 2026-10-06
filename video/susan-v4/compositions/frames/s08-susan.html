@@ -101,7 +101,8 @@
         function $(s) { return document.getElementById(ID + '-' + s); }
 
         // Tiempos locales; los de sfx_cues son contrato: whoosh-s 0.98 dentro de la caída, thud 1.00 = contacto,
-        // soft-in 2.50 = inicio del lema, sheen 4.45 = primer fotograma con brillo visible (inicio del barrido).
+        // soft-in 2.50 = inicio del lema, sheen 4.45 = inicio del barrido (la banda arranca fuera de la «S» y su borde la toca
+        // hacia 4.60, en el cuerpo del sheen, que crece hasta su pico entre 0.12 y 0.19 s).
         // Tramos quietos (frame-check): 1.8–2.5, 2.7–3.4, 3.8–4.6 y 4.9–5.6 s; ninguno llega a 1.0 s.
         var T = {
             cae: 0.60, contacto: 1.00, squashFin: 1.06,
@@ -195,12 +196,15 @@
         tl.fromTo($('cielo-claro'), { opacity: 0 }, { opacity: 1, duration: 0.70, ease: 'power1.inOut' }, T.aclara);
 
         // ---- Escena 4 (3.8–6.0 s): barrido holográfico de una sola pasada, ya en silencio (la voz acaba en 4.37 s), y fundido.
-        //      El porcentaje va al revés del viaje: 86 % → 10 % se lee de izquierda a derecha. Con la banda en 40–60 % de un
-        //      fondo de 300 %, en 86 % el borde azul ya toca la «S» (el brillo se ve desde el primer fotograma del cue) y en
-        //      10 % la banda entera ya salió tras la «N» (la palabra vuelve a tinta). Antes del cue rige el 100 % del CSS
-        //      (immediateRender: false): nada de color en reposo.
-        tl.fromTo($('holo'), { backgroundPosition: '86% 50%' },
-            { backgroundPosition: '10% 50%', duration: 0.70, ease: 'power2.inOut', immediateRender: false }, T.barrido);
+        //      El porcentaje va al revés del viaje: 93 % → 7 % se lee de izquierda a derecha. La banda (40–60 % de un fondo de
+        //      300 %) ARRANCA FUERA de las letras: en 93 % su borde azul transparente queda ~20 px antes de la tinta de la «S», así
+        //      el color no se enciende de golpe en el primer fotograma del cue (QA r1: en 86 % media «S» pasaba a azul en un solo
+        //      fotograma, 46 niveles por bloque de 40 px). Con la arrancada lenta de power2.inOut el borde entra hacia 4.60 s ya en
+        //      movimiento y crece por fotogramas (0.3 → 7 → 22 niveles), nunca de golpe. En 7 % la banda entera ya salió tras la
+        //      «N» (en 10 % su cola rosa se quedaba en la esquina inferior derecha de la «N» hasta el fundido): la palabra vuelve a
+        //      tinta exacta. Antes del cue rige el 100 % del CSS (immediateRender: false): nada de color en reposo.
+        tl.fromTo($('holo'), { backgroundPosition: '93% 50%' },
+            { backgroundPosition: '7% 50%', duration: 0.70, ease: 'power2.inOut', immediateRender: false }, T.barrido);
         tl.fromTo($('velo'), { opacity: 0 }, { opacity: 1, duration: T.fin - T.fundido, ease: 'power1.inOut' }, T.fundido);
 
         tl.set({}, {}, T.fin);
