@@ -37,3 +37,4 @@ Entregar el video final 1080p60 MÁS DINÁMICO (ver BRIEF.md, indicación del 20
   Al terminar: juntar sus informes en plan/INFORMES-DINAMISMO.md y lanzar `susan-v4-final.js`
   con args {"informesPath": "/home/user/susan/video/susan-v4/plan/INFORMES-DINAMISMO.md"}.
 - 07:23 UTC: los 4 flujos de dinamizar terminaron; informes en plan/INFORMES-DINAMISMO.md; se lanza susan-v4-final.js.
+  Run del flujo final: wf_15f3ee4a-411 (scratchpad/susan-v4-final.js; copia en scripts/flujos/).
