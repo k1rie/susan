@@ -39,7 +39,10 @@
 #s07-a-tiempo-escenario{position:absolute;inset:0;perspective:1600px;perspective-origin:960px 458px}
 #s07-a-tiempo-sombra-fila{position:absolute;left:296px;top:430px;width:1328px;height:56px;border-radius:28px;
  box-shadow:0 14px 36px rgba(30,25,25,.16),0 4px 10px rgba(30,25,25,.08)}
-#s07-a-tiempo-sombra{position:absolute;left:360px;top:240px;width:1200px;height:600px;border-radius:36px;transform-origin:600px 218px;
+/* la sombra de la tarjeta vive en un envoltorio con la MISMA caja, origen y pose 3D que la tarjeta (z, escala, rotationX/Y):
+   plana no puede seguir a una tarjeta inclinada y dejaba un doble borde (hallazgo de s04, PILOTO 3b corregido) */
+#s07-a-tiempo-sombra-pose{position:absolute;left:296px;top:240px;width:1328px;height:600px;transform-origin:664px 218px}
+#s07-a-tiempo-sombra{position:absolute;left:64px;top:0px;width:1200px;height:600px;border-radius:36px;transform-origin:600px 209.6px;
  box-shadow:0 40px 120px rgba(30,25,25,.14),0 8px 24px rgba(30,25,25,.08)}
 /* La tarjeta de Iván ocupa la unión de la caja de su fila (296–1624 × 430–486) y su caja final (360–1560 × 240–840);
    lo visible lo decide el recorte: de la fila a la tarjeta, sin tweens de width/height. */
@@ -158,7 +161,7 @@
       <!-- objeto flotante: la fila de Iván se despega y se abre en su tarjeta (pose 3D 0 → pico → 0) -->
       <div id="s07-a-tiempo-escenario">
         <div id="s07-a-tiempo-sombra-fila"></div>
-        <div id="s07-a-tiempo-sombra"></div>
+        <div id="s07-a-tiempo-sombra-pose"><div id="s07-a-tiempo-sombra"></div></div>
         <div id="s07-a-tiempo-ivan">
           <div id="s07-a-tiempo-fila-copia" class="s07-a-tiempo-fila">
             <div class="s07-a-tiempo-nombre">Cruz Rojas Iván</div>
@@ -321,9 +324,17 @@
         // Pose 0 → pico (rotX 4°, rotY −6° hacia 2.05 s) → 0 (plana a 2.40 s).
         tl.fromTo(ivan, { rotationX: 0, rotationY: 0 }, { rotationX: 4, rotationY: -6, duration: 0.30, ease: 'sine.inOut', immediateRender: false }, T.abre);
         tl.fromTo(ivan, { rotationX: 4, rotationY: -6 }, { rotationX: 0, rotationY: 0, duration: 0.35, ease: 'sine.inOut', immediateRender: false }, 2.05);
-        // Sombra de tinta en capa aparte: crece de la caja de la fila a la de la tarjeta.
-        tl.fromTo($('sombra'), { opacity: 0, scaleX: 1328 / 1200, scaleY: 56 / 600 },
-            { opacity: 1, scaleX: 1, scaleY: 1, duration: 0.65, ease: 'power3.inOut' }, T.abre);
+        // Sombra de tinta en capa aparte: su envoltorio hace la MISMA pose que la tarjeta (z, escala y rotationX/Y, mismos
+        // tiempos y curvas) y la sombra crece de la caja de la fila a la de la tarjeta con la curva del recorte (origen y 209.6:
+        // así su caja coincide con el recorte en cada instante). Solo aparece al final del aterrizaje (2.15-2.40, ya casi
+        // plana): una sombra plana bajo una tarjeta inclinada dejaba un doble borde (hallazgo de s04).
+        var sombraPose = $('sombra-pose');
+        tl.fromTo(sombraPose, { z: 40, scale: 1.04 }, { z: 0, scale: 1, duration: 0.65, ease: 'power3.inOut', immediateRender: false }, T.abre);
+        tl.fromTo(sombraPose, { rotationX: 0, rotationY: 0 }, { rotationX: 4, rotationY: -6, duration: 0.30, ease: 'sine.inOut', immediateRender: false }, T.abre);
+        tl.fromTo(sombraPose, { rotationX: 4, rotationY: -6 }, { rotationX: 0, rotationY: 0, duration: 0.35, ease: 'sine.inOut', immediateRender: false }, 2.05);
+        tl.fromTo($('sombra'), { scaleX: 1328 / 1200, scaleY: 56 / 600 },
+            { scaleX: 1, scaleY: 1, duration: 0.65, ease: 'power3.inOut' }, T.abre);
+        tl.fromTo($('sombra'), { opacity: 0 }, { opacity: 1, duration: 0.25, ease: 'power2.out' }, 2.15);
         tl.fromTo($('sombra-fila'), { opacity: 1 }, { opacity: 0, duration: 0.30, ease: 'power2.in', immediateRender: false }, T.abre);
         // Relevo de contenido dentro de la tarjeta: la fila fuera antes del 40 %, el marco al final.
         tl.fromTo($('fila-copia'), { opacity: 1 }, { opacity: 0, duration: 0.24, ease: 'power1.in' }, T.abre);
