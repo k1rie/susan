@@ -1,0 +1,194 @@
+<template>
+<style>
+@font-face{font-family:"Hanken Grotesk";font-weight:100 900;font-style:normal;font-display:block;src:url("assets/fonts/HankenGrotesk-var.woff2") format("woff2");}
+/* will-change en la raíz: antialias en gris en todo el texto (PILOTO §3b); nunca en algo que cambia de escala. */
+#root{position:absolute;inset:0;overflow:hidden;will-change:transform;font-family:"Hanken Grotesk",system-ui,sans-serif;color:#1E1919;
+ font-variant-numeric:tabular-nums;letter-spacing:-0.003em;-webkit-font-smoothing:antialiased}
+
+/* ---- E1 «cielo crema» aclarado: de #D2E0F9 arriba a la crema desde el 70 % hacia abajo (fondo de clip, pista 0) ---- */
+#s08-susan-cielo{position:absolute;inset:0;overflow:hidden;
+ background:linear-gradient(180deg,#D2E0F9 0%,#E6EEFC 30%,#EFF2F7 52%,#F7F5F2 70%,#F7F5F2 100%)}
+.s08-susan-nube{position:absolute;border-radius:50%}
+.s08-susan-nube-fria{background:radial-gradient(closest-side,rgba(255,255,255,.9),rgba(255,255,255,0))}
+.s08-susan-nube-calida{background:radial-gradient(closest-side,rgba(246,237,211,.8),rgba(246,237,211,0))}
+/* grano estático al 10 % (imagen, nunca un <filter> vivo sobre el cuadro) */
+.s08-susan-grano{position:absolute;inset:0;pointer-events:none;mix-blend-mode:multiply;opacity:.10;
+ background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
+
+/* ---- escena ---- */
+#s08-susan-escena{position:absolute;inset:0}
+
+/* «SUSAN»: BrandMark ampliado (Hanken 600, 136 px, −0.025em). Caja medida en Chrome: 411 × 136, tinta de x+4 a x+405,
+   mayúsculas de 95 px con la línea base a 115.5 px del borde superior. Tinta de 881 a 1282 → lockup 639–1282, centro 960.
+   El centro de las mayúsculas cae en y = 440, el mismo centro que la ficha. */
+#s08-susan-marca{position:absolute;left:877px;top:372px;display:grid;z-index:2}
+.s08-susan-palabra{grid-area:1/1;font-size:136px;font-weight:600;letter-spacing:-0.025em;line-height:1;white-space:nowrap;color:#1E1919}
+/* copia recortada al texto: transparente fuera de la banda, así en reposo la palabra es tinta y el barrido no necesita fundido */
+#s08-susan-holo{background-image:linear-gradient(105deg,rgba(255,106,169,0) 0%,rgba(255,106,169,0) 36%,#FF6AA9 41%,#FFB36B 46%,
+  #8BE3B5 51.4%,#6BB8FF 59%,rgba(107,184,255,0) 64%,rgba(107,184,255,0) 100%);
+ background-size:300% 100%;background-position:100% 50%;background-repeat:no-repeat;
+ -webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent}
+
+/* subrayado dorado: trazo de Resaltado bajo toda la palabra (PILOTO §3d: viewBox en px, pathLength 100, sin vector-effect) */
+#s08-susan-subrayado{position:absolute;left:873px;top:479px;width:418px;height:44px;overflow:visible;z-index:1}
+
+/* lema: una línea centrada en y = 650 */
+#s08-susan-lema{position:absolute;left:0;top:626px;width:1920px;text-align:center;font-size:40px;font-weight:500;line-height:48px;
+ color:#6F6A65;white-space:nowrap;z-index:1}
+
+/* ficha del botón central: envoltorio externo = caída (y) y deslizamiento (x); interno = squash con origen abajo;
+   el filtro de estela va en la ficha (hija), nunca en el que se mueve. Centro de reposo (900, 440). */
+#s08-susan-mov{position:absolute;left:816px;top:356px;width:168px;height:168px;z-index:3}
+#s08-susan-sombra{position:absolute;left:-15px;top:-15px;width:198px;height:198px;border-radius:50%;transform-origin:50% 55%;
+ box-shadow:0 40px 120px rgba(29,95,209,.14),0 8px 24px rgba(29,95,209,.08)}
+.s08-susan-fantasma{position:absolute;inset:0;border-radius:50%;background:#1E1919;box-shadow:0 0 0 15px #FFFFFF;opacity:0}
+#s08-susan-squash{position:absolute;inset:0;transform-origin:50% 100%}
+#s08-susan-ficha{position:absolute;inset:0;border-radius:50%;background:#1E1919;color:#FFFFFF;box-shadow:0 0 0 15px #FFFFFF;
+ display:flex;align-items:center;justify-content:center}
+#s08-susan-ficha svg{width:72px;height:72px;display:block}
+
+/* fundido final a la crema: la única salida del video */
+#s08-susan-velo{position:absolute;inset:0;background:#F7F5F2;opacity:0;z-index:5}
+</style>
+<div id="root" data-composition-id="s08-susan" data-start="0" data-duration="6" data-width="1920" data-height="1080">
+  <!-- fondo: cielo E1 aclarado con dos nubes quietas y grano estático -->
+  <div id="s08-susan-cielo" class="clip" data-start="0" data-duration="6" data-track-index="0">
+    <div class="s08-susan-nube s08-susan-nube-fria" data-layout-allow-overflow style="left:-180px;top:10px;width:1000px;height:440px"></div>
+    <div class="s08-susan-nube s08-susan-nube-calida" data-layout-allow-overflow style="left:1060px;top:-90px;width:1040px;height:480px"></div>
+    <div class="s08-susan-grano"></div>
+  </div>
+
+  <!-- la ficha cae, firma junto a «SUSAN», se dibuja el subrayado y entra el lema -->
+  <div id="s08-susan-escena" class="clip" data-start="0" data-duration="6" data-track-index="1">
+    <div id="s08-susan-marca" data-layout-allow-occlusion>
+      <div id="s08-susan-tinta" class="s08-susan-palabra">SUSAN</div>
+      <div id="s08-susan-holo" class="s08-susan-palabra" data-layout-allow-occlusion aria-hidden="true">SUSAN</div>
+    </div>
+    <svg id="s08-susan-subrayado" viewBox="0 0 418 44" aria-hidden="true">
+      <path id="s08-susan-trazo" d="M8.36 29.33 C91.96 11, 167.2 36.67, 250.8 18.33 S376.2 14.67, 409.64 25.67" pathLength="100"
+        fill="none" stroke="#A8842C" stroke-opacity=".8" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"
+        stroke-dasharray="100 120" stroke-dashoffset="104" />
+    </svg>
+    <div id="s08-susan-lema">Pasa lista en segundos y entiende la asistencia de tus grupos</div>
+    <div id="s08-susan-mov">
+      <div id="s08-susan-sombra" aria-hidden="true"></div>
+      <div id="s08-susan-fant2" class="s08-susan-fantasma" aria-hidden="true"></div>
+      <div id="s08-susan-fant1" class="s08-susan-fantasma" aria-hidden="true"></div>
+      <div id="s08-susan-squash">
+        <div id="s08-susan-ficha"><svg xmlns="http://www.w3.org/2000/svg" width="72" height="72" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" data-lucide="scan-face" aria-hidden="true"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><path d="M9 9h.01"/><path d="M15 9h.01"/></svg></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="s08-susan-velo" class="clip" data-start="0" data-duration="6" data-track-index="2"></div>
+
+  <!-- estela vertical de la ficha: región ajustada al eje del movimiento -->
+  <svg width="0" height="0" aria-hidden="true" style="position:absolute">
+    <filter id="s08-susan-mb" x="-20%" y="-60%" width="140%" height="220%" color-interpolation-filters="sRGB">
+      <feGaussianBlur id="s08-susan-mb-g" stdDeviation="0 0" />
+    </filter>
+  </svg>
+</div>
+<!-- GSAP local: el CDN responde 403 en esta máquina (frame.md §1) -->
+<script src="assets/vendor/gsap.min.js"></script>
+<script>
+    (function () {
+        var ID = 's08-susan';
+        // Obturador en segundos: el largo de la estela no depende de los fps del render (PILOTO §3c).
+        var OBT = 1 / 60;
+        function $(s) { return document.getElementById(ID + '-' + s); }
+
+        // Tiempos locales; los de sfx_cues son contrato (whoosh-s 0.98 dentro de la caída, thud 1.00, draw 2.05, soft-in 3.20, sheen 4.60).
+        var T = {
+            cae: 0.60, contacto: 1.00, squashFin: 1.06,
+            desliza: 1.45, marca: 1.45,
+            subrayado: 2.05, lema: 3.20,
+            barrido: 4.60, fundido: 5.70, fin: 6.0
+        };
+        var DESDE = -640;        // la ficha entra desde 640 px más arriba (fuera de cuadro)
+        var DESLIZA = -162;      // de x = 900 a x = 738: lockup centrado en 960 con 44 px de separación (medido)
+
+        window.__timelines = window.__timelines || {};
+        var tl = gsap.timeline({ paused: true });
+
+        // Velocidad de la curva en fracción por segundo (diferencia central sobre la misma curva: función pura de t).
+        function velocidad(ease, p, dur) {
+            var h = 0.002;
+            var a = Math.max(0, p - h);
+            var b = Math.min(1, p + h);
+            return (ease(b) - ease(a)) / (b - a) / dur;
+        }
+
+        // Movimiento con estela direccional: σ = 0.29 · v · OBT (caja del obturador → gaussiana), filter:none en reposo.
+        function conRastro(o) {
+            var ease = gsap.parseEase(o.curva);
+            var st = { p: 0 };
+            var filtro = 'url(#' + o.nodo.parentNode.id + ')';
+            function aplicar() {
+                var p = st.p;
+                var e = ease(p);
+                o.pos(e, p);
+                var v = (p <= 0 || p >= 1) ? 0 : Math.abs(o.dist) * velocidad(ease, p, o.dur);
+                var s = Math.min(o.max, 0.29 * v * OBT);
+                o.nodo.setAttribute('stdDeviation', o.eje === 'x' ? s.toFixed(2) + ' 0' : '0 ' + s.toFixed(2));
+                o.el.style.filter = s < 0.3 ? 'none' : filtro;
+                if (o.extra) { o.extra(p, v, ease); }
+            }
+            aplicar();
+            tl.fromTo(st, { p: 0 }, { p: 1, duration: o.dur, ease: 'none', onUpdate: aplicar, immediateRender: false }, o.at);
+        }
+
+        // ---- Escena 1 (0–0.6 s): el cielo aclarado, vacío y quieto bajo la blur-crossfade. Nada que tweenear. ----
+
+        // ---- Escena 2 (0.6–1.45 s): caída power2.in (velocidad máxima en el contacto) con estela SVG + 2 fantasmas ----
+        var mov = $('mov');
+        var f1 = $('fant1');
+        var f2 = $('fant2');
+        var DUR_CAIDA = T.contacto - T.cae;
+        conRastro({ el: $('ficha'), nodo: $('mb-g'), at: T.cae, dur: DUR_CAIDA, curva: 'power2.in', dist: -DESDE, eje: 'y', max: 26,
+            pos: function (e) { gsap.set(mov, { y: DESDE * (1 - e) }); },
+            extra: function (p, v, ease) {
+                var e = ease(p);
+                var fuerza = (p <= 0 || p >= 1) ? 0 : Math.min(1, v / 2500);
+                var p1 = Math.max(0, p - OBT / DUR_CAIDA);
+                var p2 = Math.max(0, p - 2 * OBT / DUR_CAIDA);
+                gsap.set(f1, { y: DESDE * (e - ease(p1)), opacity: 0.32 * fuerza });
+                gsap.set(f2, { y: DESDE * (e - ease(p2)), opacity: 0.16 * fuerza });
+            } });
+
+        // Sombra azulada en capa aparte: aparece al acercarse, se contrae al tocar y se asienta (sin rebote).
+        var sombra = $('sombra');
+        tl.fromTo(sombra, { opacity: 0, scale: 1.24 }, { opacity: 0.55, scale: 1.12, duration: 0.30, ease: 'power2.in' }, T.contacto - 0.30);
+        tl.fromTo(sombra, { opacity: 0.55, scale: 1.12 }, { opacity: 1, scale: 0.95, duration: 0.06, ease: 'power2.out', immediateRender: false }, T.contacto);
+        tl.fromTo(sombra, { scale: 0.95 }, { scale: 1, duration: 0.24, ease: 'power3.out', immediateRender: false }, T.squashFin);
+
+        // Contacto a 1.00 s: squash de volumen constante (1.07 × 0.93 ≈ 1), origen abajo, y recuperación sin rebote.
+        var squash = $('squash');
+        tl.fromTo(squash, { scaleX: 1, scaleY: 1 }, { scaleX: 1.07, scaleY: 0.93, duration: 0.06, ease: 'power2.out' }, T.contacto);
+        tl.fromTo(squash, { scaleX: 1.07, scaleY: 0.93 }, { scaleX: 1, scaleY: 1, duration: 0.24, ease: 'power3.out', immediateRender: false }, T.squashFin);
+        // Quieta de 1.30 a 1.45 s.
+
+        // ---- Escena 3 (1.45–3.8 s): la ficha se corre a la izquierda y «SUSAN» se revela desde debajo de ella ----
+        tl.fromTo(mov, { x: 0 }, { x: DESLIZA, duration: 0.34, ease: 'power3.inOut', immediateRender: false }, T.desliza);
+        tl.fromTo($('marca'), { clipPath: 'inset(0% 100% 0% 0%)', x: -30 },
+            { clipPath: 'inset(0% 0% 0% 0%)', x: 0, duration: 0.50, ease: 'power3.out' }, T.marca);
+        tl.addLabel('read:SUSAN#0', T.marca + 0.50);
+
+        // Subrayado dorado: dashoffset 104 → 0 (el remate redondo no asoma antes de empezar); el único oro del cuadro.
+        tl.fromTo($('trazo'), { attr: { 'stroke-dashoffset': 104 } },
+            { attr: { 'stroke-dashoffset': 0 }, duration: 0.80, ease: 'power2.out' }, T.subrayado);
+
+        // Lema: y 16 → 0 y opacidad, power4.out, mientras la voz dice «Pasa lista en segundos».
+        tl.fromTo($('lema'), { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.60, ease: 'power4.out' }, T.lema);
+        tl.addLabel('read:lema#1', T.lema + 0.60);
+
+        // ---- Escena 4 (3.8–6.0 s): quietud, barrido holográfico de una pasada (100 % → 0 % = izquierda → derecha) y fundido ----
+        tl.fromTo($('holo'), { backgroundPosition: '100% 50%' },
+            { backgroundPosition: '0% 50%', duration: 0.70, ease: 'power2.inOut' }, T.barrido);
+        tl.fromTo($('velo'), { opacity: 0 }, { opacity: 1, duration: T.fin - T.fundido, ease: 'power1.inOut' }, T.fundido);
+
+        tl.set({}, {}, T.fin);
+        window.__timelines['s08-susan'] = tl;
+    })();
+</script>
+</template>

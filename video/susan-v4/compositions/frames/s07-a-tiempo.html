@@ -1,0 +1,368 @@
+<template>
+<style>
+@font-face{font-family:"Hanken Grotesk";font-weight:100 900;font-style:normal;font-display:block;src:url("assets/fonts/HankenGrotesk-var.woff2") format("woff2");}
+/* will-change en la raíz: antialias en gris para todo el texto (PILOTO §3b), mismo costo. */
+#root{position:absolute;inset:0;overflow:hidden;will-change:transform;font-family:"Hanken Grotesk",sans-serif;color:#1E1919;
+ font-variant-numeric:tabular-nums;letter-spacing:-0.003em;-webkit-font-smoothing:antialiased}
+/* E3 «lienzo de datos» con halo rosa centrado en (960, 500): el mismo fondo con el que llega el cuadro 6 y con el que sale al 8. */
+#s07-a-tiempo-fondo{position:absolute;inset:0;background:
+ radial-gradient(55% 60% at 50% 46.3%,#FBE6E2 0%,rgba(247,245,242,0) 72%),
+ radial-gradient(120% 90% at 50% 40%,#F7F5F2 55%,#F3F1ED 100%)}
+.s07-a-tiempo-grano{position:absolute;inset:0;pointer-events:none;mix-blend-mode:multiply;opacity:.04;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
+#s07-a-tiempo-escena{position:absolute;inset:0}
+#s07-a-tiempo-camara{position:absolute;inset:0;transform-origin:960px 540px}
+
+/* ---- ranking «Mayor riesgo»: maquetado en su caja final 1400 × 700 (centro 960, 520); la píldora es un recorte ---- */
+#s07-a-tiempo-rig{position:absolute;inset:0;transform-origin:960px 520px}
+#s07-a-tiempo-ranking{position:absolute;left:260px;top:170px;width:1400px;height:700px;border-radius:28px;background:#FFFFFF;
+ box-shadow:inset 0 0 0 2px #E7E2DC;clip-path:inset(244px 390px 344px 390px round 56px)}
+#s07-a-tiempo-pildora{position:absolute;left:390px;top:244px;width:620px;height:112px;display:flex;align-items:center;justify-content:center;color:#FFFFFF}
+.s07-a-tiempo-pildora-linea{display:flex;align-items:baseline;gap:20px;white-space:nowrap;line-height:1}
+.s07-a-tiempo-pildora-n{font-size:72px;font-weight:600}
+.s07-a-tiempo-pildora-t{font-size:36px;font-weight:500}
+#s07-a-tiempo-titulo{position:absolute;left:64px;top:30px;font-size:32px;font-weight:600;letter-spacing:-0.025em;line-height:1.25;white-space:nowrap}
+#s07-a-tiempo-subtitulo{position:absolute;left:64px;top:76px;font-size:26px;color:#6F6A65;line-height:1.3;white-space:nowrap}
+.s07-a-tiempo-fila{position:absolute;left:36px;width:1328px;height:56px;box-sizing:border-box;padding:0 28px;display:grid;
+ grid-template-columns:440px 1fr 64px;column-gap:28px;align-items:center}
+.s07-a-tiempo-nombre{font-size:28px;font-weight:500;line-height:1.2;white-space:nowrap}
+.s07-a-tiempo-pista{position:relative;height:20px;border-radius:999px;background:#F0EDE8}
+.s07-a-tiempo-relleno{position:absolute;left:2px;top:2px;bottom:2px;border-radius:999px;min-width:8px}
+.s07-a-tiempo-relleno.alto{background:#DE4D44}
+.s07-a-tiempo-relleno.medio{background:#C98100}
+.s07-a-tiempo-cifra{font-size:28px;font-weight:500;line-height:1.2;text-align:right}
+#s07-a-tiempo-leyenda{position:absolute;left:64px;top:652px;display:flex;align-items:center;gap:32px;font-size:24px;color:#6F6A65;line-height:1.25}
+.s07-a-tiempo-ley{display:flex;align-items:center;gap:10px}
+.s07-a-tiempo-punto{width:20px;height:20px;border-radius:50%;flex:none}
+
+/* ---- escenario 3D del objeto flotante: perspectiva en un padre quieto, sin preserve-3d ---- */
+#s07-a-tiempo-escenario{position:absolute;inset:0;perspective:1600px;perspective-origin:960px 458px}
+#s07-a-tiempo-sombra-fila{position:absolute;left:296px;top:430px;width:1328px;height:56px;border-radius:28px;
+ box-shadow:0 14px 36px rgba(30,25,25,.16),0 4px 10px rgba(30,25,25,.08)}
+#s07-a-tiempo-sombra{position:absolute;left:360px;top:240px;width:1200px;height:600px;border-radius:36px;transform-origin:600px 218px;
+ box-shadow:0 40px 120px rgba(30,25,25,.14),0 8px 24px rgba(30,25,25,.08)}
+/* La tarjeta de Iván ocupa la unión de la caja de su fila (296–1624 × 430–486) y su caja final (360–1560 × 240–840);
+   lo visible lo decide el recorte: de la fila a la tarjeta, sin tweens de width/height. */
+#s07-a-tiempo-ivan{position:absolute;left:296px;top:240px;width:1328px;height:600px;background:#EFECE7;transform-origin:664px 218px;
+ clip-path:inset(190px 0px 354px 0px round 36px)}
+#s07-a-tiempo-fila-copia{top:190px;left:0}
+#s07-a-tiempo-marco{position:absolute;left:64px;top:0;width:1200px;height:600px;border-radius:36px;box-shadow:inset 0 0 0 2px #E7E2DC}
+#s07-a-tiempo-contenido{position:absolute;left:64px;top:0;width:1200px;height:600px}
+
+#s07-a-tiempo-avatar{position:absolute;left:48px;top:48px;width:80px;height:80px;border-radius:50%;background:#475569;color:#FFFFFF;
+ display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:600;letter-spacing:0}
+#s07-a-tiempo-nombre-ivan{position:absolute;left:152px;top:44px;font-size:40px;font-weight:600;letter-spacing:-0.025em;line-height:1.2;white-space:nowrap}
+#s07-a-tiempo-matricula{position:absolute;left:152px;top:98px;font-size:26px;color:#6F6A65;line-height:1.3;white-space:nowrap}
+#s07-a-tiempo-chips{position:absolute;right:48px;top:63px;display:flex;align-items:center;gap:16px}
+.s07-a-tiempo-chip{display:inline-flex;align-items:center;gap:12px;padding:8px 20px;border-radius:999px;font-size:28px;font-weight:500;line-height:1.2;white-space:nowrap}
+.s07-a-tiempo-chip-punto{width:12px;height:12px;border-radius:50%;background:currentColor;flex:none}
+#s07-a-tiempo-chip-nivel{background:#FBE4E1;color:#B3261E}
+#s07-a-tiempo-chip-alza{background:#F0EDE8;color:#B3261E;gap:10px;padding:8px 20px 8px 16px}
+.s07-a-tiempo-chip svg{width:28px;height:28px;flex:none}
+#s07-a-tiempo-divisor{position:absolute;left:48px;top:160px;width:1104px;height:2px;background:#E7E2DC}
+
+.s07-a-tiempo-rotulo{position:absolute;font-size:26px;font-weight:500;color:#6F6A65;line-height:1.3;white-space:nowrap}
+#s07-a-tiempo-rot-restantes{left:48px;top:192px}
+#s07-a-tiempo-rot-faltas{left:376px;top:192px}
+/* odómetro de un renglón: ventana enmascarada (la estela no termina en un corte duro; en reposo la cifra no se toca) */
+#s07-a-tiempo-odo{position:absolute;left:44px;top:232px;width:96px;height:144px;overflow:hidden;
+ -webkit-mask-image:linear-gradient(180deg,transparent 0%,#000 16%,#000 84%,transparent 100%);
+ mask-image:linear-gradient(180deg,transparent 0%,#000 16%,#000 84%,transparent 100%)}
+#s07-a-tiempo-odo-tira{display:block}
+#s07-a-tiempo-odo-tira span{display:block;height:144px;line-height:144px;font-size:120px;font-weight:600;letter-spacing:-0.03em;text-align:left}
+#s07-a-tiempo-valor{position:absolute;right:48px;top:186px;display:flex;align-items:baseline;gap:10px;white-space:nowrap;line-height:1.2}
+.s07-a-tiempo-valor-n{font-size:32px;font-weight:600;letter-spacing:-0.025em}
+.s07-a-tiempo-valor-p{font-size:26px;color:#6F6A65}
+#s07-a-tiempo-barra{position:absolute;left:376px;top:240px;width:776px;height:100px}
+#s07-a-tiempo-lim-chip{position:absolute;left:517px;top:6px;width:0;display:flex;justify-content:center}
+.s07-a-tiempo-lim{border-radius:999px;background:rgba(179,38,30,.1);color:#B3261E;font-size:22px;font-weight:500;line-height:1.2;padding:4px 16px;white-space:nowrap}
+#s07-a-tiempo-pista-f{position:absolute;left:0;top:56px;width:776px;height:20px;border-radius:999px;background:#F0EDE8}
+#s07-a-tiempo-relleno-f{position:absolute;left:2px;top:2px;bottom:2px;width:383px;border-radius:999px;background:#DE4D44}
+#s07-a-tiempo-lim-linea{position:absolute;left:516px;top:40px;width:0;height:48px;border-left:2px dashed rgba(179,38,30,.7)}
+#s07-a-tiempo-cruce{position:absolute;left:376px;top:360px;display:inline-flex;align-items:center;gap:12px;padding:10px 24px 10px 18px;
+ border-radius:999px;background:#F0EDE8;font-size:26px;font-weight:500;line-height:1.25;white-space:nowrap}
+#s07-a-tiempo-cruce svg{width:28px;height:28px;flex:none;color:#6F6A65}
+
+#s07-a-tiempo-accion-halo{position:absolute;left:48px;top:448px;width:1104px;height:104px;border-radius:20px;box-shadow:0 0 0 8px rgba(0,97,254,.3)}
+#s07-a-tiempo-accion-fondo{position:absolute;left:48px;top:448px;width:1104px;height:104px;border-radius:20px;background:#F7F5F2}
+#s07-a-tiempo-accion-a{position:absolute;left:68px;top:462px;width:420px;height:76px}
+.s07-a-tiempo-ficha{position:absolute;left:0;top:6px;width:64px;height:64px;border-radius:16px;background:#FBE6E2;color:#C2410C;display:flex;align-items:center;justify-content:center}
+.s07-a-tiempo-ficha svg{width:32px;height:32px}
+.s07-a-tiempo-accion-rot{position:absolute;left:84px;top:0;font-size:24px;font-weight:500;color:#6F6A65;line-height:1.25;white-space:nowrap}
+#s07-a-tiempo-accion-b{position:absolute;left:152px;top:496px;font-size:32px;font-weight:500;line-height:1.25;white-space:nowrap}
+</style>
+<div id="root" data-composition-id="s07-a-tiempo" data-start="0" data-duration="7.6" data-width="1920" data-height="1080">
+  <!-- fondo a sangre: lienzo E3 con halo rosa y grano al 4 % (pista 0, todo el cuadro) -->
+  <div id="s07-a-tiempo-fondo" class="clip" data-start="0" data-duration="7.6" data-track-index="0">
+    <div class="s07-a-tiempo-grano"></div>
+  </div>
+
+  <div id="s07-a-tiempo-escena" class="clip" data-start="0" data-duration="7.6" data-track-index="1">
+    <div id="s07-a-tiempo-camara">
+      <!-- ranking real «Mayor riesgo» (BarrasPildora, analítica 3A) que nace de la píldora heredada -->
+      <div id="s07-a-tiempo-rig">
+        <div id="s07-a-tiempo-ranking">
+          <div id="s07-a-tiempo-pildora">
+            <div class="s07-a-tiempo-pildora-linea"><span class="s07-a-tiempo-pildora-n">9</span><span class="s07-a-tiempo-pildora-t">alumnos en riesgo</span></div>
+          </div>
+          <div id="s07-a-tiempo-titulo">Mayor riesgo</div>
+          <div id="s07-a-tiempo-subtitulo">Los 8 de mayor puntaje (de 9)</div>
+          <div id="s07-a-tiempo-fila-0" class="s07-a-tiempo-fila" style="top:132px">
+            <div class="s07-a-tiempo-nombre">González Campos Mauricio</div>
+            <div class="s07-a-tiempo-pista"><div id="s07-a-tiempo-relleno-0" class="s07-a-tiempo-relleno alto" style="width:calc((100% - 4px) * .70)"></div></div>
+            <div id="s07-a-tiempo-cifra-0" class="s07-a-tiempo-cifra">70</div>
+          </div>
+          <div id="s07-a-tiempo-fila-1" class="s07-a-tiempo-fila" style="top:196px">
+            <div class="s07-a-tiempo-nombre">Mendoza Ríos Héctor</div>
+            <div class="s07-a-tiempo-pista"><div id="s07-a-tiempo-relleno-1" class="s07-a-tiempo-relleno alto" style="width:calc((100% - 4px) * .66)"></div></div>
+            <div id="s07-a-tiempo-cifra-1" class="s07-a-tiempo-cifra">66</div>
+          </div>
+          <div id="s07-a-tiempo-fila-2" class="s07-a-tiempo-fila" style="top:260px">
+            <div class="s07-a-tiempo-nombre">Cruz Rojas Iván</div>
+            <div class="s07-a-tiempo-pista"><div id="s07-a-tiempo-relleno-2" class="s07-a-tiempo-relleno alto" style="width:calc((100% - 4px) * .64)"></div></div>
+            <div id="s07-a-tiempo-cifra-2" class="s07-a-tiempo-cifra">64</div>
+          </div>
+          <div id="s07-a-tiempo-fila-3" class="s07-a-tiempo-fila" style="top:324px">
+            <div class="s07-a-tiempo-nombre">Díaz Castro Miguel</div>
+            <div class="s07-a-tiempo-pista"><div id="s07-a-tiempo-relleno-3" class="s07-a-tiempo-relleno medio" style="width:calc((100% - 4px) * .51)"></div></div>
+            <div id="s07-a-tiempo-cifra-3" class="s07-a-tiempo-cifra">51</div>
+          </div>
+          <div id="s07-a-tiempo-fila-4" class="s07-a-tiempo-fila" style="top:388px">
+            <div class="s07-a-tiempo-nombre">Aguilar Ramos Luis</div>
+            <div class="s07-a-tiempo-pista"><div id="s07-a-tiempo-relleno-4" class="s07-a-tiempo-relleno medio" style="width:calc((100% - 4px) * .49)"></div></div>
+            <div id="s07-a-tiempo-cifra-4" class="s07-a-tiempo-cifra">49</div>
+          </div>
+          <div id="s07-a-tiempo-fila-5" class="s07-a-tiempo-fila" style="top:452px">
+            <div class="s07-a-tiempo-nombre">Hernández Peña Paola</div>
+            <div class="s07-a-tiempo-pista"><div id="s07-a-tiempo-relleno-5" class="s07-a-tiempo-relleno medio" style="width:calc((100% - 4px) * .47)"></div></div>
+            <div id="s07-a-tiempo-cifra-5" class="s07-a-tiempo-cifra">47</div>
+          </div>
+          <div id="s07-a-tiempo-fila-6" class="s07-a-tiempo-fila" style="top:516px">
+            <div class="s07-a-tiempo-nombre">Rodríguez Domínguez Daniela</div>
+            <div class="s07-a-tiempo-pista"><div id="s07-a-tiempo-relleno-6" class="s07-a-tiempo-relleno medio" style="width:calc((100% - 4px) * .43)"></div></div>
+            <div id="s07-a-tiempo-cifra-6" class="s07-a-tiempo-cifra">43</div>
+          </div>
+          <div id="s07-a-tiempo-fila-7" class="s07-a-tiempo-fila" style="top:580px">
+            <div class="s07-a-tiempo-nombre">Flores Cortés Sofía</div>
+            <div class="s07-a-tiempo-pista"><div id="s07-a-tiempo-relleno-7" class="s07-a-tiempo-relleno medio" style="width:calc((100% - 4px) * .42)"></div></div>
+            <div id="s07-a-tiempo-cifra-7" class="s07-a-tiempo-cifra">42</div>
+          </div>
+          <div id="s07-a-tiempo-leyenda">
+            <span class="s07-a-tiempo-ley"><span class="s07-a-tiempo-punto" style="background:#DE4D44"></span>Alto</span>
+            <span class="s07-a-tiempo-ley"><span class="s07-a-tiempo-punto" style="background:#C98100"></span>Medio</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- objeto flotante: la fila de Iván se despega y se abre en su tarjeta (pose 3D 0 → pico → 0) -->
+      <div id="s07-a-tiempo-escenario">
+        <div id="s07-a-tiempo-sombra-fila"></div>
+        <div id="s07-a-tiempo-sombra"></div>
+        <div id="s07-a-tiempo-ivan">
+          <div id="s07-a-tiempo-fila-copia" class="s07-a-tiempo-fila">
+            <div class="s07-a-tiempo-nombre">Cruz Rojas Iván</div>
+            <div class="s07-a-tiempo-pista"><div class="s07-a-tiempo-relleno alto" style="width:calc((100% - 4px) * .64)"></div></div>
+            <div class="s07-a-tiempo-cifra">64</div>
+          </div>
+          <div id="s07-a-tiempo-marco"></div>
+          <div id="s07-a-tiempo-contenido">
+            <div id="s07-a-tiempo-avatar">CR</div>
+            <div id="s07-a-tiempo-nombre-ivan">Cruz Rojas Iván</div>
+            <div id="s07-a-tiempo-matricula">E260017 · 3A</div>
+            <div id="s07-a-tiempo-chips">
+              <span id="s07-a-tiempo-chip-nivel" class="s07-a-tiempo-chip"><span class="s07-a-tiempo-chip-punto"></span>Alto · 64 / 100</span>
+              <span id="s07-a-tiempo-chip-alza" class="s07-a-tiempo-chip"><svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" data-lucide="trending-up" aria-hidden="true"><path d="M16 7h6v6"/><path d="m22 7-8.5 8.5-5-5L2 17"/></svg>Al alza</span>
+            </div>
+            <div id="s07-a-tiempo-divisor"></div>
+
+            <div id="s07-a-tiempo-rot-restantes" class="s07-a-tiempo-rotulo">Faltas restantes</div>
+            <div id="s07-a-tiempo-odo"><span id="s07-a-tiempo-odo-tira"><span>&#8199;</span><span>2</span></span></div>
+
+            <div id="s07-a-tiempo-rot-faltas" class="s07-a-tiempo-rotulo">Faltas</div>
+            <div id="s07-a-tiempo-valor"><span class="s07-a-tiempo-valor-n">7</span><span class="s07-a-tiempo-valor-p">(14.9&nbsp;%)</span></div>
+            <div id="s07-a-tiempo-barra">
+              <div id="s07-a-tiempo-pista-f"><div id="s07-a-tiempo-relleno-f"></div></div>
+              <div id="s07-a-tiempo-lim-linea"></div>
+              <div id="s07-a-tiempo-lim-chip"><span class="s07-a-tiempo-lim">Límite 20&nbsp;%</span></div>
+            </div>
+            <div id="s07-a-tiempo-cruce"><svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" data-lucide="calendar-days" aria-hidden="true"><path d="M8 2v3"/><path d="M16 2v3"/><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M8 13h.01"/><path d="M12 13h.01"/><path d="M16 13h.01"/><path d="M8 17h.01"/><path d="M12 17h.01"/><path d="M16 17h.01"/></svg>Cruce estimado: semana 9</div>
+
+            <div id="s07-a-tiempo-accion-halo"></div>
+            <div id="s07-a-tiempo-accion-fondo"></div>
+            <div id="s07-a-tiempo-accion-a">
+              <span class="s07-a-tiempo-ficha"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" data-lucide="calendar-check" aria-hidden="true"><path d="M8 2v3"/><path d="M16 2v3"/><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="m9 15 2 2 4-4"/></svg></span>
+              <span class="s07-a-tiempo-accion-rot">Acción sugerida</span>
+            </div>
+            <div id="s07-a-tiempo-accion-b">Contactar al alumno esta semana</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- estela vertical del odómetro (feGaussianBlur en un eje, ligada a la velocidad; filter:none en reposo) -->
+  <svg width="0" height="0" aria-hidden="true" style="position:absolute">
+    <filter id="s07-a-tiempo-mb" x="-10%" y="-6%" width="120%" height="112%" color-interpolation-filters="sRGB">
+      <feGaussianBlur id="s07-a-tiempo-mb-g" stdDeviation="0 0" />
+    </filter>
+  </svg>
+</div>
+<!-- GSAP local: el CDN responde 403 en esta máquina (frame.md §1) -->
+<script src="assets/vendor/gsap.min.js"></script>
+<script>
+    (function () {
+        var ID = 's07-a-tiempo';
+        // Obturador en segundos: el largo de la estela no depende de los fps del render (PILOTO §3c).
+        var OBT = 1 / 60;
+        function $(s) { return document.getElementById(ID + '-' + s); }
+
+        // Tiempos (locales). Los que llevan sonido coinciden con sfx_cues: el tween nombrado empieza o termina ahí.
+        var T = {
+            morph: 0.05,      // soft-in: la píldora se abre en la tarjeta «Mayor riesgo»
+            filas: 0.20,      // barrido de las ocho filas
+            foco: 1.05,       // foco selectivo vivo en la fila de Iván
+            despegue: 1.40,   // tap: la fila se despega
+            refoco: 1.70,     // el desenfoque del resto vuelve a 0
+            abre: 1.75,       // la fila se abre en la tarjeta (pico de velocidad 2.075: whoosh-s 2.07)
+            cascada: 2.15,
+            faltas: 2.45,     // fill: el relleno arranca
+            odo: 2.60,        // la cifra «2» rueda un renglón (tick al asentarse, 2.85)
+            valor: 2.80,
+            cruce: 4.10,      // pop-2
+            accion: 5.05,     // soft-in
+            halo: 6.45,
+            fin: 7.6
+        };
+
+        var tl = gsap.timeline({ paused: true });
+
+        // ---------- helpers del piloto (s99-piloto.html) ----------
+        function velocidad(ease, p, dur) {
+            var h = 0.002;
+            var a = Math.max(0, p - h);
+            var b = Math.min(1, p + h);
+            return (ease(b) - ease(a)) / (b - a) / dur;
+        }
+        // Movimiento con estela direccional: sigma = 0.29 · v · OBT, filter:none en reposo.
+        function conRastro(o) {
+            var ease = gsap.parseEase(o.curva);
+            var st = { p: 0 };
+            var filtro = 'url(#' + o.nodo.parentNode.id + ')';
+            function aplicar() {
+                var p = st.p;
+                o.pos(ease(p), p);
+                var v = (p <= 0 || p >= 1) ? 0 : Math.abs(o.dist) * velocidad(ease, p, o.dur);
+                var s = Math.min(o.max, 0.29 * v * OBT);
+                o.nodo.setAttribute('stdDeviation', o.eje === 'x' ? s.toFixed(2) + ' 0' : '0 ' + s.toFixed(2));
+                o.el.style.filter = s < 0.3 ? 'none' : filtro;
+            }
+            aplicar();
+            tl.fromTo(st, { p: 0 }, { p: 1, duration: o.dur, ease: 'none', onUpdate: aplicar, immediateRender: false }, o.at);
+        }
+        // Desenfoque como función pura del tiempo sobre un objeto de estado compartido: blur(px) > 0.05, «none» en reposo.
+        function pintarBlur(els, d) {
+            var f = d < 0.05 ? 'none' : 'blur(' + d.toFixed(2) + 'px)';
+            for (var i = 0; i < els.length; i++) { els[i].style.filter = f; }
+        }
+        function blurTramo(st, els, at, dur, desde, hasta, curva, primero) {
+            tl.fromTo(st, { d: desde }, { d: hasta, duration: dur, ease: curva, immediateRender: !!primero,
+                onUpdate: function () { pintarBlur(els, st.d); } }, at);
+        }
+
+        // ---------- Escena 1 (0.0–1.05): la píldora se abre en «Mayor riesgo» y las filas barren ----------
+        var ranking = $('ranking');
+        // Recorte de radio fijo de la caja de la píldora (650–1270 × 414–526) a la caja final (260–1660 × 170–870); tinta → blanco.
+        tl.fromTo(ranking,
+            { clipPath: 'inset(244px 390px 344px 390px round 56px)', backgroundColor: '#1E1919' },
+            { clipPath: 'inset(0px 0px 0px 0px round 28px)', backgroundColor: '#FFFFFF', duration: 0.5, ease: 'power3.inOut' }, T.morph);
+        // Contenido viejo fuera antes del 40 % del morph; el nuevo después del 60 %.
+        tl.fromTo($('pildora'), { opacity: 1 }, { opacity: 0, duration: 0.2, ease: 'power1.in' }, T.morph);
+        tl.fromTo([$('titulo'), $('subtitulo')], { opacity: 0, y: 10 },
+            { opacity: 1, y: 0, duration: 0.2, ease: 'power2.out', stagger: 0.03 }, 0.35);
+
+        var filas = [], rellenos = [], cifras = [];
+        for (var i = 0; i < 8; i++) { filas.push($('fila-' + i)); rellenos.push($('relleno-' + i)); cifras.push($('cifra-' + i)); }
+        // Nombre y pista con la fila; la cifra de la fila se oculta aparte y llega 0.3 s después de su barra.
+        for (var k = 0; k < 8; k++) {
+            var tk = T.filas + 0.03 * k;
+            tl.fromTo(filas[k], { opacity: 0, x: -12 }, { opacity: 1, x: 0, duration: 0.3, ease: 'power2.out' }, tk);
+            tl.fromTo(rellenos[k], { clipPath: 'inset(0% 100% 0% 0%)' }, { clipPath: 'inset(0% 0% 0% 0%)', duration: 0.5, ease: 'power4.out' }, tk);
+            tl.fromTo(cifras[k], { opacity: 0 }, { opacity: 1, duration: 0.3, ease: 'power1.out' }, tk + 0.3);
+        }
+        tl.fromTo($('leyenda'), { opacity: 0 }, { opacity: 1, duration: 0.3, ease: 'power1.out' }, 0.72);
+
+        // ---------- Escena 2 (1.05–2.45): foco selectivo, despegue y apertura en la tarjeta de Iván ----------
+        var contexto = [$('titulo'), $('subtitulo'), $('leyenda')];
+        for (var c = 0; c < 8; c++) { if (c !== 2) { contexto.push(filas[c]); } }
+        var dof = { d: 0 };
+        // Foco vivo 0 → 6 px y opacidad 0.35 en el resto; la fila de Iván queda nítida.
+        blurTramo(dof, contexto, T.foco, 0.30, 0, 6, 'power2.inOut', true);
+        tl.fromTo(contexto, { opacity: 1 }, { opacity: 0.35, duration: 0.30, ease: 'power2.inOut', immediateRender: false }, T.foco);
+        // La copia de la fila (sobre #EFECE7) entra encima de la fila real; idéntica, solo se ve el resaltado.
+        var ivan = $('ivan');
+        tl.fromTo(ivan, { opacity: 0 }, { opacity: 1, duration: 0.30, ease: 'power2.inOut' }, T.foco);
+        // Ya cubierta por la copia opaca: se apaga para que no asome debajo cuando la copia se despega.
+        tl.set(filas[2], { visibility: 'hidden' }, 1.36);
+
+        // Despegue: z +40, scale 1.04, power3.out, con su sombra de fila.
+        tl.fromTo(ivan, { z: 0, scale: 1 }, { z: 40, scale: 1.04, duration: 0.30, ease: 'power3.out', immediateRender: false }, T.despegue);
+        tl.fromTo($('sombra-fila'), { opacity: 0 }, { opacity: 1, duration: 0.30, ease: 'power3.out' }, T.despegue);
+
+        // Desenfoque total 0.95 s: vuelve a 0 (filter: none); queda solo la atenuación.
+        blurTramo(dof, contexto, T.refoco, 0.30, 6, 0, 'power2.inOut', false);
+
+        // Apertura anclada con recorte (fila → tarjeta 1200 × 600, radio 36), sobre todo hacia abajo; un solo tween.
+        tl.fromTo(ivan,
+            { clipPath: 'inset(190px 0px 354px 0px round 36px)', backgroundColor: '#EFECE7', z: 40, scale: 1.04 },
+            { clipPath: 'inset(0px 64px 0px 64px round 36px)', backgroundColor: '#FFFFFF', z: 0, scale: 1, duration: 0.65, ease: 'power3.inOut', immediateRender: false }, T.abre);
+        // Pose 0 → pico (rotX 4°, rotY −6° hacia 2.05 s) → 0 (plana a 2.40 s).
+        tl.fromTo(ivan, { rotationX: 0, rotationY: 0 }, { rotationX: 4, rotationY: -6, duration: 0.30, ease: 'sine.inOut', immediateRender: false }, T.abre);
+        tl.fromTo(ivan, { rotationX: 4, rotationY: -6 }, { rotationX: 0, rotationY: 0, duration: 0.35, ease: 'sine.inOut', immediateRender: false }, 2.05);
+        // Sombra de tinta en capa aparte: crece de la caja de la fila a la de la tarjeta.
+        tl.fromTo($('sombra'), { opacity: 0, scaleX: 1328 / 1200, scaleY: 56 / 600 },
+            { opacity: 1, scaleX: 1, scaleY: 1, duration: 0.65, ease: 'power3.inOut' }, T.abre);
+        tl.fromTo($('sombra-fila'), { opacity: 1 }, { opacity: 0, duration: 0.30, ease: 'power2.in', immediateRender: false }, T.abre);
+        // Relevo de contenido dentro de la tarjeta: la fila fuera antes del 40 %, el marco al final.
+        tl.fromTo($('fila-copia'), { opacity: 1 }, { opacity: 0, duration: 0.24, ease: 'power1.in' }, T.abre);
+        tl.fromTo($('marco'), { opacity: 0 }, { opacity: 1, duration: 0.2, ease: 'power1.out' }, 2.20);
+        // El ranking retrocede detrás: sus filas quedan al 12 % (0.35 × 0.343) y escala 0.97.
+        tl.fromTo($('rig'), { opacity: 1, scale: 1 }, { opacity: 0.12 / 0.35, scale: 0.97, duration: 0.65, ease: 'power3.inOut' }, T.abre);
+
+        // Cascada (2.15–2.65): avatar, nombre, matrícula, nivel y tendencia.
+        tl.fromTo([$('avatar'), $('nombre-ivan'), $('matricula'), $('chip-nivel'), $('chip-alza')], { opacity: 0, y: 20 },
+            { opacity: 1, y: 0, duration: 0.3, ease: 'power3.out', stagger: 0.05 }, T.cascada);
+        tl.fromTo($('divisor'), { opacity: 0 }, { opacity: 1, duration: 0.3, ease: 'power1.out' }, 2.30);
+
+        // ---------- Escena 3 (2.45–4.45): la barra frente al límite y «2» faltas restantes ----------
+        tl.fromTo([$('rot-restantes'), $('rot-faltas'), $('pista-f'), $('lim-linea'), $('lim-chip')], { opacity: 0 },
+            { opacity: 1, duration: 0.2, ease: 'power2.out' }, T.faltas);
+        // 14.9 % sobre un eje de 0 a 30 %: el relleno mide (776 − 4) × 14.9 / 30 = 383 px; el hueco hasta la línea es el margen.
+        tl.fromTo($('relleno-f'), { clipPath: 'inset(0% 100% 0% 0%)' }, { clipPath: 'inset(0% 0% 0% 0%)', duration: 0.5, ease: 'power4.out' }, T.faltas);
+        var tira = $('odo-tira');
+        conRastro({ el: tira, nodo: $('mb-g'), at: T.odo, dur: 0.25, curva: 'power3.out', dist: 144, eje: 'y', max: 16,
+            pos: function (e) { gsap.set(tira, { y: -144 * e }); } });
+        tl.addLabel('read:faltas-restantes#0', T.odo + 0.25);
+        tl.fromTo($('valor'), { opacity: 0 }, { opacity: 1, duration: 0.4, ease: 'power1.out' }, T.valor);
+        tl.fromTo($('cruce'), { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.35, ease: 'power3.out' }, T.cruce);
+
+        // ---------- Escena 4 (4.45–7.6): la acción sugerida y su halo de foco ----------
+        var accA = $('accion-a'), accB = $('accion-b');
+        tl.fromTo($('accion-fondo'), { opacity: 0 }, { opacity: 1, duration: 0.3, ease: 'power2.out' }, T.accion);
+        var bA = { d: 10 }, bB = { d: 10 };
+        pintarBlur([accA], 10);
+        pintarBlur([accB], 10);
+        blurTramo(bA, [accA], T.accion, 0.36, 10, 0, 'power2.out', true);
+        blurTramo(bB, [accB], T.accion + 0.09, 0.36, 10, 0, 'power2.out', true);
+        tl.fromTo(accA, { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.36, ease: 'power3.out' }, T.accion);
+        tl.fromTo(accB, { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.36, ease: 'power3.out' }, T.accion + 0.09);
+        tl.addLabel('read:accion-sugerida#1', T.accion + 0.45);
+        // Halo de foco nativo (sin cursor ni pulsación): es lo siguiente que hace la docente.
+        tl.fromTo($('accion-halo'), { opacity: 0 }, { opacity: 1, duration: 0.2, ease: 'power2.out' }, T.halo);
+
+        // Cuadro quieto deliberado desde 6.65 s; la duración la fija este ancla.
+        tl.set({}, {}, T.fin);
+
+        window.__timelines = window.__timelines || {};
+        window.__timelines[ID] = tl;
+    })();
+</script>
+</template>
