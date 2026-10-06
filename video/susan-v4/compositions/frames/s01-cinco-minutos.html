@@ -10,14 +10,21 @@
 /* grano: imagen estatica al 4 % (frame.md 4), nunca un filtro vivo sobre el cuadro */
 .s01-cinco-minutos-grano{position:absolute;inset:0;pointer-events:none;mix-blend-mode:multiply;opacity:.04;
  background-image:url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+/* camara y rig de la cifra: los dos llevan la misma escala del rack focus (origen en el centro del lienzo); despues de la
+   escena 1 la cifra no comparte ningun otro movimiento, para quedar quieta al pixel mientras la voz la nombra */
 .s01-cinco-minutos-camara{position:absolute;inset:0;transform-origin:50% 50%}
 .s01-cinco-minutos-escena{position:absolute;inset:0}
+/* capa de la barra (pista, tinta y horas): su acercamiento durante el relleno sale del extremo izquierdo de la barra */
+.s01-cinco-minutos-barra{position:absolute;inset:0;transform-origin:360px 560px}
 /* la barra de la clase y su tramo de tinta: superficies del tamano de la union barra + primera casilla, recortadas con
    clip-path (morph entre cajas de distinto aspecto sin escala no uniforme ni width/height) */
 .s01-cinco-minutos-sup{position:absolute;left:360px;top:546px;width:1200px;height:88px}
 .s01-cinco-minutos-sup-in{position:absolute;inset:0}
 #s01-cinco-minutos-pista{background:#F0EDE8;clip-path:inset(0px 0px 60px 0px round 14px)}
-#s01-cinco-minutos-tinta{background:#1E1919;clip-path:inset(0px 1200px 60px 0px round 14px 0px 0px 14px)}
+/* la tinta va dentro de una mascara con el mismo recorte redondeado que la pista: su lado izquierdo hereda el radio de la
+   pista (14 en la barra, 10 en la casilla) y el derecho queda recto */
+#s01-cinco-minutos-tinta-m{clip-path:inset(0px 0px 60px 0px round 14px)}
+#s01-cinco-minutos-tinta{background:#1E1919;clip-path:inset(0px 1200px 60px 0px)}
 .s01-cinco-minutos-hora{position:absolute;top:588px;width:120px;font-size:24px;font-weight:500;line-height:31px;color:#6F6A65;letter-spacing:0;white-space:nowrap}
 /* cifra heroe: ventana de 192 px (1.2 x cuerpo) con mascara de desvanecido; linea base en y = 480, borde izquierdo en x = 360 */
 .s01-cinco-minutos-cifra{position:absolute;left:340px;top:328px;width:440px;height:192px}
@@ -34,8 +41,10 @@
 .s01-cinco-minutos-cuenta{position:absolute;left:200px;top:112px;font-size:40px;font-weight:500;line-height:52px;color:#6F6A65;letter-spacing:0;white-space:nowrap}
 /* rejilla del semestre: 16 semanas x 3 sesiones (Lun, Mie, Vie); cada casilla con su astilla de 5 min a la izquierda */
 .s01-cinco-minutos-casilla{position:absolute;width:60px;height:44px;border-radius:10px;background:#F0EDE8}
-.s01-cinco-minutos-astilla{position:absolute;width:6px;height:44px}
-.s01-cinco-minutos-astilla-in{position:absolute;inset:0;border-radius:6px 0 0 6px;background:#1E1919;transform-origin:0 50%}
+/* la astilla vive dentro de una mascara con la silueta de su casilla (60 x 44, radio 10): su lado izquierdo tiene el mismo
+   radio que la casilla aunque mida 6 px, y la onda de la cuenta la ensancha sin deformar esa esquina */
+.s01-cinco-minutos-astilla{position:absolute;width:60px;height:44px;border-radius:10px;overflow:hidden}
+.s01-cinco-minutos-astilla-in{position:absolute;left:0;top:0;width:6px;height:44px;background:#1E1919;transform-origin:0 50%}
 .s01-cinco-minutos-rot{position:absolute;font-size:22px;font-weight:400;line-height:29px;color:#6F6A65;letter-spacing:0;white-space:nowrap}
 .s01-cinco-minutos-rot-s{width:60px;text-align:center;top:552px}
 .s01-cinco-minutos-rot-d{left:344px;width:80px;text-align:right}
@@ -44,7 +53,8 @@
 .s01-cinco-minutos-redondo{position:absolute;border-radius:50%}
 #s01-cinco-minutos-sombra{inset:0;box-shadow:0 30px 90px rgba(30,25,25,.18)}
 #s01-cinco-minutos-anillo{inset:0;background:#FFFFFF}
-#s01-cinco-minutos-disco{left:15px;top:15px;width:168px;height:168px;background:#1E1919}
+/* el disco nace en tinta plena y crece por su radio (clip-path circle) al ritmo en que llegan las astillas */
+#s01-cinco-minutos-disco{left:15px;top:15px;width:168px;height:168px;background:#1E1919;clip-path:circle(0px at 84px 84px)}
 #s01-cinco-minutos-icono{position:absolute;left:63px;top:63px;width:72px;height:72px;color:#FFFFFF}
 #s01-cinco-minutos-icono svg{display:block;width:72px;height:72px}
 </style>
@@ -56,46 +66,54 @@
   </div>
 
   <div id="s01-cinco-minutos-plano" class="clip s01-cinco-minutos-capa" data-start="0" data-duration="6.4" data-track-index="1">
-    <!-- camara (escala del rack focus, acercamiento y regreso) y escena (desenfoque del rack focus) -->
-    <div id="s01-cinco-minutos-camara" class="s01-cinco-minutos-camara">
-      <div id="s01-cinco-minutos-escena" class="s01-cinco-minutos-escena">
-        <div id="s01-cinco-minutos-rejilla" class="s01-cinco-minutos-capa"></div>
-        <div class="s01-cinco-minutos-sup"><div id="s01-cinco-minutos-pista" class="s01-cinco-minutos-sup-in"></div></div>
-        <div id="s01-cinco-minutos-astillas" class="s01-cinco-minutos-capa"></div>
-        <div id="s01-cinco-minutos-tinta-w" class="s01-cinco-minutos-sup"><div id="s01-cinco-minutos-tinta" class="s01-cinco-minutos-sup-in"></div></div>
-        <div id="s01-cinco-minutos-h07" class="s01-cinco-minutos-hora" style="left:360px">07:00</div>
-        <div id="s01-cinco-minutos-h08" class="s01-cinco-minutos-hora" style="left:1440px;text-align:right">08:00</div>
-        <div id="s01-cinco-minutos-rotulos" class="s01-cinco-minutos-capa"></div>
-
-        <div id="s01-cinco-minutos-cifra" class="s01-cinco-minutos-cifra">
-          <div class="s01-cinco-minutos-ventana">
-            <div id="s01-cinco-minutos-cambio" class="s01-cinco-minutos-cambio">
-              <!-- fila A: «5 min» -> «240 min» (odometro de tres columnas) -->
-              <div class="s01-cinco-minutos-fila" style="top:0">
-                <span class="s01-cinco-minutos-col" style="left:16px"><span id="s01-cinco-minutos-tira1" class="s01-cinco-minutos-tira"></span></span>
-                <span id="s01-cinco-minutos-col2" class="s01-cinco-minutos-col" style="left:101.2px"><span id="s01-cinco-minutos-tira2" class="s01-cinco-minutos-tira"></span></span>
-                <span id="s01-cinco-minutos-col3" class="s01-cinco-minutos-col" style="left:186.4px"><span id="s01-cinco-minutos-tira3" class="s01-cinco-minutos-tira"></span></span>
-                <span id="s01-cinco-minutos-min" class="s01-cinco-minutos-unidad" style="left:123.2px">min</span>
-              </div>
-              <!-- fila B: «4 h», entra desde abajo en la misma columna -->
-              <div class="s01-cinco-minutos-fila" style="top:192px">
-                <span class="s01-cinco-minutos-dig" style="left:16px">4</span>
-                <span class="s01-cinco-minutos-unidad" style="left:123.2px">h</span>
-              </div>
-            </div>
-          </div>
-          <div id="s01-cinco-minutos-cuenta" class="s01-cinco-minutos-cuenta">= 240 min</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- la ficha de tinta en la que se juntan las 48 astillas: sombra y anillo debajo de las astillas, disco e icono encima -->
+    <!-- la ficha de tinta en la que se juntan las 48 astillas: sombra, anillo y disco DEBAJO de las astillas (cada astilla
+         desaparece al cruzar el borde del disco), icono encima de todo -->
     <div class="s01-cinco-minutos-ficha">
       <div id="s01-cinco-minutos-sombra" class="s01-cinco-minutos-redondo"></div>
       <div id="s01-cinco-minutos-anillo" class="s01-cinco-minutos-redondo"></div>
-    </div>
-    <div class="s01-cinco-minutos-ficha">
       <div id="s01-cinco-minutos-disco" class="s01-cinco-minutos-redondo"></div>
+    </div>
+
+    <!-- camara (solo la escala del rack focus) y escena (desenfoque del rack focus) -->
+    <div id="s01-cinco-minutos-camara" class="s01-cinco-minutos-camara">
+      <div id="s01-cinco-minutos-escena" class="s01-cinco-minutos-escena">
+        <div id="s01-cinco-minutos-rejilla" class="s01-cinco-minutos-capa"></div>
+        <div id="s01-cinco-minutos-astillas" class="s01-cinco-minutos-capa"></div>
+        <!-- la barra va encima de la rejilla y de las astillas: al plegarse pasa por encima de las casillas que ya entraron -->
+        <div id="s01-cinco-minutos-barra" class="s01-cinco-minutos-barra">
+          <div class="s01-cinco-minutos-sup"><div id="s01-cinco-minutos-pista" class="s01-cinco-minutos-sup-in"></div></div>
+          <div id="s01-cinco-minutos-tinta-w" class="s01-cinco-minutos-sup"><div id="s01-cinco-minutos-tinta-m" class="s01-cinco-minutos-sup-in"><div id="s01-cinco-minutos-tinta" class="s01-cinco-minutos-sup-in"></div></div></div>
+          <div id="s01-cinco-minutos-h07" class="s01-cinco-minutos-hora" style="left:360px">07:00</div>
+          <div id="s01-cinco-minutos-h08" class="s01-cinco-minutos-hora" style="left:1440px;text-align:right">08:00</div>
+        </div>
+        <div id="s01-cinco-minutos-rotulos" class="s01-cinco-minutos-capa"></div>
+      </div>
+    </div>
+
+    <!-- la cifra en su propio rig: comparte con la camara solo la escala del rack; quieta al pixel de 1.65 a 2.95 s -->
+    <div id="s01-cinco-minutos-cifra-rig" class="s01-cinco-minutos-camara">
+      <div id="s01-cinco-minutos-cifra" class="s01-cinco-minutos-cifra">
+        <div class="s01-cinco-minutos-ventana">
+          <div id="s01-cinco-minutos-cambio" class="s01-cinco-minutos-cambio">
+            <!-- fila A: «5 min» -> «240 min» (odometro de tres columnas) -->
+            <div class="s01-cinco-minutos-fila" style="top:0">
+              <span class="s01-cinco-minutos-col" style="left:16px"><span id="s01-cinco-minutos-tira1" class="s01-cinco-minutos-tira"></span></span>
+              <span id="s01-cinco-minutos-col2" class="s01-cinco-minutos-col" style="left:101.2px"><span id="s01-cinco-minutos-tira2" class="s01-cinco-minutos-tira"></span></span>
+              <span id="s01-cinco-minutos-col3" class="s01-cinco-minutos-col" style="left:186.4px"><span id="s01-cinco-minutos-tira3" class="s01-cinco-minutos-tira"></span></span>
+              <span id="s01-cinco-minutos-min" class="s01-cinco-minutos-unidad" style="left:123.2px">min</span>
+            </div>
+            <!-- fila B: «4 h», entra desde abajo en la misma columna -->
+            <div class="s01-cinco-minutos-fila" style="top:192px">
+              <span class="s01-cinco-minutos-dig" style="left:16px">4</span>
+              <span class="s01-cinco-minutos-unidad" style="left:123.2px">h</span>
+            </div>
+          </div>
+        </div>
+        <div id="s01-cinco-minutos-cuenta" class="s01-cinco-minutos-cuenta">= 240 min</div>
+      </div>
+    </div>
+
+    <div class="s01-cinco-minutos-ficha">
       <div id="s01-cinco-minutos-icono"><svg xmlns="http://www.w3.org/2000/svg" width="72" height="72" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" data-lucide="scan-face" aria-hidden="true"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><path d="M9 9h.01"/><path d="M15 9h.01"/></svg></div>
     </div>
 
@@ -119,8 +137,8 @@
         var PASO = 85.2;                   // avance de cifra tabular a 160 px con -0.03em
         var C = { x: 960, y: 500 };        // centro de la ficha (handoff_out)
         // Tiempos que comparten el cuadro y sfx_cues (contrato: el tween nombrado empieza o termina ahi).
-        var T = { foco: 0.10, giro: 0.20, tic5: 1.65, relleno: 1.95, pliegue: 2.95, cuenta: 3.00, ola: 3.25, unidad: 3.45, tic4h: 3.65,
-            igual: 4.45, junta: 5.45, ficha: 6.05, quieta: 6.20 };
+        var T = { foco: 0.10, giro: 0.90, tic5: 1.65, relleno: 1.95, pliegue: 2.95, cuenta: 3.00, ola: 3.25, unidad: 3.45, tic4h: 3.65,
+            igual: 4.45, junta: 5.45, disco: 5.74, ficha: 6.05, quieta: 6.20 };
         function $(s) { return document.getElementById(ID + '-' + s); }
         function clamp01(v) { return v < 0 ? 0 : v > 1 ? 1 : v; }
         function lerp(a, b, e) { return a + (b - a) * e; }
@@ -128,8 +146,8 @@
         // ---- odometro: tiras generadas una vez (U+2007 = espacio de cifra) ----
         var FIG = ' ';
         function tira(el, items) { var h = ''; for (var i = 0; i < items.length; i++) { h += '<span>' + items[i] + '</span>'; } el.innerHTML = h; }
-        // centenas: vacio, una vuelta hasta el 5 (renglon 10) y luego 6..9, 0, 1, 2 (renglon 17)
-        var t1 = [FIG, '6', '7', '8', '9', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '1', '2'];
+        // centenas: vacio -> 5 (un renglon, escena 1) y luego 6..9, 0, 1, 2 (renglon 8, escena 3)
+        var t1 = [FIG, '5', '6', '7', '8', '9', '0', '1', '2'];
         var t2 = [FIG]; for (var a = 1; a <= 14; a++) { t2.push(String(a % 10)); }    // decenas: una vuelta + 4
         var t3 = [FIG]; for (var b = 1; b <= 20; b++) { t3.push(String(b % 10)); }    // unidades: dos vueltas -> 0
         tira($('tira1'), t1); tira($('tira2'), t2); tira($('tira3'), t3);
@@ -206,22 +224,25 @@
             tl.fromTo(st, { d: desde }, { d: 0, duration: dur, ease: curva, onUpdate: aplicar, immediateRender: false }, at);
         }
 
-        var camara = $('camara');
+        var camara = $('camara'), cifraRig = $('cifra-rig'), barra = $('barra');
         var tira1 = $('tira1'), tira2 = $('tira2'), tira3 = $('tira3');
         gsap.set([tira1, tira2, tira3], { y: 0 });
 
-        // ================= Escena 1 (0.0-1.15): rack focus sobre el lienzo vacio =================
+        // ================= Escena 1 (0.0-1.15): rack focus; la barra es el unico objeto =================
         desenfoque($('escena'), T.foco, 0.85, 20, 'power2.out');
-        tl.fromTo(camara, { scale: 1.12, x: 0 }, { scale: 1, x: 0, duration: 1.2, ease: 'power3.out' }, T.foco);
-        // la columna de la cifra gira mientras entra el foco y se asienta en el 5 con un tic (1.65 s, 0.3 s antes de «cinco»)
-        conRastro({ el: tira1, nodo: $('mb1-g'), at: T.giro, dur: T.tic5 - T.giro, curva: 'power3.out', dist: 10 * H, max: 16,
-            pos: function (e) { gsap.set(tira1, { y: -10 * H * e }); } });
+        // la cifra lleva la misma escala del rack en su propio rig, y nada mas: queda registrada con la barra y nunca se
+        // mueve con el acercamiento de la barra ni con el pliegue
+        tl.fromTo([camara, cifraRig], { scale: 1.12 }, { scale: 1, duration: 1.2, ease: 'power3.out' }, T.foco);
+        // la columna de las centenas sigue vacia hasta 0.90 s (rack < 0.1 px) y rueda UN renglon, de vacio a 5, con estela
+        // solo mientras va rapido; se asienta con el tic de 1.65 s, 0.3 s antes de «cinco». «5» es la unica cifra de la escena.
+        conRastro({ el: tira1, nodo: $('mb1-g'), at: T.giro, dur: T.tic5 - T.giro, curva: 'power3.out', dist: H, max: 16,
+            pos: function (e) { gsap.set(tira1, { y: -H * e }); } });
 
         // ================= Escena 2 (1.15-2.95): «5 min» y el primer tramo de tinta =================
         tl.fromTo($('min'), { opacity: 0, y: 36 }, { opacity: 1, y: 0, duration: 0.25, ease: 'power3.out' }, T.tic5 - 0.25);
 
         // barra y tramo: un solo estado y tres drivers (relleno, pliegue, pulso de la cuenta); el recorte se reescribe desde todos
-        var pista = $('pista'), tinta = $('tinta'), tintaW = $('tinta-w');
+        var pista = $('pista'), tintaM = $('tinta-m'), tinta = $('tinta'), tintaW = $('tinta-w');
         var est = { relleno: 0, pliegue: 0, pulso: 0 };
         var EIO = gsap.parseEase('power3.inOut');
         function recorte() {
@@ -229,20 +250,24 @@
             var eR = EIO(clamp01(p / 0.8)), eL = EIO(clamp01((p - 0.1) / 0.9)), eV = EIO(clamp01((p - 0.2) / 0.8));
             // pista 360..1560 x 546..574 (r 14) -> casilla 440..500 x 590..634 (r 10)
             var L = lerp(360, 440, eL), R = lerp(1560, 500, eR), Tp = lerp(546, 590, eV), B = lerp(574, 634, eV), rr = lerp(14, 10, eV);
-            pista.style.clipPath = 'inset(' + (Tp - 546).toFixed(2) + 'px ' + (1560 - R).toFixed(2) + 'px ' + (634 - B).toFixed(2) + 'px ' + (L - 360).toFixed(2) + 'px round ' + rr.toFixed(2) + 'px)';
-            // tinta: 5 de 60 min (100 px) -> astilla de 6 px a la izquierda de la casilla (+12 px en el pulso de la cuenta)
+            var caja = 'inset(' + (Tp - 546).toFixed(2) + 'px ' + (1560 - R).toFixed(2) + 'px ' + (634 - B).toFixed(2) + 'px ' + (L - 360).toFixed(2) + 'px round ' + rr.toFixed(2) + 'px)';
+            pista.style.clipPath = caja;
+            tintaM.style.clipPath = caja;
+            // tinta: 5 de 60 min (100 px) -> astilla de 6 px a la izquierda de la casilla (+6 px en el pulso de la cuenta);
+            // recorte recto: la mascara le da el radio de la pista o de la casilla del lado izquierdo
             var R0 = 360 + 100 * est.relleno;
-            var Ri = lerp(R0, 446, eR) + 12 * est.pulso, rl = lerp(14, 6, eV);
-            tinta.style.clipPath = 'inset(' + (Tp - 546).toFixed(2) + 'px ' + (1560 - Ri).toFixed(2) + 'px ' + (634 - B).toFixed(2) + 'px ' + (L - 360).toFixed(2) + 'px round ' + rl.toFixed(2) + 'px 0px 0px ' + rl.toFixed(2) + 'px)';
+            var Ri = lerp(R0, 446, eR) + 6 * est.pulso;
+            tinta.style.clipPath = 'inset(0px ' + (1560 - Ri).toFixed(2) + 'px 0px 0px)';
         }
         recorte();
         tl.fromTo(est, { relleno: 0 }, { relleno: 1, duration: 0.5, ease: 'power4.out', onUpdate: recorte, immediateRender: false }, T.relleno);
-        // la camara se inclina hacia el tramo mientras se pinta («cinco minutos»); vuelve a 1 en el pliegue
-        tl.fromTo(camara, { scale: 1, x: 0 }, { scale: 1.05, x: 60, duration: 0.45, ease: 'power3.out', immediateRender: false }, T.relleno);
+        // mientras se pinta el tramo («cinco minutos») solo la capa de la barra se acerca, desde su extremo izquierdo; la
+        // cifra no se mueve. Regresa a 1 dentro del pliegue, como parte del mismo movimiento de la barra.
+        tl.fromTo(barra, { scale: 1 }, { scale: 1.05, duration: 0.45, ease: 'power3.out' }, T.relleno);
 
         // ================= Escena 3 (2.95-5.45): el pliegue en el semestre y «4 h» =================
         tl.fromTo(est, { pliegue: 0 }, { pliegue: 1, duration: 0.6, ease: 'none', onUpdate: recorte, immediateRender: false }, T.pliegue);
-        tl.fromTo(camara, { scale: 1.05, x: 60 }, { scale: 1, x: 0, duration: 0.6, ease: 'power3.inOut', immediateRender: false }, T.pliegue);
+        tl.fromTo(barra, { scale: 1.05 }, { scale: 1, duration: 0.6, ease: 'power3.inOut', immediateRender: false }, T.pliegue);
         tl.fromTo([$('h07'), $('h08')], { opacity: 1 }, { opacity: 0, duration: 0.2, ease: 'power2.out' }, T.pliegue);
 
         // odometro 5 -> 240: derecha -> izquierda, 0.02 s de desfase, todo asentado a 3.50 (expo.out, sin back.out)
@@ -251,7 +276,7 @@
         conRastro({ el: tira2, nodo: $('mb2-g'), at: T.cuenta + 0.02, dur: 0.48, curva: 'expo.out', dist: 14 * H, max: 16,
             pos: function (e) { gsap.set(tira2, { y: -14 * H * e }); } });
         conRastro({ el: tira1, nodo: $('mb1-g'), at: T.cuenta + 0.04, dur: 0.46, curva: 'expo.out', dist: 7 * H, max: 16,
-            pos: function (e) { gsap.set(tira1, { y: -10 * H - 7 * H * e }); } });
+            pos: function (e) { gsap.set(tira1, { y: -H - 7 * H * e }); } });
         // «min» se aparta rapido y las columnas nuevas aparecen detras de el: la unidad nunca se encima con la cifra que gira
         tl.fromTo($('min'), { x: 0 }, { x: 2 * PASO, duration: 0.25, ease: 'expo.out', immediateRender: false }, T.cuenta);
         tl.fromTo([$('col2'), $('col3')], { opacity: 0 }, { opacity: 1, duration: 0.12, ease: 'power1.in' }, T.cuenta + 0.02);
@@ -276,6 +301,7 @@
             pos: function (e) { gsap.set(cambio, { y: -H * e }); } });
 
         // «= 240 min» desde el desenfoque: la cuenta que la voz no dice; a la vez, la cuenta recorre las 48 astillas (S1 -> S16)
+        // con una onda finita que a lo mas duplica la astilla (6 -> 12 px), dentro de la silueta de su casilla
         var cuenta = $('cuenta');
         tl.fromTo(cuenta, { opacity: 0, y: -14 }, { opacity: 1, y: 0, duration: 0.4, ease: 'power3.out' }, T.igual);
         desenfoque(cuenta, T.igual, 0.4, 10, 'power2.out');
@@ -285,8 +311,8 @@
                 tl.fromTo(est, { pulso: 0 }, { pulso: 1, duration: 0.1, ease: 'power2.out', onUpdate: recorte, immediateRender: false }, tp);
                 tl.fromTo(est, { pulso: 1 }, { pulso: 0, duration: 0.2, ease: 'power2.inOut', onUpdate: recorte, immediateRender: false }, tp + 0.1);
             } else {
-                tl.fromTo(nucleos[n], { scaleX: 1 }, { scaleX: 3, duration: 0.1, ease: 'power2.out' }, tp);
-                tl.fromTo(nucleos[n], { scaleX: 3 }, { scaleX: 1, duration: 0.2, ease: 'power2.inOut', immediateRender: false }, tp + 0.1);
+                tl.fromTo(nucleos[n], { scaleX: 1 }, { scaleX: 2, duration: 0.1, ease: 'power2.out' }, tp);
+                tl.fromTo(nucleos[n], { scaleX: 2 }, { scaleX: 1, duration: 0.2, ease: 'power2.inOut', immediateRender: false }, tp + 0.1);
             }
         }
 
@@ -298,7 +324,24 @@
         gsap.set(cifra, { transformOrigin: (C.x - 340) + 'px ' + (C.y - 328) + 'px' });
         tl.fromTo(cifra, { scale: 1, opacity: 1 }, { scale: 0.6, opacity: 0, duration: 0.4, ease: 'power2.in' }, T.junta);
 
-        // las 48 astillas vuelan al centro, escalonadas por distancia (<= 0.15 s), y se funden en el disco
+        // disco de 168 px en tinta plena desde que aparece: nace con 40 px a 5.74 s, cuando las astillas mas cercanas estan
+        // a punto de tocarlo, y su radio crece mientras llegan (power2.inOut) hasta el pop de 6.05 s
+        var disco = $('disco');
+        var RD0 = 20, RD1 = 84, EDISCO = gsap.parseEase('power2.inOut');
+        function radioDisco(t) {
+            if (t <= T.disco) { return 0; }
+            return lerp(RD0, RD1, EDISCO(clamp01((t - T.disco) / (T.ficha - T.disco))));
+        }
+        var stD = { t: 0 };
+        function aplicarDisco() {
+            var t = T.disco + stD.t;
+            disco.style.clipPath = t >= T.ficha ? 'none' : 'circle(' + radioDisco(t).toFixed(2) + 'px at 84px 84px)';
+        }
+        aplicarDisco();
+        tl.fromTo(stD, { t: 0 }, { t: T.ficha - T.disco, duration: T.ficha - T.disco, ease: 'none', onUpdate: aplicarDisco, immediateRender: false }, T.disco);
+
+        // las 48 astillas vuelan al centro, escalonadas por distancia (<= 0.15 s), por ENCIMA del disco; cada una se apaga
+        // en 0.04 s en el instante en que su centro cruza el borde actual del disco (calculado con la misma curva)
         var vuelos = [];
         var dmin = Infinity, dmax = 0;
         for (var v = 0; v < casillas.length; v++) {
@@ -307,11 +350,11 @@
             vuelos.push({ i: v, px: px, py: py, dist: dist });
             dmin = Math.min(dmin, dist); dmax = Math.max(dmax, dist);
         }
-        var ESC = 0.7, RT = 30;
+        var ESC = 0.7, RT = 16, VUELO = 0.45, EV = gsap.parseEase('power3.inOut');
         for (var w = 0; w < vuelos.length; w++) {
             var vu = vuelos[w];
             var ux = (vu.px - C.x) / vu.dist, uy = (vu.py - C.y) / vu.dist;
-            var tx = C.x + ux * RT, ty = C.y + uy * RT;       // destino: un anillo apretado dentro del disco
+            var tx = C.x + ux * RT, ty = C.y + uy * RT;       // destino: dentro del radio inicial del disco
             var t0 = T.junta + 0.15 * (vu.dist - dmin) / (dmax - dmin);
             var el, bx, by, ox, oy;
             if (vu.i === 0) {
@@ -324,15 +367,24 @@
             // con origen O, el centro P va a O + s (P - O) + d  =>  d = T - O - s (P - O)
             var Ox = bx + ox, Oy = by + oy;
             var dx = tx - Ox - ESC * (vu.px - Ox), dy = ty - Oy - ESC * (vu.py - Oy);
-            tl.fromTo(el, { x: 0, y: 0, scale: 1 }, { x: dx, y: dy, scale: ESC, duration: 0.45, ease: 'power3.inOut', immediateRender: false }, t0);
-            tl.fromTo(el, { opacity: 1 }, { opacity: 0, duration: 0.1, ease: 'power1.in', immediateRender: false }, t0 + 0.35);
+            tl.fromTo(el, { x: 0, y: 0, scale: 1 }, { x: dx, y: dy, scale: ESC, duration: VUELO, ease: 'power3.inOut', immediateRender: false }, t0);
+            // instante en que el centro de la astilla entra al disco (muestreo a 1/600 s; determinista)
+            var tc = t0 + VUELO;
+            for (var ts = t0; ts <= t0 + VUELO + 1e-9; ts += 1 / 600) {
+                var ev = EV(clamp01((ts - t0) / VUELO)), sv = 1 + (ESC - 1) * ev;
+                var cx = Ox + sv * (vu.px - Ox) + ev * dx, cy = Oy + sv * (vu.py - Oy) + ev * dy;
+                if (Math.hypot(cx - C.x, cy - C.y) <= radioDisco(ts)) { tc = ts; break; }
+            }
+            tl.fromTo(el, { opacity: 1 }, { opacity: 0, duration: 0.04, ease: 'none', immediateRender: false }, tc);
         }
 
-        // disco de tinta 168 px (se llena con las astillas), icono scan-face, anillo blanco y sombra en su capa; quieta desde 6.20
-        tl.fromTo($('disco'), { scale: 0.25, opacity: 0 }, { scale: 1, opacity: 1, duration: T.ficha - 5.85, ease: 'power2.out' }, 5.85);
+        // icono scan-face solo cuando el disco pasa el 80 % de su radio final; anillo blanco y sombra en su capa; quieta desde 6.20
+        var tIcono = T.disco;
+        while (tIcono < T.ficha && radioDisco(tIcono) < 0.8 * RD1) { tIcono += 1 / 600; }
+        tIcono = Math.round(tIcono * 100) / 100;
         var icono = $('icono');
-        tl.fromTo(icono, { scale: 0.6, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.3, ease: 'power3.out' }, 5.85);
-        desenfoque(icono, 5.85, 0.3, 4, 'power2.out');
+        tl.fromTo(icono, { scale: 0.6, opacity: 0 }, { scale: 1, opacity: 1, duration: T.quieta - tIcono, ease: 'power3.out' }, tIcono);
+        desenfoque(icono, tIcono, T.quieta - tIcono, 4, 'power2.out');
         tl.fromTo($('anillo'), { scale: 168 / 198, opacity: 0 }, { scale: 1, opacity: 1, duration: T.quieta - 5.95, ease: 'power3.out' }, 5.95);
         tl.fromTo($('sombra'), { scale: 0.9, opacity: 0 }, { scale: 1, opacity: 1, duration: T.quieta - 5.95, ease: 'power3.out' }, 5.95);
 

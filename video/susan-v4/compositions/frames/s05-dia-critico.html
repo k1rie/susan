@@ -260,16 +260,17 @@
         }
 
         // ---- Scene 2 (1.20–3.80): las casillas se llenan una tras otra; cifra y relleno llegan juntos ----
-        // Cascada derecha -> izquierda: arrancan escalonadas 0.04 s y cada columna se fija antes que la de su izquierda; las
-        // decenas dan el último paso (PASO s, power3.out) y terminan exactamente en t1, con el tic. power3.out es cuártico en
-        // GSAP: un rodar largo que termina en t1 se ve asentado ~0.2 s antes, así que la llegada visible del número la pone
-        // ese paso corto final (lo último que se mueve, a <= 0.07 s del tic). `ini` es el retraso desde t0; `fin`, los
-        // segundos antes de t1 en que la columna se detiene.
+        // Cascada derecha -> izquierda: arrancan escalonadas 0.04 s y se fijan de derecha a izquierda; las decenas dan el último
+        // paso (PASO s, power3.out) y terminan exactamente en t1, con el tic. power3.out es cuártico en GSAP: un rodar largo que
+        // termina en t1 se ve asentado ~0.15-0.2 s antes, así que la llegada visible del número la pone ese paso corto final
+        // (lo último que se mueve, a <= 0.07 s del tic). Las unidades terminan también en t1: su cola larga ya se lee quieta
+        // cuando las decenas van a dos tercios del paso; si se fijaran antes se leería un valor falso («7.7 %», «11.8 %»)
+        // justo antes del tic. `ini` es el retraso desde t0; `fin`, los segundos antes de t1 en que la columna se detiene.
         var CASCADA = {
             q: { ini: 0.00, fin: 0.30 },   // %
-            t: { ini: 0.00, fin: 0.20 },   // décimas, dos vueltas con estela
-            p: { ini: 0.04, fin: 0.16 },   // punto
-            u: { ini: 0.04, fin: 0.10 },   // unidades, una vuelta con estela
+            t: { ini: 0.00, fin: 0.16 },   // décimas, dos vueltas con estela
+            p: { ini: 0.04, fin: 0.12 },   // punto
+            u: { ini: 0.04, fin: 0.00 },   // unidades, una vuelta con estela
             d: { ini: 0.08, fin: 0.30 }    // decenas antes del paso final (solo Vie: blanco -> 1, y el 1 -> 2 es el paso final)
         };
         var PASO = 0.20;

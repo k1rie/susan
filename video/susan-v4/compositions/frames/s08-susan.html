@@ -27,7 +27,7 @@
 /* «SUSAN»: BrandMark ampliado (Hanken 600, 136 px, −0.025em). Caja medida en Chrome: 411 × 136, tinta de x+4 a x+405,
    mayúsculas de 95 px con la línea base a 115.5 px del borde superior. Tinta de 881 a 1282 → lockup 639–1282, centro 960.
    El centro de las mayúsculas cae en y = 490, el mismo centro que la ficha. */
-#s08-susan-marca{position:absolute;left:877px;top:422px;display:grid;z-index:2}
+#s08-susan-marca{position:absolute;left:877px;top:423px;display:grid;z-index:2}
 .s08-susan-palabra{grid-area:1/1;font-size:136px;font-weight:600;letter-spacing:-0.025em;line-height:1;white-space:nowrap;color:#1E1919}
 /* copia recortada al texto: transparente fuera de una banda angosta (20 % del fondo de 300 %), así en reposo la palabra es
    tinta y el barrido no necesita fundido */
@@ -100,13 +100,14 @@
         var OBT = 1 / 60;
         function $(s) { return document.getElementById(ID + '-' + s); }
 
-        // Tiempos locales; los de sfx_cues son contrato (whoosh-s 0.98 dentro de la caída, thud 1.00, soft-in = entrada del
-        // lema, sheen 4.60 = primer fotograma con brillo visible).
+        // Tiempos locales; los de sfx_cues son contrato: whoosh-s 0.98 dentro de la caída, thud 1.00 = contacto,
+        // soft-in 2.50 = inicio del lema, sheen 4.45 = primer fotograma con brillo visible (inicio del barrido).
+        // Tramos quietos (frame-check): 1.8–2.5, 2.7–3.4, 3.8–4.6 y 4.9–5.6 s; ninguno llega a 1.0 s.
         var T = {
             cae: 0.60, contacto: 1.00, squashFin: 1.06,
             desliza: 1.45, marca: 1.45,
-            lema: 2.55, aclara: 3.35,
-            barrido: 4.60, fundido: 5.70, fin: 6.0
+            lema: 2.50, aclara: 3.30,
+            barrido: 4.45, fundido: 5.70, fin: 6.0
         };
         var DESDE = -640;        // la ficha entra desde 640 px más arriba (fuera de cuadro)
         var DESLIZA = -162;      // de x = 900 a x = 738: lockup centrado en 960 con 44 px de separación (medido)
@@ -178,19 +179,23 @@
         // Desde 1.95 s el lockup (ficha + «SUSAN») ya no se mueve: la palabra queda quieta mientras la voz la nombra.
         tl.addLabel('read:SUSAN#0', T.marca + 0.50);
 
-        // Lema: y 16 → 0 y opacidad, power4.out, justo antes de que la voz diga «Pasa lista en segundos».
+        // Lema: y 16 → 0 y opacidad, power4.out. Entra cuando la voz termina «susan.» y se asienta antes de que diga
+        // «Pasa lista en segundos»: llena la pausa con lo que la voz va a decir, sin mover la palabra nombrada.
         tl.fromTo($('lema'), { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.60, ease: 'power4.out' }, T.lema);
         tl.addLabel('read:lema#1', T.lema + 0.60);
 
-        // Mientras la voz cierra «…en segundos», el cielo da un paso hacia la crema (capa nueva encima, un solo paso de
-        // 0.8 s, sin deriva): prepara el fundido final. El lockup y el lema no se mueven.
-        tl.fromTo($('cielo-claro'), { opacity: 0 }, { opacity: 1, duration: 0.80, ease: 'power1.inOut' }, T.aclara);
+        // Mientras la voz dice «…lista en segundos», el cielo da un paso hacia la crema (capa nueva encima, un solo paso
+        // de 0.7 s, sin deriva ni vuelta atrás): es el «fondo E1 aclarado a crema» de frame.md §8 y prepara el fundido
+        // final. El lockup y el lema no se mueven.
+        tl.fromTo($('cielo-claro'), { opacity: 0 }, { opacity: 1, duration: 0.70, ease: 'power1.inOut' }, T.aclara);
 
-        // ---- Escena 4 (3.8–6.0 s): barrido holográfico de una sola pasada, ya en silencio, y fundido.
-        //      100 % → 0 % se lee de izquierda a derecha; la banda arranca ya sobre la «S» (83 %) y sale tras la «N» (14 %),
-        //      así el brillo se ve desde el primer fotograma del cue sheen hasta el último del tween.
-        tl.fromTo($('holo'), { backgroundPosition: '83% 50%' },
-            { backgroundPosition: '14% 50%', duration: 0.70, ease: 'power2.inOut' }, T.barrido);
+        // ---- Escena 4 (3.8–6.0 s): barrido holográfico de una sola pasada, ya en silencio (la voz acaba en 4.37 s), y fundido.
+        //      El porcentaje va al revés del viaje: 86 % → 10 % se lee de izquierda a derecha. Con la banda en 40–60 % de un
+        //      fondo de 300 %, en 86 % el borde azul ya toca la «S» (el brillo se ve desde el primer fotograma del cue) y en
+        //      10 % la banda entera ya salió tras la «N» (la palabra vuelve a tinta). Antes del cue rige el 100 % del CSS
+        //      (immediateRender: false): nada de color en reposo.
+        tl.fromTo($('holo'), { backgroundPosition: '86% 50%' },
+            { backgroundPosition: '10% 50%', duration: 0.70, ease: 'power2.inOut', immediateRender: false }, T.barrido);
         tl.fromTo($('velo'), { opacity: 0 }, { opacity: 1, duration: T.fin - T.fundido, ease: 'power1.inOut' }, T.fundido);
 
         tl.set({}, {}, T.fin);
