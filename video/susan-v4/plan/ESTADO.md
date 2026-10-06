@@ -75,3 +75,48 @@ Entregar el video final 1080p60 MÁS DINÁMICO (ver BRIEF.md, indicación del 20
 - Flujo: `scripts/flujos/susan-v4-menores-voz.js` (menores F1/F3/F6/F7/F8 con revisor → integración con mount-voz →
   QA con voz hasta 3 renders → entrega). Salida: renders/susan-v4-voz.mp4 (+ preview), plan/VOZ-MONTAJE.md.
 - La versión sin voz (renders/susan-v4.mp4, entregada) no se toca.
+
+### Resultado de la ronda 3 (2026-10-06, entrega con voz) — veredicto de la QA: **entregable** (0 errores, 5 menores opcionales)
+- Voz: «Antonio» (ElevenLabs), 8 líneas montadas con `scripts/mount-voz.mjs` por anclas, sin estirar ningún cuadro (detalle,
+  anclas medidas y tolerancias en `plan/VOZ-MONTAJE.md`). El pipeline de voz no cambió en esta entrega: `scripts/README.md`
+  sigue vigente tal cual.
+- Render que pasó la QA: `renders/susan-v4-voz-r2.mp4` (`hyperframes@0.8.134 render --quality high --fps 60 --workers 3`, 3 min 58 s).
+  Ningún archivo fuente cambió después del render (solo salidas ignoradas de `datos/verify-*`), así que la entrega es copia
+  byte a byte (`cmp` idéntico).
+- Final: `renders/susan-v4-voz.mp4`, H.264 High yuv420p bt709, 1920×1080, **60 fps**, 3300 fotogramas, **55.000 s**, AAC LC
+  48 kHz estéreo, 24.7 MiB (25.9 MB; ~3.6 Mb/s de video).
+- Vista ligera: `renders/susan-v4-voz-preview.mp4`, H.264 High 1280×720, 30 fps, AAC 128 kb/s, faststart, 8.9 MiB (9.3 MB), dos pasadas
+  (video a 1250 kb/s). Misma sonoridad que el original (−15.3 LUFS, −1.6 dBTP medidos sobre la vista ligera).
+- Hoja de contacto versionada: `plan/entrega-voz-contacto.jpg` (un fotograma cada 2 s, 0–54 s, 4×7, 2000×2018 px, 380 KiB,
+  con tiempo y cuadro en cada miniatura; sale del MP4 final, leyendo desde el inicio con `select='not(mod(n,120))'`).
+- Sonoridad medida sobre el MP4 final: **−15.3 LUFS integrados** (EBU R128, LRA 6.2 LU; objetivo −16…−14), **pico verdadero
+  −1.6 dBTP**, 0 muestras ≥ 0.99. Voz presente en las 8 ventanas de habla (mezcla −17.2…−18.3 dBFS RMS); SFX 22–28 dB bajo la voz.
+  Primera palabra a 1.09 s; silencio final de voz 1.65 s. `verify-sfx --video`: 63/63 cues dentro de ±33 ms.
+- Sincronía voz-imagen: las 21 anclas de `SCRIPT.md` revisadas a t−0.25, t y t+0.25 s; todas cumplen lo que promete el storyboard.
+  Siete cortes y todos los relevos revisados en ráfagas de 60 fps, sin saltos ni parpadeos.
+- Menores de la ronda 2 corregidos y verificados en el render (nada regresó): F1 apertura (el fotograma 0 ya trae el «1» y
+  la barra), F1 pliegue denso («240 min» legible, «4 h» asentada antes de la voz), F3 barra (arranca al asentarse el «19»),
+  F3 latido de esquinas (suave), F6 píldora (se cierra a punto antes de viajar), F7 losa beige (la fila pasa a blanco antes de
+  crecer), F8 paso de cielo (visible), F4 látigo 0.10 s más tarde y línea 8 realzada.
+- Menores que quedan (todos opcionales, ninguno es un error):
+  1. Audio, 53.55–53.96 s: el sheen del cierre suena dentro del silencio final, así que el silencio absoluto de la mezcla es de
+     1.05 s (el de la voz sola, 1.65 s). Es la firma sonora del cierre (decisión registrada en `VOZ-MONTAJE.md`). Para ≥ 1.5 s
+     de silencio total habría que quitar el sheen o acortar el cuadro final.
+  2. Audio, entradas desde pausas: tres subidas > 12 dB entre segundos consecutivos medidas con RMS de 1 s completo (0→1 s,
+     42→43 s, 48→49 s). Son entradas desde silencio, no saltos dentro de material continuo; con la métrica de `verify-sfx`
+     la mayor subida es 9.2 dB (tope 12).
+  3. F7, 47.34–49.7 s: es el hueco más largo sin voz ni SFX (≈ 2.4 s) y la imagen casi no cambia (tarjeta de Iván en reposo, solo
+     el halo de foco a 48.05 s). Es el cuadro quieto deliberado antes del sting; con la voz real pasó de 0.95 s a ≈ 1.9 s.
+     Arreglo opcional: un SFX suave en el halo de 48.05 s o recortar la quietud.
+  4. F8, 51.83–53.73 s: el paso del cielo se ve (52.25–53.05 s) pero a la altura del lockup cambia solo 2 niveles; 1.9 s sin otro
+     movimiento que el lema. Arreglo opcional: paso de cielo más marcado, sin pisar la cola de «segundos» (habla hasta 53.35 s).
+  5. F3, 19.4 s: bajo la cámara dice «Última captura: 23 rostros · 22 válidos» (24 px gris, x=880, y=730 en
+     `compositions/frames/s03-camara.html`). El storyboard lo permite (cuenta rostros de la toma, no lecturas por alumno), pero
+     la persona dueña dijo que aún decidirá lo de las muestras. Si se quiere cero conteos de capturas, se retira esa línea.
+  Avisos heredados bajo umbral de `verify-sfx` («sonido sin evento visible»): soft-in F1 2.00, pop-1 F5 6.15, soft-in F7 5.20.
+- Receta de la entrega ligera (sin script propio; se rehace en un minuto): vista ligera con ffmpeg en dos pasadas
+  (`scale=1280:720:flags=lanczos,fps=30,format=yuv420p`, `-c:v libx264 -profile:v high -preset slow -b:v 1250k -maxrate 2500k
+  -bufsize 5000k`, `-c:a aac -b:a 128k -ar 48000 -ac 2 -movflags +faststart`); hoja de contacto con `select='not(mod(n,120))'`
+  sobre el MP4 de 60 fps, miniaturas de 480×270 con `drawtext` y `tile=4x7:padding=16:margin=16`. No uses `-ss` + `fps=2` para
+  etiquetar fotogramas: `revision/qa-voz-r1/audio/tile.sh` lo hace y el fotograma etiquetado 18.0 s muestra el de ≈ 18.2 s.
+- Pendiente: mandar `renders/susan-v4-voz.mp4` (o la vista ligera) a la persona dueña y que decida sobre los menores 1, 3, 4 y 5.
