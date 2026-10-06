@@ -170,8 +170,8 @@
     </div>
   </div>
 
-  <!-- estelas: horizontal del látigo de entrada de cada casilla y vertical de las columnas rápidas del odómetro (décimas y
-       unidades); una por objeto, región ajustada al eje -->
+  <!-- estelas: horizontal del látigo de entrada de cada casilla, vertical de las columnas rápidas del odómetro (décimas y
+       unidades) y horizontal de la estación en el empuje; una por objeto, región ajustada al eje -->
   <svg width="0" height="0" aria-hidden="true" style="position:absolute" data-chart>
     <filter id="s05-dia-critico-mb-lun-x" x="-20%" y="-4%" width="140%" height="108%" color-interpolation-filters="sRGB"><feGaussianBlur id="s05-dia-critico-mb-lun-x-g" stdDeviation="0 0" /></filter>
     <filter id="s05-dia-critico-mb-mie-x" x="-20%" y="-4%" width="140%" height="108%" color-interpolation-filters="sRGB"><feGaussianBlur id="s05-dia-critico-mb-mie-x-g" stdDeviation="0 0" /></filter>
@@ -182,6 +182,8 @@
     <filter id="s05-dia-critico-mb-mie-u" x="-10%" y="-6%" width="120%" height="112%" color-interpolation-filters="sRGB"><feGaussianBlur id="s05-dia-critico-mb-mie-u-g" stdDeviation="0 0" /></filter>
     <filter id="s05-dia-critico-mb-vie-t" x="-10%" y="-6%" width="120%" height="112%" color-interpolation-filters="sRGB"><feGaussianBlur id="s05-dia-critico-mb-vie-t-g" stdDeviation="0 0" /></filter>
     <filter id="s05-dia-critico-mb-vie-u" x="-10%" y="-6%" width="120%" height="112%" color-interpolation-filters="sRGB"><feGaussianBlur id="s05-dia-critico-mb-vie-u-g" stdDeviation="0 0" /></filter>
+    <!-- estela horizontal de la estación en el empuje (capa de pantalla completa: la región sobra 96 px por lado, > 3σ del tope 12) -->
+    <filter id="s05-dia-critico-mb-estacion-x" x="-5%" y="-2%" width="110%" height="104%" color-interpolation-filters="sRGB"><feGaussianBlur id="s05-dia-critico-mb-estacion-x-g" stdDeviation="0 0" /></filter>
   </svg>
 </div>
 <!-- GSAP local: el CDN responde 403 en esta máquina y el render quedaría sin animación (frame.md §1) -->
@@ -316,17 +318,35 @@
             tl.fromTo(st, { d: desde }, { d: 0, duration: dur, ease: curva, onUpdate: aplicar, immediateRender: false }, at);
         }
 
-        // Inverso de `desenfoque` para la capa que se va (DINAMISMO §2.0): 0 -> hasta px. En p = 1 la capa ya está oculta por el
-        // corte, así que vuelve a «none»: nada queda con filtro fuera de su tramo.
-        function desenfocar(el, at, dur, hasta, curva) {
-            var ease = gsap.parseEase(curva);
+        // Filtro de la estación durante el empuje: una sola superficie y un solo driver (dos drivers sobre el mismo style.filter se
+        // pisarían). Estela = velocidad (DINAMISMO §2.0.4): la estela horizontal sigue la velocidad real en pantalla del borde de la
+        // casilla Vie, v = |dx/dt| + 148 · ds/dt (la traslación, power2.inOut, tiene su pico a la mitad del empuje; la escala,
+        // power2.in, acelera hasta el corte) y σx = min(12, 0.29 · v · OBT). Encima va la rampa isotrópica 0 -> 8 px de los
+        // últimos 0.25 s, que esconde el corte. En los extremos (p <= EPS, p >= 1 - EPS) el filtro es «none»: en p = 1 la capa ya
+        // está oculta por el corte.
+        var BORDE_VIE = 148.4;   // media casilla Vie levantada: 280 · 1.06 / 2 (su distancia al origen del empuje)
+        function empujar(el, nodo) {
+            var easeX = gsap.parseEase('power2.inOut');
+            var easeS = gsap.parseEase('power2.in');
+            var dur = T.corte - T.empuje;
+            var previo = T.blurEmpuje - T.empuje;
+            var rampa = T.corte - T.blurEmpuje;
+            var estela = 'url(#' + nodo.parentNode.id + ')';
             var st = { p: 0 };
             function aplicar() {
-                var d = hasta * ease(st.p);
-                el.style.filter = (st.p >= 1 - EPS || d < 0.05) ? 'none' : 'blur(' + d.toFixed(2) + 'px)';
+                var p = st.p;
+                if (p <= EPS || p >= 1 - EPS) { nodo.setAttribute('stdDeviation', '0 0'); el.style.filter = 'none'; return; }
+                var v = Math.abs(EMPUJE.x) * velocidad(easeX, p, dur) + BORDE_VIE * (EMPUJE.s - 1) * velocidad(easeS, p, dur);
+                var sx = Math.min(12, 0.29 * v * OBT);
+                var b = EMPUJE.blur * Math.max(0, (p * dur - previo) / rampa);
+                nodo.setAttribute('stdDeviation', sx.toFixed(2) + ' 0');
+                var f = [];
+                if (sx >= 0.3) { f.push(estela); }
+                if (b >= 0.05) { f.push('blur(' + b.toFixed(2) + 'px)'); }
+                el.style.filter = f.length ? f.join(' ') : 'none';
             }
             aplicar();
-            tl.fromTo(st, { p: 0 }, { p: 1, duration: dur, ease: 'none', onUpdate: aplicar, immediateRender: false }, at);
+            tl.fromTo(st, { p: 0 }, { p: 1, duration: dur, ease: 'none', onUpdate: aplicar, immediateRender: false }, T.empuje);
         }
 
         // Desenfoque de llegada de la toma (desde -> 0 px). Arranca 2 ms antes del corte: así en el corte ya vale ~8 px y antes,
@@ -437,12 +457,12 @@
         // Empuje (4.95–5.40): escala 1 -> 1.3 con origen en la casilla Vie, power2.in (la velocidad máxima del acercamiento
         // llega al corte y la toma la continúa con su expo.out), y traslación que la deja en el centro de la toma. La traslación
         // va con power2.inOut: con power2.in la casilla cruzaba el corte a 2400 px/s hacia la izquierda y la toma la recibía
-        // quieta (un frenazo seco); así llega centrada sin velocidad lateral y solo el acercamiento atraviesa el corte. La capa
-        // se desenfoca 0 -> 8 px (lineal, en px de pantalla) en el último cuarto de segundo. Solo la cámara de la estación: el
-        // fondo y su halo no se mueven.
+        // quieta (un frenazo seco); así llega centrada sin velocidad lateral y solo el acercamiento atraviesa el corte. Como el
+        // pico lateral cae a la mitad (≈ 2400 px/s a 5.175 s), la estela horizontal de la capa lo sigue a él y no a la rampa:
+        // ver `empujar`. Solo la cámara de la estación: el fondo y su halo no se mueven.
         tl.fromTo($('camara'), { scale: 1 }, { scale: EMPUJE.s, duration: T.corte - T.empuje, ease: 'power2.in', immediateRender: false }, T.empuje);
         tl.fromTo($('camara'), { x: 0, y: 0 }, { x: EMPUJE.x, y: EMPUJE.y, duration: T.corte - T.empuje, ease: 'power2.inOut', immediateRender: false }, T.empuje);
-        desenfocar($('estacion'), T.blurEmpuje, T.corte - T.blurEmpuje, EMPUJE.blur, 'none');
+        empujar($('estacion'), $('mb-estacion-x-g'));
         // Todo lo visible coincide en el corte (DINAMISMO §2.3 a): lo que no existe en la toma (tarjeta, título, selector, Lun y
         // Mié) se apaga mientras viaja rápido y desenfocado, sin moverse por su cuenta; a 5.36 ya no está, así que en el corte
         // solo quedan la casilla Vie, su día y la píldora, que la toma recibe en el mismo lugar.
