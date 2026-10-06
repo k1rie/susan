@@ -27,3 +27,8 @@ Entregar el video final 1080p60 MÁS DINÁMICO (ver BRIEF.md, indicación del 20
   [s03,s08] [s07,s04] [s06,s01] [s02,s05]); sus informes se juntan en plan/INFORMES-DINAMISMO.md.
 - `susan-v4-final.js` (args.informesPath = plan/INFORMES-DINAMISMO.md) → integra, ensambla, render 60 fps, QA (≤3
   vueltas), render final renders/susan-v4.mp4 + preview.
+
+## Bitácora
+- 06:00 UTC: el director escribió plan/DINAMISMO.md y actualizó STORYBOARD.md, pero el límite de uso lo cortó antes de
+  reportar (y canceló al crítico). 06:21 UTC: uso reiniciado; se lanza `susan-v4-critico.js` (completa lo faltante del
+  director y contrasta el plan). Siguiente: 4× `susan-v4-dinamizar.js` y luego `susan-v4-final.js`.
