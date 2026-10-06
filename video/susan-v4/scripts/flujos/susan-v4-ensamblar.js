@@ -1,0 +1,69 @@
+export const meta = {
+  name: 'susan-v4-ensamblar',
+  description: 'Ensambla la v4 (index, GSAP local, transiciones, SFX, costuras), renderiza a 60 fps y revisa el MP4',
+  phases: [
+    { title: 'Ensamblar', detail: 'index, GSAP local, transiciones, SFX, check, costuras' },
+    { title: 'Render y QA', detail: 'render 60 fps alta calidad, sincronía medida y revisión del MP4' },
+  ],
+}
+
+const P = '/home/user/susan/video/susan-v4'
+const SK = '/root/.claude/skills'
+const COMMIT_FOOTER = 'Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01GNm8ZQGo8vSP18qjgTWPYH'
+const CTX = `Project: SUSAN v4 launch video (HyperFrames, 1920x1080, 55 s, 8 frames), dir ${P}. The plan is APPROVED by the owner. Source of truth, in precedence order: ${P}/BRIEF.md (read it fully, especially the 2026-10-06 decisions and the 'Plan aprobado' block) > ${P}/STORYBOARD.md (+ its '## Video direction') > ${P}/SCRIPT.md > ${P}/frame.md (video design system) > ${P}/plan/SINTESIS.md > other ${P}/plan/*.md (DISENO-APP for exact app components, CONTENIDO §3 for data, PILOTO for render-proven recipes). Real app captures for fidelity: ${P}/capture/assets/ (flat, curated; see capture/extracted/asset-descriptions.md) and ${P}/capture/app-real/{desktop,mobile,crops,dom}/ (INVENTORY.md) — view images with the Read tool. Write prose in Spanish (Mexico). Git: branch feat/video-v4 in /home/user/susan; when told to commit, use 'git -C /home/user/susan add <paths> && git -C /home/user/susan commit -m "<msg>\n\n${COMMIT_FOOTER}" && git -C /home/user/susan push -q origin feat/video-v4' (retry push up to 3 times on network error).`
+
+const S = `${SK}/product-launch-video/scripts`
+const HF = 'npx --yes hyperframes@0.8.134'
+
+const frameSummary = args.frameSummary
+phase('Ensamblar')
+const SEAM_SCHEMA = {
+  type: 'object',
+  properties: {
+    assembled: { type: 'boolean' },
+    total_duration_s: { type: 'number' },
+    check_ok: { type: 'boolean' },
+    sfx_ok: { type: 'boolean' },
+    seams: { type: 'array', items: { type: 'object', properties: {
+      cut: { type: 'string' }, ok: { type: 'boolean' }, issue: { type: 'string' }, fixed: { type: 'string' },
+    }, required: ['cut', 'ok', 'issue', 'fixed'] } },
+    remaining: { type: 'array', items: { type: 'string' } },
+    contact_sheet: { type: 'string' },
+  },
+  required: ['assembled', 'total_duration_s', 'check_ok', 'sfx_ok', 'seams', 'remaining', 'contact_sheet'],
+}
+const assembled = await agent(`${CTX}
+
+You are the assembler. All 8 frames exist in ${P}/compositions/frames/. Per-frame outcomes:
+${frameSummary}
+
+Run the v4 pipeline EXACTLY in the order of ${P}/scripts/README.md §1 (read it first; respect its warnings: assemble-index rewrites index.html entirely; localizar-gsap after assembling; transitions inject ONCE per assembly; never audio.mjs fetch-sfx/sync-durations): assemble-index → localizar-gsap (+ --check) → transitions inject → transitions verify → mount-sfx → verify-sfx → ${HF} check (fix every error; if a frame has a lint/runtime error, make the minimal fix in that frame file) → mark every frame '- status: animated' in STORYBOARD.md (status line only).
+Then the SEAMS: for each of the 7 cuts, take snapshots at cut−0.1 s and cut+0.2 s (and the transition midpoint for push-slide/blur-crossfade) with \`${HF} snapshot . --at <times>\`, LOOK at each pair, and verify every handoff (STORYBOARD handoff_out/handoff_in: same element, same position/scale/opacity/rotation, no pop, no double image, nothing disappearing). Fix any seam with the minimal edit in the frame file(s) (frame edits do not require re-assembly unless a duration changes; if one does, redo the pipeline from assemble-index). Also take snapshots at every frame midpoint and build one contact sheet (the snapshot command writes snapshots/contact-sheet.jpg) and LOOK at it.
+Finally commit compositions/, index.html, STORYBOARD.md, assets/ changes and any scripts changes (NOT renders/snapshots/revision) with message 'feat(video): cuadros animados y ensamblado de la v4'. Return the structured report.`, { label: 'ensamblar:index-sfx-costuras', phase: 'Ensamblar', schema: SEAM_SCHEMA })
+
+phase('Render y QA')
+const QA_SCHEMA = {
+  type: 'object',
+  properties: {
+    mp4: { type: 'string' }, duration_s: { type: 'number' }, fps: { type: 'number' }, size_mb: { type: 'number' },
+    render_seconds: { type: 'number' },
+    sfx_sync: { type: 'string' },
+    contact_sheets: { type: 'array', items: { type: 'string' } },
+    issues: { type: 'array', items: { type: 'object', properties: {
+      at_s: { type: 'number' }, frame: { type: 'string' }, severity: { type: 'string', enum: ['bloqueante', 'importante', 'menor'] },
+      issue: { type: 'string' }, fix: { type: 'string' },
+    }, required: ['at_s', 'frame', 'severity', 'issue', 'fix'] } },
+    verdict: { type: 'string' },
+  },
+  required: ['mp4', 'duration_s', 'fps', 'size_mb', 'render_seconds', 'sfx_sync', 'contact_sheets', 'issues', 'verdict'],
+}
+const qa = await agent(`${CTX}
+
+You render and QA the first full cut. Assembler report: ${JSON.stringify(assembled)}
+1. Render: \`cd ${P} && ${HF} render --quality high --fps 60 --workers 3 --skill=product-launch-video --output renders/susan-v4-v1.mp4\` (time it). If it fails, read the error, apply the minimal fix, retry once.
+2. \`node ${P}/scripts/verify-sfx.mjs --video renders/susan-v4-v1.mp4\` (measured SFX sync) and ffprobe the result (duration, fps, size, audio stream).
+3. Watch it as a viewer would, through stills: extract a frame every 0.5 s with ffmpeg into ${P}/revision/v1-qa/ and tile them into contact sheets of 4x3 (ffmpeg tile filter) with the timestamp drawn on each tile; ALSO extract dense bursts (every 1/60 s for 0.3 s) around each of the 7 cuts and around the fastest moves (rack focus, odometers, chip drop) to catch pops, flicker, double images or smear. LOOK at every sheet with the Read tool.
+4. Judge it against the brief: professional, fluid, rhythmic, meaningful motion, faithful SUSAN UI, readable numbers, owner rules (no cursor, no sample counts, straight tooltip, soft tilt flat at reads, closing chip -> SUSAN + tagline). List concrete issues with timestamps and the fix.
+Also save a light preview copy for the owner: ${P}/renders/susan-v4-v1-preview.mp4 (H.264, 1280x720, 30 fps, ~6-10 MB, AAC audio). Return the structured report (contact_sheets = absolute paths).`, { label: 'render-qa:v1', phase: 'Render y QA', schema: QA_SCHEMA })
+
+return { assembled, qa }
