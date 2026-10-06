@@ -265,7 +265,7 @@ SELECT t.eq((public.api_plantilla_alumno(t.id_alumno('A002')) #>> '{activa,cosen
 SELECT t.eq((public.api_plantilla_alumno(t.id_alumno('A002')) #>> '{activa,coseno_medio}')::numeric, 0.83, 'activa.coseno_medio = promedio de coseno_resto');
 SELECT t.eq(jsonb_array_length(public.api_plantilla_alumno(t.id_alumno('A002')) #> '{activa,fotos}'), 5, 'activa.fotos tiene 5 elementos');
 SELECT t.eq((SELECT string_agg(k, ',' ORDER BY k) FROM jsonb_object_keys(public.api_plantilla_alumno(t.id_alumno('A002')) #> '{activa,fotos,0}') k),
-    'calidad,coseno_resto,id_foto,orden,principal', 'cada foto trae solo id_foto, orden, principal, calidad y coseno_resto');
+    'calidad,coseno_resto,disponible,id_foto,orden,principal', 'cada foto trae solo id_foto, orden, principal, disponible, calidad y coseno_resto');
 SELECT t.eq((SELECT string_agg((f ->> 'orden') || ':' || (f ->> 'principal'), ',' ORDER BY (f ->> 'orden')::int)
                FROM jsonb_array_elements(public.api_plantilla_alumno(t.id_alumno('A002')) #> '{activa,fotos}') f),
     '1:true,2:false,3:false,4:false,5:false', 'solo la de orden 1 es principal; las fotos salen ordenadas');

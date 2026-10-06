@@ -1,7 +1,7 @@
 import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('@/lib/backend', () => ({ getServerBackend: vi.fn(), getAdminBackend: vi.fn() }));
-vi.mock('./indice.js', () => ({ reconstruirIndice: vi.fn() }));
+vi.mock('./indice.js', () => ({ reconstruirIndice: vi.fn(), CLAVE_BLOQUEO_INDICE: 'indice' }));
 
 import { getAdminBackend, getServerBackend } from '@/lib/backend';
 import { ApiError } from '@/lib/api/errors';
@@ -177,5 +177,57 @@ describe('purgar-recortes (3 pasos en orden)', () => {
         const { a } = purga({ svc_bloqueo_adquirir: () => false });
         expect(await ejecutarJob('purgar-recortes', { admin: a })).toMatchObject({ estado: 'omitido' });
         expect(a.bucket.remove).not.toHaveBeenCalled();
+    });
+});
+
+describe('purgar-fotos-registro (barrido; toma el bloqueo del índice)', () => {
+    const UUID = (n) => `00000000-0000-4000-8000-${String(n).padStart(12, '0')}`;
+    const items = [{ id_plantilla: 7, objetos: [`registro/3/${UUID(1)}.jpg`, `registro/3/${UUID(2)}.jpg`] }];
+    function barrido(extra = {}) {
+        const eventos = [];
+        const a = crearBackend({
+            rpcs: {
+                svc_bloqueo_adquirir: () => true,
+                svc_bloqueo_liberar: () => true,
+                svc_fotos_registro_listar: () => {
+                    eventos.push('listar');
+                    return eventos.filter((e) => e === 'listar').length === 1 ? { pendientes_total: 1, items } : { pendientes_total: 0, items: [] };
+                },
+                svc_fotos_registro_marcar: ({ p_ids }) => { eventos.push(`marcar:${p_ids.join(',')}`); return { solicitadas: p_ids.length, marcadas: p_ids.length }; },
+                ...extra,
+            },
+            storage: { remove: vi.fn(async (rutas) => { eventos.push(`borrar:${rutas.length}`); return { error: null }; }) },
+        });
+        return { a, eventos };
+    }
+
+    it('lista -> borra -> marca, y reporta lo purgado', async () => {
+        const { a, eventos } = barrido();
+        const r = await ejecutarJob('purgar-fotos-registro', { admin: a });
+        expect(eventos).toEqual(['listar', 'borrar:2', 'marcar:7']);
+        expect(r).toMatchObject({ job: 'purgar-fotos-registro', estado: 'ok', objetos_borrados: 2, marcadas: 1 });
+        expect(a.llamadas.at(-1)).toBe('svc_bloqueo_liberar');
+    });
+
+    it('toma el bloqueo del ÍNDICE (no uno propio): no corre mientras se reconstruye o revierte', async () => {
+        const { a } = barrido();
+        await ejecutarJob('purgar-fotos-registro', { admin: a });
+        expect(a.rpc.mock.calls[0]).toEqual(['svc_bloqueo_adquirir', expect.objectContaining({ p_clave: 'indice' })]);
+    });
+
+    it('con el bloqueo ocupado omite la corrida sin borrar nada', async () => {
+        const { a } = barrido({ svc_bloqueo_adquirir: () => false });
+        expect(await ejecutarJob('purgar-fotos-registro', { admin: a })).toMatchObject({ estado: 'omitido', motivo: 'en_ejecucion' });
+        expect(a.bucket.remove).not.toHaveBeenCalled();
+        expect(a.llamadas).toEqual(['svc_bloqueo_adquirir']);
+    });
+
+    it('si falla el borrado no marca y libera el bloqueo', async () => {
+        const { a, eventos } = barrido();
+        a.bucket.remove.mockResolvedValue({ error: { message: 'x' } });
+        const e = await ejecutarJob('purgar-fotos-registro', { admin: a }).catch((x) => x);
+        expect(e).toBeInstanceOf(ApiError);
+        expect(eventos.some((x) => x.startsWith('marcar'))).toBe(false);
+        expect(a.llamadas.at(-1)).toBe('svc_bloqueo_liberar');
     });
 });

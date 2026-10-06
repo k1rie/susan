@@ -18,7 +18,7 @@ Los contratos de detalle (RPC, rutas, formas JSON) viven en `docs/API.md` y `doc
    Programador de tareas = /api/jobs/* (cron)     · construye/carga índice (JSON en el bucket)
  DATOS ───────────────────────────────────────────────────────────────────────────
    PostgreSQL (Supabase): 20 tablas 3FN (19 de la spec + `plantilla_foto`) + RLS + triggers + RPC api_*/svc_*
-   Supabase Storage: bucket privado `susan-private` (fotos, documentos, recortes, índice FAISS .json)
+   Supabase Storage: bucket privado `susan-private` (documentos, recortes, índice FAISS .json; las fotos de registro solo viven hasta que se indexan, ext. 18)
 ```
 
 Reglas de reparto (spec Tabla 34): las **reglas de negocio nunca viven en la interfaz**. Viven en PostgreSQL
@@ -113,7 +113,7 @@ Superficie PERMITIDA de ese objeto (nada más; así el modo local puede imitarla
 
 ## 5. Biometría e índice FAISS (spec §3.5.1, RN-12, RNF-03/09/14)
 
-- La BD guarda por rostro solo `faiss_id` + rutas `objeto_*`. El vector de consulta de cada captura existe solo en la
+- La BD guarda por rostro solo `faiss_id` + rutas `objeto_*` (la de la foto de registro pasa a `NULL` cuando la foto se borra al indexarse: ext. 18, `docs/DECISIONS.md` §8). El vector de consulta de cada captura existe solo en la
   memoria del servicio y no figura en ninguna respuesta.
 - **Índice = archivo JSON versionado en el bucket** (`indice/<version>.json`), formato `susan-faiss-json/1`:
   `{ format, version, dimension, model, metric: "ip", created_at, ntotal, ids: [int…], vectors_b64: "<float32 LE

@@ -407,6 +407,26 @@ describe('PlantillaFacialPanel: plantilla actual', () => {
         expect(mocks.solicitarUrlDocumento).toHaveBeenLastCalledWith({ tipo: 'plantilla_foto', idRegistro: 103 });
     });
 
+    it('con las fotos ya borradas (extensión 18) no ofrece enlaces y dice que solo se guarda el vector', async () => {
+        const purgada = { ...ACTIVA, foto_disponible: false, fotos: ACTIVA.fotos.map((f) => ({ ...f, disponible: false })) };
+        mocks.plantillaAlumno.mockResolvedValue({ activa: purgada, archivadas: { total: 0, items: [] } });
+        await montar();
+        expect(screen.getByText('Fotos: 5')).toBeInTheDocument();
+        expect(screen.getByText('Las fotos no se conservan: solo se guarda el vector del rostro en el índice.')).toBeInTheDocument();
+        expect(screen.queryByRole('button', { name: 'Ver foto' })).not.toBeInTheDocument();
+        expect(screen.queryByText(/Ver las .* fotos/)).not.toBeInTheDocument();
+        expect(mocks.solicitarUrlDocumento).not.toHaveBeenCalled();
+    });
+
+    it('con las fotos aún sin indexar (disponible: true) sigue ofreciendo «Ver foto» y la lista de fotos', async () => {
+        const reciente = { ...ACTIVA, indexada: false, version_indice: null, foto_disponible: true, fotos: ACTIVA.fotos.map((f) => ({ ...f, disponible: true })) };
+        mocks.plantillaAlumno.mockResolvedValue({ activa: reciente, archivadas: { total: 0, items: [] } });
+        await montar();
+        expect(screen.getByRole('button', { name: 'Ver foto' })).toBeInTheDocument();
+        expect(screen.getByText('Ver las 5 fotos')).toBeInTheDocument();
+        expect(screen.queryByText(/Las fotos no se conservan/)).not.toBeInTheDocument();
+    });
+
     it('explica por qué varias fotos en un solo bloque plegable', async () => {
         await montar();
         expect(within(screen.getByText('¿Por qué varias fotos?').closest('div')).getByText('SUSAN promedia las fotos para reconocer mejor con distintos ángulos y luz.')).toBeInTheDocument();

@@ -87,6 +87,7 @@ Todas son idempotentes. Frecuencias sugeridas:
 | `POST /api/jobs/cerrar-sesiones` | Cierra sesiones abiertas cuya hora de fin pasó (crea ausentes, recalcula, bitácora) | `*/5 * * * *` |
 | `POST /api/jobs/resolver-pendientes` | Pendientes sin revisar tras 48 h → ausente (origen `correccion`, cuenta de servicio) | `15 * * * *` |
 | `POST /api/jobs/purgar-recortes` | Borra recortes de rostro con más de 7 días (objeto + ruta) | `0 3 * * *` |
+| `POST /api/jobs/purgar-fotos-registro` | Borra fotos de registro de plantillas ya indexadas o archivadas (objeto + ruta). Cada reconstrucción ya purga las suyas; este job reintenta fallos y limpia lo anterior. Toma el bloqueo del índice | `45 3 * * *` |
 | `POST /api/jobs/recalcular` | Recalcula faltas equivalentes y derecho a examen del periodo vigente | `30 2 * * *` |
 | `POST /api/jobs/reconstruir-indice` | Indexa plantillas pendientes (no hace nada si no hay) | `*/15 * * * *` |
 
@@ -96,6 +97,11 @@ Tres formas de dispararlos (elige una):
 - **pg_cron + pg_net** dentro de Supabase: `select cron.schedule('susan-cerrar', '*/5 * * * *', $$select net.http_post('https://<dominio>/api/jobs/cerrar-sesiones', headers := jsonb_build_object('Authorization','Bearer <CRON_SECRET>'))$$);`.
 
 ## 5. Operación
+
+- **Fotos de registro efímeras** (extensión 18): el bucket guarda el JSON del índice, no las fotos de los alumnos. Tras activar una versión se borran las fotos que contiene. Para limpiar las que ya
+  estaban antes de esta extensión, dispara una vez `POST /api/jobs/purgar-fotos-registro` (es irreversible: después esas plantillas solo existen como vectores). Consecuencias operativas: una
+  reconstrucción **completa** o un cambio de dimensión sobre plantillas ya indexadas responde `409 PLANTILLAS_SIN_FOTO` (hay que registrar de nuevo a esos alumnos), y revertir a una versión que no
+  conoce a una plantilla purgada responde `409 REVERSION_PERDERIA_PLANTILLAS`. Si el índice queda `pendiente`, las fotos siguen en el bucket hasta la siguiente reconstrucción exitosa.
 
 - **Calibración** (RNF-02): el técnico edita `umbral_similitud` (0.850), `min_detecciones_validas` (3), `intervalo_muestreo_seg` (15)… en `/tecnico`; cada cambio queda en bitácora con valor anterior y nuevo.
   Con rostros reales (InsightFace) el 0.850 es demasiado exigente (coseno 0.70): en local se calibró a **0.700** (coseno 0.40); ver `docs/DEMO.md` §9 y las mediciones en `recognition-service/README.md`. Recalíbralo con tus propias cámaras y plantillas.
