@@ -14,20 +14,25 @@
    escena 1 la cifra no comparte ningun otro movimiento, para quedar quieta al pixel mientras la voz la nombra */
 .s01-cinco-minutos-camara{position:absolute;inset:0;transform-origin:50% 50%}
 .s01-cinco-minutos-escena{position:absolute;inset:0}
-/* capa de la barra (pista, tinta y horas): su acercamiento durante el relleno sale del extremo izquierdo de la barra */
-.s01-cinco-minutos-barra{position:absolute;inset:0;transform-origin:360px 560px}
-/* la barra de la clase y su tramo de tinta: superficies del tamano de la union barra + primera casilla, recortadas con
-   clip-path (morph entre cajas de distinto aspecto sin escala no uniforme ni width/height) */
-.s01-cinco-minutos-sup{position:absolute;left:360px;top:546px;width:1200px;height:88px}
-.s01-cinco-minutos-sup-in{position:absolute;inset:0}
-#s01-cinco-minutos-pista{background:#F0EDE8;clip-path:inset(0px 0px 60px 0px round 14px)}
+/* capa de las barras (pistas, tinta y horas), encima de la rejilla: al plegarse pasan por encima de las casillas que entran */
+.s01-cinco-minutos-barra{position:absolute;inset:0}
+/* las tres barras de clase (Lun, Mie, Vie) en las filas de la rejilla: 1140 x 44 (60 min; 5 min = 95 px), radio 22. La de
+   Lun es la del gancho; las de Mie y Vie salen de debajo de ella con «cada clase». Cada una se pliega en SU casilla de S1
+   (60 x 44, radio 10) con clip-path: el pliegue es solo horizontal, sin escala no uniforme ni width/height */
+.s01-cinco-minutos-fila-barra{position:absolute;left:440px;width:1140px;height:44px}
+.s01-cinco-minutos-sup{position:absolute;inset:0}
+/* pista y casillas en el token de borde (#E7E2DC): sobre el lienzo crema conservan el contraste que la pista #F0EDE8 tiene en
+   la app sobre una tarjeta blanca (la barra es el objeto del gancho y se lee de un vistazo) */
+.s01-cinco-minutos-pista{background:#E7E2DC;clip-path:inset(0px 0px 0px 0px round 22px)}
 /* la tinta va dentro de una mascara con el mismo recorte redondeado que la pista: su lado izquierdo hereda el radio de la
-   pista (14 en la barra, 10 en la casilla) y el derecho queda recto */
-#s01-cinco-minutos-tinta-m{clip-path:inset(0px 0px 60px 0px round 14px)}
-#s01-cinco-minutos-tinta{background:#1E1919;clip-path:inset(0px 1200px 60px 0px)}
-.s01-cinco-minutos-hora{position:absolute;top:588px;width:120px;font-size:24px;font-weight:500;line-height:31px;color:#6F6A65;letter-spacing:0;white-space:nowrap}
-/* cifra heroe: ventana de 192 px (1.2 x cuerpo) con mascara de desvanecido; linea base en y = 480, borde izquierdo en x = 360 */
-.s01-cinco-minutos-cifra{position:absolute;left:340px;top:328px;width:440px;height:192px}
+   pista (22 en la barra, 10 en la casilla) y el derecho queda recto */
+.s01-cinco-minutos-tinta-m{clip-path:inset(0px 0px 0px 0px round 22px)}
+.s01-cinco-minutos-tinta{background:#1E1919;clip-path:inset(0px 1140px 0px 0px)}
+/* horas de la clase SOBRE la barra de Lun, en el renglon donde luego van S1 ... S16 */
+.s01-cinco-minutos-hora{position:absolute;top:562px;width:120px;font-size:24px;font-weight:500;line-height:29px;color:#6F6A65;letter-spacing:0;white-space:nowrap}
+/* cifra heroe: ventana de 192 px (1.2 x cuerpo) con mascara de desvanecido; linea base en y = 490, borde izquierdo en x = 440
+   (alineado con barras y rejilla) */
+.s01-cinco-minutos-cifra{position:absolute;left:420px;top:338px;width:440px;height:192px}
 .s01-cinco-minutos-ventana{position:absolute;left:0;top:0;width:440px;height:192px;overflow:hidden;
  -webkit-mask-image:linear-gradient(180deg,transparent 0%,#000 16%,#000 84%,transparent 100%);mask-image:linear-gradient(180deg,transparent 0%,#000 16%,#000 84%,transparent 100%)}
 .s01-cinco-minutos-cambio{position:absolute;left:0;top:0;width:440px;height:384px}
@@ -40,13 +45,13 @@
 .s01-cinco-minutos-unidad{position:absolute;top:80px;font-size:72px;font-weight:500;line-height:94px;color:#6F6A65;letter-spacing:0;white-space:nowrap}
 .s01-cinco-minutos-cuenta{position:absolute;left:200px;top:112px;font-size:40px;font-weight:500;line-height:52px;color:#6F6A65;letter-spacing:0;white-space:nowrap}
 /* rejilla del semestre: 16 semanas x 3 sesiones (Lun, Mie, Vie); cada casilla con su astilla de 5 min a la izquierda */
-.s01-cinco-minutos-casilla{position:absolute;width:60px;height:44px;border-radius:10px;background:#F0EDE8}
+.s01-cinco-minutos-casilla{position:absolute;width:60px;height:44px;border-radius:10px;background:#E7E2DC}
 /* la astilla vive dentro de una mascara con la silueta de su casilla (60 x 44, radio 10): su lado izquierdo tiene el mismo
    radio que la casilla aunque mida 6 px, y la onda de la cuenta la ensancha sin deformar esa esquina */
 .s01-cinco-minutos-astilla{position:absolute;width:60px;height:44px;border-radius:10px;overflow:hidden}
 .s01-cinco-minutos-astilla-in{position:absolute;left:0;top:0;width:6px;height:44px;background:#1E1919;transform-origin:0 50%}
 .s01-cinco-minutos-rot{position:absolute;font-size:22px;font-weight:400;line-height:29px;color:#6F6A65;letter-spacing:0;white-space:nowrap}
-.s01-cinco-minutos-rot-s{width:60px;text-align:center;top:552px}
+.s01-cinco-minutos-rot-s{width:60px;text-align:center;top:562px}
 .s01-cinco-minutos-rot-d{left:344px;width:80px;text-align:right}
 /* ficha del boton central «Pasar lista» (barra movil real): el handoff al cuadro 2 */
 .s01-cinco-minutos-ficha{position:absolute;left:861px;top:401px;width:198px;height:198px}
@@ -81,16 +86,27 @@
         <div id="s01-cinco-minutos-astillas" class="s01-cinco-minutos-capa"></div>
         <!-- la barra va encima de la rejilla y de las astillas: al plegarse pasa por encima de las casillas que ya entraron -->
         <div id="s01-cinco-minutos-barra" class="s01-cinco-minutos-barra">
-          <div class="s01-cinco-minutos-sup"><div id="s01-cinco-minutos-pista" class="s01-cinco-minutos-sup-in"></div></div>
-          <div id="s01-cinco-minutos-tinta-w" class="s01-cinco-minutos-sup"><div id="s01-cinco-minutos-tinta-m" class="s01-cinco-minutos-sup-in"><div id="s01-cinco-minutos-tinta" class="s01-cinco-minutos-sup-in"></div></div></div>
-          <div id="s01-cinco-minutos-h07" class="s01-cinco-minutos-hora" style="left:360px">07:00</div>
-          <div id="s01-cinco-minutos-h08" class="s01-cinco-minutos-hora" style="left:1440px;text-align:right">08:00</div>
+          <!-- Vie y Mie primero: salen de DEBAJO de la barra de Lun -->
+          <div id="s01-cinco-minutos-fila-2" class="s01-cinco-minutos-fila-barra" style="top:712px">
+            <div id="s01-cinco-minutos-pista-2" class="s01-cinco-minutos-sup s01-cinco-minutos-pista"></div>
+            <div id="s01-cinco-minutos-tinta-w-2" class="s01-cinco-minutos-sup"><div id="s01-cinco-minutos-tinta-m-2" class="s01-cinco-minutos-sup s01-cinco-minutos-tinta-m"><div id="s01-cinco-minutos-tinta-2" class="s01-cinco-minutos-sup s01-cinco-minutos-tinta"></div></div></div>
+          </div>
+          <div id="s01-cinco-minutos-fila-1" class="s01-cinco-minutos-fila-barra" style="top:656px">
+            <div id="s01-cinco-minutos-pista-1" class="s01-cinco-minutos-sup s01-cinco-minutos-pista"></div>
+            <div id="s01-cinco-minutos-tinta-w-1" class="s01-cinco-minutos-sup"><div id="s01-cinco-minutos-tinta-m-1" class="s01-cinco-minutos-sup s01-cinco-minutos-tinta-m"><div id="s01-cinco-minutos-tinta-1" class="s01-cinco-minutos-sup s01-cinco-minutos-tinta"></div></div></div>
+          </div>
+          <div id="s01-cinco-minutos-fila-0" class="s01-cinco-minutos-fila-barra" style="top:600px">
+            <div id="s01-cinco-minutos-pista-0" class="s01-cinco-minutos-sup s01-cinco-minutos-pista"></div>
+            <div id="s01-cinco-minutos-tinta-w-0" class="s01-cinco-minutos-sup"><div id="s01-cinco-minutos-tinta-m-0" class="s01-cinco-minutos-sup s01-cinco-minutos-tinta-m"><div id="s01-cinco-minutos-tinta-0" class="s01-cinco-minutos-sup s01-cinco-minutos-tinta"></div></div></div>
+          </div>
+          <div id="s01-cinco-minutos-h07" class="s01-cinco-minutos-hora" style="left:440px">07:00</div>
+          <div id="s01-cinco-minutos-h08" class="s01-cinco-minutos-hora" style="left:1460px;text-align:right">08:00</div>
         </div>
         <div id="s01-cinco-minutos-rotulos" class="s01-cinco-minutos-capa"></div>
       </div>
     </div>
 
-    <!-- la cifra en su propio rig: comparte con la camara solo la escala del rack; quieta al pixel de 1.65 a 2.95 s -->
+    <!-- la cifra en su propio rig: comparte con la camara solo el rack (escala y encuadre); quieta al pixel de 1.65 a 2.95 s -->
     <div id="s01-cinco-minutos-cifra-rig" class="s01-cinco-minutos-camara">
       <div id="s01-cinco-minutos-cifra" class="s01-cinco-minutos-cifra">
         <div class="s01-cinco-minutos-ventana">
@@ -137,8 +153,8 @@
         var PASO = 85.2;                   // avance de cifra tabular a 160 px con -0.03em
         var C = { x: 960, y: 500 };        // centro de la ficha (handoff_out)
         // Tiempos que comparten el cuadro y sfx_cues (contrato: el tween nombrado empieza o termina ahi).
-        var T = { foco: 0.10, giro: 0.70, tic5: 1.65, relleno: 1.95, pliegue: 2.95, cuenta: 3.00, ola: 3.25, unidad: 3.45, tic4h: 3.65,
-            igual: 4.45, junta: 5.45, disco: 5.74, ficha: 6.05, quieta: 6.20 };
+        var T = { foco: 0.10, giro: 0.70, tic5: 1.65, relleno: 1.75, filas: 2.00, pliegue: 2.95, cuenta: 3.00, ola: 3.25, unidad: 3.45,
+            tic4h: 3.65, igual: 4.45, junta: 5.45, disco: 5.74, ficha: 6.05, quieta: 6.20 };
         function $(s) { return document.getElementById(ID + '-' + s); }
         function clamp01(v) { return v < 0 ? 0 : v > 1 ? 1 : v; }
         function lerp(a, b, e) { return a + (b - a) * e; }
@@ -152,15 +168,16 @@
         var t3 = [FIG]; for (var b = 1; b <= 20; b++) { t3.push(String(b % 10)); }    // unidades: dos vueltas -> 0
         tira($('tira1'), t1); tira($('tira2'), t2); tira($('tira3'), t3);
 
-        // ---- rejilla 16 x 3: casilla 0 = la barra plegada (pista + tinta); 1..47 se generan ----
-        var COLS = 16, FILAS = 3, X0 = 440, Y0 = 590, CW = 60, CH = 44, GAP = 12;
+        // ---- rejilla 16 x 3: casillas 0..2 (S1 de Lun, Mie y Vie) = las tres barras plegadas (pista + tinta); 3..47 se generan ----
+        var COLS = 16, FILAS = 3, X0 = 440, Y0 = 600, CW = 60, CH = 44, GAP = 12;
+        var BARRAS = 3, ANCHO = 1140, QUINCE = 95;   // barra = 60 min en 1140 px: 5 min = 95 px
         var rejilla = $('rejilla'), astillas = $('astillas'), rotulos = $('rotulos');
         var casillas = [], piezas = [], nucleos = [];
         for (var k = 0; k < COLS * FILAS; k++) {
             var col = Math.floor(k / FILAS), fila = k % FILAS;   // indice de izquierda a derecha (semana) y luego por sesion
             var x = X0 + col * (CW + GAP), y = Y0 + fila * (CH + GAP);
             var cas = null, ast = null, nuc = null;
-            if (k > 0) {
+            if (k >= BARRAS) {
                 cas = document.createElement('div');
                 cas.className = ID + '-casilla';
                 cas.style.left = x + 'px'; cas.style.top = y + 'px';
@@ -224,51 +241,62 @@
             tl.fromTo(st, { d: desde }, { d: 0, duration: dur, ease: curva, onUpdate: aplicar, immediateRender: false }, at);
         }
 
-        var camara = $('camara'), cifraRig = $('cifra-rig'), barra = $('barra');
+        var camara = $('camara'), cifraRig = $('cifra-rig');
         var tira1 = $('tira1'), tira2 = $('tira2'), tira3 = $('tira3');
         gsap.set([tira1, tira2, tira3], { y: 0 });
 
         // ================= Escena 1 (0.0-1.15): rack focus; la barra es el unico objeto =================
         desenfoque($('escena'), T.foco, 0.85, 20, 'power2.out');
-        // la cifra lleva la misma escala del rack en su propio rig, y nada mas: queda registrada con la barra y nunca se
-        // mueve con el acercamiento de la barra ni con el pliegue
-        tl.fromTo([camara, cifraRig], { scale: 1.12 }, { scale: 1, duration: 1.2, ease: 'power3.out' }, T.foco);
+        // la cifra lleva el mismo rack en su propio rig, y nada mas: queda registrada con la barra y nunca se mueve con el
+        // pliegue. El rack tambien reencuadra (y -60 -> 0): la barra sola abre en el centro optico del cuadro y baja a su fila
+        // mientras la cifra ocupa el espacio de arriba
+        tl.fromTo([camara, cifraRig], { scale: 1.12, y: -60 }, { scale: 1, y: 0, duration: 1.2, ease: 'power3.out' }, T.foco);
         // la columna de las centenas esta vacia (U+2007) y rueda UN renglon, de vacio a 5, con estela solo mientras va rapido:
         // arranca a 0.70 s con el 5 todavia bajo la mascara, que asoma hacia 0.80 s, cuando el rack ya bajo de 1 px; se asienta
         // con el tic de 1.65 s, 0.3 s antes de «cinco». «5» es la unica cifra que aparece en la escena.
         conRastro({ el: tira1, nodo: $('mb1-g'), at: T.giro, dur: T.tic5 - T.giro, curva: 'power3.out', dist: H, max: 16,
             pos: function (e) { gsap.set(tira1, { y: -H * e }); } });
 
-        // ================= Escena 2 (1.15-2.95): «5 min» y el primer tramo de tinta =================
+        // ================= Escena 2 (1.15-2.95): «5 min», el primer tramo de tinta y «cada clase» =================
         tl.fromTo($('min'), { opacity: 0, y: 36 }, { opacity: 1, y: 0, duration: 0.25, ease: 'power3.out' }, T.tic5 - 0.25);
 
-        // barra y tramo: un solo estado y tres drivers (relleno, pliegue, pulso de la cuenta); el recorte se reescribe desde todos
-        var pista = $('pista'), tintaM = $('tinta-m'), tinta = $('tinta'), tintaW = $('tinta-w');
-        var est = { relleno: 0, pliegue: 0, pulso: 0 };
+        // barras: un solo estado y tres drivers (relleno de Lun, pliegue, pulsos de la cuenta); el recorte se reescribe desde todos.
+        // Mie y Vie ya traen su tramo de tinta: cada clase pierde los mismos cinco minutos.
+        var pistas = [], tintasM = [], tintas = [], tintasW = [], filasB = [];
+        for (var bi = 0; bi < BARRAS; bi++) {
+            pistas.push($('pista-' + bi)); tintasM.push($('tinta-m-' + bi)); tintas.push($('tinta-' + bi));
+            tintasW.push($('tinta-w-' + bi)); filasB.push($('fila-' + bi));
+        }
+        var est = { relleno: 0, pliegue: 0, pulso0: 0, pulso1: 0, pulso2: 0 };
         var EIO = gsap.parseEase('power3.inOut');
         function recorte() {
             var p = est.pliegue;
-            var eR = EIO(clamp01(p / 0.8)), eL = EIO(clamp01((p - 0.1) / 0.9)), eV = EIO(clamp01((p - 0.2) / 0.8));
-            // pista 360..1560 x 546..574 (r 14) -> casilla 440..500 x 590..634 (r 10)
-            var L = lerp(360, 440, eL), R = lerp(1560, 500, eR), Tp = lerp(546, 590, eV), B = lerp(574, 634, eV), rr = lerp(14, 10, eV);
-            var caja = 'inset(' + (Tp - 546).toFixed(2) + 'px ' + (1560 - R).toFixed(2) + 'px ' + (634 - B).toFixed(2) + 'px ' + (L - 360).toFixed(2) + 'px round ' + rr.toFixed(2) + 'px)';
-            pista.style.clipPath = caja;
-            tintaM.style.clipPath = caja;
-            // tinta: 5 de 60 min (100 px) -> astilla de 6 px a la izquierda de la casilla (+6 px en el pulso de la cuenta);
-            // recorte recto: la mascara le da el radio de la pista o de la casilla del lado izquierdo
-            var R0 = 360 + 100 * est.relleno;
-            var Ri = lerp(R0, 446, eR) + 6 * est.pulso;
-            tinta.style.clipPath = 'inset(0px ' + (1560 - Ri).toFixed(2) + 'px 0px 0px)';
+            var eR = EIO(clamp01(p / 0.8)), eV = EIO(clamp01((p - 0.2) / 0.8));
+            // barra 440..1580 (r 22) -> casilla 440..500 (r 10), en su misma fila: el pliegue es solo horizontal
+            var R = lerp(1580, 500, eR), rr = lerp(22, 10, eV);
+            var caja = 'inset(0px ' + (1580 - R).toFixed(2) + 'px 0px 0px round ' + rr.toFixed(2) + 'px)';
+            for (var b = 0; b < BARRAS; b++) {
+                pistas[b].style.clipPath = caja;
+                tintasM[b].style.clipPath = caja;
+                // tinta: 5 de 60 min (95 px) -> astilla de 6 px a la izquierda de la casilla (+6 px en el pulso de la cuenta);
+                // recorte recto: la mascara le da el radio de la pista o de la casilla del lado izquierdo
+                var R0 = 440 + QUINCE * (b === 0 ? est.relleno : 1);
+                var Ri = lerp(R0, 446, eR) + 6 * est['pulso' + b];
+                tintas[b].style.clipPath = 'inset(0px ' + (1580 - Ri).toFixed(2) + 'px 0px 0px)';
+            }
         }
         recorte();
-        tl.fromTo(est, { relleno: 0 }, { relleno: 1, duration: 0.5, ease: 'power4.out', onUpdate: recorte, immediateRender: false }, T.relleno);
-        // mientras se pinta el tramo («cinco minutos») solo la capa de la barra se acerca, desde su extremo izquierdo; la
-        // cifra no se mueve. Regresa a 1 dentro del pliegue, como parte del mismo movimiento de la barra.
-        tl.fromTo(barra, { scale: 1 }, { scale: 1.05, duration: 0.45, ease: 'power3.out' }, T.relleno);
+        tl.fromTo(est, { relleno: 0 }, { relleno: 1, duration: 0.4, ease: 'power4.out', onUpdate: recorte, immediateRender: false }, T.relleno);
+        // «cada clase»: las barras de Mie y Vie salen de debajo de la de Lun (3 clases por semana, frame.md 10) y sus dias
+        // aparecen a la izquierda; la cifra no se mueve
+        // escondidas hasta que salen: bajo la barra de Lun, su tinta asomaba por el borde suavizado de la pista
+        tl.set([filasB[1], filasB[2]], { visibility: 'hidden' }, 0);
+        tl.set([filasB[1], filasB[2]], { visibility: 'visible' }, T.filas);
+        tl.fromTo(filasB[1], { y: -56 }, { y: 0, duration: 0.45, ease: 'power3.out' }, T.filas);
+        tl.fromTo(filasB[2], { y: -112 }, { y: 0, duration: 0.5, ease: 'power3.out' }, T.filas + 0.06);
 
         // ================= Escena 3 (2.95-5.45): el pliegue en el semestre y «4 h» =================
         tl.fromTo(est, { pliegue: 0 }, { pliegue: 1, duration: 0.6, ease: 'none', onUpdate: recorte, immediateRender: false }, T.pliegue);
-        tl.fromTo(barra, { scale: 1.05 }, { scale: 1, duration: 0.6, ease: 'power3.inOut', immediateRender: false }, T.pliegue);
         tl.fromTo([$('h07'), $('h08')], { opacity: 1 }, { opacity: 0, duration: 0.2, ease: 'power2.out' }, T.pliegue);
 
         // odometro 5 -> 240: derecha -> izquierda, 0.02 s de desfase, todo asentado a 3.50 (expo.out, sin back.out)
@@ -282,19 +310,20 @@
         tl.fromTo($('min'), { x: 0 }, { x: 2 * PASO, duration: 0.25, ease: 'expo.out', immediateRender: false }, T.cuenta);
         tl.fromTo([$('col2'), $('col3')], { opacity: 0 }, { opacity: 1, duration: 0.12, ease: 'power1.in' }, T.cuenta + 0.02);
 
-        // ola de casillas 1..47 de izquierda a derecha (3.25 -> 3.65), cada una con su astilla (que escala con su casilla)
+        // ola de casillas 3..47 (S2 ... S16) de izquierda a derecha (3.25 -> 3.65), cada una con su astilla (que escala con su casilla)
         for (var q = 0; q < piezas.length; q++) {
             if (piezas[q]) { gsap.set(piezas[q], { transformOrigin: '30px 22px' }); }
         }
-        for (var i = 1; i < casillas.length; i++) {
-            var at = T.ola + (i - 1) / 46 * 0.2;
+        for (var i = BARRAS; i < casillas.length; i++) {
+            var at = T.ola + (i - BARRAS) / (casillas.length - 1 - BARRAS) * 0.2;
             tl.fromTo([casillas[i].el, piezas[i]], { opacity: 0, scale: 0.92 }, { opacity: 1, scale: 1, duration: 0.2, ease: 'power3.out' }, at);
         }
         // rotulos en el eje contrario, despues de que la barra pasa
         for (var j = 0; j < rotS.length; j++) {
             tl.fromTo(rotS[j], { opacity: 0, y: 6 }, { opacity: 1, y: 0, duration: 0.3, ease: 'power3.out' }, 3.35 + j * 0.012);
         }
-        tl.fromTo(rotD, { opacity: 0, x: -6 }, { opacity: 1, x: 0, duration: 0.3, ease: 'power3.out' }, 3.35);
+        // los dias (Lun, Mie, Vie) entran con sus barras, en «cada clase»
+        tl.fromTo(rotD, { opacity: 0, x: -6 }, { opacity: 1, x: 0, duration: 0.3, ease: 'power3.out', stagger: 0.06 }, T.filas + 0.10);
 
         // cambio de unidad en su sitio: «240 min» sale hacia arriba y «4 h» entra desde abajo (un renglon, estela corta)
         var cambio = $('cambio');
@@ -308,9 +337,13 @@
         desenfoque(cuenta, T.igual, 0.4, 10, 'power2.out');
         for (var n = 0; n < casillas.length; n++) {
             var tp = T.igual + casillas[n].col * 0.012 + casillas[n].fila * 0.006;
-            if (n === 0) {
-                tl.fromTo(est, { pulso: 0 }, { pulso: 1, duration: 0.1, ease: 'power2.out', onUpdate: recorte, immediateRender: false }, tp);
-                tl.fromTo(est, { pulso: 1 }, { pulso: 0, duration: 0.2, ease: 'power2.inOut', onUpdate: recorte, immediateRender: false }, tp + 0.1);
+            if (n < BARRAS) {
+                var a0 = {}, a1 = {}, b0 = {}, b1 = {};
+                a0['pulso' + n] = 0; a1['pulso' + n] = 1; b0['pulso' + n] = 1; b1['pulso' + n] = 0;
+                a1.duration = 0.1; a1.ease = 'power2.out'; a1.onUpdate = recorte; a1.immediateRender = false;
+                b1.duration = 0.2; b1.ease = 'power2.inOut'; b1.onUpdate = recorte; b1.immediateRender = false;
+                tl.fromTo(est, a0, a1, tp);
+                tl.fromTo(est, b0, b1, tp + 0.1);
             } else {
                 tl.fromTo(nucleos[n], { scaleX: 1 }, { scaleX: 2, duration: 0.1, ease: 'power2.out' }, tp);
                 tl.fromTo(nucleos[n], { scaleX: 2 }, { scaleX: 1, duration: 0.2, ease: 'power2.inOut', immediateRender: false }, tp + 0.1);
@@ -318,11 +351,11 @@
         }
 
         // ================= Escena 4 (5.45-6.4): las cuatro horas se vuelven el boton =================
-        var grises = [$('pista'), $('rotulos')];
-        for (var g = 1; g < casillas.length; g++) { grises.push(casillas[g].el); }
+        var grises = pistas.concat([$('rotulos')]);
+        for (var g = BARRAS; g < casillas.length; g++) { grises.push(casillas[g].el); }
         tl.fromTo(grises, { opacity: 1 }, { opacity: 0, duration: 0.3, ease: 'power2.out', immediateRender: false }, T.junta);
         var cifra = $('cifra');
-        gsap.set(cifra, { transformOrigin: (C.x - 340) + 'px ' + (C.y - 328) + 'px' });
+        gsap.set(cifra, { transformOrigin: (C.x - 420) + 'px ' + (C.y - 338) + 'px' });
         tl.fromTo(cifra, { scale: 1, opacity: 1 }, { scale: 0.6, opacity: 0, duration: 0.4, ease: 'power2.in' }, T.junta);
 
         // disco de 168 px en tinta plena desde que aparece: nace con 40 px a 5.74 s, cuando las astillas mas cercanas estan
@@ -358,9 +391,9 @@
             var tx = C.x + ux * RT, ty = C.y + uy * RT;       // destino: dentro del radio inicial del disco
             var t0 = T.junta + 0.15 * (vu.dist - dmin) / (dmax - dmin);
             var el, bx, by, ox, oy;
-            if (vu.i === 0) {
-                // la astilla de la barra plegada: su superficie empieza en (360, 546); origen en su centro
-                el = tintaW; bx = 360; by = 546; ox = vu.px - 360; oy = vu.py - 546;
+            if (vu.i < BARRAS) {
+                // la astilla de una barra plegada: su superficie empieza en (440, fila); origen en su centro
+                el = tintasW[vu.i]; bx = 440; by = Y0 + vu.i * (CH + GAP); ox = vu.px - bx; oy = vu.py - by;
                 gsap.set(el, { transformOrigin: ox + 'px ' + oy + 'px' });
             } else {
                 el = piezas[vu.i]; bx = vu.px - 3; by = vu.py - 22; ox = 30; oy = 22;   // mismo origen que su casilla

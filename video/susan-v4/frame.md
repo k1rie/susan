@@ -21,7 +21,7 @@ colors:
   hover-accent: "#EFECE7"      # hover, destino activo del BottomNav
   sidebar-accent: "#EBE8E3"    # ítem activo del riel
   primary-hover: "#3A3433"     # pulso del botón sin cursor
-  brand-gold: "#A8842C"        # chispa: UN elemento por cuadro, nunca texto < 48 px
+  brand-gold: "#A8842C"        # chispa: a lo sumo UN elemento por cuadro, nunca texto < 48 px (en la v4 no se usa: §2.3)
   brand-gold-soft: "#F6EDD3"
   info: "#0061FE"              # enlaces y halo de foco, nunca marca
 
@@ -65,7 +65,7 @@ typography:
   hero-number: { fontFamily: "Hanken Grotesk", px: "120–180", weight: "500–600", tracking: "-0.03em", unit: "0.45–0.5em gris" }
   kicker:      { fontFamily: "Hanken Grotesk", px: "30–40", weight: 500 }
   greeting:    { fontFamily: "EB Garamond", appPx: 52, px: 104, weight: 500, lineHeight: 1.05, tracking: "-0.025em" }
-  wordmark:    { fontFamily: "Hanken Grotesk", px: "200 (176 con lema)", weight: 600, lineHeight: 1, tracking: "-0.025em" }
+  wordmark:    { fontFamily: "Hanken Grotesk", px: "136 en la v4 (cuadros 2 y 8; sin subrayado)", weight: 600, lineHeight: 1, tracking: "-0.025em" }
   tagline:     { fontFamily: "Hanken Grotesk", px: 40, weight: 500, color: "muted-foreground" }
   mono:        { fontFamily: "Geist Mono", px: 24, weight: 500 }
 ---
@@ -117,8 +117,10 @@ timeline pausado registrado al final en `window.__timelines["<frame_id>"]`; `fro
 1. **Dos capas**: UI fiel (lo que existe en la app) + escenario cinematográfico con colores del frontmatter.
 2. **Tinta** = único acento estructural (botón primario, píldora activa, tooltip, bloque resaltado, botón central).
    Titulares en tinta, nunca de color. **Azul** solo enlaces («Otras sesiones de hoy (1)») y halo de foco.
-3. **Oro = un solo elemento por cuadro** (subrayado del saludo o del wordmark, aro de la pulsación de «Pasar lista», línea
-   EMA). Nunca texto dorado < 48 px (3.22:1 sobre crema), nunca junto a un chip «Retardo» ni sobre datos de asistencia.
+3. **Oro = a lo sumo un elemento por cuadro** (subrayado del saludo «Patricia», aro de la pulsación de «Pasar lista», línea
+   EMA). **Nunca bajo el wordmark «SUSAN»**: la persona dueña retiró el subrayado dorado ondulado de la marca («no pongas esa
+   cosa abajo de SUSAN», BRIEF, ajuste del 2026-10-06) y nada lo reemplaza; en la v4 ningún cuadro lleva oro. Nunca texto
+   dorado < 48 px (3.22:1 sobre crema), nunca junto a un chip «Retardo» ni sobre datos de asistencia.
 4. **Estados siempre con etiqueta + color**; no pintes los cuatro a la vez si no cuentas un estado.
 5. **Holograma** = `escenario.degradado` (portada real de «Pasar lista»): solo superficie héroe, ficha o barrido de la marca;
    nunca en gráficas, chips o datos; una superficie holográfica por cuadro.
@@ -336,13 +338,14 @@ escala con el icono. App → video: 14→28 chips · 16→32 StatCard, flechas �
 
 ## 8. Marca y cierre (BRIEF)
 
-Sin logo: wordmark **«SUSAN»** = el BrandMark de la app ampliado, sin escudo. Hanken 600, 200 px (176 con lema), −0.025em,
-lh 1, tinta (~640–660 px de ancho; medir en snapshot). Subrayado dorado = trazo `Resaltado` bajo toda la palabra: alto 64,
-a −24 px de la línea base, `#A8842C` .8, 14 px, remates redondos, con la receta de PILOTO §3d: SVG con `viewBox` en px del
-tamaño real (p. ej. 440 × 40), `pathLength="100"`, `stroke-dasharray="100"` y `stroke-dashoffset` 100 → 0, **sin
-`vector-effect`** (con `non-scaling-stroke` el trazo se ve punteado antes de dibujarse); dibujo 0.9 s `power4.out` 0.15 s
-después de posarse la palabra (`sheen` suave); es el oro del cuadro. **Lema** debajo: «Pasa lista en segundos y entiende la
-asistencia de tus grupos», Hanken 500 40 px `#6F6A65`, una línea, 40 px bajo el subrayado. **Llegada decidida**: la ficha
+Sin logo: wordmark **«SUSAN»** = el BrandMark de la app ampliado, sin escudo. Hanken 600, −0.025em, lh 1, tinta; en la v4,
+136 px en los cuadros 2 y 8 (tinta de ≈ 401 px de ancho, mayúsculas de 95 px; medido en snapshot). **Sin subrayado**: el trazo
+dorado `Resaltado` bajo la palabra se retiró por indicación de la persona dueña (BRIEF, ajuste del 2026-10-06: «ese como palo
+en zigzag, no me gusta») y no se reemplaza con ningún otro adorno (ni punto, ni línea, ni otra marca dorada); la palabra va
+limpia. **Lema** directamente debajo del nombre: «Pasa lista en segundos y entiende la asistencia de tus grupos», Hanken 500
+40 px `#6F6A65`, una línea; el espacio que ocupaba el subrayado se reparte para que el bloque ficha + nombre + lema quede
+centrado ópticamente (en el cuadro 8: ficha y mayúsculas centradas en y = 490, mayúsculas del lema en y ≈ 650–678, bloque
+centrado en y ≈ 539). **Llegada decidida**: la ficha
 redonda de tinta del botón central (círculo 168, `scan-face` blanco 72 trazo 1.75, anillo blanco 15, sombra
 `0 30px 90px rgba(30,25,25,.18)`) cae con estela vertical (0.35–0.45 s), squash de volumen constante al contacto
 (`scaleX 1.07 · scaleY .93`, 0.07 s, origen abajo) y recuperación 0.3 s `power3.out` **sin rebote**; luego se resuelve en
@@ -380,7 +383,7 @@ por alumno o la fila de Iván); «límite» con tilde; ningún cronómetro; «un
 
 1. ¿Un héroe por plano, legible a 0.5 s, cifra quieta ≥ 1.2 s mientras se nombra?
 2. ¿Tokens exactos, radios app × E, bordes 2 px, sin sombras internas, iconos de `assets/icons/`?
-3. ¿Un solo oro; estados con etiqueta; ningún «Límite 20 %» junto a 20.8 %; cifras solo de §10; ningún número de
+3. ¿A lo sumo un oro (y ninguno bajo «SUSAN»); estados con etiqueta; ningún «Límite 20 %» junto a 20.8 %; cifras solo de §10; ningún número de
    lecturas, capturas o muestras por alumno?
 4. ¿Tilt solo en el objeto completo, 0° al leer y en ambos bordes; `handoff` con números idénticos; ≤ 2 sobreimpulsos?
 5. ¿GSAP y fuentes locales; `zoom` solo en `.ui` y posiciones en el rig; sin `filter`/opacidad en ancestros 3D?
