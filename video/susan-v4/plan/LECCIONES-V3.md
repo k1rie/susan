@@ -20,7 +20,8 @@ anterior la registra.
 5. El estilo de la v3 (lienzo crema plano, tipografía enorme tecleada, tableros densos y 9 familias de transición) es
    casi el opuesto de la referencia v4: un objeto de UI por plano, profundidad con desenfoque, inclinación 3D suave,
    fondos de cielo o pastel y movimiento continuo y suave.
-6. **Conservar:** sonido, voz, iconos, avatares, datos de demostración, el match cut del anillo y los medidores.
+6. **Conservar:** sonido, voz, iconos, avatares, el escenario de demostración (grupo 3A, Patricia Ortega, 24 alumnos; las
+   **cifras** de la v3 se retiran y mandan las de `CONTENIDO.md` §3), el match cut del anillo y los medidores.
    **Cambiar:** la gramática visual, el número y la duración de los planos, las transiciones, la densidad de micro-eventos y el orden voz → animación.
    **Retirar:** el tecleo como recurso principal, el muestrario de transiciones, los titulares que repiten la locución y el frame.md heredado.
 
@@ -323,11 +324,13 @@ que digo de la v3 está medido o tiene archivo y línea.
 - **Medidores** `frame-check` y `preview-frame` (tras adaptar rutas y versión) y `lucide.mjs --verify --strict`.
 - **Avatares Lorelei, iconos Lucide con su tabla de tamaños y fuentes**, y el **kit de tokens** de frame.md (líneas
   340–385) contrastado con `capture/app-real/`.
-- **Datos de demostración coherentes** (validarlos contra la captura real): 3A «Administración Financiera», Patricia
-  Ortega (avatar-16), 24 inscritos, límite 20 %. 10 min × 3 grupos × 5 días = 2 h 30. 24/24 → 21 presentes + 2 retardos
-  + 1 sin registro = 88 %. HM de 6 % a 21.6 % = «Sin derecho». Serie S1–S8 de 8 a 17 %, recta y = 6.9 + 1.28·S que
-  cruza el 20 % en S11 y llega a 22.3 % en S12; 9 en riesgo. Alumno con 29/33 = 88 % y racha de 7. AG con 71 % de
-  similitud y pendientes 3 → 2.
+- **Escenario de demostración** (3A «Administración Financiera», Patricia Ortega, avatar-16, 24 alumnos, límite 20 %).
+  **Corrección de la crítica:** las cifras de la v3 que estaban aquí (10 min × 3 grupos × 5 días = 2 h 30; 21 presentes +
+  2 retardos + 1 sin registro = 88 %; HM de 6 a 21.6 %; serie S1–S8 de 8 a 17 % con cruce en S11; alumno 29/33 = 88 %
+  con racha de 7; AG con 71 % y pendientes 3 → 2) **se retiran**: no tienen respaldo en la semilla ni en la spec, o
+  contradicen las reglas de la app (por ejemplo, el medidor «Presentes ahora» cuenta presentes + retardos, así que 21 + 2
+  daría 96 %, no 88 %). La hoja canónica es `CONTENIDO.md` §3 (semilla real + una instantánea inventada pero coherente
+  de la sesión de las 07:12) y la tabla de sustituciones es `CONTENIDO.md` §6.
 - **Técnicas:** match cut con contenido idéntico, `immediateRender:false`, entrada en dos tweens con el sonido al
   asentamiento, tecleo y cascada guiados por la alineación de la voz, cifra con tick y golpecito, y `readMark` con lectura
   mínima de 0.6–0.7 s.
@@ -341,7 +344,8 @@ que digo de la v3 está medido o tiene archivo y línea.
   provisional) y recalcular con la alineación real **sin estirar cuadros**: se ajusta la escena por dentro.
 - **Menos planos y más largos:** 7–9 escenas de 5–8 s, cada una con **un objeto de UI héroe** y cámara continua. Cada
   escena sigue siendo una sub-composición para Studio.
-- **Profundidad:** `perspective` en la escena y pose 3D suave de las tarjetas (`rotationX/Y` de 6–12°, `z`, paralaje
+- **Profundidad:** `perspective` en la escena y pose 3D suave de las tarjetas (entrada con |`rotationX`| ≤ 8° y |`rotationY`| ≤ 10°, reposo en 0–3°, tope unificado
+  con DISENO-APP §3.7; `z`, paralaje
   entre capas), foco por capa con `filter: blur()` (rack focus) y un fondo de cielo o pastel con `su-grain`. **Hay que
   confirmarlo con la persona dueña**: en la v2.3 vetó la rotación; esto es pose 3D en perspectiva, no balanceo en el plano,
   pero conviene enseñarlo en la hoja de bocetos. La sombra suave ambiental, solo en el objeto flotante del video, también
