@@ -32,3 +32,7 @@ Entregar el video final 1080p60 MÁS DINÁMICO (ver BRIEF.md, indicación del 20
 - 06:00 UTC: el director escribió plan/DINAMISMO.md y actualizó STORYBOARD.md, pero el límite de uso lo cortó antes de
   reportar (y canceló al crítico). 06:21 UTC: uso reiniciado; se lanza `susan-v4-critico.js` (completa lo faltante del
   director y contrasta el plan). Siguiente: 4× `susan-v4-dinamizar.js` y luego `susan-v4-final.js`.
+- 06:40 UTC: crítico terminado (commit 87943ee, plan de dinamismo revisado). Lanzados 4× `susan-v4-dinamizar.js`:
+  [s03,s08] wf_bf618df1-df0 · [s07,s04] wf_5535526d-523 · [s06,s01] wf_2e623188-150 · [s02,s05] wf_c97556cb-004.
+  Al terminar: juntar sus informes en plan/INFORMES-DINAMISMO.md y lanzar `susan-v4-final.js`
+  con args {"informesPath": "/home/user/susan/video/susan-v4/plan/INFORMES-DINAMISMO.md"}.
