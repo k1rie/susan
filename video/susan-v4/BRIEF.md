@@ -45,6 +45,15 @@ voz» (guion con tiempos amarrados a cada escena).
 - Sonido: solo efectos por ahora (diseño sonoro tipo reel: whooshes, clics, tecleo, destellos). Sin música. La voz
   (ElevenLabs) y una posible música se deciden después.
 - Revisión: plan en chat → hoja de bocetos → construcción → vista final antes del render.
+- Decisiones de la persona dueña (2026-10-06):
+  - Inclinación 3D SÍ, suave: solo la pieza flotante entra con perspectiva (|rotX| ≤ 8°, |rotY| ≤ 10°) y se aplana
+    antes de que se lea cualquier cifra y en cada borde de cuadro. El tooltip de la gráfica va RECTO (sin rotación en
+    el plano). Esto levanta, solo para la v4, el veto a la rotación que se dio en la v3.
+  - Cierre: la ficha redonda de tinta del botón central «Pasar lista» (barra móvil real) cae con estela y squash sin
+    rebote y se resuelve en el wordmark «SUSAN» (Hanken Grotesk 600, subrayado dorado) con el lema debajo: «Pasa lista
+    en segundos y entiende la asistencia de tus grupos». La ficha funciona como propuesta de logo.
+  - Sin tramo extra (ni vista del alumno ni reportes): ese tiempo se le da a la analítica para que las cifras y las
+    gráficas se lean con calma.
 
 ## Notes
 
