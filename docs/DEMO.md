@@ -298,8 +298,9 @@ Si tu cara no se reconoce y quedan lecturas con score entre 0.60 y 0.70 en Revis
 Si ya creaste tu alumno (por ejemplo la matrícula `TEST`, id 76, que hoy ya existe con consentimiento vigente hasta 2029), búscalo en
 `/admin/alumnos` y sigue desde el paso 3 (desde el 2 si aún no tiene consentimiento vigente).
 
-1. **`admin@susan.local`** → **Alumnos** → **Nuevo alumno**. Matrícula única (p. ej. la tuya), apellidos, nombres y correo. Pulsa
-   **Ir a la ficha (consentimiento y foto)**.
+1. **`admin@susan.local`** → **Alumnos** → **Nuevo alumno**. Es un asistente de 3 pasos: identidad (matrícula única, p. ej. la tuya,
+   apellidos y nombres), contacto y cuenta de acceso (opcional) y revisión. Pulsa **Crear alumno** y, en la pantalla de éxito,
+   **Ir a la ficha**.
 2. **Consentimiento** (en la ficha) → registrar: adjunta **cualquier PDF** como documento firmado y elige la **fecha de firma
    igual o anterior al 14-sep-2026** (el reloj de la demostración). El formulario deja elegir hasta la fecha real de tu equipo, pero
    la base valida contra el reloj de la demo: una firma posterior al 14-sep se rechaza con «La fecha de firma no puede ser
