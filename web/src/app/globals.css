@@ -8,7 +8,7 @@
    SUSAN — tokens de diseño (ver docs/design/SISTEMA.md)
    Vocabulario de shadcn/ui (background, card, primary, muted, accent, …) con el
    lenguaje de Dropbox Dash: lienzo crema, panel blanco flotante, tinta casi negra como
-   acción, bordes en lugar de sombras; marca UNACH (dorado, azul marino) como acento y los
+   acción, bordes en lugar de sombras; marca SUSAN (dorado, azul marino) como acento y los
    estados de asistencia (siempre texto + color).
    Los componentes NUNCA usan colores crudos: solo estas utilidades semánticas.
    ========================================================================= */
@@ -60,7 +60,7 @@
   --sidebar-border: #e7e2dc;
   --sidebar-ring: #0061fe;
 
-  /* Marca UNACH */
+  /* Marca SUSAN */
   --brand-navy: #1f3a5f;
   --brand-gold: #a8842c;
   --brand-gold-soft: #f6edd3;
