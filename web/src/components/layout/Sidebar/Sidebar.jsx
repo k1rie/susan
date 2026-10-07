@@ -69,7 +69,7 @@ export default function Sidebar({ items, pathname, open, onClose, proximos = [],
                     <BrandMark variant="compact" />
                 </div>
 
-                <div className="flex flex-1 flex-col overflow-y-auto px-3 pt-2 lg:pt-0">
+                <div className="flex flex-1 flex-col overflow-y-auto overscroll-contain px-3 pt-2 lg:pt-0">
                     <nav aria-label="Principal">
                         <ul className="flex flex-col gap-0.5">
                             {inicio && enlace(inicio)}
