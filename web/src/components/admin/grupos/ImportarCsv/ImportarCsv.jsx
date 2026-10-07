@@ -1,39 +1,58 @@
 'use client';
 
+import { FileUp } from 'lucide-react';
 import { useState } from 'react';
-import Alert from '@/components/ui/Alert';
 import Button from '@/components/ui/Button';
-import FileInput from '@/components/ui/FileInput';
-import Table from '@/components/ui/Table';
-import { useToast } from '@/components/ui/Toast';
+import FormActions from '@/components/ui/FormActions';
+import Modal from '@/components/ui/Modal';
+import Stepper from '@/components/ui/Stepper';
 import { useApiMutation } from '@/hooks/data';
 import { importarInscripciones } from '@/lib/api/admin.js';
-import { COLUMNAS, filasParaApi, MAX_FILAS, parsearCsvInscripciones } from './importarCsv.utils.js';
+import { descargarTexto } from '../compartido/descargar.js';
+import { plural } from '../compartido/grupos.utils.js';
+import PasoArchivo from './PasoArchivo.jsx';
+import PasoConfirmar from './PasoConfirmar.jsx';
+import PasoResultado from './PasoResultado.jsx';
+import PasoRevision from './PasoRevision.jsx';
+import { filasParaApi, NOMBRE_REPORTE, parsearCsvInscripciones, reporteDeFallidos, revisarAnalisis } from './importarCsv.utils.js';
 
-const COLS_PREVIA = [
-    { key: 'linea', header: 'Línea', align: 'right' },
-    { key: 'matricula', header: 'Matrícula', primary: true },
-    { key: 'nombre', header: 'Nombre', render: (f) => [f.apellido_paterno, f.apellido_materno, f.nombres].filter(Boolean).join(' ') || '-' },
-    { key: 'correo', header: 'Correo', render: (f) => f.correo || '-' },
-];
-const COLS_RESULTADO = [
-    { key: 'linea', header: 'Línea', align: 'right' },
-    { key: 'matricula', header: 'Matrícula', primary: true },
-    { key: 'resultado', header: 'Resultado' },
-    { key: 'mensaje', header: 'Detalle', render: (f) => f.mensaje || '-' },
+const PASOS = [
+    { id: 'archivo', label: 'Archivo' },
+    { id: 'revision', label: 'Revisión' },
+    { id: 'confirmar', label: 'Confirmar' },
+    { id: 'resultado', label: 'Resultado' },
 ];
 
-// Importación por lotes (máx. 500): vista previa local, envío y reporte fila por fila.
-export default function ImportarCsv({ idGrupo, onImported }) {
-    const { toast } = useToast();
+// Importación por lotes (máx. 500) en un diálogo de 4 pasos: archivo (plantilla y zona de arrastre) -> revisión (contadores y errores
+// agrupados por causa) -> confirmar -> resultado con el reporte descargable. El parser es local y la validación real es la del servidor
+// (api_importar_inscripciones: cada fila en su subtransacción). `matriculasInscritas`/`activos`/`capacidadAula` permiten avisar de lo ya
+// inscrito y de si el aula alcanza.
+export default function ImportarCsv({ idGrupo, matriculasInscritas = [], activos = 0, capacidadAula, onImported }) {
     const importar = useApiMutation(importarInscripciones);
+    const [abierto, setAbierto] = useState(false);
+    const [paso, setPaso] = useState(0);
     const [archivo, setArchivo] = useState(null);
     const [analisis, setAnalisis] = useState(null);
     const [reporte, setReporte] = useState(null);
+    const [errorEnvio, setErrorEnvio] = useState(null);
+
+    const revision = analisis && analisis.erroresGlobales.length === 0 ? revisarAnalisis(analisis, matriculasInscritas) : null;
+
+    const reiniciar = () => {
+        setPaso(0);
+        setArchivo(null);
+        setAnalisis(null);
+        setReporte(null);
+        setErrorEnvio(null);
+    };
+    const cerrar = () => {
+        setAbierto(false);
+        reiniciar();
+    };
 
     const elegir = async (file) => {
         setArchivo(file);
-        setReporte(null);
+        setErrorEnvio(null);
         if (!file) {
             setAnalisis(null);
             return;
@@ -46,62 +65,97 @@ export default function ImportarCsv({ idGrupo, onImported }) {
     };
 
     const enviar = async () => {
+        setErrorEnvio(null);
         try {
-            const r = await importar.run({ idGrupo, filas: filasParaApi(analisis.filas) });
-            // El servidor numera por posición en el lote; se vuelve a la línea del archivo.
-            const filas = (r.filas ?? []).map((f) => ({ ...f, linea: analisis.filas[f.fila - 1]?.linea ?? f.fila }));
+            const r = await importar.run({ idGrupo, filas: filasParaApi(revision.paraEnviar) });
+            // El servidor numera por posición en el lote enviado; se vuelve a la fila del archivo.
+            const filas = (r.filas ?? []).map((f) => ({ ...f, linea: revision.paraEnviar[f.fila - 1]?.linea ?? f.fila }));
             setReporte({ ...r, filas });
-            toast({ tone: r.errores ? 'warning' : 'success', message: `Importación terminada: ${r.inscritos + (r.reinscritos || 0)} inscritos, ${r.errores} con error.` });
+            setPaso(3);
             onImported?.(r);
         } catch (error) {
-            toast({ tone: 'danger', title: 'No se pudo importar', message: error.message });
+            setErrorEnvio(error);
         }
     };
 
-    const puedeEnviar = analisis && analisis.erroresGlobales.length === 0 && analisis.filas.length > 0 && !reporte;
+    const fallidasReporte = reporte ? reporteDeFallidos({ descartadas: revision?.descartadas, filasServidor: reporte.filas }) : null;
+    const descargarErrores = () => {
+        const { texto } = reporteDeFallidos({ descartadas: revision?.descartadas ?? [], filasServidor: reporte?.filas ?? [] });
+        descargarTexto(NOMBRE_REPORTE, texto);
+    };
+
+    // Lo que impide avanzar se escribe junto al botón en vez de dejarlo apagado sin explicación.
+    const bloqueo =
+        paso === 0
+            ? !archivo
+                ? 'Elige un archivo CSV para continuar.'
+                : !revision
+                  ? 'Corrige el archivo para continuar.'
+                  : revision.paraEnviar.length + revision.yaInscritas.length + revision.descartadas.length === 0
+                    ? 'El archivo no tiene filas de datos.'
+                    : null
+            : paso === 1 && revision?.paraEnviar.length === 0
+              ? 'No hay filas para importar.'
+              : null;
+
+    const alSeleccionarPaso = paso < 3 ? (id) => {
+        const i = PASOS.findIndex((p) => p.id === id);
+        if (i >= 0 && i < paso) setPaso(i);
+    } : undefined;
+
+    const pie = ({ cerrar: cerrarModal }) => (
+        <FormActions flat motivoBloqueo={bloqueo ?? undefined}>
+            {paso === 0 && (
+                <Button variant="secondary" onClick={cerrarModal}>
+                    Cancelar
+                </Button>
+            )}
+            {paso > 0 && paso < 3 && (
+                <Button variant="secondary" onClick={() => setPaso(paso - 1)} disabled={importar.loading}>
+                    Atrás
+                </Button>
+            )}
+            {paso < 2 && (
+                <Button arrow disabled={Boolean(bloqueo)} onClick={() => setPaso(paso + 1)}>
+                    Siguiente
+                </Button>
+            )}
+            {paso === 2 && (
+                <Button loading={importar.loading} onClick={enviar}>
+                    Importar {plural(revision.paraEnviar.length, 'alumno')}
+                </Button>
+            )}
+            {paso === 3 && <Button onClick={cerrarModal}>Cerrar</Button>}
+        </FormActions>
+    );
 
     return (
-        <div className="grid gap-3">
-            <p className="text-sm text-muted-foreground">
-                CSV con encabezado. Columnas: {COLUMNAS.join(', ')}. Con la matrícula basta si el alumno ya existe; para un alumno nuevo
-                se requieren apellido_paterno, nombres y correo. Máximo {MAX_FILAS} filas.
-            </p>
-            <FileInput value={archivo} onSelect={elegir} accept=".csv,text/csv,text/plain" maxBytes={1024 * 1024} label="Elegir archivo CSV" />
-            {analisis?.erroresGlobales.map((m) => (
-                <Alert key={m} tone="danger">{m}</Alert>
-            ))}
-            {analisis && analisis.erroresGlobales.length === 0 && !reporte && (
-                <>
-                    <p aria-live="polite" className="text-sm">
-                        {analisis.filas.length} fila(s) listas para importar; {analisis.errores.length} descartada(s).
-                    </p>
-                    {analisis.errores.length > 0 && (
-                        <Alert tone="warning" title="Filas descartadas">
-                            <ul className="list-disc pl-5">
-                                {analisis.errores.map((e) => (
-                                    <li key={e.linea}>Línea {e.linea}{e.matricula ? ` (${e.matricula})` : ''}: {e.mensaje}</li>
-                                ))}
-                            </ul>
-                        </Alert>
+        <>
+            <Button variant="secondary" icon={<FileUp aria-hidden="true" className="size-4" strokeWidth={1.75} />} onClick={() => setAbierto(true)}>
+                Importar desde CSV
+            </Button>
+            <Modal
+                open={abierto}
+                onClose={cerrar}
+                title="Importar alumnos desde CSV"
+                size="lg"
+                fullMobile
+                showClose
+                dirty={Boolean(archivo) && paso < 3}
+                onDiscard={reiniciar}
+                closeDisabled={importar.loading}
+                footer={pie}
+            >
+                <div className="flex flex-col gap-5">
+                    <Stepper steps={PASOS} current={paso} onSelect={alSeleccionarPaso} />
+                    {paso === 0 && <PasoArchivo archivo={archivo} analisis={analisis} onElegir={elegir} />}
+                    {paso === 1 && revision && <PasoRevision revision={revision} analisis={analisis} onDescargarErrores={descargarErrores} />}
+                    {paso === 2 && revision && <PasoConfirmar revision={revision} capacidadAula={capacidadAula} activos={activos} error={errorEnvio} />}
+                    {paso === 3 && reporte && (
+                        <PasoResultado reporte={reporte} fallidas={fallidasReporte.cantidad} onDescargar={descargarErrores} onCerrar={cerrar} onOtro={reiniciar} />
                     )}
-                    <Table columns={COLS_PREVIA} rows={analisis.filas.slice(0, 20)} rowKey="linea" caption={analisis.filas.length > 20 ? 'Vista previa (primeras 20 filas)' : 'Vista previa'} />
-                </>
-            )}
-            {puedeEnviar && (
-                <div>
-                    <Button loading={importar.loading} onClick={enviar}>
-                        Importar {analisis.filas.length} fila(s)
-                    </Button>
                 </div>
-            )}
-            {reporte && (
-                <div className="grid gap-2" aria-live="polite">
-                    <Alert tone={reporte.errores ? 'warning' : 'success'} title="Reporte de importación">
-                        Total {reporte.total}: inscritos {reporte.inscritos}, reinscritos {reporte.reinscritos}, omitidos {reporte.omitidos}, con error {reporte.errores}; alumnos creados {reporte.alumnos_creados}.
-                    </Alert>
-                    <Table columns={COLS_RESULTADO} rows={reporte.filas} rowKey="fila" />
-                </div>
-            )}
-        </div>
+            </Modal>
+        </>
     );
 }

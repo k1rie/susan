@@ -1,98 +1,44 @@
 'use client';
 
-import { useState } from 'react';
 import Alert from '@/components/ui/Alert';
+import Badge from '@/components/ui/Badge';
 import Button from '@/components/ui/Button';
-import Field from '@/components/ui/Field';
-import Input from '@/components/ui/Input';
-import Select from '@/components/ui/Select';
-import { useToast } from '@/components/ui/Toast';
-import { useApiMutation } from '@/hooks/data';
-import { camaraGuardar } from '@/lib/api/admin.js';
-import { probarCamara } from '@/lib/http/admin.js';
-import { datosCamara, ESTATUS_CAMARA, etiquetaPosicion, TIPOS, validarCamara } from './camaraForm.utils.js';
+import FormActions from '@/components/ui/FormActions';
+import { useAvisarSucio } from '../compartido/useAvisarSucio.js';
+import CamposCamara from './CamposCamara.jsx';
+import { etiquetaEstatus, etiquetaPosicion } from './camaraForm.utils.js';
+import { useCamaraForm } from './useCamaraForm.js';
 
-// Una cámara (frente o fondo) de un aula: alta o edición y prueba de conexión.
-export default function CamaraForm({ idAula, posicion, camara, onSaved }) {
-    const { toast } = useToast();
-    const guardar = useApiMutation(camaraGuardar);
-    const [valores, setValores] = useState({
-        tipo: camara?.tipo ?? 'ip',
-        direccion_ip: camara?.direccion_ip ?? '',
-        estatus: camara?.estatus ?? 'activa',
-    });
-    const [errores, setErrores] = useState({});
-    const [probando, setProbando] = useState(false);
-    const [prueba, setPrueba] = useState(null);
+const TONO_ESTATUS = { activa: 'success', mantenimiento: 'warning', inactiva: 'neutral' };
 
-    const cambiar = (campo) => (e) => setValores((v) => ({ ...v, [campo]: e.target.value }));
-
-    const enviar = async (e) => {
-        e.preventDefault();
-        const err = validarCamara(valores);
-        setErrores(err);
-        if (Object.keys(err).length) return;
-        try {
-            await guardar.run({ datos: datosCamara(valores, { idAula, posicion, idCamara: camara?.id_camara }) });
-            toast({ tone: 'success', message: `Cámara de ${posicion} guardada.` });
-            setPrueba(null);
-            onSaved?.();
-        } catch (error) {
-            toast({ tone: 'danger', title: 'No se pudo guardar la cámara', message: error.message });
-        }
-    };
-
-    const probar = async () => {
-        setProbando(true);
-        setPrueba(null);
-        try {
-            setPrueba(await probarCamara({ idCamara: camara.id_camara }));
-        } catch (error) {
-            setPrueba({ ok: false, mensaje: error.message });
-        } finally {
-            setProbando(false);
-        }
-    };
-
-    const puedeProbar = camara && camara.tipo === 'ip' && valores.tipo === 'ip';
+// Edición de una cámara que ya existe (frente o fondo) dentro de su tarjeta. El alta de una cámara nueva es un panel lateral (CamaraPanel).
+// «Probar conexión» deja su resultado a la vista; y como la prueba usa la dirección GUARDADA, con cambios sin guardar se bloquea y lo dice.
+export default function CamaraForm({ idAula, posicion, camara, onSaved, onSucioChange }) {
+    const { f, probando, prueba, probar, puedeProbar, motivoProbar } = useCamaraForm({ idAula, posicion, camara, onSaved });
+    useAvisarSucio(f.sucio, onSucioChange);
 
     return (
-        <form onSubmit={enviar} noValidate className="grid gap-3" aria-label={`Cámara de ${posicion}`}>
-            <h3 className="font-medium">{etiquetaPosicion(posicion)}</h3>
-            {!camara && <p className="text-sm text-muted-foreground">Sin cámara configurada en esta posición.</p>}
-            <Field label="Tipo">
-                <Select value={valores.tipo} onChange={cambiar('tipo')} options={TIPOS} />
-            </Field>
-            {valores.tipo === 'ip' && (
-                <Field label="Dirección IP" required error={errores.direccion_ip}>
-                    <Input value={valores.direccion_ip} onChange={cambiar('direccion_ip')} inputMode="decimal" autoComplete="off" />
-                </Field>
+        <form onSubmit={f.enviar} noValidate className="flex flex-col gap-4" aria-label={`Cámara de ${posicion}`}>
+            <div className="flex items-center justify-between gap-2">
+                <h3 className="font-medium">{etiquetaPosicion(posicion)}</h3>
+                {camara && <Badge tone={TONO_ESTATUS[camara.estatus] ?? 'neutral'}>{etiquetaEstatus(camara.estatus)}</Badge>}
+            </div>
+            <CamposCamara f={f} conexion={{ prueba, probando, puedeProbar, motivo: motivoProbar, onProbar: probar }} />
+            {f.errorEnvio && (
+                <Alert tone="danger" compact title="No se pudo guardar la cámara">
+                    {f.errorEnvio.message}
+                </Alert>
             )}
-            <Field label="Estatus">
-                <Select value={valores.estatus} onChange={cambiar('estatus')} options={ESTATUS_CAMARA} />
-            </Field>
-            <div className="flex flex-wrap gap-2">
-                <Button type="submit" loading={guardar.loading}>
-                    {camara ? 'Guardar cámara' : 'Agregar cámara'}
-                </Button>
-                {puedeProbar && (
-                    <Button variant="secondary" loading={probando} onClick={probar}>
-                        Probar
+            <FormActions sticky={false} dirty={f.cambios} className="sm:!flex-col sm:!items-stretch" motivoBloqueo={f.sucio ? undefined : 'Aún no hay cambios que guardar.'}>
+                {f.sucio && (
+                    <Button variant="secondary" onClick={() => f.reiniciar()} disabled={f.enviando}>
+                        Descartar
                     </Button>
                 )}
-            </div>
-            {camara && camara.tipo === 'navegador' && (
-                <p className="text-xs text-muted-foreground">La webcam del navegador se prueba al abrir la sesión de captura.</p>
-            )}
-            <div aria-live="polite">
-                {prueba && (
-                    <Alert tone={prueba.ok ? 'success' : 'danger'}>
-                        {prueba.ok
-                            ? `Conexión correcta${prueba.ms != null ? ` (${prueba.ms} ms)` : ''}${prueba.rostros != null ? `, rostros detectados: ${prueba.rostros}` : ''}.`
-                            : prueba.mensaje || 'La cámara no respondió.'}
-                    </Alert>
-                )}
-            </div>
+                <Button type="submit" loading={f.enviando} disabled={!f.sucio}>
+                    Guardar cámara
+                </Button>
+            </FormActions>
         </form>
     );
 }
