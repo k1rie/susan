@@ -37,7 +37,7 @@ export default function HomeRol({ children }) {
     return (
         <div className="flex flex-col gap-10">
             <header className="flex flex-col items-start gap-3">
-                <p className="text-sm font-medium text-muted-foreground">{rolEtiqueta(rol)} · FCA C-I</p>
+                <p className="text-sm font-medium text-muted-foreground">{rolEtiqueta(rol)}</p>
                 <h1 className="flex flex-wrap items-baseline gap-x-3 font-display text-[2.6rem] font-medium leading-[1.05] tracking-tight sm:text-[3.25rem]">
                     <BlurText as="span" text={nombre ? `${saludo},` : saludo} animateBy="words" />
                     {nombre && <Resaltado>{nombre}</Resaltado>}
