@@ -62,23 +62,26 @@ export default function InscripcionesTabla({ idGrupo, capacidadAula, onChanged }
         },
     ];
 
-    const excede = capacidadAula != null && activos.length > capacidadAula;
-    const llena = capacidadAula != null && activos.length === capacidadAula;
+    // Sin la lista cargada no se conoce cuántos lugares quedan: no se enseñan cifras a medias.
+    const capacidad = consulta.data ? capacidadAula : undefined;
+    const excede = capacidad != null && activos.length > capacidad;
 
     return (
         <div className="grid gap-4">
-            {capacidadAula != null && (
-                <p className="text-sm text-muted-foreground">
-                    Inscritos activos: {activos.length} de {capacidadAula} lugares del aula.
-                </p>
-            )}
-            {excede && <Alert tone="danger">El grupo supera la capacidad del aula ({capacidadAula}). Amplía la capacidad o cambia de aula.</Alert>}
-            {llena && <Alert tone="warning">El aula está al límite de su capacidad; una inscripción más la superaría.</Alert>}
-            <Card title="Inscribir alumno">
-                <InscribirAlumno idGrupo={idGrupo} inscritosActivos={activos.map((i) => i.id_alumno)} onInscrito={recargar} />
-            </Card>
-            <Card title="Importar desde CSV">
-                <ImportarCsv idGrupo={idGrupo} onImported={recargar} />
+            {excede && <Alert tone="danger">El grupo supera la capacidad del aula ({capacidad}). Amplía la capacidad o cambia de aula.</Alert>}
+            <Card
+                title="Inscribir alumnos"
+                actions={
+                    <ImportarCsv
+                        idGrupo={idGrupo}
+                        matriculasInscritas={activos.map((i) => i.matricula)}
+                        activos={activos.length}
+                        capacidadAula={capacidad}
+                        onImported={recargar}
+                    />
+                }
+            >
+                <InscribirAlumno idGrupo={idGrupo} inscritosActivos={activos.map((i) => i.id_alumno)} capacidadAula={capacidad} onInscrito={recargar} />
             </Card>
             <DataState
                 loading={consulta.loading}
@@ -86,14 +89,18 @@ export default function InscripcionesTabla({ idGrupo, capacidadAula, onChanged }
                 data={consulta.data}
                 onRetry={consulta.refetch}
                 isEmpty={(d) => !d.items || d.items.length === 0}
-                empty={<EmptyState title="Sin inscripciones" description="Inscribe alumnos manualmente o importa un CSV." />}
+                empty={<EmptyState title="Sin inscripciones" description="Busca a un alumno arriba para inscribirlo o importa un CSV con varios." />}
             >
                 {() => <Table columns={columnas} rows={items} rowKey="id_inscripcion" caption={`${items.length} inscripcion(es)`} />}
             </DataState>
             <ConfirmDialog
                 open={!!aBaja}
                 title="Dar de baja la inscripción"
-                message={aBaja ? `Se dará de baja a ${aBaja.nombre_completo} (${aBaja.matricula}). Se conserva su historial.` : ''}
+                message={
+                    aBaja
+                        ? `Se dará de baja a ${aBaja.nombre_completo} (${aBaja.matricula}). Se conserva su historial, pero ya no contará en el cupo del aula ni aparecerá en el pase de lista. Si vuelve, se puede reinscribir.`
+                        : ''
+                }
                 confirmLabel="Dar de baja"
                 variant="danger"
                 onConfirm={confirmarBaja}

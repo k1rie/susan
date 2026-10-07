@@ -91,3 +91,85 @@ export function parsearCsvInscripciones(texto) {
 
 /** Quita `linea` (solo de interfaz) antes de enviar al servidor. */
 export const filasParaApi = (filas) => filas.map(({ linea, ...resto }) => Object.fromEntries(Object.entries(resto).filter(([, v]) => v !== undefined)));
+
+// ---------------------------------------------------------------------------------------------------------------------------
+// Apoyo del flujo en pasos (plantilla, revisión por causas, reporte descargable). El parser de arriba no cambia.
+// ---------------------------------------------------------------------------------------------------------------------------
+
+export const NOMBRE_PLANTILLA = 'plantilla-inscripciones.csv';
+export const NOMBRE_REPORTE = 'filas-con-error.csv';
+
+/** Texto de la plantilla descargable: encabezado + un alumno nuevo con todos sus datos y uno que solo lleva la matrícula (ya existente). */
+export function plantillaCsv() {
+    return `${COLUMNAS.join(',')}\nEJEMPLO1,Ramírez,Soto,Ana María,ejemplo1@unach.test\nEJEMPLO2,,,,\n`;
+}
+
+// Una celda que empieza por = + - @ puede ejecutarse como fórmula al abrir el CSV en una hoja de cálculo: se neutraliza con una comilla.
+const celdaCsv = (valor) => {
+    let texto = String(valor ?? '');
+    if (/^[=+\-@\t\r]/.test(texto)) texto = `'${texto}`;
+    return /[",\n\r]/.test(texto) ? `"${texto.replace(/"/g, '""')}"` : texto;
+};
+
+/** Filas -> texto CSV con BOM (para que Excel respete los acentos). */
+export const aCsv = (encabezados, filas) => `\uFEFF${[encabezados, ...filas].map((f) => f.map(celdaCsv).join(',')).join('\n')}\n`;
+
+/** [5, 9, 12, 13, 14] -> «5, 9 y 12 a 14». Las rachas de 3 o más se resumen; más de 8 tramos se recortan («2, 4, 6, 8, 10, 12 y 4 más»). */
+export function rangoDeFilas(lineas) {
+    const orden = [...new Set(lineas)].sort((a, b) => a - b);
+    const tramos = [];
+    for (let i = 0; i < orden.length; ) {
+        let j = i;
+        while (j + 1 < orden.length && orden[j + 1] === orden[j] + 1) j += 1;
+        if (j - i >= 2) tramos.push(`${orden[i]} a ${orden[j]}`);
+        else for (let k = i; k <= j; k += 1) tramos.push(String(orden[k]));
+        i = j + 1;
+    }
+    if (tramos.length > 8) return `${tramos.slice(0, 6).join(', ')} y ${tramos.length - 6} más`;
+    if (tramos.length <= 1) return tramos.join('');
+    return `${tramos.slice(0, -1).join(', ')} y ${tramos[tramos.length - 1]}`;
+}
+
+/** Agrupa por causa: [{ mensaje, lineas, cantidad, filas: «5, 9 y 12 a 14» }], las causas más frecuentes primero. */
+export function agruparPorCausa(items) {
+    const grupos = new Map();
+    for (const it of items) {
+        if (!grupos.has(it.mensaje)) grupos.set(it.mensaje, []);
+        grupos.get(it.mensaje).push(it.linea);
+    }
+    return [...grupos.entries()]
+        .map(([mensaje, lineas]) => ({ mensaje, lineas, cantidad: lineas.length, filas: rangoDeFilas(lineas) }))
+        .sort((a, b) => b.cantidad - a.cantidad || a.mensaje.localeCompare(b.mensaje, 'es'));
+}
+
+const traeDatos = (f) => Boolean(f.apellido_paterno || f.apellido_materno || f.nombres || f.correo);
+
+/**
+ * Lo que la revisión le dice a la persona antes de escribir en la base.
+ * `matriculasInscritas`: matrículas ya inscritas (activas) en el grupo; esas filas no se envían.
+ * `soloMatricula`: filas que solo traen la matrícula; sirven si el alumno ya existe, y si no el servidor las rechaza (aviso, no error).
+ */
+export function revisarAnalisis(analisis, matriculasInscritas = []) {
+    const inscritas = new Set(matriculasInscritas.map((m) => String(m).toUpperCase()));
+    const filas = analisis?.filas ?? [];
+    const yaInscritas = filas.filter((f) => inscritas.has(f.matricula));
+    const paraEnviar = filas.filter((f) => !inscritas.has(f.matricula));
+    const soloMatricula = paraEnviar.filter((f) => !traeDatos(f));
+    return {
+        paraEnviar,
+        yaInscritas,
+        soloMatricula,
+        descartadas: analisis?.errores ?? [],
+        gruposDescartadas: agruparPorCausa(analisis?.errores ?? []),
+        avisoSoloMatricula: soloMatricula.length > 0 ? agruparPorCausa(soloMatricula.map((f) => ({ mensaje: 'Solo trae la matrícula', linea: f.linea })))[0] : null,
+    };
+}
+
+/** Reporte descargable de lo que NO entró: lo descartado al leer el archivo y lo que el servidor rechazó fila por fila. */
+export function reporteDeFallidos({ descartadas = [], filasServidor = [] }) {
+    const filas = [
+        ...descartadas.map((e) => [e.linea, e.matricula ?? '', 'Descartada al leer el archivo', e.mensaje]),
+        ...filasServidor.filter((f) => f.resultado === 'error').map((f) => [f.linea, f.matricula ?? '', f.codigo ?? 'Error', f.mensaje ?? '']),
+    ].sort((a, b) => a[0] - b[0]);
+    return { cantidad: filas.length, texto: aCsv(['linea', 'matricula', 'causa', 'detalle'], filas) };
+}

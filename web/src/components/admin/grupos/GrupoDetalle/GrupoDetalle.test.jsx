@@ -1,15 +1,24 @@
 // @vitest-environment jsdom
-import { render, screen, within } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const obtener = vi.hoisted(() => vi.fn());
-vi.mock('@/lib/api/admin.js', () => ({ grupoObtener: (...a) => obtener(...a) }));
-// Las pestañas pesadas no son lo que se prueba aquí: solo las cifras de la cabecera.
-vi.mock('../AulaCamaras', () => ({ default: () => null }));
+const materia = vi.hoisted(() => vi.fn());
+vi.mock('@/lib/api/admin.js', () => ({ grupoObtener: (...a) => obtener(...a), materiaObtener: (...a) => materia(...a) }));
+// Las pestañas pesadas no son lo que se prueba aquí: solo las cifras de la cabecera y qué pestaña se ve. Cada una deja un marcador y un
+// botón para avisar «tengo cambios sin guardar» (lo que hacen los formularios reales con onSucioChange).
+const pestana = vi.hoisted(() => (nombre) => async () => {
+    const { createElement: h } = await import('react');
+    return {
+        default: ({ onSucioChange, horasMateria }) =>
+            h('div', { 'data-testid': `contenido-${nombre}`, 'data-horas': horasMateria ?? '' }, h('button', { type: 'button', onClick: () => onSucioChange?.(true) }, `ensuciar ${nombre}`)),
+    };
+});
+vi.mock('../AulaCamaras', pestana('aula'));
 vi.mock('../GenerarSesiones', () => ({ default: () => null }));
-vi.mock('../GrupoForm', () => ({ default: () => null }));
-vi.mock('../HorarioEditor', () => ({ default: () => null }));
-vi.mock('../InscripcionesTabla', () => ({ default: () => null }));
+vi.mock('../GrupoForm', pestana('datos'));
+vi.mock('../HorarioEditor', pestana('horario'));
+vi.mock('../InscripcionesTabla', pestana('inscripciones'));
 
 import GrupoDetalle from './GrupoDetalle.jsx';
 
@@ -24,7 +33,11 @@ const tarjetaDe = (nombre) => screen.getByText(nombre).closest('.rounded-xl');
 const cifra = (nombre) => tarjetaDe(nombre).querySelector('p.tabular-nums');
 const pastilla = (nombre) => tarjetaDe(nombre).querySelector('svg').parentElement;
 
-beforeEach(() => obtener.mockReset());
+beforeEach(() => {
+    obtener.mockReset();
+    materia.mockReset();
+    materia.mockResolvedValue({ id_materia: 1, horas_semana: 4 });
+});
 
 describe('GrupoDetalle: cifras de la cabecera', () => {
     it('lee los inscritos frente a la capacidad del aula y las cerradas frente al total', async () => {
@@ -85,5 +98,62 @@ describe('GrupoDetalle: cifras de la cabecera', () => {
         render(<GrupoDetalle idGrupo={7} />);
         await screen.findByText('Inscritos activos');
         expect(tarjetaDe('Inscritos activos').parentElement).toHaveClass('grid-cols-2', 'sm:grid-cols-4');
+    });
+});
+
+describe('GrupoDetalle: pestaña activa en ?tab= y cambios sin guardar', () => {
+    beforeEach(() => {
+        obtener.mockResolvedValue({ ...grupo, id_materia: 1 });
+        window.history.replaceState(null, '', '/admin/grupos/7');
+    });
+    afterEach(() => vi.restoreAllMocks());
+
+    it('abre en la pestaña indicada por tabInicial y, si no es válida, en Datos', async () => {
+        const { unmount } = render(<GrupoDetalle idGrupo={7} tabInicial="inscripciones" />);
+        expect(await screen.findByTestId('contenido-inscripciones')).toBeInTheDocument();
+        expect(screen.getByRole('tab', { name: 'Inscripciones' })).toHaveAttribute('aria-selected', 'true');
+        unmount();
+        render(<GrupoDetalle idGrupo={7} tabInicial="inventada" />);
+        expect(await screen.findByTestId('contenido-datos')).toBeInTheDocument();
+    });
+
+    it('al cambiar de pestaña la URL queda con ?tab= (sin recargar)', async () => {
+        render(<GrupoDetalle idGrupo={7} />);
+        await screen.findByTestId('contenido-datos');
+        fireEvent.click(screen.getByRole('tab', { name: 'Horario' }));
+        expect(await screen.findByTestId('contenido-horario')).toBeInTheDocument();
+        expect(window.location.search).toBe('?tab=horario');
+    });
+
+    it('en la pestaña Horario consulta las horas de la materia y se las pasa al editor', async () => {
+        render(<GrupoDetalle idGrupo={7} tabInicial="horario" />);
+        const contenido = await screen.findByTestId('contenido-horario');
+        await waitFor(() => expect(contenido).toHaveAttribute('data-horas', '4'));
+        expect(materia).toHaveBeenCalledWith({ idMateria: 1 });
+    });
+
+    it('con cambios sin guardar pregunta antes de cambiar de pestaña: si se queda, no cambia; si acepta, cambia', async () => {
+        render(<GrupoDetalle idGrupo={7} />);
+        await screen.findByTestId('contenido-datos');
+        fireEvent.click(screen.getByText('ensuciar datos'));
+        const confirmar = vi.spyOn(window, 'confirm').mockReturnValueOnce(false).mockReturnValueOnce(true);
+        fireEvent.click(screen.getByRole('tab', { name: 'Horario' }));
+        expect(confirmar).toHaveBeenCalledTimes(1);
+        expect(screen.getByTestId('contenido-datos')).toBeInTheDocument();
+        expect(screen.queryByTestId('contenido-horario')).toBeNull();
+        fireEvent.click(screen.getByRole('tab', { name: 'Horario' }));
+        expect(await screen.findByTestId('contenido-horario')).toBeInTheDocument();
+        // Ya en otra pestaña sin cambios, volver no pregunta.
+        fireEvent.click(screen.getByRole('tab', { name: 'Datos' }));
+        expect(confirmar).toHaveBeenCalledTimes(2);
+    });
+
+    it('sin cambios sin guardar cambia de pestaña sin preguntar', async () => {
+        render(<GrupoDetalle idGrupo={7} />);
+        await screen.findByTestId('contenido-datos');
+        const confirmar = vi.spyOn(window, 'confirm');
+        fireEvent.click(screen.getByRole('tab', { name: 'Aula y cámaras' }));
+        expect(await screen.findByTestId('contenido-aula')).toBeInTheDocument();
+        expect(confirmar).not.toHaveBeenCalled();
     });
 });
