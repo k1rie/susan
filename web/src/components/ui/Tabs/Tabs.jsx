@@ -5,8 +5,17 @@ import { useRef } from 'react';
 
 // Tira de pestañas con teclado (flechas, Inicio, Fin). El panel lo pinta quien la usa con
 // role="tabpanel" id="<prefix>-panel-<id>" aria-labelledby="<prefix>-<id>".
-export default function Tabs({ tabs, value, onChange, idPrefix = 'tab', className }) {
+//   confirmLeave  () => boolean, opcional. Se consulta antes de pasar a OTRA pestaña (clic o teclado); si devuelve false el cambio se
+//                 cancela y la pestaña actual conserva el foco. Pensado para `useCambiosSinGuardar(...).confirmarSalida`.
+export default function Tabs({ tabs, value, onChange, idPrefix = 'tab', confirmLeave, className }) {
     const refs = useRef({});
+
+    // Devuelve true si el cambio se aplicó (volver a la misma pestaña no pregunta nada).
+    const cambiar = (id) => {
+        if (id !== value && confirmLeave && !confirmLeave()) return false;
+        onChange(id);
+        return true;
+    };
 
     const mover = (indice, paso) => {
         const habilitadas = tabs.filter((t) => !t.disabled);
@@ -14,8 +23,7 @@ export default function Tabs({ tabs, value, onChange, idPrefix = 'tab', classNam
         const actual = tabs[indice];
         const pos = habilitadas.findIndex((t) => t.id === actual.id);
         const destino = habilitadas[(pos + paso + habilitadas.length) % habilitadas.length];
-        onChange(destino.id);
-        refs.current[destino.id]?.focus();
+        if (cambiar(destino.id)) refs.current[destino.id]?.focus();
     };
 
     const alTeclear = (e, indice) => {
@@ -25,8 +33,7 @@ export default function Tabs({ tabs, value, onChange, idPrefix = 'tab', classNam
         else if (e.key === 'Home' || e.key === 'End') {
             const destino = e.key === 'Home' ? habilitadas[0] : habilitadas[habilitadas.length - 1];
             if (!destino) return;
-            onChange(destino.id);
-            refs.current[destino.id]?.focus();
+            if (cambiar(destino.id)) refs.current[destino.id]?.focus();
         } else return;
         e.preventDefault();
     };
@@ -48,7 +55,7 @@ export default function Tabs({ tabs, value, onChange, idPrefix = 'tab', classNam
                         aria-selected={activa}
                         tabIndex={activa ? 0 : -1}
                         disabled={t.disabled}
-                        onClick={() => onChange(t.id)}
+                        onClick={() => cambiar(t.id)}
                         onKeyDown={(e) => alTeclear(e, i)}
                         className={clsx(
                             'relative min-h-11 shrink-0 whitespace-nowrap pb-0.5 text-sm font-medium transition-colors duration-150 disabled:opacity-50',

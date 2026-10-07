@@ -26,4 +26,30 @@ describe('TarjetaFila', () => {
         const { container } = render(<TarjetaFila icono={Users} tono="nada" titulo="x" />);
         expect(container.querySelector('.bg-tono-azul')).toBeNull();
     });
+
+    it('por omisión título y subtítulo van en una sola línea con «…» (truncate)', () => {
+        render(<TarjetaFila titulo="Título muy largo" subtitulo="Subtítulo muy largo" />);
+        expect(screen.getByText('Título muy largo')).toHaveClass('block', 'truncate');
+        expect(screen.getByText('Subtítulo muy largo')).toHaveClass('block', 'truncate');
+    });
+
+    it('lineas={2} permite dos líneas con line-clamp y parte las palabras largas, sin truncate', () => {
+        render(<TarjetaFila lineas={2} titulo="Registrar el consentimiento firmado" subtitulo="Adjunta el PDF para que quede en el expediente" />);
+        for (const nodo of [screen.getByText('Registrar el consentimiento firmado'), screen.getByText(/Adjunta el PDF/)]) {
+            expect(nodo).toHaveClass('line-clamp-2', 'break-words');
+            expect(nodo).not.toHaveClass('truncate');
+            // line-clamp ya fija el display: no lleva `block` (dos `display` chocarían).
+            expect(nodo).not.toHaveClass('block');
+        }
+    });
+
+    it('lineas 3 y «todas», y un valor desconocido vuelve a una línea', () => {
+        const { rerender } = render(<TarjetaFila lineas={3} titulo="A" subtitulo="B" />);
+        expect(screen.getByText('A')).toHaveClass('line-clamp-3');
+        rerender(<TarjetaFila lineas="todas" titulo="A" subtitulo="B" />);
+        expect(screen.getByText('A')).toHaveClass('break-words');
+        expect(screen.getByText('A')).not.toHaveClass('truncate', 'line-clamp-2');
+        rerender(<TarjetaFila lineas={9} titulo="A" subtitulo="B" />);
+        expect(screen.getByText('A')).toHaveClass('truncate');
+    });
 });
