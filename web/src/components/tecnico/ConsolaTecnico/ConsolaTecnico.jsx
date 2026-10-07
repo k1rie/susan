@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import PageHeader from '@/components/layout/PageHeader';
 import Tabs from '@/components/ui/Tabs';
+import { confirmarNavegacion } from '@/hooks/ui/useCambiosSinGuardar.js';
 import CamarasEstado from '../CamarasEstado';
 import ParametrosEditor from '../ParametrosEditor';
 import IndiceFacialPanel from '../IndiceFacialPanel';
@@ -20,7 +21,8 @@ export default function ConsolaTecnico({ encabezado = true, soloLectura = false 
     return (
         <div>
             {encabezado && <PageHeader title="Consola técnica" subtitle="Cámaras, parámetros del sistema e índice facial." />}
-            <Tabs tabs={PESTANAS} value={activa} onChange={setActiva} idPrefix="tec" />
+            {/* Cada pestaña desmonta a la anterior: sin la pregunta se perderían los parámetros sin guardar. */}
+            <Tabs tabs={PESTANAS} value={activa} onChange={setActiva} idPrefix="tec" confirmLeave={() => confirmarNavegacion()} />
             <div role="tabpanel" id={`tec-panel-${activa}`} aria-labelledby={`tec-${activa}`} className="mt-4">
                 {activa === 'camaras' && <CamarasEstado soloLectura={soloLectura} />}
                 {activa === 'parametros' && <ParametrosEditor soloLectura={soloLectura} />}

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { contadoresCamaras, datosCapturas, haceCuanto, mensajeCambio, resumenCapturas, sinCapturar } from './camaras.utils.js';
+import { confirmacionCambio, contadoresCamaras, datosCapturas, ESTATUS_CAMARA, haceCuanto, resumenCapturas, sinCapturar } from './camaras.utils.js';
 
 const cam = (id, extra = {}) => ({ id_camara: id, aula_clave: `A-${id}`, posicion: 'frontal', estatus: 'activa', capturas_24h: 10, ...extra });
 
@@ -9,12 +9,36 @@ describe('camaras.utils', () => {
         expect(sinCapturar(cam(1, { estatus: 'inactiva', capturas_24h: 0 }))).toBe(false);
         expect(sinCapturar(cam(1))).toBe(false);
     });
-    it('haceCuanto y mensajeCambio siguen igual', () => {
+    it('haceCuanto sigue igual', () => {
         expect(haceCuanto(null)).toBe('Sin capturas');
         const ahora = Date.parse('2026-09-10T12:00:00Z');
         expect(haceCuanto('2026-09-10T11:30:00Z', ahora)).toBe('hace 30 min');
-        expect(mensajeCambio(cam(1), 'activa')).toBe('Cambiar la cámara A-1 (frontal) a activa.');
-        expect(mensajeCambio(cam(1), 'inactiva')).toMatch(/pase manual/);
+    });
+    it('confirmacionCambio nombra la cámara, dice la consecuencia y pone el verbo en el botón', () => {
+        const a = confirmacionCambio(cam(1), 'activa');
+        expect(a).toEqual({ titulo: 'Activar la cámara A-1 · frontal', mensaje: 'Volverá a capturar en las sesiones del aula.', confirmar: 'Activar', aviso: null });
+        const i = confirmacionCambio(cam(1), 'inactiva');
+        expect(i.titulo).toBe('Desactivar la cámara A-1 · frontal');
+        expect(i.mensaje).toMatch(/pase manual/);
+        expect(i.confirmar).toBe('Desactivar');
+        const m = confirmacionCambio(cam(1), 'mantenimiento');
+        expect(m.titulo).toBe('Poner en mantenimiento la cámara A-1 · frontal');
+        expect(m.confirmar).toBe('Poner en mantenimiento');
+    });
+    it('confirmacionCambio avisa de la sesión abierta solo si la cámara deja de capturar', () => {
+        expect(confirmacionCambio(cam(1, { sesion_abierta: true }), 'inactiva').aviso).toMatch(/sesión en curso/);
+        expect(confirmacionCambio(cam(1, { sesion_abierta: true }), 'mantenimiento').aviso).toMatch(/sesión en curso/);
+        expect(confirmacionCambio(cam(1, { sesion_abierta: true }), 'activa').aviso).toBeNull();
+        expect(confirmacionCambio(cam(1), 'inactiva').aviso).toBeNull();
+        // Un estatus desconocido no rompe la confirmación.
+        expect(confirmacionCambio(cam(1), 'raro').confirmar).toBe('Cambiar');
+    });
+    it('las opciones de estatus llevan el mismo tono que la pastilla de la cámara y siempre texto', () => {
+        expect(ESTATUS_CAMARA.map((o) => [o.value, o.label, o.tone])).toEqual([
+            ['activa', 'Activa', 'presente'],
+            ['inactiva', 'Inactiva', 'pendiente'],
+            ['mantenimiento', 'Mantenimiento', 'retardo'],
+        ]);
     });
     it('contadoresCamaras: activas, inactivas (con mantenimiento) y activas sin capturas', () => {
         const n = contadoresCamaras([cam(1), cam(2, { capturas_24h: 0 }), cam(3, { estatus: 'inactiva' }), cam(4, { estatus: 'mantenimiento' })]);

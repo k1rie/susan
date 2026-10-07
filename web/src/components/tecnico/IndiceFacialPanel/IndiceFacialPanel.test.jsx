@@ -112,4 +112,66 @@ describe('IndiceFacialPanel', () => {
         expect(await screen.findByText('Índice reconstruido y activado')).toBeInTheDocument();
         await waitFor(() => expect(reconstruir).toHaveBeenCalledTimes(1));
     });
+
+    it('el diálogo de reconstruir dice cuántas plantillas procesa y la reconstrucción completa sale desmarcada y explicada', async () => {
+        const user = userEvent.setup();
+        render(<IndiceFacialPanel />);
+        await user.click(await screen.findByRole('button', { name: 'Reconstruir índice' }));
+        const dialogo = screen.getByRole('dialog', { name: 'Reconstruir índice facial' });
+        expect(within(dialogo).getByText(/las 500 plantillas activas/)).toBeInTheDocument();
+        expect(within(dialogo).getByText(/pase de lista sigue con la versión actual/)).toBeInTheDocument();
+        const completa = within(dialogo).getByRole('checkbox', { name: /Reconstrucción completa/ });
+        expect(completa).not.toBeChecked();
+        expect(within(dialogo).getByText('Solo hace falta si cambió el modelo o la dimensión del vector.')).toBeInTheDocument();
+        await user.click(within(dialogo).getByRole('button', { name: 'Reconstruir' }));
+        await waitFor(() => expect(reconstruir).toHaveBeenCalledWith({ completa: false }));
+    });
+
+    it('si la dimensión del índice no coincide con la configurada, la reconstrucción completa sale marcada y recomendada', async () => {
+        estado.mockResolvedValue({
+            en_uso: { version: 'v003', dimension: 128, total_vectores: 498, fecha_construccion: null },
+            dimension_coincide: false, dimension_configurada: 512,
+            plantillas: { activas: 500, indexadas: 498, pendientes: 2, obsoletas_en_indice: 0 },
+            requiere_reconstruccion: true, pendientes_detalle: [], versiones: { total: 0, items: [] },
+            servicio: { disponible: true }, sincronizado: true,
+        });
+        reconstruir.mockResolvedValue({ estado: 'activada', version: 'v004', total_vectores: 500 });
+        const user = userEvent.setup();
+        render(<IndiceFacialPanel />);
+        await user.click(await screen.findByRole('button', { name: 'Reconstruir índice' }));
+        const dialogo = screen.getByRole('dialog', { name: 'Reconstruir índice facial' });
+        expect(within(dialogo).getByRole('checkbox', { name: /Reconstrucción completa/ })).toBeChecked();
+        expect(within(dialogo).getByText(/Recomendada ahora: la dimensión del índice no coincide/)).toBeInTheDocument();
+        await user.click(within(dialogo).getByRole('button', { name: 'Reconstruir' }));
+        await waitFor(() => expect(reconstruir).toHaveBeenCalledWith({ completa: true }));
+    });
+
+    it('al abrir el diálogo otra vez la casilla vuelve a su valor sugerido', async () => {
+        const user = userEvent.setup();
+        render(<IndiceFacialPanel />);
+        await user.click(await screen.findByRole('button', { name: 'Reconstruir índice' }));
+        await user.click(screen.getByRole('checkbox', { name: /Reconstrucción completa/ }));
+        expect(screen.getByRole('checkbox', { name: /Reconstrucción completa/ })).toBeChecked();
+        await user.click(screen.getByRole('button', { name: 'Cancelar' }));
+        await user.click(screen.getByRole('button', { name: 'Reconstruir índice' }));
+        expect(screen.getByRole('checkbox', { name: /Reconstrucción completa/ })).not.toBeChecked();
+    });
+
+    it('si el índice requiere reconstrucción, «Reconstruir índice» es la acción primaria', async () => {
+        render(<IndiceFacialPanel />);
+        expect(await screen.findByRole('button', { name: 'Reconstruir índice' })).toHaveClass('bg-primary');
+    });
+
+    it('con el índice al día «Reconstruir índice» deja de ser la acción primaria', async () => {
+        estado.mockResolvedValue({
+            en_uso: { version: 'v003', dimension: 512, total_vectores: 500, fecha_construccion: null },
+            plantillas: { activas: 500, indexadas: 500, pendientes: 0, obsoletas_en_indice: 0 },
+            requiere_reconstruccion: false, pendientes_detalle: [], versiones: { total: 0, items: [] },
+            servicio: { disponible: true }, sincronizado: true,
+        });
+        render(<IndiceFacialPanel />);
+        const boton = await screen.findByRole('button', { name: 'Reconstruir índice' });
+        expect(boton).not.toHaveClass('bg-primary');
+        expect(boton).toHaveClass('bg-card');
+    });
 });
