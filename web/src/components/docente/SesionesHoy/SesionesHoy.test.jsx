@@ -22,11 +22,11 @@ describe('SesionesHoy: lista completa debajo de la tarjeta principal', () => {
         expect(container.querySelector('#sesiones-hoy')).toBeInTheDocument();
     });
 
-    it('el ancla deja 80 px de aire bajo lg (la TopbarMovil fija mide 56 px) y 16 px desde lg, donde la barra se oculta', () => {
+    it('el ancla deja 16 px de aire al saltar: ya no hay una barra superior fija que la tape', () => {
         const { container } = render(<SesionesHoy sesiones={[ses(1)]} />);
         const ancla = container.querySelector('#sesiones-hoy');
-        expect(ancla).toHaveClass('scroll-mt-20', 'lg:scroll-mt-4');
-        expect(ancla).not.toHaveClass('scroll-mt-4');
+        expect(ancla).toHaveClass('scroll-mt-4');
+        expect(ancla).not.toHaveClass('scroll-mt-20');
     });
 
     it('sin sesiones: aviso amable', () => {

@@ -26,9 +26,9 @@ describe('AppShell: acción central de la barra inferior por rol', () => {
         render(<AppShell me={DOCENTE}>contenido</AppShell>);
         const centro = within(barraInferior()).getByRole('link', { name: 'Pasar lista' });
         expect(centro).toHaveAttribute('href', '/docente/pasar-lista');
-        // el buscador queda en la barra superior; ya no hay botón de búsqueda en la barra inferior
+        // el centro no es el buscador: la búsqueda queda en el cajón («Más»)
         expect(within(barraInferior()).queryByRole('button', { name: 'Buscar o ir a' })).toBeNull();
-        expect(screen.getByRole('button', { name: 'Buscar o ir a' })).toBeInTheDocument(); // TopbarMovil
+        expect(within(barraInferior()).getByRole('button', { name: 'Más' })).toBeInTheDocument();
         // riel lateral: Panel y luego Pasar lista
         const enlaces = within(riel()).getAllByRole('link').map((a) => a.textContent.trim());
         expect(enlaces.slice(0, 2)).toEqual(['Panel', 'Pasar lista']);
@@ -52,10 +52,11 @@ describe('AppShell: acción central de la barra inferior por rol', () => {
         expect(await screen.findByRole('combobox')).toBeInTheDocument();
     });
 
-    it('alumno (un solo destino): no hay barra inferior ni «Pasar lista» en ninguna parte', () => {
+    it('alumno (un solo destino): la barra inferior sigue ahí (su «Más» es la única puerta a la cuenta) y no hay «Pasar lista»', () => {
         rutaActual = '/alumno';
         render(<AppShell me={ALUMNO}>contenido</AppShell>);
-        expect(screen.queryByRole('navigation', { name: 'Navegación inferior' })).toBeNull();
+        expect(within(barraInferior()).getByRole('link', { name: 'Mi asistencia' })).toBeInTheDocument();
+        expect(within(barraInferior()).getByRole('button', { name: 'Más' })).toBeInTheDocument();
         expect(screen.queryByRole('link', { name: 'Pasar lista' })).toBeNull();
     });
 
@@ -73,5 +74,46 @@ describe('AppShell: acción central de la barra inferior por rol', () => {
         expect(screen.queryByTestId('reloj-demo')).toBeNull();
         rerender(<AppShell me={DOCENTE} relojSimulado>contenido</AppShell>);
         expect(await screen.findByTestId('reloj-demo')).toBeInTheDocument();
+    });
+});
+
+describe('AppShell: sin barra superior en teléfono', () => {
+    it('no hay encabezado fijo ni el botón de hamburguesa «Abrir menú»', () => {
+        rutaActual = '/docente';
+        render(<AppShell me={DOCENTE}>contenido</AppShell>);
+        expect(screen.queryByRole('banner')).toBeNull();
+        expect(screen.queryByRole('button', { name: 'Abrir menú' })).toBeNull();
+        // el contenido ya no reserva los 56 px de la barra (pt-14)
+        expect(screen.getByRole('main')).not.toHaveClass('pt-14');
+    });
+
+    it.each([
+        ['docente', DOCENTE, '/docente'],
+        ['administrador', ADMIN, '/admin'],
+        ['alumno', ALUMNO, '/alumno'],
+    ])('%s: «Más» abre el cajón con la marca, la búsqueda y la cuenta a la vista (sin ocultarse bajo lg)', async (_rol, me, ruta) => {
+        rutaActual = ruta;
+        render(<AppShell me={me}>contenido</AppShell>);
+        const cajon = screen.getByRole('complementary');
+        expect(cajon).toHaveClass('hidden', 'lg:flex'); // cerrado en teléfono
+        await userEvent.click(within(barraInferior()).getByRole('button', { name: 'Más' }));
+        expect(cajon).toHaveClass('flex');
+        expect(cajon).not.toHaveClass('hidden');
+        expect(cajon).not.toHaveClass('top-14'); // ya no cuelga de una barra superior
+        expect(within(cajon).getByText('SUSAN').closest('.hidden')).toBeNull();
+        expect(within(cajon).getByRole('button', { name: /Buscar/ })).toBeInTheDocument();
+        expect(within(cajon).getByRole('button', { name: `Cuenta de ${me.nombre}` }).closest('.hidden')).toBeNull();
+    });
+
+    it('desde el cajón de teléfono se puede salir: «Cuenta» → «Salir» llama a onSalir y cierra el cajón', async () => {
+        rutaActual = '/docente';
+        const onSalir = vi.fn();
+        render(<AppShell me={DOCENTE} onSalir={onSalir}>contenido</AppShell>);
+        const cajon = screen.getByRole('complementary');
+        await userEvent.click(within(barraInferior()).getByRole('button', { name: 'Más' }));
+        await userEvent.click(within(cajon).getByRole('button', { name: /Cuenta de Patricia/ }));
+        await userEvent.click(within(cajon).getByRole('menuitem', { name: /Salir/ }));
+        expect(onSalir).toHaveBeenCalledTimes(1);
+        expect(cajon).toHaveClass('hidden'); // onNavegar cerró el cajón
     });
 });

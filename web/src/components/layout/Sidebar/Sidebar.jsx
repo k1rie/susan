@@ -10,7 +10,8 @@ import { agruparNav, itemActivo } from './navItems.js';
 
 // Riel de navegación al estilo Dropbox Dash: marca arriba, «Inicio» y «Buscar ⌘K», secciones con título gris (grupos de la
 // navegación y «Próximamente»), y al pie «Módulos» y la cuenta. Sin borde ni fondo propio: vive sobre el lienzo crema.
-// >= 1024 px es columna fija; debajo es un cajón controlado por `open`.
+// >= 1024 px es columna fija; debajo es un cajón controlado por `open`. En teléfono no hay barra superior: el cajón es el único
+// lugar de la marca, la búsqueda y la cuenta (con «Salir»).
 //   items      navegación del rol (navItems.js) · proximos  módulos de la hoja de ruta · onBuscar  abre la paleta ⌘K
 export default function Sidebar({ items, pathname, open, onClose, proximos = [], me = null, onSalir, onBuscar }) {
     const activo = itemActivo(items, pathname || '');
@@ -54,18 +55,18 @@ export default function Sidebar({ items, pathname, open, onClose, proximos = [],
                     type="button"
                     aria-label="Cerrar menú"
                     onClick={onClose}
-                    className="fixed inset-0 top-14 z-[44] animate-in bg-foreground/30 duration-200 fade-in-0 lg:hidden"
+                    className="fixed inset-0 z-[44] animate-in bg-foreground/30 duration-200 fade-in-0 lg:hidden"
                 />
             )}
             <aside
                 className={clsx(
                     'bg-sidebar',
-                    // móvil: cajón bajo la barra superior; escritorio: columna fija de 232 px a pantalla completa
-                    'fixed bottom-0 left-0 top-14 z-[45] w-[17rem] flex-col lg:static lg:top-auto lg:z-auto lg:flex lg:h-dvh lg:w-[14.5rem] lg:shrink-0',
+                    // móvil: cajón a todo lo alto (lo abre «Más» de la barra inferior); escritorio: columna fija de 232 px a pantalla completa
+                    'fixed inset-y-0 left-0 z-[45] w-[17rem] flex-col lg:static lg:top-auto lg:z-auto lg:flex lg:h-dvh lg:w-[14.5rem] lg:shrink-0',
                     open ? 'flex animate-in shadow-lift duration-200 slide-in-from-left max-lg:shadow-lift' : 'hidden lg:flex',
                 )}
             >
-                <div className="hidden px-5 pb-3 pt-5 lg:block">
+                <div className="px-5 pb-3 pt-5">
                     <BrandMark variant="compact" />
                 </div>
 
@@ -124,11 +125,7 @@ export default function Sidebar({ items, pathname, open, onClose, proximos = [],
                         <LayoutGrid aria-hidden="true" className={icono} strokeWidth={1.5} />
                         <span>Módulos</span>
                     </Link>
-                    {me && (
-                        <div className="hidden lg:block">
-                            <MenuCuenta me={me} onSalir={onSalir} variante="fila" />
-                        </div>
-                    )}
+                    {me && <MenuCuenta me={me} onSalir={onSalir} variante="fila" onNavegar={onClose} />}
                 </nav>
             </aside>
         </>
