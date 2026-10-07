@@ -47,4 +47,11 @@ describe('ResolverComo', () => {
         expect(screen.getByRole('button', { name: /Resolver como Presente/ })).toBeDisabled();
         expect(screen.getByText('Plazo vencido')).toBeInTheDocument();
     });
+    it('el comentario se rotula como opcional con la palabra y dice a dónde va', () => {
+        render(<ResolverComo onResolver={vi.fn()} />);
+        const campo = screen.getByLabelText(/Comentario/);
+        expect(campo).toHaveAccessibleName(/Comentario\s*\(opcional\)/);
+        expect(campo).toHaveAccessibleDescription(/Queda en el historial de correcciones del caso\./);
+        expect(screen.getByText('0/200')).toBeInTheDocument();
+    });
 });

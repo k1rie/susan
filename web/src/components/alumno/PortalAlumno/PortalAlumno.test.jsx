@@ -84,7 +84,8 @@ describe('PortalAlumno', () => {
         render(<PortalAlumno encabezado={false} />);
         await userEvent.click(await screen.findByRole('button', { name: 'Justificar' }));
         const tarjeta = screen.getByRole('region', { name: 'Registrar justificante' });
-        expect(await within(tarjeta).findByLabelText(/Falta o retardo/)).toHaveValue('9');
+        // La falta se elige con tarjetas (radios): la de la sesión 9 queda marcada.
+        expect(await within(tarjeta).findByRole('radio', { name: /Álgebra/ })).toBeChecked();
     });
 
     it('sin materias muestra el aviso', async () => {
@@ -222,7 +223,7 @@ describe('PortalAlumno', () => {
             render(<PortalAlumno encabezado={false} />);
             await screen.findByRole('group', { name: 'Calendario de asistencia' });
             await userEvent.click(await screen.findByRole('button', { name: 'Justificar' }));
-            expect(await within(screen.getByRole('region', { name: 'Registrar justificante' })).findByLabelText(/Falta o retardo/)).toHaveValue('9');
+            expect(await within(screen.getByRole('region', { name: 'Registrar justificante' })).findByRole('radio', { name: /Álgebra/ })).toBeChecked();
         });
     });
 });

@@ -553,7 +553,9 @@ describe('AlertasAnalitica, TarjetasAnalitica y SelectorGrupo', () => {
         render(
             <SelectorGrupo periodos={['2026-1', '2026-2']} grupos={[{ id_grupo: 7, materia_nombre: 'Cálculo', clave_grupo: '3A' }]} valor={{ periodo: '2026-2', idGrupo: null }} onCambio={onCambio} />,
         );
-        await userEvent.selectOptions(screen.getByLabelText('Grupo'), '7');
+        // El grupo se busca en un selector con búsqueda (materia y clave en la opción), no en un <select>.
+        await userEvent.click(screen.getByRole('combobox', { name: 'Grupo' }));
+        await userEvent.click(await screen.findByRole('option', { name: /Cálculo · 3A/ }));
         expect(onCambio).toHaveBeenLastCalledWith({ periodo: '2026-2', idGrupo: 7 });
         await userEvent.selectOptions(screen.getByLabelText('Periodo'), '2026-1');
         expect(onCambio).toHaveBeenLastCalledWith({ periodo: '2026-1', idGrupo: null });
