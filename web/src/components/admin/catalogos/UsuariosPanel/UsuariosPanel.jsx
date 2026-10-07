@@ -8,18 +8,33 @@ import PasswordTemporalModal from '../PasswordTemporalModal';
 import AccionesUsuario from './AccionesUsuario.jsx';
 import { usuariosListar } from '@/lib/api/admin.js';
 
+// En 360 px el rol y el estado pasan a una línea bajo el correo y el vínculo se oculta (la tabla no cabe con todas las columnas).
 const COLUMNAS = [
-    { key: 'correo', header: 'Correo', primary: true },
-    { key: 'rol', header: 'Rol', render: (u) => etiquetaRol(u.rol) },
+    {
+        key: 'correo',
+        header: 'Correo',
+        primary: true,
+        render: (u) => (
+            <>
+                {u.correo}
+                <span className="block text-xs font-normal text-muted-foreground sm:hidden">
+                    {etiquetaRol(u.rol)} · {u.activo ? 'Activa' : 'Inactiva'}
+                </span>
+            </>
+        ),
+    },
+    { key: 'rol', header: 'Rol', hideBelow: 'sm', render: (u) => etiquetaRol(u.rol) },
     {
         key: 'vinculo',
         header: 'Vínculo',
+        className: 'hidden xl:table-cell',
         render: (u) => (u.vinculo ? `${u.vinculo}${u.nombre ? ` - ${u.nombre}` : ''}` : <span className="text-muted-foreground">Sin vínculo</span>),
     },
-    { key: 'activo', header: 'Estado', render: (u) => (u.activo ? 'Activa' : 'Inactiva') },
+    { key: 'activo', header: 'Estado', hideBelow: 'sm', render: (u) => (u.activo ? 'Activa' : 'Inactiva') },
 ];
 
-// Alta: la tabla genérica abre este "formulario", que en realidad es el diálogo de creación.
+// Alta: la tabla genérica abre este «formulario», que en realidad es el panel de creación de la cuenta. Su éxito es el aviso de la
+// contraseña temporal (PasswordTemporalModal), así que al crear se cierra el panel y se refresca la lista.
 function FormularioCrear({ onClose, onGuardado, onCreado }) {
     return (
         <CrearUsuarioDialog
@@ -28,6 +43,7 @@ function FormularioCrear({ onClose, onGuardado, onCreado }) {
             onCreado={(r) => {
                 onCreado(r);
                 onGuardado();
+                onClose();
             }}
         />
     );
