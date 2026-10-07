@@ -31,7 +31,9 @@ export default function useRegistrarJustificante({ onRegistrado, onNoJustificabl
             const j = await registrarJustificante({ idSesion, motivo: motivo.trim(), objetoDocumento: objeto });
             subido.current = null;
             setFase('listo');
-            onRegistrado?.(j);
+            // El segundo argumento dice QUÉ sesión se justificó (la respuesta puede no traerla en todas las formas): lo usa la tarjeta para
+            // contar cuántas faltas quedan por justificar.
+            onRegistrado?.(j, { idSesion });
             return j;
         } catch (e) {
             setFase('error');

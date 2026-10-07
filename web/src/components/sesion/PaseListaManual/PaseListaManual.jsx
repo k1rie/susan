@@ -7,6 +7,7 @@ import Button from '@/components/ui/Button';
 import StatusChip from '@/components/ui/StatusChip';
 import { useToast } from '@/components/ui/Toast';
 import { useApiMutation } from '@/hooks/data';
+import { useCambiosSinGuardar } from '@/hooks/ui/useCambiosSinGuardar.js';
 import { cerrarSesion, paseListaManual } from '@/lib/api/sesiones.js';
 import AccionesPaseLista from '../AccionesPaseLista';
 import { enfocarPanel } from '../enfocarPanel.js';
@@ -64,6 +65,10 @@ export default function PaseListaManual({ data, onActualizar, enfocar = false })
     const ocupado = guardarMut.loading || cerrarMut.loading;
     const avance = conteoMarcas(activos, marcas);
     const todosMarcados = avance.total > 0 && avance.marcados === avance.total;
+    // Las marcas viven en estado local: sin aviso, recargar o salir por el riel las pierde. Hay cambios cuando alguna marca difiere de lo ya
+    // guardado en el servidor (`a.estado`); al guardar y actualizar `data` la diferencia desaparece sola.
+    const sucio = activos.some((a) => (marcas[a.id_alumno] ?? '') !== (ESTADOS_EDITABLES.includes(a.estado) ? a.estado : ''));
+    useCambiosSinGuardar(sucio);
     const panelRef = useRef(null);
     useEffect(() => {
         if (enfocar) enfocarPanel(panelRef.current);
