@@ -98,7 +98,7 @@ texto «Sin derecho» (no solo color); `en_limite` con «En el límite».
 | Componente | Props | Responsabilidad |
 |---|---|---|
 | `ReporteAsistencia` | `{ rol: 'administrador'\|'docente', filtrosIniciales: { periodo?: string, idGrupo?: number, idAlumno?: number } }` | Contenedor. Sincroniza URL, llama a las RPC, decide vista de periodo o de grupo, pagina. Hook propio `useReporteAsistencia`. |
-| `ReporteFiltros` | `{ periodos: string[], grupos: GrupoOpcion[], alumnos: {idAlumno:number, nombreCompleto:string}[], valor: {periodo, idGrupo, idAlumno}, onCambio(valor) }` | Tres `Select`; al cambiar periodo limpia grupo y alumno. `GrupoOpcion` = fila de `api_reporte_filtros.grupos`. |
+| `ReporteFiltros` | `{ periodos: string[], grupos: GrupoOpcion[], alumnos: {idAlumno:number, nombreCompleto:string}[], valor: {periodo, idGrupo, idAlumno}, onCambio(valor) }` | `Select` de periodo y `Combobox` (con búsqueda) de grupo y alumno, más los filtros activos con «Quitar» y «Limpiar»; al cambiar periodo limpia grupo y alumno. `GrupoOpcion` = fila de `api_reporte_filtros.grupos`. |
 | `ReporteKpis` | `{ kpis: object }` (clave `kpis` de `api_reporte_grupo`) | Cuatro `StatCard` de Tabla 43: Sesiones cerradas (`sesiones_cerradas` de `sesiones_programadas`), Asistencia promedio (`asistencia_promedio` %), Alumnos en el límite, Alumnos sin derecho. |
 | `ReporteTabla` | `{ items: ReporteFila[], limitePct: number, seleccionado?: number, onSeleccionar?(idAlumno) }` | Tabla/tarjetas descritas arriba. |
 | `ReportePeriodoTabla` | `{ items: ReporteGrupoFila[], onAbrirGrupo(idGrupo) }` | Una fila por grupo: Grupo, Materia, Docente, Inscritos, Sesiones cerradas/programadas, Asistencia promedio, En el límite, Sin derecho. |
@@ -230,7 +230,7 @@ Periodo,Grupo,Materia,Docente,Inscritos,Sesiones programadas,Sesiones cerradas,A
 | Componente (`web/src/components/analitica/<Nombre>/`) | Props | Responsabilidad |
 |---|---|---|
 | `Analitica` | `{ filtrosIniciales: { periodo?: string, idGrupo?: number } }` | Contenedor; hook `useAnalitica({ idGrupo })` -> `{ estado: 'sin_grupo'\|'cargando'\|'error'\|'vacio'\|'listo', error, serie, matriz, analisis, recargar() }`. |
-| `SelectorGrupo` | `{ periodos: string[], grupos: GrupoOpcion[], valor: {periodo, idGrupo}, onCambio(valor), deshabilitado?: boolean }` | Dos `Select`; al cambiar el periodo limpia el grupo. |
+| `SelectorGrupo` | `{ periodos: string[], grupos: GrupoOpcion[], valor: {periodo, idGrupo}, onCambio(valor), deshabilitado?: boolean }` | `Select` de periodo y `Combobox` (con búsqueda) de grupo, más el filtro activo con «Quitar» y «Limpiar»; al cambiar el periodo limpia el grupo. |
 | `TarjetasAnalitica` | `{ resumen, tendencia, proyeccion, cruceLimite, limitePct }` | Las cuatro `StatCard` (contenido 2). |
 | `AlertasAnalitica` | `{ alertas: Alerta[] }` | Alertas con nivel y mensaje (el código va en `data-codigo`); `Alert` del ui-kit; las 3 primeras a la vista y el resto en `Detalles`. |
 | `GraficaSerie` | `{ tendencia, suavizado, proyeccion, resumen, cruceLimite, limitePct }` | Contenido 4 (sobre `GraficaLinea`); casillas de series; datos combinados por `semana`. |

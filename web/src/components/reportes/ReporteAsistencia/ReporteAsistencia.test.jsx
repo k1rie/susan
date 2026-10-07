@@ -121,7 +121,9 @@ describe('ReporteAsistencia', () => {
         api.reporteGrupo.mockImplementation(async (a) => (a.idAlumno ? { ...reporteGrupo(), items: [fila({ id_alumno: 2 })], detalle: [] } : reporteGrupo()));
         render(<ReporteAsistencia filtrosIniciales={{ periodo: '2026-2', idGrupo: 1 }} />);
         expect(await screen.findByRole('tab', { name: 'Resumen' })).toHaveAttribute('aria-selected', 'true');
-        await userEvent.selectOptions(screen.getByLabelText('Alumno'), '2');
+        // El alumno se busca en un selector con búsqueda (nombre arriba, matrícula debajo), no en un <select>.
+        await userEvent.click(screen.getByRole('combobox', { name: 'Alumno' }));
+        await userEvent.click(await screen.findByRole('option', { name: /Luis Gómez/ }));
         expect(await screen.findByRole('tab', { name: 'Sesiones' })).toHaveAttribute('aria-selected', 'true');
     });
 
@@ -154,7 +156,8 @@ describe('ReporteAsistencia', () => {
         api.reporteGrupo.mockResolvedValue(reporteGrupo());
         render(<ReporteAsistencia filtrosIniciales={{ periodo: '2026-2' }} />);
         await userEvent.click(await screen.findByRole('tab', { name: /Grupos/ }));
-        await userEvent.selectOptions(screen.getByLabelText('Grupo'), '1');
+        await userEvent.click(screen.getByRole('combobox', { name: 'Grupo' }));
+        await userEvent.click(await screen.findByRole('option', { name: /Finanzas/ }));
         expect(await screen.findByRole('tab', { name: /Alumnos/ })).toBeInTheDocument();
         expect(screen.getByRole('tab', { name: 'Resumen' })).toHaveAttribute('aria-selected', 'true');
     });
