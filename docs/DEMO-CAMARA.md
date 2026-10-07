@@ -40,10 +40,11 @@ baja y no aparece ante la cámara). No hace falta tocar el reloj a mano: el simu
 1. Entra como `docente1@` y pulsa **Pasar lista** (riel lateral, botón central de la barra inferior en el móvil o tarjeta de arriba
    del panel). La sesión de las 07:00 del 3A se abre y llegas a `/docente/sesiones/19?pasar-lista=1`.
    Si no se abrió sola, la pantalla muestra la tarjeta **«Abrir sesión y pasar lista»**: pulsa ese único botón.
-2. Verás arriba el título **Pasar lista** (materia y grupo, hora, aula y los chips «Abierta» y «Automático»), la **guía de 3 pasos**
-   (puedes ocultarla con la X) y, justo debajo, el **panel de pase de lista**: la vista de cámara con el chip **«En pausa»**
-   (la webcam espera permiso; no hace falta darlo), la cifra **«0 de 24 presentes»** y los botones **Cerrar pase de lista**
-   (deshabilitado, con los minutos que faltan) y **Registrar manualmente**.
+2. Verás arriba el título **Pasar lista** (materia y grupo, hora, aula y los chips «Abierta» y «Automático»), la **franja de pasos**
+   (*Abrir la sesión ✓ → **Pasar lista** → Revisar y cerrar*, con una línea que dice qué hacer en el paso actual) y, justo debajo, el
+   **panel de pase de lista**: la vista de cámara con el chip **«En pausa»** (la webcam espera permiso; no hace falta darlo), la cifra
+   **«0 de 24 presentes»** y los botones **Revisar y cerrar** y **Registrar manualmente**. Las cifras, las gráficas y la lista de
+   alumnos no están en esta vista: viven en el paso 3 (*Revisar y cerrar*), para que aquí solo se vea la cámara.
 3. Baja al final del panel: la tarjeta **Cámara simulada (demostración)** con el distintivo «Solo desarrollo». Déjala como está
    (escenario «Todos llegan a tiempo», «Detener después de 5 ciclos», visitante y «Empezar en el minuto 2» marcados) y **activa el
    interruptor**.
@@ -55,15 +56,18 @@ baja y no aparece ante la cámara). No hace falta tocar el reloj a mano: el simu
      marco magenta y las iniciales de cada alumno debajo) y el chip de arriba a la derecha dice **«Cámara simulada»**. El chip de
      la izquierda pasa a **«Reconociendo»**.
    - Sale el 1.er fotograma. «Última captura: **24 rostros · 24 válidos** · +24 registros · hace N s» (los «registros» son los alumnos
-     que se crearon o se confirmaron con esa captura: el 2.º fotograma no suma ninguno). En la tabla de abajo, los alumnos pasan a
-     **Pendiente** con lecturas **1/3** (los números del monitor se refrescan cada 5 s).
+     que se crearon o se confirmaron con esa captura: el 2.º fotograma no suma ninguno). Para ver el detalle por alumno pasa al paso 3
+     (**Revisar y cerrar**; la cámara sigue reconociendo mientras tanto) y abre **Más detalle de la sesión → Lecturas por alumno**: los
+     alumnos pasan a **Pendiente** con lecturas **1/3** (los números del monitor se refrescan cada 5 s).
    - 2.º fotograma (~10 s): 25 rostros (apareció un **visitante**, rótulo «Visita»): «25 rostros · 24 válidos». Lecturas **2/3**.
-   - **3.er fotograma (~20 s)**: lecturas **3/3** («+24 registros»). Todos pasan a **Presente**; la cifra grande dice **«24 de 24 presentes»**, las
-     cuatro tarjetas de arriba se actualizan (Presentes 24, Sin registro 0) y el anillo se llena.
+   - **3.er fotograma (~20 s)**: lecturas **3/3** («+24 registros»). Todos pasan a **Presente**; la cifra grande dice **«24 de 24 presentes»** y, en el
+     paso 3, las cuatro tarjetas se actualizan (Presentes 24, Sin registro 0), el anillo se llena y el titular pasa a «Todos los
+     alumnos tienen registro».
    - Los fotogramas 4.º y 5.º suman lecturas (el 5.º trae otro visitante). Después, la tarjeta dice **«Simulación completa:
      5 ciclos enviados»** y el chip pasa a «En pausa» (ya no se mandan fotogramas).
 5. **Cerrar.** La tolerancia (20 min) todavía no termina: en la tarjeta del reloj pulsa **`+30 min`**. El chip pasa a **«Fuera de la
-   ventana»**, el botón **Cerrar pase de lista** se habilita («La tolerancia terminó: ya puedes cerrar»). Púlsalo y confirma.
+   ventana»**. Pulsa **Revisar y cerrar** (paso 3): el botón **Cerrar pase de lista** se habilita («Ya puedes cerrar el pase de lista»;
+   antes de eso dice cuántos minutos faltan). Púlsalo y confirma.
 6. La pantalla pasa al **resumen de la sesión cerrada**: Presentes 24, ausentes 0. Para volver a empezar:
    `scripts/seed-demo.sh --reset`.
 
@@ -148,7 +152,7 @@ de fin ya pasó.
 
 1. Elige **«Casos dudosos»**, activa el interruptor y espera a «Simulación completa» (~45 s). En la tabla, 16 alumnos están en
    **Presente** y 8 se quedaron en lecturas 1/3 o 2/3 (estado Pendiente, sin confirmar).
-2. En la tarjeta del reloj pulsa `+30 min` (pasa de las 07:20) y en el panel **Cerrar pase de lista** → confirma. El mensaje dice
+2. En la tarjeta del reloj pulsa `+30 min` (pasa de las 07:20) pasa a **Revisar y cerrar** y pulsa **Cerrar pase de lista** → confirma. El mensaje dice
    «0 ausentes creados, 8 pendientes»: quien tiene 1 o 2 lecturas **no es ausente**, queda **pendiente de revisión** (RN-07).
 3. En el resumen de la sesión cerrada aparece la tarjeta **«Pendientes»** (8, con la nota «Resolver en Revisión»); pulsa para ir a
    `/docente/revision?pestana=pendientes` (o entra por **Revisión** en el riel).
