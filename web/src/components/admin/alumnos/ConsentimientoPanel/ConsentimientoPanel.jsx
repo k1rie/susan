@@ -7,58 +7,36 @@ import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import DataState from '@/components/ui/DataState';
-import Field from '@/components/ui/Field';
-import FileInput from '@/components/ui/FileInput';
-import Input from '@/components/ui/Input';
 import { useToast } from '@/components/ui/Toast';
-import { useApiMutation } from '@/hooks/data';
-import { registrarConsentimiento, revocarConsentimiento, solicitarUrlDocumento } from '@/lib/http/biometria.js';
-import {
-    hoyLocal, MAX_DOCUMENTO_BYTES, resumenConsentimiento, textoEstatusItem, validarConsentimiento,
-} from './consentimiento.utils.js';
+import { revocarConsentimiento, solicitarUrlDocumento } from '@/lib/http/biometria.js';
+import { fechaLegible, resumenConsentimiento, textoEstatusItem } from './consentimiento.utils.js';
+import FormularioConsentimiento from './FormularioConsentimiento.jsx';
 import useConsentimientos from './useConsentimientos.js';
 
-const VACIO = { fechaFirma: '', vigenciaHasta: '', documento: null };
-
 // Consentimiento informado firmado (RN-13): estado, documento, registro y revocación.
-export default function ConsentimientoPanel({ idAlumno, version = 0, onCambio }) {
+//   alumnoActivo  false si el alumno está en baja: la RPC solo registra consentimientos de alumnos activos, así que en vez del
+//                 formulario se explica qué hacer.
+export default function ConsentimientoPanel({ idAlumno, version = 0, onCambio, alumnoActivo = true }) {
     const consulta = useConsentimientos(idAlumno, version);
     const { toast } = useToast();
-    const registrar = useApiMutation(registrarConsentimiento);
-    const [form, setForm] = useState(VACIO);
-    const [errores, setErrores] = useState({});
     const [formAbierto, setFormAbierto] = useState(false);
     const [confirmando, setConfirmando] = useState(false);
     const [enlace, setEnlace] = useState(null);
     const [abriendo, setAbriendo] = useState(false);
+    const [registrado, setRegistrado] = useState(null);
 
     const resumen = resumenConsentimiento(consulta.data);
-    const mostrarForm = resumen.estado !== 'vigente' || formAbierto;
+    const mostrarForm = alumnoActivo && (resumen.estado !== 'vigente' || formAbierto);
 
     const alCambiar = async () => {
         await consulta.refetch();
         onCambio?.();
     };
 
-    const enviar = async (e) => {
-        e.preventDefault();
-        const encontrados = validarConsentimiento(form);
-        setErrores(encontrados);
-        if (Object.keys(encontrados).length > 0) return;
-        const datos = new FormData();
-        datos.append('id_alumno', String(idAlumno));
-        datos.append('fecha_firma', form.fechaFirma);
-        datos.append('vigencia_hasta', form.vigenciaHasta);
-        datos.append('documento', form.documento, form.documento.name || 'consentimiento.pdf');
-        try {
-            await registrar.run(datos);
-            toast({ tone: 'success', title: 'Consentimiento registrado' });
-            setForm(VACIO);
-            setFormAbierto(false);
-            await alCambiar();
-        } catch (err) {
-            toast({ tone: 'danger', title: 'No se pudo registrar el consentimiento', message: err.message });
-        }
+    const alRegistrar = async (nuevo) => {
+        setFormAbierto(false);
+        setRegistrado(nuevo);
+        await alCambiar();
     };
 
     const revocar = async () => {
@@ -70,6 +48,7 @@ export default function ConsentimientoPanel({ idAlumno, version = 0, onCambio })
             throw err;
         }
         setConfirmando(false);
+        setRegistrado(null);
         // La revocación solo es efectiva cuando el índice se reconstruye: si quedó pendiente, el vector sigue
         // en el índice y hay que avisarlo en lugar de dar el trámite por cerrado.
         if (respuesta?.indice?.estado === 'pendiente') {
@@ -99,7 +78,7 @@ export default function ConsentimientoPanel({ idAlumno, version = 0, onCambio })
     };
 
     return (
-        <Card title="Consentimiento informado">
+        <Card id="consentimiento" title="Consentimiento informado" className="scroll-mt-20 lg:scroll-mt-4">
             <DataState
                 loading={consulta.loading}
                 error={consulta.error}
@@ -113,9 +92,11 @@ export default function ConsentimientoPanel({ idAlumno, version = 0, onCambio })
                             <Badge tone={resumen.tone}>{resumen.texto}</Badge>
                             {resumen.estado === 'vigente' && (
                                 <>
-                                    <Button variant="secondary" size="sm" onClick={() => setFormAbierto((v) => !v)}>
-                                        {formAbierto ? 'Cancelar nuevo registro' : 'Registrar nuevo'}
-                                    </Button>
+                                    {alumnoActivo && (
+                                        <Button variant="secondary" size="sm" onClick={() => setFormAbierto((v) => !v)}>
+                                            {formAbierto ? 'Cancelar nuevo registro' : 'Registrar nuevo'}
+                                        </Button>
+                                    )}
                                     <Button variant="danger" size="sm" onClick={() => setConfirmando(true)}>
                                         Revocar
                                     </Button>
@@ -123,9 +104,25 @@ export default function ConsentimientoPanel({ idAlumno, version = 0, onCambio })
                             )}
                         </div>
 
-                        {resumen.estado !== 'vigente' && (
+                        {registrado && (
+                            <Alert tone="success" title="Consentimiento registrado" onClose={() => setRegistrado(null)}>
+                                Vigente hasta {fechaLegible(registrado.vigencia_hasta)}. Siguiente paso:{' '}
+                                <a href="#plantilla" className="font-medium underline underline-offset-2">
+                                    registrar la plantilla facial
+                                </a>
+                                .
+                            </Alert>
+                        )}
+
+                        {resumen.estado !== 'vigente' && !registrado && (
                             <Alert tone="warning" title="Sin consentimiento vigente">
-                                Se tomará asistencia por pase de lista manual. Registre el documento firmado para habilitar la plantilla facial.
+                                Se tomará asistencia por pase de lista manual. Registra el documento firmado para habilitar la plantilla facial.
+                            </Alert>
+                        )}
+
+                        {!alumnoActivo && resumen.estado !== 'vigente' && (
+                            <Alert tone="info" compact>
+                                Solo se registra el consentimiento de un alumno activo. Reactívalo en la sección Estado de sus datos.
                             </Alert>
                         )}
 
@@ -139,30 +136,11 @@ export default function ConsentimientoPanel({ idAlumno, version = 0, onCambio })
                         )}
 
                         {mostrarForm && (
-                            <form onSubmit={enviar} noValidate className="grid gap-3 sm:grid-cols-2" aria-label="Registrar consentimiento">
-                                <Field label="Fecha de firma" required error={errores.fechaFirma}>
-                                    <Input type="date" max={hoyLocal()} value={form.fechaFirma} onChange={(e) => setForm((f) => ({ ...f, fechaFirma: e.target.value }))} />
-                                </Field>
-                                <Field label="Vigente hasta" required error={errores.vigenciaHasta}>
-                                    <Input type="date" min={form.fechaFirma || undefined} value={form.vigenciaHasta} onChange={(e) => setForm((f) => ({ ...f, vigenciaHasta: e.target.value }))} />
-                                </Field>
-                                <div className="flex flex-col gap-1 sm:col-span-2">
-                                    <span className="text-sm font-medium">Documento firmado (PDF, máx. 10 MB)</span>
-                                    <FileInput
-                                        accept="application/pdf"
-                                        maxBytes={MAX_DOCUMENTO_BYTES}
-                                        value={form.documento}
-                                        onSelect={(documento) => setForm((f) => ({ ...f, documento }))}
-                                        label="Seleccionar PDF"
-                                        error={errores.documento}
-                                    />
-                                </div>
-                                <div className="sm:col-span-2">
-                                    <Button type="submit" loading={registrar.loading}>
-                                        Registrar consentimiento
-                                    </Button>
-                                </div>
-                            </form>
+                            <FormularioConsentimiento
+                                idAlumno={idAlumno}
+                                onRegistrado={alRegistrar}
+                                onCancelar={resumen.estado === 'vigente' ? () => setFormAbierto(false) : undefined}
+                            />
                         )}
 
                         <div>
@@ -172,7 +150,7 @@ export default function ConsentimientoPanel({ idAlumno, version = 0, onCambio })
                                     {data.items.map((c) => (
                                         <li key={c.id_consent} className="rounded-xl border border-border p-3.5 text-sm">
                                             <p className="font-medium">
-                                                Firmado {c.fecha_firma} · vigente hasta {c.vigencia_hasta}
+                                                Firmado {fechaLegible(c.fecha_firma)} · vigente hasta {fechaLegible(c.vigencia_hasta)}
                                             </p>
                                             <p className="text-muted-foreground">
                                                 {textoEstatusItem(c)} · {c.plantillas_activas ?? 0} plantilla(s) activa(s)
