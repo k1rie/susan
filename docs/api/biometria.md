@@ -34,6 +34,7 @@ Fuera (otros dominios): alta/edición del alumno (admin), `POST /api/sesiones/{i
 | RF-03 (servicio) muestreo por cámara | Servicio `POST /v1/recognize` con `camera_url` (el muestreo lo orquesta el dominio sesiones); `api_camaras_estado` expone `ultima_captura` y `capturas_24h` para vigilar las 80 ± 1 capturas |
 | RF-04 búsqueda k-NN solo entre inscritos con consentimiento | Servicio `/v1/recognize` con `allowed_faiss_ids` + `IDSelectorBatch`; índice `IndexIDMap2(IndexFlatIP)`; `svc_indice_en_uso` para el arranque |
 | RF-05 (servicio) candidato y score aunque no alcance el umbral | `/v1/recognize` devuelve siempre el mejor candidato permitido con `score = (coseno+1)/2`; el umbral lo aplica sesiones |
+| Spec §1.2.1 «el alumno otorga su consentimiento»; RF-15/RF-16/RN-13 por el propio alumno (extensión 19) | `api_mi_registro`, `api_mi_consentimiento_aceptar`, `api_mi_consentimiento_revocar`, `api_mi_plantilla_registrar`, `app.plantilla_registrar` (núcleo común con el administrador), `svc_faiss_ids_otros_alumnos`, `POST /api/yo/consentimiento`, `POST /api/yo/consentimiento/revocar`, `POST /api/yo/plantilla/verificar`, `POST /api/yo/plantilla`, `lib/server/autoservicio.js`, `lib/server/constancia.js`, `lib/avisoBiometrico.js`, componentes `MiRegistro` y `AvisoRegistro` (§7) |
 | RF-10 cierre por programador de tareas | `svc_job_cerrar_sesiones`, `POST /api/jobs/cerrar-sesiones` |
 | RF-11 / RN-08 pendientes vencidos -> ausente con cuenta de servicio | `svc_job_resolver_pendientes`, `POST /api/jobs/resolver-pendientes`, `app.id_cuenta_servicio`, `app.asumir_cuenta_servicio` |
 | RF-13 / RF-14 / RN-10 / RN-11 recálculo | `svc_job_recalcular` (invoca `app.recalcular_grupo`) |
@@ -1238,3 +1239,83 @@ Administrador. Igual que el de `plantilla` con `urlDeDocumento('plantilla_foto')
 - **Orden obligatorio: SQL, servicio, web.** Un servicio viejo rechaza con 422 las entradas `objetos_foto` (solo si ya existen plantillas multifoto). `scripts/db-up.sh` aplica `0235` una sola vez; es inocuo con el web y el servicio viejos (4 argumentos y una sola foto siguen funcionando). En modo local, el adaptador cachea el catálogo de funciones 60 s: tras migrar, reinicia el Next o espera más de 60 s, o la llamada con `p_fotos` falla con `PGRST202`.
 - **Plantillas existentes de una foto**: sin migración manual. El *backfill* y el trigger les dan su fila `orden = 1`; siguen en `keep` con su `faiss_id`; una reconstrucción completa las trata como entrada de una foto (sin promedio). Para pasar a 5 fotos se registra de nuevo (la anterior se archiva por RN-12); el panel lo sugiere.
 - Otros contratos intactos: `api_consentimiento_revocar`, `svc_indice_registrar`/`activar`/`revertir`/`en_uso`, `api_indice_estado`, `svc_job_reconstruir_indice`, `api_alumno_obtener` y `api_detecciones_caso` (`objeto_foto_registro` es la foto principal de la plantilla activa).
+---
+
+## 7. Autoservicio del alumno (extensión 19 de `docs/DECISIONS.md`)
+
+Hasta aquí solo el administrador capturaba el consentimiento y el rostro. La spec (§1.2.1) ya dice que el alumno «otorga o no su consentimiento»; esta extensión deja que el alumno
+acepte el aviso y registre su propio rostro desde su portal. El administrador conserva el alta de cuentas (RF-20) y sigue pudiendo registrar a cualquiera (respaldo para quien no tiene
+dispositivo); además audita y revoca. **Nada del flujo del administrador cambia de contrato.**
+
+### 7.1 Principios
+
+- **El alumno es siempre el de la sesión.** Ninguna RPC `api_mi_*` ni ninguna ruta `/api/yo/*` recibe `id_alumno` ni `id_consent`: salen de `app.id_alumno()` / `api_mi_registro`. Un `id_alumno` en el
+  cuerpo es 422 (`.strict()`). No hay IDOR posible por parámetro.
+- **El alumno no lee las tablas biométricas** (siguen con RLS solo de administrador): `api_mi_registro` es `DEFINER` y devuelve el estado de SU registro, sin rutas de objetos ni datos de otras personas.
+- **Un solo núcleo de reglas.** `app.plantilla_registrar(...)` (cuerpo de 0235 sin la comprobación de rol, más `p_origen`) lo llaman `api_plantilla_registrar` (administrador, firma y contrato intactos) y
+  `api_mi_plantilla_registrar` (alumno). RN-12 y RN-13 se aplican igual a ambos.
+- **Aceptación electrónica**: el alumno acepta con su sesión autenticada (cuenta institucional). El servidor genera la **constancia PDF** (nombre, matrícula, fecha y hora de negocio, vigencia, versión del aviso,
+  **huella SHA-256 del texto aceptado**, IP) y la guarda en el bucket como `consentimientos/{id_alumno}/{uuid}.pdf`, igual que el PDF firmado a mano del administrador. El texto vive en un solo módulo
+  (`lib/avisoBiometrico.js`, `VERSION_AVISO`): pantalla y constancia leen la misma fuente y el servidor rechaza una aceptación hecha sobre otra versión (`AVISO_DESACTUALIZADO`).
+  **El texto es un borrador técnico: debe revisarlo la oficina jurídica de la UNACH antes de producción** (subir `VERSION_AVISO` con cada cambio).
+- **Antisuplantación** (sin aprobación del administrador): (1) el rostro se toma solo con la cámara en vivo (el asistente guiado en modo `propio`, sin «Subir fotos»); (2) antes de guardar nada se busca el
+  rostro entre las plantillas **de todos los demás alumnos activos** del índice en uso (`svc_faiss_ids_otros_alumnos` + `POST /v1/recognize` con `allowed_faiss_ids` y `max_faces = 1`) y se rechaza si el score
+  alcanza `umbral_similitud` (el mismo umbral con que el pase de lista atribuiría la asistencia a otra persona); (3) tope de 5 registros por alumno cada 24 h; (4) todo queda en bitácora con `origen = alumno`.
+- **Límites que conviene conocer** (ver la sección 9 de `docs/DECISIONS.md`): «solo cámara» es un control de la interfaz, no una prueba criptográfica de que la imagen salió de una cámara; la búsqueda de duplicados solo
+  compara contra plantillas ya indexadas y es fiable solo mientras el servicio tenga cargado el mismo índice que la base; no hay detección de vida en el registro.
+
+### 7.2 Modelo de datos (migración `0239_autoservicio_registro.sql`)
+
+| Cambio | Detalle |
+|---|---|
+| `consentimiento.origen` | `administrador` (por omisión) \| `alumno`. `ck_consentimiento_origen` |
+| `consentimiento.version_aviso` | `varchar(20)`, NULL en los del administrador |
+| `plantilla_facial.origen` | `administrador` (por omisión) \| `alumno`. `ck_plantilla_origen` |
+| `accion_bitacora` | + `alta_consentimiento`, + `revocacion_consentimiento` (10 valores; ver extensión 19) |
+| `app.autoregistro_limite()` / `app.consentimiento_meses()` | Constantes de negocio: 5 registros / 24 h y 12 meses de vigencia de lo aceptado en la app |
+
+### 7.3 RPC (`authenticated`, rol `alumno`)
+
+El detalle de argumentos y errores está en `docs/API-RPC.md` (se genera de los `COMMENT ON FUNCTION`).
+
+| RPC | Hace | Errores propios |
+|---|---|---|
+| `api_mi_registro()` | Estado del registro: `consentimiento` (vigente o null), `plantilla` (activa o null), `completo`, `paso` (`consentimiento` \| `rostro` \| `listo`), `puede_registrar`, `vigencia_meses`, `vigencia_prevista`, `registros_24h`, `limite_registros_24h`, `ahora`, `nombre`, `matricula` | `CUENTA_NO_VINCULADA` |
+| `api_mi_consentimiento_aceptar(p_objeto_documento, p_version_aviso, p_ip)` | Firma = hoy, vigencia = hoy + 12 meses, constancia ya subida; bitácora `alta_consentimiento` | `CONSENTIMIENTO_YA_VIGENTE`, `ALUMNO_INACTIVO`, `RUTA_INVALIDA`, `VALIDACION` |
+| `api_mi_consentimiento_revocar(p_ip)` | Revoca sus consentimientos vigentes y archiva sus plantillas (RNF-06); bitácora `revocacion_consentimiento` | `RN_13_CONSENTIMIENTO_NO_VIGENTE` |
+| `api_mi_plantilla_registrar(p_id_consent, p_objeto_foto, p_ip, p_fotos)` | Mismo núcleo que el administrador, `origen = alumno`, tope diario | `AUTOREGISTRO_LIMITE`, y los de `api_plantilla_registrar` |
+| `svc_faiss_ids_otros_alumnos(p_id_alumno)` (`service_role`) | `{ indice, faiss_ids }` de los demás alumnos activos con plantilla indexada en el índice en uso. Solo enteros | `VALIDACION` |
+
+### 7.4 Rutas web (`/api/yo/*`, rol `alumno`)
+
+Todas: `handle({ roles: ['alumno'] })` → autenticar → autorizar → validar (zod) → ejecutar. Cualquier otro rol recibe 403 `NO_AUTORIZADO`.
+
+| Ruta | Entrada | Resultado |
+|---|---|---|
+| `POST /api/yo/consentimiento` | JSON `{ version_aviso, acepto: true }` (`aceptarAvisoCuerpo`, `.strict()`) | 201 con el consentimiento (`{ id_consent, fecha_firma, vigencia_hasta, origen: 'alumno', version_aviso, ... }`). Genera la constancia PDF, la sube con ruta del servidor y registra; si el registro falla borra el PDF |
+| `POST /api/yo/consentimiento/revocar` | sin cuerpo | 200 `{ consentimientos_revocados, plantillas_archivadas, requiere_reconstruccion, indice? }`; reconstruye el índice si había plantillas indexadas |
+| `POST /api/yo/plantilla/verificar` | multipart `fotos` (JPEG, repetido, 1 a 8) | 200, la misma forma que `POST /api/plantilla/verificar` con `fotos`. Exige consentimiento vigente y cupo diario; no guarda nada |
+| `POST /api/yo/plantilla` | multipart `fotos` (JPEG, repetido, 3 a 8) | 201 con la plantilla + `indice` + `muestra`. Orden: consentimiento vigente y cupo → calidad del conjunto → **rostro no repetido** → subir → `api_mi_plantilla_registrar` → reconstruir el índice. No hay camino de una sola foto |
+
+Códigos de error nuevos (todos en `STATUS_POR_CODIGO`):
+
+| Código | HTTP | Cuándo |
+|---|---|---|
+| `CONSENTIMIENTO_YA_VIGENTE` | 409 | Aceptar con un consentimiento vigente |
+| `AVISO_DESACTUALIZADO` | 409 | `version_aviso` distinta de `VERSION_AVISO`: la pantalla debe recargarse |
+| `ROSTRO_YA_REGISTRADO` | 409 | El rostro se parece (score >= `umbral_similitud`) al de otra persona. El mensaje **no** revela de quién es ni el score |
+| `AUTOREGISTRO_LIMITE` | 429 | 5 registros en 24 h (se avisa antes de gastar CPU en el servicio de reconocimiento) |
+
+Reutilizados: `RN_13_CONSENTIMIENTO_NO_VIGENTE` (409, sin consentimiento), `ALUMNO_INACTIVO` (409), `FOTOS_RECHAZADAS`/`FOTOS_INSUFICIENTES`/`FOTOS_DUPLICADAS` (422), `SERVICIO_RECONOCIMIENTO_*` (502/503: si el servicio
+falla al buscar duplicados **no se guarda nada**; falla cerrado).
+
+### 7.5 Pantallas
+
+- `/alumno/registro` · **Mi registro facial** (`components/alumno/MiRegistro`): Stepper de tres pasos (aviso y consentimiento → tu rostro → listo). Reutiliza `RegistroFacialGuiado` con `propio` (solo cámara, textos en segunda persona) y
+  `usePlantillaFacial` con la API inyectada `API_PROPIA` (`miRegistro.api.js`); `permiteUna: false`. Módulo `registro-facial` (rol alumno) y ítem «Mi registro facial» en el riel y la barra inferior.
+- `/alumno` · `AvisoRegistro`: recordatorio mientras el registro esté incompleto; no aparece si está listo, si la cuenta no puede registrarse o si la consulta falla.
+- Administración: la bitácora (`/admin/bitacora`) filtra y rotula `alta_consentimiento` y `revocacion_consentimiento`; cada entrada trae `origen`.
+
+### 7.6 Orden de despliegue
+
+SQL (`0239`) y después web. El servicio de reconocimiento no cambia. En modo local el adaptador cachea el catálogo de funciones 60 s: tras migrar, reinicia el Next o espera más de 60 s.

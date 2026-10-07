@@ -149,6 +149,25 @@ rostro sale **sin atribuir** y al cerrar la sesión queda **ausente**. Para devo
 `scripts/seed-demo.sh` (registra un consentimiento nuevo, una plantilla nueva y reconstruye el índice; la versión en uso deja de
 ser `v003`).
 
+### 4.2b. Autoservicio: el alumno acepta el aviso y registra su propio rostro
+
+El administrador ya no tiene que capturar todo: el alumno lo hace desde **Mi registro facial** (`/alumno/registro`; en el riel, bajo «Mi cuenta», y como recordatorio en `/alumno` mientras esté incompleto).
+Detalle del diseño en [`docs/api/biometria.md`](api/biometria.md) §7 y [`DECISIONS.md`](DECISIONS.md) §9.
+
+1. Entra con `e260001@` → **Mi registro facial**. Como la semilla le dejó el consentimiento que registró el administrador, verás «Tu rostro está registrado» y «Lo registró tu coordinación».
+2. **Revocar consentimiento** (con confirmación): la plantilla se archiva y el índice se reconstruye solo. La pantalla vuelve al paso 1 y en `/alumno` aparece el recordatorio «Completa tu registro facial».
+3. Marca la declaración y **Aceptar y continuar**. Queda como consentimiento de origen *alumno* (vigente 12 meses) y el sistema genera la **constancia PDF** (nombre, matrícula, fecha, IP, versión del aviso y huella SHA-256 del texto):
+   `$SUSAN_LOCAL_DIR/storage/susan-private/consentimientos/<id_alumno>/<uuid>.pdf`. En `/admin/bitacora` aparecen `alta_consentimiento` y `revocacion_consentimiento`, con usuario, IP y origen.
+4. **Registrar mi rostro** abre el asistente guiado en modo *propio*: solo cámara (sin «Subir fotos») y textos en segunda persona.
+
+> **Con el embedder `fake` la webcam no sirve para el paso 4** (no produce los rostros sintéticos que reconoce el servicio). Dos salidas: (a) `scripts/dev-modo.sh insightface` y repetir con tu cara real (§9), o
+> (b) `scripts/seed-demo.sh --autoservicio`, que ejerce de punta a punta las rutas `/api/yo/*` con rostros sintéticos y comprueba: aceptar el aviso, verificar tomas, **rechazo de la cara de otro alumno**
+> (`ROSTRO_YA_REGISTRADO`, sin guardar nada y sin revelar de quién es), registro con origen *alumno* e indexado, el segundo alumno **no** puede registrar esa cara, un docente recibe 403 y el cuerpo no admite `id_alumno`.
+> Opciones: `--alumno E260003 --otro E260004`. Deja al alumno con una cara sintética registrada por él mismo.
+
+El candado de 5 registros por 24 h usa el reloj de negocio: con el reloj de demostración **detenido** se agota tras 5 registros del mismo alumno (`AUTOREGISTRO_LIMITE`); adelanta el reloj un día con
+la tarjeta «Reloj de demostración» (**Fijar hora**) para volver a probar.
+
 ### 4.3. Pase manual (5C, sesión 115)
 
 El 5C (aula B-04, sin cámaras activas) se abre solo de 09:00 a 10:00; con el reloj en 07:12 «Abrir sesión» responde

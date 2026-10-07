@@ -30,6 +30,10 @@ const RUTAS = {
     'plantilla/verificar': ['POST'],
     'salud': ['GET'],
     'sesiones/[id]/captura': ['POST'],
+    'yo/consentimiento': ['POST'],
+    'yo/consentimiento/revocar': ['POST'],
+    'yo/plantilla': ['POST'],
+    'yo/plantilla/verificar': ['POST'],
 };
 
 // Rutas de este dominio descubiertas en disco (excluye _local, que es de adapters).

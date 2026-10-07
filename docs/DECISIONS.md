@@ -25,6 +25,7 @@ técnicamente y lo que sigue abierto. El SQL (`supabase/`) y `docs/API-RPC.md` s
 | 16 | QR (de SmartClass) **no** se incluye | La spec no lo contempla; el respaldo del reconocimiento es el pase de lista manual (RF-09). |
 | 17 | Tabla **`plantilla_foto`** (20.ª tabla; la spec tiene 19) y plantilla de **3 a 8 fotos promediadas** en un solo vector | Una foto sola da cosenos de 0.4–0.7 con fotos de salón y un mal registro no tiene salvaguarda. Con 5 fotos las lecturas bajo el umbral bajan a la mitad frente a una foto frontal buena y de 22.8 % a 3.7 % frente a una foto cualquiera (nivel duro). Se conserva RN-12: una fila activa de `plantilla_facial` y un `faiss_id`. Detalle en la sección 6. |
 | 18 | Las **fotos de registro son efímeras**: se borran del bucket en cuanto su vector queda en el JSON del índice en uso; `objeto_foto` admite NULL | Guardar un rostro que ya no se usa para nada es retención innecesaria de un dato biométrico (RNF-03). El único lector de la foto es la construcción del índice, así que se borra justo después de activar la versión que la contiene. Los recortes de la sesión NO cambian (evidencia de la revisión, RNF-05). Detalle en la sección 8. |
+| 19 | **Autoservicio del alumno**: acepta el aviso (constancia PDF generada por el sistema) y registra su propio rostro; el administrador queda como respaldo, auditor y quien revoca. La bitácora gana `alta_consentimiento` y `revocacion_consentimiento` (**10 valores, no 8**) | La spec (§1.2.1) ya dice que el alumno «otorga su consentimiento»; que el administrador capture todo es un cuello de botella y contradice el objetivo del sistema. Cambia la decisión 12 («`accion_bitacora` tiene exactamente 8 valores»): el consentimiento no tenía auditoría, y revocar no deja otro rastro con fecha. Ver sección 9. |
 
 ## 2. Decisiones técnicas
 
@@ -224,3 +225,39 @@ Método y limitaciones: `buffalo_s` real (el embedder del servicio) sobre 8 pers
 
 - **Despliegue**: SQL (`0237_fotos_registro_efimeras.sql`), después web; el servicio de reconocimiento no cambia. Las fotos que ya estaban en el bucket NO se borran solas: se limpian
   ejecutando el job `purgar-fotos-registro` (o esperando a su cron).
+
+## 9. Autoservicio del alumno (extensión 19, 2026-10-07)
+
+- **Contexto**: hasta ahora el administrador capturaba el consentimiento (PDF firmado a mano) y el rostro de cada alumno (RF-15/16 y la lista de actores de la spec §1.2.1). La misma spec dice que el alumno
+  «otorga o no su consentimiento». Con 20 000 alumnos previstos, que el administrador capture todo es el cuello de botella; el objetivo del sistema es que el alumno se dé de alta solo. Las cuentas siguen
+  creándolas el administrador (RF-20: no hay autorregistro público).
+- **Decisión**: el alumno acepta el aviso de privacidad en `/alumno/registro` y registra su rostro con la cámara de su dispositivo. Dos decisiones fueron del responsable del proyecto: **aceptación en la app**
+  (no «descargar, firmar y subir») y **sin aprobación del administrador, con candados**.
+  - **Consentimiento**: aceptación electrónica con la sesión autenticada. El servidor genera una **constancia PDF** (sin librerías: PDF de texto escrito a mano en `lib/server/constancia.js`; verificada con pypdf y poppler)
+    con los datos de la aceptación, el texto completo y su **huella SHA-256**; queda en el bucket igual que el PDF firmado. Vigencia: 12 meses (`app.consentimiento_meses()`).
+  - **Sin `id_alumno` en la entrada**: RPC `api_mi_*` y rutas `/api/yo/*` toman el alumno de la sesión. El núcleo de RN-12/RN-13 es el mismo (`app.plantilla_registrar`); `api_plantilla_registrar` del administrador conserva su contrato.
+  - **Candados en lugar de aprobación**: solo cámara en vivo en la interfaz; rechazo si el rostro ya pertenece a otra matrícula (búsqueda con `/v1/recognize` y `allowed_faiss_ids` de los demás alumnos, mismo umbral
+    que el pase de lista); tope de 5 registros por 24 h; bitácora con `origen`. El administrador **audita y revoca**, no aprueba.
+  - **Revocar**: el alumno puede retirar su consentimiento cuando quiera (`api_mi_consentimiento_revocar`): es la contraparte de otorgarlo.
+- **Alternativas descartadas**:
+
+  | Alternativa | Por qué no |
+  |---|---|
+  | Descargar el formato, firmarlo y subir el PDF escaneado | Más fricción y más soporte; el administrador acabaría revisando PDFs, que es lo que se quiere evitar |
+  | Cola de aprobación del administrador antes de activar la plantilla | Más seguro, pero devuelve el cuello de botella; el riesgo se atiende con candados y auditoría |
+  | Ampliar `api_plantilla_registrar` para aceptar al alumno (comprobando que el id coincida) | El id seguiría llegando por parámetro; es preferible que no exista como entrada |
+  | Reutilizar `alta_plantilla`/`correccion` de la bitácora para el consentimiento | Rótulos engañosos en `/admin/bitacora` y filtros imprecisos; se prefirió ampliar el enum (desviación documentada) |
+  | Librería de PDF (`pdf-lib`, `pdfkit`) | Una página de texto no justifica una dependencia nueva en el proyecto |
+
+- **Lo que NO garantiza (honesto)**:
+  - «Solo cámara» es un control de la **interfaz**: un cliente que hable con `POST /api/yo/plantilla` directamente puede mandar JPEG cualquiera (con su propia sesión). Lo que sí se comprueba en el servidor es calidad,
+    consistencia entre tomas, que el rostro no sea el de otra matrícula y el tope diario. No hay detección de vida en el registro (la del pase de lista, extensión de `0238`, es solo informativa).
+  - La búsqueda de duplicados compara contra plantillas **ya indexadas** del índice en uso: dos alumnos que se registren casi al mismo tiempo con la misma cara podrían coincidir hasta la siguiente reconstrucción; y si el
+    servicio tiene cargado un índice distinto del de la base, el resultado no es fiable. Si el servicio no responde al buscar, **no se guarda nada**.
+  - Dos personas muy parecidas (gemelos) pueden dar un score sobre el umbral: el alumno ve «acude a tu coordinación» y el administrador puede registrarlas con el flujo de siempre.
+  - **El texto del aviso es un borrador técnico** (`lib/avisoBiometrico.js`): lo debe revisar la oficina jurídica de la UNACH. Cualquier cambio sube `VERSION_AVISO`.
+- **Consecuencias**: la tabla `consentimiento` gana `origen` y `version_aviso`; `plantilla_facial`, `origen`. La bitácora pasa de 8 a 10 acciones (la decisión 12 queda matizada: el consentimiento ahora sí se audita).
+  `usePlantillaFacial` recibe sus llamadas por parámetro (`api`, por omisión las del administrador) y `RegistroFacialGuiado` gana `propio`. El riel y la barra inferior del alumno pasan de un destino a dos (aparece la barra inferior móvil).
+- **Pendiente / siguientes pasos** (no incluidos): que el alumno descargue su constancia (URL firmada propia, con bitácora RF-19); mostrar el origen en `ConsentimientoPanel`/`PlantillaFacialPanel` del administrador;
+  límite de tasa de `POST /api/yo/plantilla/verificar` (hoy solo lo frena el tope diario de registros y el consentimiento); detección de vida en el registro; vencimiento: avisar al alumno antes de que caduque su consentimiento.
+- **Despliegue**: SQL (`0239_autoservicio_registro.sql`), después web; el servicio de reconocimiento no cambia. En modo local reinicia el Next o espera >60 s (caché del catálogo de funciones).

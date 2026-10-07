@@ -21,8 +21,8 @@ SELECT t.eq((SELECT count(*) FROM pg_proc WHERE pronamespace = 'public'::regname
     'una sola api_plantilla_registrar (sin overload ambiguo)');
 SELECT t.eq((SELECT pronargs::int FROM pg_proc WHERE pronamespace = 'public'::regnamespace AND proname = 'api_plantilla_registrar'), 5,
     'api_plantilla_registrar tiene 5 parametros (p_fotos es el ultimo)');
-SELECT t.eq((SELECT count(*) FROM pg_proc WHERE pronamespace = 'public'::regnamespace AND proname LIKE 'api\_%'), 72::bigint,
-    'el catalogo sigue en 72 api_* (ninguna RPC nueva)');
+SELECT t.eq((SELECT count(*) FROM pg_proc WHERE pronamespace = 'public'::regnamespace AND proname LIKE 'api\_%'), 76::bigint,
+    'el catalogo tiene 76 api_* (72 + las 4 api_mi_* del autoservicio, 0239)');
 SELECT t.ok(EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'trg_plantilla_foto_principal' AND NOT tgisinternal), 'existe el trigger de la foto principal');
 SELECT t.ok(NOT has_function_privilege('authenticated', 'app.trg_plantilla_foto_principal()', 'EXECUTE'), 'authenticated no ejecuta la funcion del trigger');
 SELECT t.ok(NOT has_function_privilege('anon', 'app.calidad_foto_valida(jsonb)', 'EXECUTE'), 'anon no ejecuta el validador');

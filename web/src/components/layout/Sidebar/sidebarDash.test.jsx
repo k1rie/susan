@@ -21,8 +21,14 @@ describe('agruparNav', () => {
         expect(grupos[0].items.map((i) => i.label)).toEqual(['Pasar lista']);
     });
     it('un rol con un solo ítem no tiene grupos; sin ítems no falla', () => {
-        expect(agruparNav(navParaRol('alumno')).grupos).toEqual([]);
+        expect(agruparNav(navParaRol('tecnico')).grupos).toEqual([]);
         expect(agruparNav([])).toEqual({ inicio: null, grupos: [] });
+    });
+    it('alumno: «Mi asistencia» es el inicio y «Mi registro facial» va en «Mi cuenta»', () => {
+        const { inicio, grupos } = agruparNav(navParaRol('alumno'));
+        expect(inicio.href).toBe('/alumno');
+        expect(grupos.map((g) => g.grupo)).toEqual(['Mi cuenta']);
+        expect(grupos[0].items.map((i) => i.label)).toEqual(['Mi registro facial']);
     });
 });
 

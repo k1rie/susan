@@ -182,3 +182,65 @@ export async function camarasEstado(args = {}, opts = {}) {
 export async function camaraCambiarEstatus(args = {}, opts = {}) {
     return callRpc('api_camara_cambiar_estatus', args, opts);
 }
+
+// ---- Autoservicio del alumno (migración 0239): ninguna recibe id_alumno, sale de la sesión ----
+
+/**
+ * api_mi_registro: Estado del registro biometrico del alumno de la sesion: consentimiento vigente, plantilla activa y el paso que sigue (consentimiento | rostro | listo). No recibe id_alumno: sale de la sesion.
+ * Roles: alumno
+ *
+ * @param {object} [args]
+ * @param {{ backend?: object }} [opts]
+ * @returns {Promise<object>} {"id_alumno":17,"matricula":"E20230045","nombre":"Ana Perez Lopez","estatus":"activo","hoy":"2026-10-07","ahora":"2026-10-07T09:12:41-06:00","puede_registrar":true,"consentimiento":{"id_consent":9,"fecha_firma":"2026-10-07","vigencia_hasta":"2027-10-07","dias_restantes":365,"origen":"alumno","version_aviso":"2026-10"}|null,"plantilla":{"id_plantilla":41,"id_consent":9,"fecha_registro":"...","indexada":true,"en_uso":true,"n_fotos":5,"origen":"alumno","consentimiento_vigente":true}|null,"completo":true,"paso":"listo","vigencia_meses":12,"vigencia_prevista":"2027-10-07","registros_24h":1,"limite_registros_24h":5}
+ * @throws {ApiError} NO_AUTENTICADO, CUENTA_INACTIVA, NO_AUTORIZADO (no es alumno), CUENTA_NO_VINCULADA
+ */
+export async function miRegistro(args = {}, opts = {}) {
+    return callRpc('api_mi_registro', args, opts);
+}
+
+/**
+ * api_mi_consentimiento_aceptar: El alumno de la sesion acepta el aviso de privacidad biometrico: registra su consentimiento (firma hoy, vigencia 12 meses) con la constancia PDF ya subida, y lo asienta en bitacora. No recibe id_alumno.
+ * Roles: alumno
+ *
+ * @param {object} [args]
+ * @param {string} args.objetoDocumento p_objeto_documento text.
+ * @param {string} args.versionAviso p_version_aviso text.
+ * @param {string} [args.ip] p_ip inet (def. NULL).
+ * @param {{ backend?: object }} [opts]
+ * @returns {Promise<object>} {"id_consent":9,"id_alumno":17,"fecha_firma":"2026-10-07","vigencia_hasta":"2027-10-07","estatus":"vigente","vigente":true,"origen":"alumno","version_aviso":"2026-10"}
+ * @throws {ApiError} NO_AUTORIZADO (no es alumno), CUENTA_NO_VINCULADA, ALUMNO_INACTIVO, VALIDACION (version), RUTA_INVALIDA, CONSENTIMIENTO_YA_VIGENTE
+ */
+export async function miConsentimientoAceptar(args = {}, opts = {}) {
+    return callRpc('api_mi_consentimiento_aceptar', args, opts);
+}
+
+/**
+ * api_mi_consentimiento_revocar: El alumno de la sesion revoca su consentimiento vigente y se archivan sus plantillas activas (pase manual). Asienta revocacion_consentimiento. No recibe id_alumno.
+ * Roles: alumno
+ *
+ * @param {object} [args]
+ * @param {string} [args.ip] p_ip inet (def. NULL).
+ * @param {{ backend?: object }} [opts]
+ * @returns {Promise<object>} {"id_alumno":17,"consentimientos_revocados":1,"plantillas_archivadas":1,"requiere_reconstruccion":true}
+ * @throws {ApiError} NO_AUTORIZADO (no es alumno), CUENTA_NO_VINCULADA, RN_13_CONSENTIMIENTO_NO_VIGENTE (no hay uno vigente)
+ */
+export async function miConsentimientoRevocar(args = {}, opts = {}) {
+    return callRpc('api_mi_consentimiento_revocar', args, opts);
+}
+
+/**
+ * api_mi_plantilla_registrar: El alumno de la sesion registra su propia plantilla facial (RN-12/RN-13): igual que api_plantilla_registrar pero sin id_alumno (sale de la sesion), con origen alumno y un maximo de 5 registros por 24 h.
+ * Roles: alumno
+ *
+ * @param {object} [args]
+ * @param {number} args.idConsent p_id_consent integer.
+ * @param {string} args.objetoFoto p_objeto_foto text.
+ * @param {string} [args.ip] p_ip inet (def. NULL).
+ * @param {object[]} [args.fotos] p_fotos jsonb (def. NULL).
+ * @param {{ backend?: object }} [opts]
+ * @returns {Promise<object>} {"id_plantilla":41,"id_alumno":17,"id_consent":9,"activa":true,"indexada":false,"plantilla_archivada":33,"fecha_registro":"2026-10-07T09:12:41-06:00","requiere_reconstruccion":true,"n_fotos":5}
+ * @throws {ApiError} NO_AUTORIZADO (no es alumno), CUENTA_NO_VINCULADA, AUTOREGISTRO_LIMITE, ALUMNO_INACTIVO, VALIDACION, RUTA_INVALIDA, RN_13_CONSENTIMIENTO_AJENO, RN_13_CONSENTIMIENTO_NO_VIGENTE
+ */
+export async function miPlantillaRegistrar(args = {}, opts = {}) {
+    return callRpc('api_mi_plantilla_registrar', args, opts);
+}
