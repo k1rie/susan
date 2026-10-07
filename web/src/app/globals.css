@@ -409,6 +409,26 @@
   }
 }
 
+/* Registro facial guiado: las marcas del aro se encienden en cascada y la flecha de la pose «empuja» hacia donde hay que girar. */
+@keyframes registro-marca-entra {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes registro-guia-empuja {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(var(--guia-x, 0), var(--guia-y, 0), 0);
+  }
+}
+
 /* iOS hace auto-zoom al enfocar campos con font-size < 16px (patrón MVP-FITNESS). */
 @media (max-width: 768px) {
   input,

@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { ScanFace } from 'lucide-react';
+import { useState } from 'react';
 import Alert from '@/components/ui/Alert';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
@@ -8,30 +9,21 @@ import DataState from '@/components/ui/DataState';
 import Detalles from '@/components/ui/Detalles';
 import { useToast } from '@/components/ui/Toast';
 import { solicitarUrlDocumento } from '@/lib/http/biometria.js';
-import CalidadFotoResumen from '../CalidadFotoResumen';
-import CapturaGuiadaPlantilla from '../CapturaGuiadaPlantilla';
-import { numerarTomas } from '../CapturaGuiadaPlantilla/capturaGuiada.utils.js';
-import SubidaFotosPlantilla from '../SubidaFotosPlantilla';
-import { esServicioNoDisponible, mensajeErrorPlantilla, resultadoDeToma, textoContador, textoFotos } from './plantillaFacial.utils.js';
+import RegistroFacialGuiado from '../RegistroFacialGuiado';
+import { textoFotos } from './plantillaFacial.utils.js';
 import usePlantillaFacial from './usePlantillaFacial.js';
 
 const dec = (n) => (typeof n === 'number' ? n.toFixed(2) : '-');
 
 // Plantilla facial (RN-12/RN-13): solo con consentimiento vigente. Se arma con 3 a 8 tomas del mismo alumno
 // (5 guiadas por defecto) cuyos vectores el servicio promedia en uno solo; cada toma se verifica antes de registrar.
-export default function PlantillaFacialPanel({ idAlumno, version = 0, onCambio }) {
+// La tarjeta solo muestra el estado de la plantilla; la captura vive en el asistente paso a paso (RegistroFacialGuiado).
+export default function PlantillaFacialPanel({ idAlumno, nombreAlumno, version = 0, onCambio }) {
     const p = usePlantillaFacial({ idAlumno, version, onCambio });
     const { toast } = useToast();
     const [enlaceFoto, setEnlaceFoto] = useState(null);
     const [enlacesPorFoto, setEnlacesPorFoto] = useState({});
-    const botonRef = useRef(null);
-    const [pedirFoco, setPedirFoco] = useState(0);
-
-    // Tras repetir o quitar el botón de la toma desaparece: el foco pasa al botón de captura. Se hace en un
-    // efecto porque ese botón puede estar deshabilitado hasta que se pinte el estado nuevo.
-    useEffect(() => {
-        if (pedirFoco > 0) botonRef.current?.focus();
-    }, [pedirFoco]);
+    const [asistenteAbierto, setAsistenteAbierto] = useState(false);
 
     const cargando = p.consentimientos.loading || p.plantilla.loading;
     const error = p.consentimientos.error || p.plantilla.error;
@@ -55,29 +47,10 @@ export default function PlantillaFacialPanel({ idAlumno, version = 0, onCambio }
     const verFoto = () => abrir({ tipo: 'plantilla', idRegistro: p.activa?.id_plantilla }, setEnlaceFoto);
     const verFotoN = (f) => abrir({ tipo: 'plantilla_foto', idRegistro: f.id_foto }, (url) => setEnlacesPorFoto((m) => ({ ...m, [f.id_foto]: url })));
 
-    const enviando = p.envio.cargando;
-    const total = p.tomas.length;
-    const marcadas = p.tomas.filter((t) => t.estado !== 'aceptada' && t.estado !== 'verificando').length;
-    const resultado = p.verificacion.resultado;
-    const numeros = numerarTomas(p.tomas, p.modo);
-    const detallesCalidad = p.ordenadas.filter((t) => t.estado !== 'verificando');
     const nFotosActiva = p.activa?.n_fotos ?? 1;
     // Las fotos de registro se borran al indexarse (extensión 18). Sin la clave (servidor anterior) se asume que existen.
     const fotoDisponible = p.activa?.foto_disponible !== false;
     const hayFotosSueltas = (p.activa?.fotos ?? []).some((f) => f.disponible !== false);
-    // Los textos de botón deben caber en ~286 px (360 px de pantalla): ui/Button no parte líneas (whitespace-nowrap).
-    // Lo que no cabe va en una nota de texto plano justo debajo, nunca en la etiqueta.
-    const textoRegistrar = p.activa ? 'Reemplazar plantilla' : `Registrar plantilla con ${textoFotos(total)}`;
-
-    const alQuitar = (id) => {
-        p.quitarToma(id);
-        setPedirFoco((n) => n + 1);
-    };
-    const alRepetir = (id) => {
-        p.repetirToma(id);
-        setPedirFoco((n) => n + 1);
-    };
-
     return (
         <Card title="Plantilla facial">
             <DataState loading={cargando} error={error} data={datos} onRetry={reintentar} isEmpty={() => false}>
@@ -149,130 +122,28 @@ export default function PlantillaFacialPanel({ idAlumno, version = 0, onCambio }
                             )}
                         </section>
 
-                        {p.registro && <ResultadoRegistro registro={p.registro} />}
+                        {/* Con el registro exitoso ya dicho por el asistente, la tarjeta solo avisa de lo que requiere atención o sigue en curso. */}
+                        {p.registro && !asistenteAbierto && (p.registro.indice !== 'lista' || p.registro.descartadas > 0) && <ResultadoRegistro registro={p.registro} />}
 
                         {!p.vigente ? (
                             <Alert tone="warning">Registre un consentimiento vigente para habilitar la captura.</Alert>
                         ) : (
-                            <div className="flex flex-col gap-3">
-                                <Detalles titulo="¿Por qué varias fotos?">
-                                    <p className="text-sm">SUSAN promedia las fotos para reconocer mejor con distintos ángulos y luz.</p>
-                                </Detalles>
-
-                                <div className="flex flex-wrap gap-2" role="group" aria-label="Origen de las fotos">
-                                    <Button variant={p.modo === 'camara' ? 'primary' : 'secondary'} size="sm" aria-pressed={p.modo === 'camara'} onClick={() => p.setModo('camara')} disabled={enviando}>
-                                        Usar cámara
-                                    </Button>
-                                    <Button variant={p.modo === 'archivo' ? 'primary' : 'secondary'} size="sm" aria-pressed={p.modo === 'archivo'} onClick={() => p.setModo('archivo')} disabled={enviando}>
-                                        Subir fotos
+                            <div className="flex flex-col gap-2">
+                                <div>
+                                    <Button icon={<ScanFace aria-hidden="true" className="size-4" strokeWidth={1.75} />} onClick={() => setAsistenteAbierto(true)}>
+                                        {p.activa ? 'Registrar el rostro de nuevo' : 'Registrar rostro'}
                                     </Button>
                                 </div>
-
-                                {p.modo === 'camara' ? (
-                                    <CapturaGuiadaPlantilla
-                                        tomas={p.tomas}
-                                        minimo={p.minimo}
-                                        maximo={p.maximo}
-                                        deshabilitado={enviando}
-                                        onCapturar={(blob, paso) => p.agregarToma(blob, 'camara', { paso })}
-                                        onRepetir={alRepetir}
-                                        onQuitar={alQuitar}
-                                        botonRef={botonRef}
-                                    />
-                                ) : (
-                                    <SubidaFotosPlantilla
-                                        tomas={p.tomas}
-                                        minimo={p.minimo}
-                                        maximo={p.maximo}
-                                        deshabilitado={enviando}
-                                        onAgregar={(blob, { nombre }) => p.agregarToma(blob, 'archivo', { nombre })}
-                                        onQuitar={alQuitar}
-                                        botonRef={botonRef}
-                                    />
-                                )}
-
-                                <p className="text-sm">{textoContador({ total, aceptadas: p.aceptadas, marcadas, minimo: p.minimo })}</p>
-                                <div role="status" aria-live="polite" className="sr-only">
-                                    {p.anuncio} {textoContador({ total, aceptadas: p.aceptadas, marcadas, minimo: p.minimo })}
-                                </div>
-
-                                {p.verificacion.error && (
-                                    <Alert tone="danger" title="No se pudieron verificar las fotos">
-                                        {mensajeErrorPlantilla(p.verificacion.error)}
-                                        <div className="mt-2">
-                                            <Button variant="secondary" size="sm" onClick={p.verificacion.reintentar}>
-                                                Reintentar verificación
-                                            </Button>
-                                        </div>
-                                    </Alert>
-                                )}
-                                {resultado?.ambiguo && (
-                                    <Alert tone="warning">Las tomas no coinciden entre sí. Revisa que todas sean del mismo alumno.</Alert>
-                                )}
-                                {resultado?.advertencias?.includes('DIVERSIDAD_BAJA') && (
-                                    <Alert tone="info">Las tomas son casi idénticas; varía el ángulo, la expresión o la luz.</Alert>
-                                )}
-
-                                {detallesCalidad.length > 0 && (
-                                    <Detalles titulo="Ver detalles de calidad">
-                                        <div className="flex flex-col gap-4">
-                                            {detallesCalidad.map((t) => (
-                                                <CalidadFotoResumen
-                                                    key={t.id}
-                                                    resultado={resultadoDeToma(t)}
-                                                    titulo={`Toma ${numeros.get(t.id)}`}
-                                                    guiada={t.origen === 'camara'}
-                                                />
-                                            ))}
-                                        </div>
-                                    </Detalles>
-                                )}
-
-                                {p.envio.error && (
-                                    <Alert tone="danger" title="No se pudo registrar la plantilla">
-                                        {mensajeErrorPlantilla(p.envio.error)}
-                                        {esServicioNoDisponible(p.envio.error) && (
-                                            <div className="mt-2">
-                                                <Button variant="secondary" size="sm" onClick={p.reintentarEnvio}>
-                                                    Reintentar
-                                                </Button>
-                                            </div>
-                                        )}
-                                    </Alert>
-                                )}
-
-                                {enviando && (
-                                    <p role="status" className="text-sm text-muted-foreground">
-                                        Subiendo {textoFotos(total)} y actualizando el índice. Puede tardar un minuto; no cierres esta ventana.
-                                    </p>
-                                )}
-
-                                <div className="flex flex-wrap gap-2">
-                                    <Button onClick={p.registrar} disabled={!p.puedeRegistrar} loading={enviando}>
-                                        {textoRegistrar}
-                                    </Button>
-                                    {p.puedeRegistrarUna && (
-                                        <Button variant="ghost" onClick={p.registrarUna} disabled={enviando}>
-                                            Registrar con una sola foto
-                                        </Button>
-                                    )}
-                                    {total > 0 && (
-                                        <Button variant="ghost" onClick={p.limpiar} disabled={enviando}>
-                                            Quitar todas las tomas
-                                        </Button>
-                                    )}
-                                </div>
-                                {(p.activa || p.puedeRegistrarUna) && (
-                                    <p className="text-xs text-muted-foreground break-words">
-                                        {p.activa && 'La plantilla anterior se archivará al reemplazarla. '}
-                                        {p.puedeRegistrarUna && 'Registrar con una sola foto es menos preciso que usar de 3 a 8 tomas.'}
-                                    </p>
-                                )}
+                                <p className="text-xs text-muted-foreground">
+                                    Asistente paso a paso: 5 tomas con la cámara, o de {p.minimo} a {p.maximo} fotos subidas.
+                                    {p.activa && ' La plantilla anterior se archivará al reemplazarla.'}
+                                </p>
                             </div>
                         )}
                     </div>
                 )}
             </DataState>
+            {asistenteAbierto && <RegistroFacialGuiado p={p} nombreAlumno={nombreAlumno} onClose={() => setAsistenteAbierto(false)} />}
         </Card>
     );
 }

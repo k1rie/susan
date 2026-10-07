@@ -64,6 +64,13 @@ export const consentimientoCampos = z.object({
     path: ['vigencia_hasta'],
 });
 
+// Aceptación del aviso por el propio alumno (no lleva id_alumno: sale de la sesión). `acepto` debe ser true: la casilla es
+// la manifestación de voluntad; `version_aviso` ata la aceptación al texto que la pantalla le mostró.
+export const aceptarAvisoCuerpo = z.object({
+    version_aviso: z.string().min(1).max(20),
+    acepto: z.boolean().refine((v) => v === true, 'Marca la declaración para continuar.'),
+}).strict();
+
 export const indiceQuery = z.object({
     limit: z.preprocess((v) => (typeof v === 'string' && /^\d{1,3}$/.test(v) ? Number(v) : v),
         z.number().int().min(1).max(200)).optional().default(10),

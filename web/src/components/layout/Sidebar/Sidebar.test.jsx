@@ -10,7 +10,7 @@ describe('navegación por rol', () => {
         expect(navParaRol('administrador')).toHaveLength(11);
         // «Pasar lista» va justo después del Panel (la acción diaria del docente no se esconde en un grupo)
         expect(navParaRol('docente').map((i) => i.href)).toEqual(['/docente', '/docente/pasar-lista', '/docente/revision', '/reportes', '/analitica']);
-        expect(navParaRol('alumno').map((i) => i.href)).toEqual(['/alumno']);
+        expect(navParaRol('alumno').map((i) => i.href)).toEqual(['/alumno', '/alumno/registro']);
         expect(navParaRol('tecnico').map((i) => i.label)).toEqual(['Consola técnica']);
         expect(navParaRol('otro')).toEqual([]);
         for (const items of Object.values(NAV_POR_ROL)) for (const i of items) expect(i.icon).toBeTruthy();

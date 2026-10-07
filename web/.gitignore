@@ -21,6 +21,9 @@
 # production
 /build
 
+# WASM de MediaPipe: se copian de node_modules en postinstall (scripts/copiar-mediapipe.mjs)
+/public/mediapipe/wasm/
+
 # misc
 .DS_Store
 *.pem
