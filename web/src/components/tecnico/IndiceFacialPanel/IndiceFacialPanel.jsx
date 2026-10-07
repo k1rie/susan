@@ -28,6 +28,15 @@ export default function IndiceFacialPanel({ soloLectura = false }) {
     const { q, enCurso, resultado, cerrarResultado, reconstruir, sincronizar } = useIndiceFacial();
     const [abierto, setAbierto] = useState(false);
     const [completa, setCompleta] = useState(false);
+    // Con la dimensión del índice distinta de la configurada una reconstrucción parcial no sirve (el aviso de la tarjeta la pide completa):
+    // la casilla ya sale marcada y lo explica.
+    const dimensionNoCoincide = q.data?.dimension_coincide === false;
+    const plantillasActivas = q.data?.plantillas?.activas;
+
+    const abrirReconstruccion = () => {
+        setCompleta(dimensionNoCoincide);
+        setAbierto(true);
+    };
 
     // El diálogo queda abierto (con Spinner) mientras corre; ConfirmDialog ya deshabilita sus botones.
     const confirmar = async () => {
@@ -83,7 +92,8 @@ export default function IndiceFacialPanel({ soloLectura = false }) {
                                         </Badge>
                                         {!soloLectura && (
                                             <>
-                                                <Button disabled={enCurso} loading={enCurso} onClick={() => setAbierto(true)}>Reconstruir índice</Button>
+                                                {/* Con el índice al día, reconstruir es mantenimiento, no la siguiente tarea: no compite como acción primaria. */}
+                                                <Button variant={d.requiere_reconstruccion ? 'primary' : 'secondary'} disabled={enCurso} loading={enCurso} onClick={abrirReconstruccion}>Reconstruir índice</Button>
                                                 {servicio?.disponible && d.sincronizado === false && (
                                                     <Button variant="secondary" disabled={enCurso} onClick={sincronizar}>Sincronizar servicio</Button>
                                                 )}
@@ -152,7 +162,7 @@ export default function IndiceFacialPanel({ soloLectura = false }) {
             <ConfirmDialog
                 open={abierto}
                 title="Reconstruir índice facial"
-                message="Se construirá una nueva versión con las plantillas activas y se activará al terminar. Puede tardar varios minutos."
+                message={`Se construirá una nueva versión con ${plantillasActivas != null ? `las ${plantillasActivas} plantillas activas` : 'las plantillas activas'} y se activará al terminar. El pase de lista sigue con la versión actual mientras tanto. Puede tardar varios minutos.`}
                 confirmLabel={enCurso ? 'Reconstruyendo...' : 'Reconstruir'}
                 onConfirm={confirmar}
                 onCancel={() => !enCurso && setAbierto(false)}
@@ -160,6 +170,7 @@ export default function IndiceFacialPanel({ soloLectura = false }) {
                 <Checkbox
                     className="mt-3"
                     label="Reconstrucción completa (reprocesa todas las fotos; tarda más)"
+                    hint={dimensionNoCoincide ? 'Recomendada ahora: la dimensión del índice no coincide con la configurada.' : 'Solo hace falta si cambió el modelo o la dimensión del vector.'}
                     checked={completa}
                     disabled={enCurso}
                     onChange={(e) => setCompleta(e.target.checked)}
