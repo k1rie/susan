@@ -120,6 +120,53 @@ describe('reconocer', () => {
     });
 });
 
+describe('vivacidad (detección de vida) en reconocer', () => {
+    const rostro = (extra) => ({ ...RESPUESTA_OK.faces[0], ...extra });
+
+    it('conserva el veredicto de vida cuando el servicio lo manda', async () => {
+        const vivacidad = { estado: 'ok', es_viva: false, puntaje: 0.12 };
+        vi.stubGlobal('fetch', vi.fn(async () => jsonRes({ ...RESPUESTA_OK, faces: [rostro({ vivacidad })] })));
+        const r = await reconocer({ imagen: imagen(), allowedFaissIds: [1001], cropPrefix: 'recortes/1/2-3/' });
+        expect(r.faces[0].vivacidad).toEqual(vivacidad);
+    });
+
+    it('omitida: es_viva y puntaje llegan como null (no se evaluó)', async () => {
+        vi.stubGlobal('fetch', vi.fn(async () => jsonRes({ ...RESPUESTA_OK, faces: [rostro({ vivacidad: { estado: 'omitida', es_viva: null, puntaje: null } })] })));
+        const r = await reconocer({ imagen: imagen(), allowedFaissIds: [1001], cropPrefix: 'recortes/1/2-3/' });
+        expect(r.faces[0].vivacidad).toEqual({ estado: 'omitida', es_viva: null, puntaje: null });
+    });
+
+    it('sin la clave (embedder fake, LIVENESS=off o servicio anterior) queda null y nada falla', async () => {
+        vi.stubGlobal('fetch', vi.fn(async () => jsonRes(RESPUESTA_OK)));
+        const r = await reconocer({ imagen: imagen(), allowedFaissIds: [1001], cropPrefix: 'recortes/1/2-3/' });
+        expect(r.faces[0].vivacidad).toBeNull();
+    });
+});
+
+describe('pose en la verificación de una foto', () => {
+    const base = { rostros: 1, un_solo_rostro: true, motivo_rechazo: null, motivo_codigo: null };
+    const MEDIDAS = { brillo: 120, nitidez: 80, tamano_rostro_px: 150, frontal: true };
+
+    it('conserva la pose con signo cuando el servicio la manda', async () => {
+        const pose = { cabeceo: 3, giro: -21.3, alabeo: 7 };
+        vi.stubGlobal('fetch', vi.fn(async () => jsonRes({ ...base, calidad: { ...MEDIDAS, pose } })));
+        const r = await verificarFotoServicio(imagen());
+        expect(r.calidad.pose).toEqual(pose);
+    });
+
+    it('sin pose (embedder fake o servicio anterior) la clave no aparece', async () => {
+        vi.stubGlobal('fetch', vi.fn(async () => jsonRes({ ...base, calidad: MEDIDAS })));
+        const r = await verificarFotoServicio(imagen());
+        expect(r.calidad).toEqual(MEDIDAS);
+        expect('pose' in r.calidad).toBe(false);
+    });
+
+    it('rechaza una pose mal formada en vez de pasarla a la pantalla', async () => {
+        vi.stubGlobal('fetch', vi.fn(async () => jsonRes({ ...base, calidad: { ...MEDIDAS, pose: { giro: 'x' } } })));
+        await expect(verificarFotoServicio(imagen())).rejects.toMatchObject({ code: 'SERVICIO_RECONOCIMIENTO_ERROR' });
+    });
+});
+
 describe('otros endpoints', () => {
     it('photo check, build, activate, info y manifest devuelven la forma validada', async () => {
         const respuestas = {

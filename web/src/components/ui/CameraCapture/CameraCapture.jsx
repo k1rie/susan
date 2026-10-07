@@ -4,6 +4,7 @@ import clsx from 'clsx';
 import { useEffect, useImperativeHandle, useRef, useState } from 'react';
 import Alert from '../Alert/Alert.jsx';
 import Button from '../Button/Button.jsx';
+import DeteccionRostros from '../DeteccionRostros/DeteccionRostros.jsx';
 import Select from '../Select/Select.jsx';
 import Spinner from '../Spinner/Spinner.jsx';
 import { periodoCaptura } from './cameraCapture.utils.js';
@@ -12,6 +13,8 @@ import useCameraCapture from './useCameraCapture.js';
 // Captura de cámara: vista previa, foto única (botón o ref.capture()) y captura continua opcional.
 // En continuo se invoca onFrame (o, si no existe, onCapture) y el siguiente disparo espera a que
 // termine la promesa anterior, para no acumular trabajo (RNF-01).
+// detectarRostros = dibuja un recuadro sobre cada rostro que se ve (detector en el navegador, solo retroalimentación visual) y avisa con
+// onDeteccion({ estado, cantidad }) cuando cambia el estado del detector o el número de rostros.
 export default function CameraCapture({
     onCapture,
     onFrame,
@@ -20,6 +23,8 @@ export default function CameraCapture({
     intervalMs,
     active = true,
     ovalGuide = false,
+    detectarRostros = false,
+    onDeteccion,
     showShutter,
     quality = 0.9,
     maxWidth = 1280,
@@ -35,7 +40,9 @@ export default function CameraCapture({
     const [deviceInterno, setDeviceInterno] = useState(undefined);
     const dispositivoActivo = deviceId ?? deviceInterno;
     const continuo = intervalMs != null;
-    const espejo = mirrored ?? facingMode === 'user';
+    // Siempre en espejo (también con la cámara trasera): el docente se orienta mejor viendo la vista como un reflejo. Es solo visual,
+    // el fotograma que se captura y se envía al servidor va sin espejar (ver useCameraCapture).
+    const espejo = mirrored ?? true;
     const mostrarObturador = showShutter ?? !continuo;
 
     const { videoRef, capture, restart, estado, error: errorCamara, dispositivos } = useCameraCapture({ active, facingMode, deviceId: dispositivoActivo, maxWidth, maxHeight, quality, onReady, onError });
@@ -102,6 +109,7 @@ export default function CameraCapture({
                     aria-label="Vista previa de la cámara"
                     className={clsx('h-full w-full object-cover', espejo && '-scale-x-100')}
                 />
+                {detectarRostros && <DeteccionRostros videoRef={videoRef} activo={active && estado === 'ready'} espejo={espejo} onCambio={onDeteccion} />}
                 {estado === 'starting' && (
                     <div className="absolute inset-0 flex items-center justify-center text-primary-foreground">
                         <Spinner label="Iniciando cámara" />

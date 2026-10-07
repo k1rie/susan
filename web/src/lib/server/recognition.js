@@ -137,6 +137,17 @@ const esquemaRostro = z.object({
     det_score: z.number(),
     candidate: z.object({ faiss_id: z.number().int(), score: z.number() }).nullable().optional().transform((v) => v ?? null),
     objeto_recorte: z.string().nullable().optional().transform((v) => v ?? null),
+    // Detección de vida (anti-spoofing pasivo), solo informativa y aditiva: ausente con el embedder fake, con LIVENESS=off o con un
+    // servicio anterior. `es_viva`/`puntaje` son null si no se evaluó (rostro pequeño, error del addon).
+    vivacidad: z
+        .object({
+            estado: z.string(),
+            es_viva: z.boolean().nullable().optional().transform((v) => v ?? null),
+            puntaje: z.number().nullable().optional().transform((v) => v ?? null),
+        })
+        .nullable()
+        .optional()
+        .transform((v) => v ?? null),
 });
 const esquemaReconocer = z.object({
     index_version: z.string().nullable().optional().transform((v) => v ?? null),
@@ -144,11 +155,15 @@ const esquemaReconocer = z.object({
     image: z.object({ width: z.number(), height: z.number() }),
     faces: z.array(esquemaRostro),
 });
+// Pose del rostro mayor en grados CON SIGNO (modelo de landmarks 3D), solo en /v1/photo/check y solo con el embedder real:
+// ausente (o null) con el embedder fake, en /check-set o con un servicio anterior. Es aditiva: nada la exige.
+const esquemaPose = z.object({ cabeceo: z.number(), giro: z.number(), alabeo: z.number() });
 const esquemaMedidasCalidad = z.object({
     brillo: z.number(),
     nitidez: z.number(),
     tamano_rostro_px: z.number(),
     frontal: z.boolean(),
+    pose: esquemaPose.nullable().optional(),
 });
 // `motivo_rechazo` es la frase del servicio (puede cambiar); `motivo_codigo` es el identificador estable que usa
 // la pantalla para decidir el texto. Un servicio anterior a esta mejora no lo manda: queda en null.

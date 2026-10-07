@@ -3,9 +3,13 @@ import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import CameraCapture from './CameraCapture.jsx';
+import { cargarDetector } from '../DeteccionRostros/detectorRostros.js';
 import { crearError, dimensionesCaptura, periodoCaptura, traducirError } from './cameraCapture.utils.js';
 
 // getUserMedia simulado: devuelve un flujo con una sola pista de video que se puede espiar.
+// El detector de rostros (MediaPipe) no corre en jsdom: se reemplaza por uno que no ve a nadie.
+vi.mock('../DeteccionRostros/detectorRostros.js', () => ({ cargarDetector: vi.fn() }));
+
 function flujoFalso() {
     const pista = { stop: vi.fn(), getSettings: () => ({ deviceId: 'cam-1' }) };
     return { pista, stream: { getTracks: () => [pista], getVideoTracks: () => [pista] } };
@@ -96,5 +100,38 @@ describe('CameraCapture', () => {
         await waitFor(() => expect(onFrame).toHaveBeenCalledTimes(1), { timeout: 3000 });
         expect(onFrame.mock.calls[0][0]).toBeInstanceOf(Blob);
         await act(async () => {});
+    });
+
+    it('la vista previa va siempre en espejo, también con la cámara trasera, pero la foto capturada no se voltea', async () => {
+        const { stream } = flujoFalso();
+        prepararNavegador(vi.fn().mockResolvedValue(stream));
+        const dibujar = vi.fn();
+        HTMLCanvasElement.prototype.getContext = vi.fn(() => ({ drawImage: dibujar, scale: vi.fn(), translate: vi.fn() }));
+        const { rerender } = render(<CameraCapture facingMode="environment" onCapture={vi.fn()} />);
+        const video = screen.getByLabelText('Vista previa de la cámara');
+        expect(video).toHaveClass('-scale-x-100');
+        rerender(<CameraCapture facingMode="user" onCapture={vi.fn()} />);
+        expect(video).toHaveClass('-scale-x-100');
+        // Quien lo pida expresamente puede quitarlo.
+        rerender(<CameraCapture mirrored={false} onCapture={vi.fn()} />);
+        expect(video).not.toHaveClass('-scale-x-100');
+        await act(async () => {});
+    });
+
+    it('con detectarRostros carga el detector solo cuando la cámara ya entrega imagen; sin él, nunca', async () => {
+        const { stream } = flujoFalso();
+        prepararNavegador(vi.fn().mockResolvedValue(stream));
+        cargarDetector.mockResolvedValue({ detectForVideo: vi.fn(() => ({ detections: [] })) });
+        const onDeteccion = vi.fn();
+        const { unmount } = render(<CameraCapture detectarRostros onDeteccion={onDeteccion} showShutter={false} />);
+        expect(cargarDetector).not.toHaveBeenCalled();
+        await waitFor(() => expect(cargarDetector).toHaveBeenCalled());
+        await waitFor(() => expect(onDeteccion).toHaveBeenLastCalledWith({ estado: 'listo', cantidad: 0 }));
+        unmount();
+
+        cargarDetector.mockClear();
+        render(<CameraCapture showShutter={false} />);
+        await act(async () => {});
+        expect(cargarDetector).not.toHaveBeenCalled();
     });
 });
