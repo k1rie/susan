@@ -37,4 +37,27 @@ describe('Table', () => {
         expect(screen.getByRole('status')).toBeInTheDocument();
         expect(screen.queryByText('Sin resultados')).toBeNull();
     });
+
+    it.each([
+        ['sm', 'hidden', 'sm:table-cell'],
+        ['md', 'hidden', 'md:table-cell'],
+        ['lg', 'hidden', 'lg:table-cell'],
+        ['xl', 'hidden', 'xl:table-cell'],
+    ])('hideBelow="%s" oculta la columna (encabezado y celdas) por debajo de ese ancho', (corte, oculta, visible) => {
+        render(
+            <Table
+                columns={[{ key: 'nombre', header: 'Nombre' }, { key: 'extra', header: 'Extra', hideBelow: corte }]}
+                rows={[{ id: 1, nombre: 'Ana', extra: 'dato' }]}
+            />,
+        );
+        for (const nodo of [screen.getByRole('columnheader', { name: 'Extra' }), screen.getByText('dato')]) {
+            expect(nodo).toHaveClass(oculta, visible);
+        }
+        expect(screen.getByText('Ana')).not.toHaveClass('hidden');
+    });
+
+    it('un hideBelow desconocido no agrega clases (no rompe)', () => {
+        render(<Table columns={[{ key: 'a', header: 'A', hideBelow: '2xl' }]} rows={[{ id: 1, a: 'x' }]} />);
+        expect(screen.getByText('x')).not.toHaveClass('hidden');
+    });
 });

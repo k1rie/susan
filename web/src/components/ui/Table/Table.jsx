@@ -3,12 +3,20 @@ import { ArrowDown, ArrowUp } from 'lucide-react';
 import Spinner from '../Spinner/Spinner.jsx';
 
 const ALINEACION = { left: 'text-left', right: 'text-right', center: 'text-center' };
-const OCULTAR = { sm: 'hidden sm:table-cell', md: 'hidden md:table-cell' };
+// Clases completas y estáticas (no interpoladas) para que el compilador de Tailwind las vea. `lg` y `xl` sirven con el riel lateral, que le quita
+// ancho al contenido: las columnas secundarias caben mucho después que en una página sin riel.
+const OCULTAR = {
+    sm: 'hidden sm:table-cell',
+    md: 'hidden md:table-cell',
+    lg: 'hidden lg:table-cell',
+    xl: 'hidden xl:table-cell',
+};
 
 const clasesCelda = (col) => clsx(ALINEACION[col.align] || 'text-left', col.hideBelow && OCULTAR[col.hideBelow], col.className);
 
 // Tabla simple y semántica. En pantallas angostas el contenedor se desplaza en horizontal
-// (360 px); hideBelow oculta columnas secundarias. El orden lo hace el servidor (onSort solo notifica).
+// (360 px); hideBelow ('sm' | 'md' | 'lg' | 'xl') oculta columnas secundarias por debajo de ese ancho de pantalla. El orden lo hace el
+// servidor (onSort solo notifica).
 export default function Table({
     columns,
     rows = [],

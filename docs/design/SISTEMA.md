@@ -159,6 +159,21 @@ mueven el resto de la página. `SloshGauge` anima el `clip-path` de su líquido 
   `/bienvenida` (menú de cuenta): los tres últimos. El color del avatar se guarda por navegador (`localStorage`, sin datos sensibles); la contraseña va a Supabase Auth; el acuse de privacidad no sustituye al consentimiento firmado.
   No hay autorregistro: las cuentas las crea el administrador (spec).
 
+## Formularios
+
+Todo formulario o captura de datos es **guiado y dinámico**, con patrones vistos en Mobbin (referencias y URLs en
+[`formularios/referencias-flujos-guiados.md`](formularios/referencias-flujos-guiados.md) y
+[`formularios/referencias-campos-y-validacion.md`](formularios/referencias-campos-y-validacion.md)):
+
+- **Contenedor según la complejidad**: catálogos de un paso (aula, materia, docente, cámara) en `ui/PanelLateral` (pantalla completa en el teléfono); altas largas (alumno, grupo) en `ui/Asistente` de 3 pasos con revisión («Editar» por sección) y pantalla de éxito con 2–4 siguientes pasos (`ui/SuccessState`); importaciones en un `Modal` por pasos con `ui/Stepper`.
+- **Validación al salir del campo** (`hooks/ui/useFormulario`), foco al primer error, límites reales de la base en `lib/formularios` (`LIMITES`), errores del servidor pegados al campo que los causó y un solo aviso por error.
+- **Barra de acciones** (`ui/FormActions`) con «N cambios sin guardar» y el motivo visible cuando un botón está bloqueado; el aviso de salida (`useCambiosSinGuardar`) cubre recargar, cerrar, pestañas propias y los enlaces del riel y de la barra inferior.
+- **Selectores con búsqueda** (`ui/Combobox`, opciones de dos líneas) en lugar de `<select>` largos; `ui/SegmentedControl` para 2–4 opciones excluyentes (siempre texto + color); `ui/BarraFiltros` para búsqueda con retraso y chips de filtros activos.
+
+Contrato de cada pieza: [`formularios/PRIMITIVAS-campos.md`](formularios/PRIMITIVAS-campos.md) y [`formularios/PRIMITIVAS-contenedores.md`](formularios/PRIMITIVAS-contenedores.md).
+Qué cambió en cada pantalla (antes → después): `formularios/FRENTE-F2-acceso-y-consola.md`, `FRENTE-F3-alumnos.md`, `FRENTE-F4-catalogos.md`,
+`FRENTE-F5-grupos.md` y `FRENTE-F6-justificantes-y-pase-manual.md`. Auditoría de partida: [`formularios/auditoria.md`](formularios/auditoria.md).
+
 ## Qué NO cambia
 
 Lógica de negocio, RPC, contratos y rutas. El rediseño es solo capa de presentación (`components/`, `globals.css`, `app/**/layout|page` delgadas).
