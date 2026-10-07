@@ -23,7 +23,8 @@ const csp = [
     "font-src 'self' data:",
     "style-src 'self' 'unsafe-inline'",
     // Next inyecta scripts en linea (hidratacion). Endurecerlo con nonces desde proxy.js es una mejora futura documentada.
-    "script-src 'self' 'unsafe-inline'",
+    // 'wasm-unsafe-eval' solo permite compilar WebAssembly (no eval de JS): lo necesita el detector de rostros de MediaPipe (recuadros de la camara).
+    "script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'",
     `connect-src 'self'${supabase ? ` ${supabase}` : ''}`,
     "worker-src 'self' blob:",
     'upgrade-insecure-requests',
