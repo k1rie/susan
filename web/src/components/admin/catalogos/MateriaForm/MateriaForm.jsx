@@ -1,94 +1,98 @@
 'use client';
 
-import { useId, useState } from 'react';
-import Button from '@/components/ui/Button';
 import Field from '@/components/ui/Field';
+import FormSection from '@/components/ui/FormSection';
 import Input from '@/components/ui/Input';
-import Modal from '@/components/ui/Modal';
-import { useToast } from '@/components/ui/Toast';
 import { materiaGuardar } from '@/lib/api/admin.js';
-import { enteroEnRango, mensajeDeError } from '../comun.js';
+import { LIMITES, PATRONES } from '@/lib/formularios';
+import CampoNumerico from '../CampoNumerico';
+import PanelCatalogo from '../PanelCatalogo';
+import { useAltaCatalogo } from '../PanelCatalogo/useAltaCatalogo.js';
+import {
+    CREDITOS_MAX,
+    CREDITOS_MIN,
+    datosMateria,
+    errorDeCampoMateria,
+    HORAS_MAX,
+    HORAS_MIN,
+    INICIAL_MATERIA,
+    materiaInicial,
+    normalizarClaveMateria,
+    normalizarNombreMateria,
+    validarMateria,
+} from './materia.utils.js';
 
-/** Validación de conveniencia (la real es de la base): clave, nombre, créditos >= 0 y horas por semana 1-20. */
-export function validarMateria(v) {
-    const e = {};
-    if (!v.clave.trim()) e.clave = 'La clave es obligatoria.';
-    if (!v.nombre.trim()) e.nombre = 'El nombre es obligatorio.';
-    if (!enteroEnRango(v.creditos, 0, 99)) e.creditos = 'Escriba los créditos (entero de 0 a 99).';
-    if (!enteroEnRango(v.horas_semana, 1, 20)) e.horas_semana = 'Las horas por semana deben ser de 1 a 20.';
-    return e;
-}
-
-// Alta/edición de materia (RF-01).
+// Alta/edición de materia (RF-01) en panel lateral. Tras crear, el siguiente paso natural es un grupo con esa materia.
 export default function MateriaForm({ item, onClose, onGuardado }) {
-    const formId = useId();
-    const { toast } = useToast();
-    const [v, setV] = useState({
-        clave: item?.clave ?? '',
-        nombre: item?.nombre ?? '',
-        creditos: item?.creditos != null ? String(item.creditos) : '',
-        horas_semana: item?.horas_semana != null ? String(item.horas_semana) : '',
+    const editando = Boolean(item);
+    const { f, campo, formId, enviar, pedirOtro, exito, crearOtra } = useAltaCatalogo({
+        editando,
+        inicial: materiaInicial(item),
+        inicialOtra: () => INICIAL_MATERIA,
+        validar: validarMateria,
+        mapearError: errorDeCampoMateria,
+        guardar: (v) => materiaGuardar({ datos: datosMateria(v, item) }),
+        onGuardado,
+        onClose,
+        mensajeEditado: (r) => `Materia ${r.clave} actualizada`,
+        mensajeOtra: (r) => `Materia ${r.clave} creada`,
     });
-    const [errores, setErrores] = useState({});
-    const [guardando, setGuardando] = useState(false);
-    const cambiar = (c) => (e) => setV((p) => ({ ...p, [c]: e.target.value }));
 
-    const enviar = async (ev) => {
-        ev.preventDefault();
-        const e = validarMateria(v);
-        setErrores(e);
-        if (Object.keys(e).length) return;
-        setGuardando(true);
-        try {
-            const r = await materiaGuardar({
-                datos: {
-                    ...(item ? { id_materia: item.id_materia } : {}),
-                    clave: v.clave.trim(),
-                    nombre: v.nombre.trim(),
-                    creditos: Number(v.creditos),
-                    horas_semana: Number(v.horas_semana),
-                },
-            });
-            toast({ tone: 'success', title: item ? 'Materia actualizada' : 'Materia creada' });
-            onGuardado?.(r);
-        } catch (err) {
-            toast({ tone: 'danger', title: 'No se pudo guardar la materia', message: mensajeDeError(err) });
-        } finally {
-            setGuardando(false);
-        }
-    };
+    const clave = campo('clave');
+    const nombre = campo('nombre');
+    const creditos = campo('creditos');
+    const horas = campo('horas_semana');
+    // La palomita «Válido» solo sale en lo que la persona cambió: en la edición, lo ya guardado no necesita aprobación.
+    const claveValida = !clave.error && f.valores.clave !== (item?.clave ?? '') && PATRONES.materia_clave.test(normalizarClaveMateria(f.valores.clave));
 
     return (
-        <Modal
-            open
-            onClose={guardando ? undefined : onClose}
-            title={item ? 'Editar materia' : 'Nueva materia'}
-            closeOnOverlay={false}
-            footer={
-                <>
-                    <Button variant="secondary" onClick={onClose} disabled={guardando}>
-                        Cancelar
-                    </Button>
-                    <Button type="submit" form={formId} loading={guardando}>
-                        Guardar
-                    </Button>
-                </>
+        <PanelCatalogo
+            f={f}
+            formId={formId}
+            onEnviar={enviar}
+            onClose={onClose}
+            onOtra={pedirOtro}
+            editando={editando}
+            title={editando ? 'Editar materia' : 'Nueva materia'}
+            description={editando ? 'Cambia la clave, el nombre o la carga de la materia.' : 'Registra la materia con su clave, nombre y carga.'}
+            etiquetaCrear="Crear materia"
+            etiquetaOtra="Crear y agregar otra"
+            tituloError="No se pudo guardar la materia"
+            exito={
+                exito && {
+                    title: `Materia ${exito.clave} creada`,
+                    description: `${exito.nombre} · ${exito.creditos} ${exito.creditos === 1 ? 'crédito' : 'créditos'} · ${exito.horas_semana} h por semana.`,
+                    steps: [
+                        {
+                            label: 'Crear un grupo con esta materia',
+                            description: 'Elige docente, aula y periodo.',
+                            href: '/admin/grupos/nuevo',
+                            recommended: true,
+                        },
+                    ],
+                    actions: [
+                        { label: 'Crear otra materia', onClick: crearOtra },
+                        { label: 'Ir a la lista', onClick: onClose, variant: 'secondary' },
+                    ],
+                }
             }
         >
-            <form id={formId} onSubmit={enviar} noValidate className="grid gap-4 sm:grid-cols-2">
-                <Field label="Clave" required error={errores.clave}>
-                    <Input value={v.clave} onChange={cambiar('clave')} autoComplete="off" />
+            <FormSection title="Identificación">
+                <Field label="Clave" required error={clave.error} valid={claveValida} hint="Letras y dígitos, sin guiones." example="ADM101" reserveError>
+                    <Input {...clave.props} maxLength={LIMITES.materia_clave} showCount transform={normalizarClaveMateria} autoComplete="off" />
                 </Field>
-                <Field label="Nombre" required error={errores.nombre}>
-                    <Input value={v.nombre} onChange={cambiar('nombre')} autoComplete="off" />
+                <Field label="Nombre" required error={nombre.error} example="Administración I" counter={{ actual: f.valores.nombre.length, max: LIMITES.materia_nombre, desde: 0.8 }} reserveError>
+                    <Input {...nombre.props} maxLength={LIMITES.materia_nombre} transform={normalizarNombreMateria} autoComplete="off" />
                 </Field>
-                <Field label="Créditos" required error={errores.creditos}>
-                    <Input type="number" inputMode="numeric" min={0} max={99} value={v.creditos} onChange={cambiar('creditos')} />
+            </FormSection>
+            <FormSection title="Carga académica" columns={2}>
+                <Field label="Créditos" required error={creditos.error} hint="De 1 a 99; no puede ser 0." reserveError>
+                    <CampoNumerico {...creditos.props} min={CREDITOS_MIN} max={CREDITOS_MAX} maxDigitos={2} nombre="créditos" />
                 </Field>
-                <Field label="Horas por semana" required hint="De 1 a 20." error={errores.horas_semana}>
-                    <Input type="number" inputMode="numeric" min={1} max={20} value={v.horas_semana} onChange={cambiar('horas_semana')} />
+                <Field label="Horas por semana" required error={horas.error} hint="De 1 a 20 horas." reserveError>
+                    <CampoNumerico {...horas.props} min={HORAS_MIN} max={HORAS_MAX} maxDigitos={2} nombre="horas por semana" />
                 </Field>
-            </form>
-        </Modal>
+            </FormSection>
+        </PanelCatalogo>
     );
 }
