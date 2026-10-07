@@ -20,7 +20,7 @@ export async function reconstruirSinFallar(admin) {
     }
 }
 
-const comoBlob = (archivo) => new Blob([archivo.bytes], { type: archivo.contentType });
+export const comoBlob = (archivo) => new Blob([archivo.bytes], { type: archivo.contentType });
 
 /** Huella de los bytes: dos fotos con la misma huella son la misma toma subida dos veces. */
 const sha256 = (archivo) => createHash('sha256').update(archivo.bytes).digest('hex');
@@ -46,7 +46,7 @@ const errorValidacion = (campo, mensaje) => new ApiError({
  * `foto` (una sola, camino heredado) XOR `fotos` (1 a 8, repetido). Devuelve { foto, fotos }: exactamente uno viene
  * con valor. Ninguno o ambos es 422, no se adivina cuál quiso decir el cliente.
  */
-function fotosDeLaPeticion(form) {
+export function fotosDeLaPeticion(form) {
     const foto = form.archivos.foto ?? null;
     const fotos = form.archivos.fotos ?? [];
     if (foto && fotos.length > 0) throw errorValidacion('fotos', "Envía 'foto' o 'fotos', no ambos.");
@@ -80,7 +80,7 @@ async function exigirConsentimientoVigente(rpc, idAlumno, idConsent) {
  * primera ocurrencia) y la lista de índices únicos. Las copias exactas no se mandan al servicio: no aportan
  * identidad nueva y promediarlas solo daría más peso a una toma.
  */
-function agruparDuplicadas(archivos) {
+export function agruparDuplicadas(archivos) {
     const vistas = new Map();
     const de = [];
     const unicas = [];
@@ -102,7 +102,7 @@ function agruparDuplicadas(archivos) {
  * ORIGINALES del envío: las copias exactas salen como estado 'duplicada' (con `duplicada_de`) y el resto lleva el
  * análisis del servicio. Los totales (aceptadas, suficiente, consistencia, cosenos) son los del conjunto sin copias.
  */
-async function analizarConjunto(archivos, agrupacion) {
+export async function analizarConjunto(archivos, agrupacion) {
     const { de, unicas } = agrupacion;
     const conjunto = validarFormaConjunto(await verificarFotosServicio(unicas.map((i) => comoBlob(archivos[i]))), unicas.length);
     const posicionDeUnica = new Map(unicas.map((original, k) => [original, k]));
@@ -160,7 +160,7 @@ function fotoParaRpc(ruta, foto) {
 }
 
 /** Resumen escalar del build para ESTA plantilla (el arreglo completo de muestras no viaja al cliente). */
-function muestraDe(indice, idPlantilla) {
+export function muestraDe(indice, idPlantilla) {
     const m = indice?.muestras?.find((x) => x.id_plantilla === idPlantilla);
     if (!m) return null;
     return {
@@ -174,14 +174,20 @@ function muestraDe(indice, idPlantilla) {
 }
 
 /** Quita `muestras` de la respuesta del índice: es detalle interno del build, no del contrato con la pantalla. */
-function indiceSinMuestras(indice) {
+export function indiceSinMuestras(indice) {
     const salida = { ...indice };
     delete salida.muestras;
     return salida;
 }
 
+/**
+ * La alta con la RPC del administrador (api_plantilla_registrar). El autoservicio del alumno pasa su propia función `registrar`
+ * (api_mi_plantilla_registrar), que no lleva id_alumno: sale de la sesión.
+ */
+const altaDelAdministrador = ({ rpc, ip, idAlumno, idConsent }) => (args) => rpc('api_plantilla_registrar', { idAlumno, idConsent, ...args, ip });
+
 /** Camino heredado de UNA foto: calidad individual -> subir -> RPC con los 4 argumentos de siempre. */
-async function registrarUnaFoto({ rpc, admin, ip, idAlumno, idConsent, archivo }) {
+async function registrarUnaFoto({ rpc, admin, ip, idAlumno, idConsent, archivo, registrar = null }) {
     // Calidad: un solo rostro y sin motivo de rechazo.
     const calidad = conAlias(await verificarFotoServicio(comoBlob(archivo)));
     if (!calidad.un_solo_rostro || calidad.motivo_rechazo) {
@@ -203,7 +209,7 @@ async function registrarUnaFoto({ rpc, admin, ip, idAlumno, idConsent, archivo }
     const ruta = rutaObjeto.registro(idAlumno);
     await subirObjeto(ruta, archivo.bytes, { contentType: 'image/jpeg', upsert: false, admin: cliente });
     try {
-        return await rpc('api_plantilla_registrar', { idAlumno, idConsent, objetoFoto: ruta, ip });
+        return await (registrar ?? altaDelAdministrador({ rpc, ip, idAlumno, idConsent }))({ objetoFoto: ruta });
     } catch (e) {
         await eliminarObjetoSilencioso(ruta, { admin: cliente });
         throw e;
@@ -215,7 +221,7 @@ async function registrarUnaFoto({ rpc, admin, ip, idAlumno, idConsent, archivo }
  * subida de TODAS -> RPC con p_fotos. Las fotos rechazadas nunca se suben: lo que queda en el bucket y en
  * plantilla_foto es exactamente lo aceptado (y no se guarda el rostro de un tercero que se coló en el lote).
  */
-async function registrarVariasFotos({ rpc, admin, ip, idAlumno, idConsent, archivos }) {
+export async function registrarVariasFotos({ rpc, admin, ip, idAlumno, idConsent, archivos, registrar = null, antesDeGuardar = null }) {
     const agrupacion = agruparDuplicadas(archivos);
     const duplicadas = agrupacion.de.flatMap((de, indice) => (de === null ? [] : [{ indice, de }]));
     if (duplicadas.length > 0) {
@@ -261,6 +267,10 @@ async function registrarVariasFotos({ rpc, admin, ip, idAlumno, idConsent, archi
         });
     }
 
+    // Comprobaciones propias de quien llama (p. ej. que el rostro no pertenezca ya a otra matrícula): después de validar la calidad
+    // y antes de guardar nada, para que un rechazo no deje fotos en el bucket.
+    if (antesDeGuardar) await antesDeGuardar(archivos);
+
     // Subida en serie (una ruta de servidor por foto, uuid distinto). TRANSACCIONALIDAD: si falla cualquier subida
     // o la RPC se borran TODAS las ya subidas y se relanza el error original; no quedan huérfanos.
     const cliente = await admin();
@@ -271,12 +281,9 @@ async function registrarVariasFotos({ rpc, admin, ip, idAlumno, idConsent, archi
             await subirObjeto(ruta, archivo.bytes, { contentType: 'image/jpeg', upsert: false, admin: cliente });
             subidas.push(ruta);
         }
-        return await rpc('api_plantilla_registrar', {
-            idAlumno,
-            idConsent,
+        return await (registrar ?? altaDelAdministrador({ rpc, ip, idAlumno, idConsent }))({
             objetoFoto: subidas[0],
             fotos: subidas.map((ruta, i) => fotoParaRpc(ruta, conjunto.fotos[i])),
-            ip,
         });
     } catch (e) {
         await Promise.allSettled(subidas.map((ruta) => eliminarObjetoSilencioso(ruta, { admin: cliente })));

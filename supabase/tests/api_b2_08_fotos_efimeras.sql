@@ -21,8 +21,8 @@ SELECT t.ok((SELECT NOT attnotnull FROM pg_attribute WHERE attrelid = 'public.pl
     'plantilla_facial.objeto_foto admite NULL (foto no conservada)');
 SELECT t.ok((SELECT NOT attnotnull FROM pg_attribute WHERE attrelid = 'public.plantilla_foto'::regclass AND attname = 'objeto_foto'),
     'plantilla_foto.objeto_foto admite NULL (foto no conservada)');
-SELECT t.eq((SELECT count(*) FROM pg_proc WHERE pronamespace = 'public'::regnamespace AND proname LIKE 'api\_%'), 72::bigint,
-    'el catalogo sigue en 72 api_* (la purga son dos svc_*)');
+SELECT t.eq((SELECT count(*) FROM pg_proc WHERE pronamespace = 'public'::regnamespace AND proname LIKE 'api\_%'), 76::bigint,
+    'el catalogo tiene 76 api_* (72 + las 4 api_mi_* del autoservicio, 0239)');
 SELECT t.ok(has_function_privilege('service_role', 'public.svc_fotos_registro_listar(integer[], integer)', 'EXECUTE')
         AND has_function_privilege('service_role', 'public.svc_fotos_registro_marcar(integer[])', 'EXECUTE'),
     'service_role ejecuta listar y marcar');

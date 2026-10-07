@@ -4,3 +4,4 @@ export * from './captura.js';
 export * from './revision.js';
 export * from './biometria.js';
 export * from './admin.js';
+export * from './autoservicio.js';

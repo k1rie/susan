@@ -56,6 +56,7 @@ export const MODULOS = [
     { id: 'analitica', titulo: 'Analítica de ausentismo', descripcion: 'Tendencia, proyección y riesgo con métodos numéricos para intervenir a tiempo.', icono: ChartLine, categoria: 'analisis', roles: ['docente', 'administrador'], estado: 'activo', href: '/analitica', tono: 'violeta' },
     // ---- Activos: alumno ----
     { id: 'mi-asistencia', titulo: 'Mi asistencia', descripcion: 'Tu historial por materia, el límite de faltas para examen y tus justificantes.', icono: UserCheck, categoria: 'asistencia', roles: ['alumno'], estado: 'activo', href: '/alumno', tono: 'azul' },
+    { id: 'registro-facial', titulo: 'Mi registro facial', descripcion: 'Acepta el aviso de privacidad y registra tu rostro para que tu asistencia se tome con la cámara.', icono: ScanFace, categoria: 'asistencia', roles: ['alumno'], estado: 'activo', href: '/alumno/registro', tono: 'dorado' },
     // ---- Activos: administración ----
     { id: 'resumen-admin', titulo: 'Resumen del periodo', descripcion: 'Contadores del periodo: alumnos, grupos, sesiones, cámaras y consentimientos.', icono: LayoutDashboard, categoria: 'administracion', roles: ['administrador'], estado: 'activo', href: '/admin', tono: 'azul' },
     { id: 'grupos', titulo: 'Grupos y horarios', descripcion: 'Grupos del periodo, inscripciones, horarios y cámaras por aula.', icono: Users, categoria: 'administracion', roles: ['administrador'], estado: 'activo', href: '/admin/grupos', tono: 'dorado' },

@@ -8,6 +8,7 @@
 #   scripts/seed-demo.sh --abierta    como --reset, pero la sesión 19 queda ABIERTA y sin registros
 #   scripts/seed-demo.sh --muestras   solo escribe una foto sintética por alumno para subirla a mano en el alta de plantilla
 #   scripts/seed-demo.sh --captura …  simula la cámara del aula desde la terminal (ver scripts/demo/captura.mjs; --help allí)
+#   scripts/seed-demo.sh --autoservicio …  prueba de punta a punta el registro del alumno por su cuenta (ver scripts/demo/autoservicio.mjs; --help allí)
 #
 # Si PostgreSQL, el servicio de reconocimiento o la web no están arriba, llama a scripts/dev-all.sh (que respeta lo que ya
 # corre). Se niega a correr contra una base que no sea la local de desarrollo (reloj de demostración habilitado).
@@ -26,14 +27,17 @@ die() { printf '[seed-demo] ERROR: %s\n' "$*" >&2; exit 1; }
 
 solo_muestras=0
 modo_captura=0
+modo_autoservicio=0
 [ "${1:-}" = "--captura" ] && { modo_captura=1; shift; }
+[ "${1:-}" = "--autoservicio" ] && { modo_autoservicio=1; shift; }
 for arg in "$@"; do
     [ "$modo_captura" -eq 1 ] && break   # los argumentos de --captura son de captura.mjs, que los valida
+    [ "$modo_autoservicio" -eq 1 ] && break   # y los de --autoservicio, de autoservicio.mjs
     case "$arg" in
         --reset|--abierta) ;;
         --muestras) solo_muestras=1 ;;
-        -h|--help) sed -n '2,14p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
-        *) die "Opción desconocida: $arg (usa --reset, --abierta o --muestras)." ;;
+        -h|--help) sed -n '2,16p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+        *) die "Opción desconocida: $arg (usa --reset, --abierta, --muestras, --captura o --autoservicio)." ;;
     esac
 done
 
@@ -74,5 +78,8 @@ export RECOGNITION_SERVICE_API_KEY="${RECOGNITION_SERVICE_API_KEY:-dev-local-key
 
 if [ "$modo_captura" -eq 1 ]; then
     exec node "$ROOT/scripts/demo/captura.mjs" "$@"
+fi
+if [ "$modo_autoservicio" -eq 1 ]; then
+    exec node "$ROOT/scripts/demo/autoservicio.mjs" "$@"
 fi
 exec node "$ROOT/scripts/demo/seed-demo.mjs" "$@"

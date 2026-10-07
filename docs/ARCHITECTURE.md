@@ -142,6 +142,10 @@ Superficie PERMITIDA de ese objeto (nada más; así el modo local puede imitarla
   - **Compatibilidad**: las plantillas de una foto siguen funcionando sin migración manual (backfill + trigger crean su fila `orden = 1`). Orden de despliegue: SQL, servicio, web.
   - Archivado: sigue siendo solo `activa = false`; las fotos extra no tienen bandera propia (su estado es el de la plantilla padre) y, como la foto principal, no se borran del bucket al
     archivar (ver la brecha de retención en `docs/DECISIONS.md`). Contratos y algoritmo: `docs/api/biometria.md` §4.
+- **Autoservicio del alumno** (extensión 19; `docs/api/biometria.md` §7). El alumno acepta el aviso y registra su propio rostro por `POST /api/yo/*` (rol `alumno`): ninguna ruta ni RPC `api_mi_*`
+  recibe `id_alumno`/`id_consent`, salen de la sesión (`api_mi_registro`). El consentimiento es una aceptación electrónica con **constancia PDF generada por el servidor** (`lib/server/constancia.js`, con la huella
+  del texto de `lib/avisoBiometrico.js`). El rostro nuevo se busca en el índice en uso entre los demás alumnos (`svc_faiss_ids_otros_alumnos` → `POST /v1/recognize`, mismo umbral que el pase de lista) y se rechaza si ya
+  es de otra matrícula; `app.plantilla_registrar` es el núcleo común de RN-12/RN-13 para alumno y administrador. El servicio de reconocimiento no cambia.
 - Puntaje y modelo: el embedder es enchufable (`EMBEDDER=insightface|fake`); `fake` (determinista) permite pruebas sin
   modelos. Dimensión = parámetro `dimension_vector` (512).
 

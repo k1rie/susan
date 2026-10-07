@@ -41,7 +41,10 @@ export const NAV_POR_ROL = {
         { href: '/reportes', label: 'Reportes', icon: FileBarChart, grupo: 'Asistencia' },
         { href: '/analitica', label: 'Analítica', icon: ChartLine, grupo: 'Análisis' },
     ],
-    alumno: [{ href: '/alumno', label: 'Mi asistencia', icon: UserCheck }],
+    alumno: [
+        { href: '/alumno', label: 'Mi asistencia', icon: UserCheck },
+        { href: '/alumno/registro', label: 'Mi registro facial', icon: ScanFace, grupo: 'Mi cuenta' },
+    ],
     tecnico: [{ href: '/tecnico', label: 'Consola técnica', icon: Wrench }],
 };
 

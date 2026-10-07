@@ -10,7 +10,7 @@ const VARIANTES = {
     danger: 'bg-destructive text-primary-foreground border border-transparent hover:opacity-90',
     ghost: 'bg-transparent text-foreground border border-transparent hover:bg-accent',
 };
-const TAMANOS = { md: 'min-h-10 px-4 text-sm', sm: 'min-h-8 px-3 text-[13px]' };
+const TAMANOS = { lg: 'min-h-12 px-5 text-[15px]', md: 'min-h-10 px-4 text-sm', sm: 'min-h-8 px-3 text-[13px]' };
 
 // Botón base. Con href se renderiza como enlace de Next; loading deshabilita sin cambiar el ancho.
 // `arrow` añade una flecha (Lucide) al final.
