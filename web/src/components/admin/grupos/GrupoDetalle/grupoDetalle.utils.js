@@ -36,3 +36,8 @@ export function apoyoSesiones(sesiones) {
     const programadas = entero(sesiones?.programadas);
     return `${programadas} programada${programadas === 1 ? '' : 's'}`;
 }
+
+const PESTANAS = ['datos', 'horario', 'aula', 'inscripciones'];
+
+/** Pestaña válida a partir de `?tab=`; cualquier otro valor cae en «datos». */
+export const pestanaValida = (id) => (PESTANAS.includes(id) ? id : 'datos');
