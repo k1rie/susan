@@ -8,11 +8,14 @@
 // cambia al final: nunca hay una ventana con un índice que la BD cree activo y el servicio no pueda cargar.
 // Si algo falla antes de activar en la BD no hay efectos sobre lo que usa el reconocimiento; reintentar es
 // seguro (el plan sugiere la siguiente versión libre y una versión registrada sin activar es inofensiva).
+// Al final, y solo si todo salió bien, se borran las fotos de registro que esa versión acaba de convertir en vector
+// (extensión 18): la foto es material del build, no un dato que se conserve.
 import { randomUUID } from 'node:crypto';
 import { ApiError } from '@/lib/api/errors';
 import { callRpc } from '@/lib/api/client';
 import { getAdminBackend } from '@/lib/backend';
 import { activarIndice, construirIndice, infoIndice, manifiestoIndice } from './recognition.js';
+import { purgarFotosRegistro } from './fotosRegistro.js';
 
 export const CLAVE_BLOQUEO_INDICE = 'indice';
 const TTL_BLOQUEO_SEG = 1200; // 20 min; el bloqueo caduca solo si el proceso muere
@@ -70,11 +73,54 @@ export function entradasDeBuild(plan) {
     });
 }
 
+/** Rutas de foto que el plan trae para una entrada (las plantillas de una foto traen `objeto_foto`, las de varias `objetos_foto`). */
+const rutasDeFoto = (e) => (Array.isArray(e.objetos_foto) && e.objetos_foto.length > 0 ? e.objetos_foto : [e.objeto_foto])
+    .filter((ruta) => typeof ruta === 'string' && ruta !== '');
+
+/** La plantilla ya no conserva ninguna foto: tras indexarse se borran y solo queda su vector en el JSON del índice. */
+const sinFoto = (e) => rutasDeFoto(e).length === 0;
+
+/**
+ * Las entradas nuevas del build se calculan desde su foto. Si alguna ya no la conserva (reconstrucción completa o cambio
+ * de dimensión sobre plantillas ya indexadas) el build no puede producir su vector: se corta ANTES de llamar al servicio,
+ * con la lista de plantillas a registrar de nuevo, en vez de dejar que el servicio falle a la mitad.
+ */
+function exigirFotosParaConstruir(plan) {
+    const faltan = plan.entries.filter((e) => !e.en_base && sinFoto(e));
+    if (faltan.length === 0) return;
+    throw new ApiError({
+        code: 'PLANTILLAS_SIN_FOTO',
+        message: `${faltan.length === 1 ? '1 plantilla ya no conserva' : `${faltan.length} plantillas ya no conservan`} su foto (solo se guarda el vector) y esta reconstrucción necesita leerla. Registra de nuevo a esos alumnos.`,
+        status: 409,
+        details: {
+            fase: 'plan',
+            motivo_sin_base: plan.motivo_sin_base ?? null,
+            plantillas: faltan.map((e) => ({ id_plantilla: e.id_plantilla, id_alumno: e.id_alumno })),
+        },
+    });
+}
+
+/**
+ * Borra las fotos de las plantillas que esta versión acaba de indexar. Nunca invalida la activación: el índice ya está en
+ * uso; si el borrado falla, las fotos quedan en el bucket y el job purgar-fotos-registro las limpia en su próxima corrida.
+ * @returns {Promise<number | null>} objetos borrados, o null si el borrado falló
+ */
+async function purgarFotosIndexadas(svc, admin, plan) {
+    try {
+        const ids = plan.entries.filter((e) => !e.en_base).map((e) => e.id_plantilla);
+        const r = await purgarFotosRegistro({ svc, admin, ids });
+        return r.objetos_borrados;
+    } catch {
+        console.error('[indice] no se pudieron borrar las fotos de registro ya indexadas; el job purgar-fotos-registro lo reintenta');
+        return null;
+    }
+}
+
 /**
  * Reconstruye y activa una versión completa del índice.
  * @param {{ completa?: boolean, admin?: object }} [opts] completa = reprocesar todas las fotos
  * @returns {Promise<{ estado: 'activada' | 'sin_cambios', version: string | null, id_indice: number | null,
- *   total_vectores: number, muestras?: object[], plantillas_asignadas?: number, plantillas_pendientes?: number, anterior?: object | null,
+ *   total_vectores: number, fotos_purgadas?: number | null, muestras?: object[], plantillas_asignadas?: number, plantillas_pendientes?: number, anterior?: object | null,
  *   ya_activo?: boolean }>}
  * @throws {ApiError} RECONSTRUCCION_EN_CURSO | INDICE_CONSTRUCCION_FALLIDA (details.errores) | el de la fase que falló
  */
@@ -90,6 +136,7 @@ export async function reconstruirIndice({ completa = false, admin } = {}) {
                 total_vectores: plan.base?.total_vectores ?? 0,
             };
         }
+        exigirFotosParaConstruir(plan);
         const version = plan.version_sugerida;
         const entries = entradasDeBuild(plan);
 
@@ -144,11 +191,15 @@ export async function reconstruirIndice({ completa = false, admin } = {}) {
             throw enFase(e, 'activacion_servicio', { version, id_indice: registro.id_indice, bd_activada: true, sincronizado: false });
         }
 
+        // 6. El vector ya vive en el JSON en uso: la foto de registro deja de servir y se borra del bucket.
+        const fotosPurgadas = await purgarFotosIndexadas(svc, cliente, plan);
+
         return {
             estado: 'activada',
             version,
             id_indice: registro.id_indice,
             total_vectores: build.ntotal,
+            fotos_purgadas: fotosPurgadas,
             muestras: build.muestras ?? [],
             plantillas_asignadas: activacion.plantillas_asignadas,
             plantillas_pendientes: activacion.plantillas_pendientes,
@@ -209,6 +260,29 @@ export async function revertirIndice({ idIndice, version, admin }) {
         let manifiesto;
         try {
             manifiesto = await manifiestoIndice(version);
+        } catch (e) {
+            throw enFase(e, 'precarga', { version });
+        }
+
+        // Revertir deja «pendientes» a las plantillas activas que esa versión no conoce, y su vector se recalcula desde la
+        // foto. Si ya se borró, ese alumno se quedaría sin reconocimiento y el siguiente build fallaría: se rechaza antes.
+        const conocidas = new Set((manifiesto.refs ?? []).map((r) => r.id_plantilla));
+        const plan = await svc('svc_indice_plan', { completa: false });
+        const perderian = plan.entries.filter((e) => !conocidas.has(e.id_plantilla) && sinFoto(e));
+        if (perderian.length > 0) {
+            throw new ApiError({
+                code: 'REVERSION_PERDERIA_PLANTILLAS',
+                message: `No se puede volver a ${version}: ${perderian.length === 1 ? '1 plantilla se indexó' : `${perderian.length} plantillas se indexaron`} después y ya no conserva su foto, así que se quedaría sin vector.`,
+                status: 409,
+                details: {
+                    fase: 'verificacion',
+                    version,
+                    plantillas: perderian.map((e) => ({ id_plantilla: e.id_plantilla, id_alumno: e.id_alumno })),
+                },
+            });
+        }
+
+        try {
             await activarIndice({ version, preloadOnly: true });
         } catch (e) {
             throw enFase(e, 'precarga', { version });

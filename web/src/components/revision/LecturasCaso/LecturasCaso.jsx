@@ -75,10 +75,15 @@ export default function LecturasCaso({ idAsistencia, minimoValidas }) {
                 </TarjetaGrafica>
             )}
 
-            <div className="flex items-center gap-3 text-sm">
-                <RecorteFirmado url={data?.foto_registro?.url ?? null} alt="Foto de registro del alumno" onExpirada={recargar} />
-                <span className="text-muted-foreground">{data?.foto_registro ? 'Foto de registro' : 'Sin foto de registro activa'}</span>
-            </div>
+            {data?.foto_registro ? (
+                <div className="flex items-center gap-3 text-sm">
+                    <RecorteFirmado url={data.foto_registro.url ?? null} alt="Foto de registro del alumno" onExpirada={recargar} />
+                    <span className="text-muted-foreground">Foto de registro</span>
+                </div>
+            ) : (
+                // Las fotos de registro se borran al indexarse (extensión 18): solo queda el vector, y la comparación es el score.
+                <p className="text-sm text-muted-foreground">La foto de registro no se conserva; solo se guarda el vector del rostro.</p>
+            )}
             {lecturas.length === 0 ? (
                 <p className="text-sm text-muted-foreground">Sin lecturas del reconocimiento facial en esta sesión.</p>
             ) : (

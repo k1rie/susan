@@ -62,6 +62,9 @@ export default function PlantillaFacialPanel({ idAlumno, version = 0, onCambio }
     const numeros = numerarTomas(p.tomas, p.modo);
     const detallesCalidad = p.ordenadas.filter((t) => t.estado !== 'verificando');
     const nFotosActiva = p.activa?.n_fotos ?? 1;
+    // Las fotos de registro se borran al indexarse (extensión 18). Sin la clave (servidor anterior) se asume que existen.
+    const fotoDisponible = p.activa?.foto_disponible !== false;
+    const hayFotosSueltas = (p.activa?.fotos ?? []).some((f) => f.disponible !== false);
     // Los textos de botón deben caber en ~286 px (360 px de pantalla): ui/Button no parte líneas (whitespace-nowrap).
     // Lo que no cabe va en una nota de texto plano justo debajo, nunca en la etiqueta.
     const textoRegistrar = p.activa ? 'Reemplazar plantilla' : `Registrar plantilla con ${textoFotos(total)}`;
@@ -104,20 +107,28 @@ export default function PlantillaFacialPanel({ idAlumno, version = 0, onCambio }
                                             <p className="text-muted-foreground">Plantilla de una sola foto: se recomienda registrar de 3 a 5 tomas.</p>
                                         )
                                     )}
-                                    <div>
-                                        <Button variant="secondary" size="sm" onClick={verFoto}>
-                                            Ver foto
-                                        </Button>
-                                    </div>
-                                    {enlaceFoto && (
+                                    {fotoDisponible ? (
+                                        <div>
+                                            <Button variant="secondary" size="sm" onClick={verFoto}>
+                                                Ver foto
+                                            </Button>
+                                        </div>
+                                    ) : (
+                                        !hayFotosSueltas && (
+                                            <p className="text-muted-foreground">
+                                                Las fotos no se conservan: solo se guarda el vector del rostro en el índice.
+                                            </p>
+                                        )
+                                    )}
+                                    {enlaceFoto && fotoDisponible && (
                                         <a href={enlaceFoto} target="_blank" rel="noopener noreferrer" className="text-link underline">
                                             Abrir foto (el enlace caduca en 5 minutos)
                                         </a>
                                     )}
-                                    {nFotosActiva > 1 && p.activa.fotos?.length > 0 && (
+                                    {nFotosActiva > 1 && hayFotosSueltas && (
                                         <Detalles titulo={`Ver las ${nFotosActiva} fotos`}>
                                             <ul className="flex flex-col gap-2">
-                                                {p.activa.fotos.map((f) => (
+                                                {p.activa.fotos.filter((f) => f.disponible !== false).map((f) => (
                                                     <li key={f.id_foto} className="flex flex-col items-start gap-1">
                                                         <Button variant="secondary" size="sm" onClick={() => verFotoN(f)}>
                                                             Abrir foto {f.orden}
