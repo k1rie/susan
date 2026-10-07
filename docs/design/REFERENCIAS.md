@@ -84,3 +84,18 @@ Solo observaciones propias; las capturas no se versionan.
 5. **Ilustración**: estilo duotono con grano **sin imágenes pesadas**: SVG inline + textura de ruido pequeña (tile de ~128 px) en CSS; una paleta de 2 tonos por tarjeta (azul/dorado/verde).
 6. **Radios y sombras**: tarjetas 24 px, píldoras para botones/chips/inputs de búsqueda, sombras muy suaves y grandes, borde 1 px casi invisible.
 7. **Movimiento observado y reproducible barato**: teselas flotantes lentas (`transform` en bucle largo), carruseles con desplazamiento suave, vista previa de producto "escribiéndose". Nada requiere WebGL.
+
+## Mobbin: check-in de asistentes (revisión del 2026-10-06) — referencia de «Pasar lista»
+
+Pedido del usuario: la pantalla de pasar lista metía todo en una sola vista y se entendía poco. Solo observaciones propias; las capturas no se versionan.
+
+- **Luma · *Checking in guests***: cámara a pantalla completa con un recuadro-guía al centro y nada más; al detectar a alguien sube una **hoja inferior** con su nombre, sus datos y **una sola acción primaria** («Check in»); después, aviso verde breve («Check In Successful») y la acción pasa a «Undo». Un botón circular abajo alterna entre la cámara y la lista de invitados.
+- **Meetup · asistentes de un evento**: alternador segmentado **Lista | Escanear** arriba, contador de registrados y buscador de asistentes al pie; el aviso de estado es un toast sobre la lista.
+- **Partiful · *Checking in a guest***: lista simple (avatar, nombre, estado) con **un botón «Check in» por fila**, que al marcarse se vuelve una palomita negra; las acciones masivas van en una hoja inferior.
+
+### Qué se adopta en SUSAN
+1. **Una cosa por vez**: la captura es solo cámara + cifra «N de M» + una acción primaria («Revisar y cerrar»); las cifras, las gráficas y quién falta van en una vista aparte, no debajo.
+2. **Una acción primaria por pantalla** (tinta); las demás, secundarias con borde.
+3. **Filas con un botón por fila** en lugar de tablas anchas; en el pase manual, un toque por alumno (tres botones Presente / Retardo / Ausente) en lugar de un selector.
+4. **Avisos cortos** (etiqueta de estado, una línea de instrucción por paso) en lugar de párrafos.
+5. **No se adopta** la hoja inferior por persona de Luma: SUSAN reconoce a un grupo entero en cada fotograma, así que no hay «una persona detectada» a quien confirmar.

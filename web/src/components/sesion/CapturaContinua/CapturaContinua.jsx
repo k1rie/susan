@@ -1,7 +1,7 @@
 'use client';
 
 import clsx from 'clsx';
-import { CameraOff, ClipboardCheck, UserPen } from 'lucide-react';
+import { CameraOff, ListChecks, UserPen } from 'lucide-react';
 import { useEffect, useId, useRef, useState } from 'react';
 import Alert from '@/components/ui/Alert';
 import Button from '@/components/ui/Button';
@@ -11,7 +11,6 @@ import Select from '@/components/ui/Select';
 import { useToast } from '@/components/ui/Toast';
 import AccionesPaseLista from '../AccionesPaseLista';
 import { enfocarPanel } from '../enfocarPanel.js';
-import { cierreHabilitado, motivoCierre } from '../MonitorSesion/monitorSesion.utils.js';
 import ResumenPaseLista from '../ResumenPaseLista';
 import LienzoSimulado from '../LienzoSimulado';
 import SimuladorCamara, { useSimuladorCamara } from '../SimuladorCamara';
@@ -37,15 +36,16 @@ function SinVista({ texto, className }) {
     );
 }
 
-// PANEL DE PASE DE LISTA de una sesión automática abierta (P-03): lo primero que ve el docente. Muestrea (cámara del navegador, cámaras IP
-// o la cámara simulada del desarrollo local) y junta en un solo lugar la vista de cámara con su estado, la cifra «N de M presentes», la
-// última captura y las acciones (cerrar el pase de lista, registrar manualmente). El reconocimiento y la atribución de lecturas ocurren en
-// el servidor; aquí solo se toman y envían los fotogramas.
+// PANEL DE PASE DE LISTA de una sesión automática abierta (P-03), paso 2 «Pasar lista»: lo primero que ve el docente. Muestrea (cámara del
+// navegador, cámaras IP o la cámara simulada del desarrollo local) y junta en un solo lugar la vista de cámara con su estado, la cifra
+// «N de M presentes», la última captura y las acciones: «Revisar y cerrar» (pasa al paso 3, no cierra nada) y registrar manualmente. El
+// cierre en sí vive en RevisionCierre. El reconocimiento y la atribución de lecturas ocurren en el servidor; aquí solo se toman y envían
+// los fotogramas.
 //   sesion, camaras, alumnos, totales = de api_sesion_monitor · activo = la sesión está en ventana de tolerancia (sesion.en_ventana)
 //   simulado = api_ahora().reloj_simulado: habilita el simulador de cámara (solo desarrollo; en producción siempre es false)
-//   onFin = el servidor dijo «deja de muestrear» · onCerrar / onRegistrarManual = abren los diálogos que vive en MonitorSesion
+//   onFin = el servidor dijo «deja de muestrear» · onRevisar = pasa a la revisión · onRegistrarManual = abre el diálogo que vive en MonitorSesion
 //   enfocar = se llegó con ?pasar-lista=1: al montarse el panel recibe el foco y, si hace falta, se desplaza hasta verlo
-export default function CapturaContinua({ sesion, camaras = [], alumnos = [], totales = {}, activo, simulado = false, onFin, onCerrar, onRegistrarManual, enfocar = false }) {
+export default function CapturaContinua({ sesion, camaras = [], alumnos = [], totales = {}, activo, simulado = false, onFin, onRevisar, onRegistrarManual, enfocar = false }) {
     const { toast } = useToast();
     const idTitulo = useId();
     const fuentes = fuentesDeCaptura(camaras);
@@ -93,7 +93,6 @@ export default function CapturaContinua({ sesion, camaras = [], alumnos = [], to
         servicioNoDisponible: muestreo.servicioNoDisponible,
         simulacionTerminada: simulando && simulador.terminado && camarasIp.length === 0,
     });
-    const puedeCerrar = cierreHabilitado(sesion);
     const sinFuentes = !navegadorEnUso && !simulacionEncendida && camarasIp.length === 0;
 
     let medio;
@@ -197,9 +196,8 @@ export default function CapturaContinua({ sesion, camaras = [], alumnos = [], to
                     <ResumenPaseLista totales={totales} ultima={muestreo.ultima} enviando={muestreo.enviando} activo={activo} />
                     <AccionesPaseLista
                         apilado
-                        primaria={{ etiqueta: 'Cerrar pase de lista', onClick: onCerrar, disabled: !puedeCerrar, icono: <ClipboardCheck aria-hidden="true" className="size-5" strokeWidth={1.75} /> }}
+                        primaria={{ etiqueta: 'Revisar y cerrar', onClick: onRevisar, icono: <ListChecks aria-hidden="true" className="size-5" strokeWidth={1.75} /> }}
                         secundarias={[{ etiqueta: 'Registrar manualmente', onClick: onRegistrarManual, icono: <UserPen aria-hidden="true" className="size-5" strokeWidth={1.75} /> }]}
-                        nota={puedeCerrar ? 'La tolerancia terminó: ya puedes cerrar. Quien no tenga registro quedará como ausente.' : motivoCierre(sesion)}
                     />
                 </div>
             </div>

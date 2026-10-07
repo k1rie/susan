@@ -114,7 +114,7 @@ La sesión de hoy del 3A (07:00) es la que se abre con la cámara del navegador.
    tanda entra como **retardo** (las otras dos, como presente). «Casos dudosos» deja alumnos con 1 o 2 lecturas, que al cerrar pasan a
    Revisión. Al completar los ciclos aparece «Simulación completa» y **Reiniciar ciclos** los repite. Después de las **07:20**
    (tolerancia terminada) el muestreo se detiene solo (`FUERA_DE_VENTANA`, por ejemplo con «Sin límite» de ciclos) y se habilita
-   **Cerrar pase de lista**; para llegar ahí sin esperar, usa `+10 min` o `+30 min` en la tarjeta del reloj.
+   **Cerrar pase de lista** (en el paso 3, *Revisar y cerrar*); para llegar ahí sin esperar, usa `+10 min` o `+30 min` en la tarjeta del reloj.
 7. **Cerrar la sesión** (confirma en el diálogo). Los alumnos sin registro se marcan **ausente**; quien se quedó con 1 o 2 lecturas
    queda **pendiente** y pasa a Revisión. El grupo se recalcula (RN-10, RN-11): si **E260001 no apareció**, queda con 10 faltas y
    **pierde el derecho a examen** (aviso en el panel y en su `/alumno`).
@@ -156,9 +156,9 @@ El 5C (aula B-04, sin cámaras activas) se abre solo de 09:00 a 10:00; con el re
 
 1. Con `docente1@`, en la tarjeta «Reloj de demostración» pulsa `Fijar hora` y elige 14-sep-2026 09:05 (el reloj puede quedar
    detenido: el pase manual no usa capturas).
-2. Abre **Pasar lista**: la 115 es la única candidata (la 19 ya venció) y se abre sola en modo manual («Sesión en modo manual»).
-3. En la lista, elige en el selector de estado a un alumno **Presente**, a otro **Retardo** y a otro **Ausente**, y pulsa el botón
-   secundario **Guardar** (avisa «3 registros (origen manual)»). Quien quede sin marcar será ausente al cerrar.
+2. Abre **Pasar lista**: la 115 es la única candidata (la 19 ya venció) y se abre sola en modo manual (la franja de pasos dice «Marcar alumnos»).
+3. En la lista, toca el botón **Presente** de un alumno, **Retardo** el de otro y **Ausente** el de otro (un segundo toque lo
+   desmarca; «Marcar restantes según la hora» llena el resto), y pulsa el botón secundario **Guardar** (avisa «3 registros (origen manual)»). Quien quede sin marcar será ausente al cerrar.
 4. Lleva el reloj a las 09:20 o más (`+30 min` da 09:35): antes de eso el cierre responde `VENTANA_TOLERANCIA_ABIERTA`, porque la
    tolerancia es de 20 min; «Guardar y cerrar sesión de clase» antes de las 09:20 guarda pero muestra «No se pudo cerrar la sesión».
 5. Con el reloj en 09:20 o más, pulsa **Guardar y cerrar sesión de clase**: los no marcados quedan ausentes (origen manual) y el
