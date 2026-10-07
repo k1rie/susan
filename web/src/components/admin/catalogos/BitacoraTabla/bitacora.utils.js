@@ -6,6 +6,8 @@ export const ACCIONES_BITACORA = [
     { value: 'aprobacion_justificante', label: 'Aprobación de justificante' },
     { value: 'rechazo_justificante', label: 'Rechazo de justificante' },
     { value: 'alta_plantilla', label: 'Alta de plantilla' },
+    { value: 'alta_consentimiento', label: 'Alta de consentimiento' },
+    { value: 'revocacion_consentimiento', label: 'Revocación de consentimiento' },
     { value: 'cambio_parametro', label: 'Cambio de parámetro' },
     { value: 'cierre_sesion', label: 'Cierre de sesión' },
     { value: 'notificacion', label: 'Notificación' },

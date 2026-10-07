@@ -27,7 +27,7 @@ SELECT t.eq((SELECT array_agg(e.enumlabel::text ORDER BY e.enumsortorder) FROM p
             ARRAY['ip', 'navegador'], 'tipo_camara = ip | navegador');
 SELECT t.eq((SELECT array_agg(e.enumlabel::text ORDER BY e.enumsortorder) FROM pg_enum e WHERE e.enumtypid = 'public.estado_asistencia'::regtype),
             ARRAY['presente', 'retardo', 'ausente', 'pendiente', 'justificado'], 'estado_asistencia (5 valores)');
-SELECT t.eq((SELECT count(*) FROM pg_enum e WHERE e.enumtypid = 'public.accion_bitacora'::regtype), 8::bigint, 'accion_bitacora (8 valores)');
+SELECT t.eq((SELECT count(*) FROM pg_enum e WHERE e.enumtypid = 'public.accion_bitacora'::regtype), 10::bigint, 'accion_bitacora (8 valores base + alta_consentimiento y revocacion_consentimiento de 0239)');
 
 -- Tipos fisicos clave del diccionario de datos
 SELECT t.eq((SELECT format_type(atttypid, atttypmod) FROM pg_attribute WHERE attrelid = 'public.deteccion'::regclass AND attname = 'score_similitud'), 'numeric(4,3)', 'score_similitud NUMERIC(4,3)');

@@ -252,6 +252,7 @@ Definición única en `web/src/components/layout/Sidebar/nav.config.js` (`NAV_PO
 | docente | Reportes | `/reportes` | `FileBarChart` |
 | docente | Analítica | `/analitica` | `ChartLine` |
 | alumno | Mi asistencia | `/alumno` | `UserCheck` |
+| alumno | Mi registro facial | `/alumno/registro` | `ScanFace` (grupo «Mi cuenta») |
 | tecnico | Consola técnica | `/tecnico` | `Wrench` |
 
 - El ítem activo es el de **coincidencia más larga** entre `pathname` y `href` (`pathname === href || pathname.startsWith(href + '/')`); así `/docente/revision` no activa también `/docente`.

@@ -16,7 +16,7 @@ const modulos = [plataforma, sesiones, revision, reportes, admin, biometria];
 const apis = [...catalogo.matchAll(/^### `(api_[a-z0-9_]+)\(/gm)].map((m) => m[1]);
 
 describe('sincronia con docs/API-RPC.md', () => {
-    it('el catalogo tiene las 72 api_*', () => expect(apis.length).toBe(72));
+    it('el catalogo tiene las 76 api_* (72 + las 4 api_mi_* del autoservicio)', () => expect(apis.length).toBe(76));
 
     it.each(apis)('%s tiene envoltorio exportado', (nombre) => {
         const fn = camel(nombre.replace(/^api_/, ''));

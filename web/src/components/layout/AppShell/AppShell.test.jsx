@@ -52,11 +52,14 @@ describe('AppShell: acción central de la barra inferior por rol', () => {
         expect(await screen.findByRole('combobox')).toBeInTheDocument();
     });
 
-    it('alumno (un solo destino): la barra inferior sigue ahí (su «Más» es la única puerta a la cuenta) y no hay «Pasar lista»', () => {
-        rutaActual = '/alumno';
+    it('alumno (dos destinos): la barra inferior lleva Mi asistencia y Mi registro facial (la ruta actual queda activa), conserva «Más» y no hay «Pasar lista»', () => {
+        rutaActual = '/alumno/registro';
         render(<AppShell me={ALUMNO}>contenido</AppShell>);
-        expect(within(barraInferior()).getByRole('link', { name: 'Mi asistencia' })).toBeInTheDocument();
-        expect(within(barraInferior()).getByRole('button', { name: 'Más' })).toBeInTheDocument();
+        const barra = within(barraInferior());
+        expect(barra.getByRole('link', { name: 'Mi asistencia' })).toHaveAttribute('href', '/alumno');
+        expect(barra.getByRole('link', { name: 'Mi registro facial' })).toHaveAttribute('aria-current', 'page');
+        expect(barra.getByRole('link', { name: 'Mi asistencia' })).not.toHaveAttribute('aria-current');
+        expect(barra.getByRole('button', { name: 'Más' })).toBeInTheDocument();
         expect(screen.queryByRole('link', { name: 'Pasar lista' })).toBeNull();
     });
 
