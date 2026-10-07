@@ -57,6 +57,8 @@ reglas de movimiento en `web/src/components/motion/README.md`; plan y avance en 
 | `ui/Button` | «Create Stack» | 8 px de radio; primario tinta, secundario blanco con borde, `arrow` opcional (Lucide) |
 | `ui/Avatar` | «SL / AS» | Círculo de color sólido con iniciales blancas; el color lo elige la persona en el onboarding (`lib/perfil.js`) |
 | `home/Resaltado` | SchoolAI | Subrayado dorado que se dibuja una vez (saludo y titulares) |
+| `sesion/PasosPaseLista` | Check-in de Luma y Partiful (Mobbin, ver `REFERENCIAS.md`) | Franja de 3 pasos *Abrir → Pasar lista → Revisar y cerrar* (o *Marcar alumnos → Guardar y cerrar* en el pase manual), siempre visible en la sesión; el paso actual en tinta, los hechos con palomita verde, y una línea con lo que toca hacer. Con `onIrA` los pasos 2 y 3 navegan. Sustituye a la guía descartable de tres tarjetas |
+| `sesion/ListaAlumnosSesion` | Lista de invitados de Partiful y Meetup | Alumnos como filas (nombre, matrícula, estado, «Registrar»), con `ui/Pills` «Sin registro / Todos»; cabe en 360 px sin desplazarse. Reemplaza a la tabla de 8 columnas en la revisión |
 
 ## Gráficas y «menos texto» (familia hecha a mano)
 

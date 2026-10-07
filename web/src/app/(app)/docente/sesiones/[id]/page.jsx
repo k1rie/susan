@@ -5,7 +5,7 @@ import SesionClase from '@/components/sesion/SesionClase';
 export const metadata = { title: 'Pasar lista | SUSAN' };
 
 // ?pasar-lista=1 (contrato de llegada de /docente/pasar-lista y de la tarjeta «Pasar lista» del panel): la sesión ya está abierta y se
-// llega a pasar lista, así que la pantalla muestra la guía de 3 pasos y enfoca la captura. Solo orienta la presentación.
+// llega a pasar lista, así que la pantalla enfoca la captura (paso 2 de la franja de pasos). Solo orienta la presentación.
 export default async function PaginaSesion({ params, searchParams }) {
     const { id } = await params;
     const sp = await searchParams;
