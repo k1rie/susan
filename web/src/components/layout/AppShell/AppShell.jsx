@@ -71,7 +71,10 @@ export default function AppShell({ me, relojSimulado = false, onSalir, children 
 
     return (
         <ShellContext.Provider value={contexto}>
-            <div className="min-h-dvh bg-background lg:flex lg:h-dvh lg:overflow-hidden">
+            {/* `relative` es lo que mantiene el scroll de la página en cero en escritorio: los `sr-only` (position: absolute) del riel y del contenido
+                toman como bloque contenedor el primer ancestro con `position`; sin él, escapan del overflow del panel y del riel, quedan
+                en su posición natural bajo el pliegue y alargan el documento (la página hacía un segundo scroll y asomaba el crema). */}
+            <div className="relative min-h-dvh bg-background lg:flex lg:h-dvh lg:overflow-hidden">
                 <a
                     href="#contenido"
                     className="sr-only focus:not-sr-only focus:fixed focus:left-2 focus:top-2 focus:z-[70] focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground"
@@ -90,7 +93,7 @@ export default function AppShell({ me, relojSimulado = false, onSalir, children 
                 />
                 <main
                     id="contenido"
-                    className="min-h-dvh min-w-0 flex-1 bg-card pb-24 lg:m-2 lg:ml-0 lg:min-h-0 lg:overflow-y-auto lg:rounded-2xl lg:border lg:border-border/60 lg:pb-0"
+                    className="min-h-dvh min-w-0 flex-1 bg-card pb-24 lg:m-2 lg:ml-0 lg:min-h-0 lg:overflow-y-auto lg:overscroll-contain lg:rounded-2xl lg:border lg:border-border/60 lg:pb-0"
                 >
                     {relojSimulado && (
                         // Reloj de demostración (solo desarrollo local): muestra la hora simulada y deja adelantarla para probar el ciclo de una sesión.
