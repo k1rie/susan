@@ -11,7 +11,7 @@ import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import DataState from '@/components/ui/DataState';
 import Detalles from '@/components/ui/Detalles';
 import EmptyState from '@/components/ui/EmptyState';
-import Select from '@/components/ui/Select';
+import SegmentedControl from '@/components/ui/SegmentedControl';
 import StatCard from '@/components/ui/StatCard';
 import StatusChip from '@/components/ui/StatusChip';
 import TarjetaGrafica from '@/components/ui/TarjetaGrafica';
@@ -21,21 +21,22 @@ import {
     ESTATUS_CAMARA,
     contadoresCamaras,
     datosCapturas,
+    confirmacionCambio,
     haceCuanto,
-    mensajeCambio,
     resumenCapturas,
     sinCapturar,
 } from './camaras.utils.js';
 
 const ARGS = { limit: 200 };
 
-// `soloLectura` (administrador): sin selector para cambiar el estatus; la base lo niega de todos modos.
+// `soloLectura` (administrador): sin control para cambiar el estatus; la base lo niega de todos modos.
 export default function CamarasEstado({ soloLectura = false }) {
     const q = useApiQuery(camarasEstado, ARGS, { refetchInterval: 30000 });
     const cambiar = useApiMutation(camaraCambiarEstatus);
     const { toast } = useToast();
     const [pendiente, setPendiente] = useState(null); // { camara, estatus }
     const [avisos, setAvisos] = useState([]);
+    const textos = pendiente ? confirmacionCambio(pendiente.camara, pendiente.estatus) : null;
 
     const confirmar = async () => {
         try {
@@ -93,7 +94,7 @@ export default function CamarasEstado({ soloLectura = false }) {
                             </TarjetaGrafica>
                             <ul className="grid gap-3 md:grid-cols-2">
                                 {d.items.map((c) => (
-                                    <li key={c.id_camara}>
+                                    <li key={c.id_camara} className="min-w-0">
                                         <Card
                                             title={`Aula ${c.aula_clave} · ${c.posicion}`}
                                             actions={<StatusChip kind="camara" value={c.estatus} />}
@@ -116,15 +117,20 @@ export default function CamarasEstado({ soloLectura = false }) {
                                                     <Alert tone="warning">Sin capturas en 24 h: revise la conexión.</Alert>
                                                 )}
                                                 {!soloLectura && (
-                                                    <label className="block text-sm">
-                                                        <span className="mb-1 block text-xs text-muted-foreground">Cambiar estatus</span>
-                                                        <Select
-                                                            aria-label={`Estatus de la cámara ${c.aula_clave} ${c.posicion}`}
+                                                    <div className="flex flex-col gap-1">
+                                                        <span className="text-xs text-muted-foreground" aria-hidden="true">Cambiar estatus</span>
+                                                        {/* Tres opciones excluyentes y siempre visibles: un control segmentado, no un desplegable. La elegida sigue siendo
+                                                            el estatus actual hasta que se confirma el cambio en el diálogo. Sin `fullWidth`: a 360 px «Mantenimiento» no cabe
+                                                            en un tercio del ancho, así que las opciones toman el ancho de su texto y reparten el sobrante (flex-auto). */}
+                                                        <SegmentedControl
+                                                            label={`Cambiar estatus de la cámara ${c.aula_clave} ${c.posicion}`}
+                                                            items={ESTATUS_CAMARA}
                                                             value={c.estatus}
-                                                            options={ESTATUS_CAMARA}
-                                                            onChange={(e) => e.target.value !== c.estatus && setPendiente({ camara: c, estatus: e.target.value })}
+                                                            size="sm"
+                                                            className="w-full [&>button]:flex-auto [&>button]:px-2.5"
+                                                            onChange={(estatus) => estatus !== c.estatus && setPendiente({ camara: c, estatus })}
                                                         />
-                                                    </label>
+                                                    </div>
                                                 )}
                                             </div>
                                             <div className="border-t border-border">
@@ -146,12 +152,14 @@ export default function CamarasEstado({ soloLectura = false }) {
             </DataState>
             <ConfirmDialog
                 open={Boolean(pendiente)}
-                title="Cambiar estatus de la cámara"
-                message={pendiente ? mensajeCambio(pendiente.camara, pendiente.estatus) : ''}
-                confirmLabel="Cambiar"
+                title={textos?.titulo ?? 'Cambiar estatus de la cámara'}
+                message={textos?.mensaje ?? ''}
+                confirmLabel={textos?.confirmar ?? 'Cambiar'}
                 onConfirm={confirmar}
                 onCancel={() => setPendiente(null)}
-            />
+            >
+                {textos?.aviso && <Alert tone="warning" compact className="mt-3">{textos.aviso}</Alert>}
+            </ConfirmDialog>
         </div>
     );
 }

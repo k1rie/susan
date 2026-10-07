@@ -5,29 +5,32 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Alert from '@/components/ui/Alert/Alert.jsx';
 import Button from '@/components/ui/Button/Button.jsx';
+import CampoPassword from '@/components/ui/CampoPassword/CampoPassword.jsx';
 import Field from '@/components/ui/Field/Field.jsx';
 import Spinner from '@/components/ui/Spinner/Spinner.jsx';
 import { useToast } from '@/components/ui/Toast/Toast.jsx';
+import { useFormulario } from '@/hooks/ui/useFormulario.js';
 import { cambiarContrasena, obtenerSesion, suscribirCambioAuth } from '@/lib/api/auth.js';
-import PasswordInput from '../PasswordInput/PasswordInput.jsx';
-import ReglasContrasena from '../ReglasContrasena/ReglasContrasena.jsx';
-import { TEXTO_ERROR_CONTRASENA, validarContrasena } from './contrasena.utils.js';
+import { mensajeContrasena, TEXTO_ERROR_CONTRASENA } from './contrasena.utils.js';
 
 const ESPERA_SESION_MS = 3000;
 
+const INICIAL = { nueva: '' };
+const validar = ({ nueva }) => ({ nueva: mensajeContrasena(nueva) });
+// El servidor rechaza la contraseña por su política o por ser igual a la actual: el aviso va pegado al campo, con el foco en él.
+const mapearError = (err) => (TEXTO_ERROR_CONTRASENA[err?.code] ? { nueva: TEXTO_ERROR_CONTRASENA[err.code] } : null);
+
 // modo: 'cambiar' (recuperación o cambio voluntario) | 'activar' (primera contraseña de una cuenta creada por el administrador).
 // `onExito`: si se pasa (onboarding), se llama al guardar en lugar de mostrar el aviso y redirigir al inicio.
+// Un solo campo (CampoPassword): con «Mostrar» y la lista de requisitos en vivo («N de 3») sobra el doble tecleo.
+// Mientras envía el campo queda `readOnly` y no `disabled`: un campo deshabilitado no puede recibir el foco, y el error del servidor lo necesita.
 export default function CambiarContrasenaForm({ modo = 'cambiar', onExito }) {
     const activar = modo === 'activar';
     const router = useRouter();
     const { toast } = useToast();
     // 'verificando' | 'sin_sesion' | 'listo'
     const [estado, setEstado] = useState('verificando');
-    const [nueva, setNueva] = useState('');
-    const [confirmacion, setConfirmacion] = useState('');
-    const [errores, setErrores] = useState({});
-    const [error, setError] = useState(null);
-    const [cargando, setCargando] = useState(false);
+    const [hecho, setHecho] = useState(false);
 
     // El token de recuperación lo procesa el cliente de Auth al cargar: se espera hasta 3 s a que haya sesión.
     useEffect(() => {
@@ -50,28 +53,32 @@ export default function CambiarContrasenaForm({ modo = 'cambiar', onExito }) {
         };
     }, []);
 
-    async function enviar(e) {
-        e.preventDefault();
-        if (cargando) return;
-        const v = validarContrasena(nueva, confirmacion);
-        setErrores(v);
-        setError(null);
-        if (Object.keys(v).length) return;
-        setCargando(true);
-        try {
-            await cambiarContrasena({ contrasena: nueva });
+    const f = useFormulario({
+        inicial: INICIAL,
+        validar,
+        mapearError,
+        onSubmit: async ({ nueva }) => {
+            try {
+                await cambiarContrasena({ contrasena: nueva });
+            } catch (err) {
+                if (err?.code === 'NO_AUTENTICADO') {
+                    setEstado('sin_sesion');
+                    return;
+                }
+                throw err;
+            }
+            // Tras guardar, el botón queda en «cargando» hasta que cambie la pantalla: así no se puede pulsar dos veces.
+            setHecho(true);
             if (onExito) {
                 onExito();
                 return;
             }
             toast({ tone: 'success', message: activar ? 'Cuenta activada' : 'Contraseña actualizada' });
             router.replace('/');
-        } catch (err) {
-            if (err?.code === 'NO_AUTENTICADO') setEstado('sin_sesion');
-            else setError(TEXTO_ERROR_CONTRASENA[err?.code] ?? err?.message ?? 'No se pudo actualizar la contraseña.');
-            setCargando(false);
-        }
-    }
+        },
+    });
+    const nueva = f.campo('nueva');
+    const cargando = f.enviando || hecho;
 
     if (estado === 'verificando') {
         return (
@@ -93,21 +100,11 @@ export default function CambiarContrasenaForm({ modo = 'cambiar', onExito }) {
         );
     }
     return (
-        <form onSubmit={enviar} noValidate className="flex flex-col gap-4">
-            {error && <Alert tone="danger">{error}</Alert>}
-            <Field label={activar ? 'Crea tu contraseña' : 'Nueva contraseña'} required error={errores.nueva}>
-                <PasswordInput name="nueva" autoComplete="new-password" value={nueva} onChange={(e) => setNueva(e.target.value)} disabled={cargando} />
+        <form onSubmit={f.enviar} noValidate className="flex flex-col gap-4">
+            {f.errorEnvio && <Alert tone="danger">{f.errorEnvio.message ?? 'No se pudo actualizar la contraseña.'}</Alert>}
+            <Field label={activar ? 'Crea tu contraseña' : 'Nueva contraseña'} required error={nueva.error}>
+                <CampoPassword {...nueva.props} autoFocus readOnly={cargando} />
             </Field>
-            <Field label="Confirmar contraseña" required error={errores.confirmacion}>
-                <PasswordInput
-                    name="confirmacion"
-                    autoComplete="new-password"
-                    value={confirmacion}
-                    onChange={(e) => setConfirmacion(e.target.value)}
-                    disabled={cargando}
-                />
-            </Field>
-            <ReglasContrasena nueva={nueva} confirmacion={confirmacion} />
             <Button type="submit" loading={cargando} fullWidth arrow>
                 {activar ? 'Activar mi cuenta' : 'Guardar contraseña'}
             </Button>
