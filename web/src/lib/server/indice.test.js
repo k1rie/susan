@@ -38,6 +38,8 @@ function admin(anular = {}) {
             svc_indice_registrar: () => ({ id_indice: 4, version: 'v004', ya_registrada: false }),
             svc_indice_activar: () => ({ id_indice: 4, version: 'v004', anterior: { id_indice: 3, version: 'v003' }, plantillas_asignadas: 2, plantillas_pendientes: 0, ya_activo: false }),
             svc_indice_en_uso: () => ({ id_indice: 4, version: 'v004' }),
+            svc_fotos_registro_listar: () => ({ pendientes_total: 0, items: [] }),
+            svc_fotos_registro_marcar: ({ p_ids }) => ({ solicitadas: p_ids.length, marcadas: p_ids.length }),
             svc_indice_revertir: () => ({ id_indice: 3, version: 'v003', anterior: { id_indice: 4, version: 'v004' }, plantillas_asignadas: 1, plantillas_pendientes: 1, ya_activo: false }),
             ...anular,
         },
@@ -103,7 +105,7 @@ describe('entradasDeBuild', () => {
 });
 
 describe('reconstruirIndice', () => {
-    it('orquesta en orden: bloqueo -> plan -> build -> registrar -> precarga -> activar BD -> activar servicio -> liberar', async () => {
+    it('orquesta en orden: bloqueo -> plan -> build -> registrar -> precarga -> activar BD -> activar servicio -> purgar fotos -> liberar', async () => {
         const orden = [];
         const a = admin();
         const original = a.rpc.getMockImplementation();
@@ -115,7 +117,7 @@ describe('reconstruirIndice', () => {
 
         expect(orden).toEqual([
             'svc_bloqueo_adquirir', 'svc_indice_plan', '/build', 'svc_indice_registrar', '/activate(preload)',
-            'svc_indice_activar', '/activate', 'svc_bloqueo_liberar',
+            'svc_indice_activar', '/activate', 'svc_fotos_registro_listar', 'svc_bloqueo_liberar',
         ]);
         expect(r).toMatchObject({ estado: 'activada', version: 'v004', id_indice: 4, total_vectores: 2, plantillas_asignadas: 2 });
     });
@@ -249,5 +251,175 @@ describe('estado, sincronizar y revertir', () => {
         expect(a.llamadas[0]).toBe('svc_bloqueo_adquirir');
         expect(a.llamadas.at(-1)).toBe('svc_bloqueo_liberar');
         expect(activarIndice.mock.calls.map(([x]) => x.preloadOnly ?? false)).toEqual([true, false]);
+    });
+});
+
+// ---- Fotos de registro efímeras (extensión 18) ----
+const UUID = (n) => `00000000-0000-4000-8000-${String(n).padStart(12, '0')}`;
+const RUTA_NUEVA = `registro/17/${UUID(1)}.jpg`;
+const planConFoto = (extra = {}) => ({
+    ...PLAN,
+    entries: [
+        { id_plantilla: 12, id_alumno: 3, faiss_id: 1001, id_indice: 3, en_base: true, objeto_foto: null, objetos_foto: null },
+        { id_plantilla: 41, id_alumno: 17, faiss_id: 1043, id_indice: null, en_base: false, objeto_foto: RUTA_NUEVA, objetos_foto: [RUTA_NUEVA] },
+    ],
+    ...extra,
+});
+
+describe('reconstruirIndice: borra las fotos que acaba de convertir en vector', () => {
+    it('tras activar, purga SOLO las plantillas nuevas de este build y reporta cuántos objetos borró', async () => {
+        const a = admin({
+            svc_indice_plan: () => planConFoto(),
+            svc_fotos_registro_listar: vi.fn()
+                .mockReturnValueOnce({ pendientes_total: 1, items: [{ id_plantilla: 41, objetos: [RUTA_NUEVA] }] })
+                .mockReturnValue({ pendientes_total: 0, items: [] }),
+        });
+        const r = await reconstruirIndice({ admin: a });
+        const listar = a.rpc.mock.calls.find(([n]) => n === 'svc_fotos_registro_listar');
+        expect(listar[1]).toMatchObject({ p_ids: [41] }); // la 12 (en_base, ya indexada antes) no se vuelve a tocar
+        expect(a.bucket.remove).toHaveBeenCalledWith([RUTA_NUEVA]);
+        expect(a.rpc.mock.calls.find(([n]) => n === 'svc_fotos_registro_marcar')[1]).toEqual({ p_ids: [41] });
+        expect(r).toMatchObject({ estado: 'activada', fotos_purgadas: 1 });
+    });
+
+    it('la purga ocurre DESPUÉS de activar en el servicio, nunca antes (la foto es la única copia hasta ese punto)', async () => {
+        const orden = [];
+        const a = admin({ svc_indice_plan: () => planConFoto() });
+        const original = a.rpc.getMockImplementation();
+        a.rpc.mockImplementation(async (n, args) => { orden.push(n); return original(n, args); });
+        activarIndice.mockImplementation(async ({ preloadOnly }) => { orden.push(preloadOnly ? '/activate(preload)' : '/activate'); return {}; });
+        await reconstruirIndice({ admin: a });
+        expect(orden.indexOf('svc_fotos_registro_listar')).toBeGreaterThan(orden.indexOf('/activate'));
+        expect(orden.indexOf('svc_fotos_registro_listar')).toBeGreaterThan(orden.indexOf('svc_indice_activar'));
+    });
+
+    it('si el build falla NO se borra ninguna foto (se necesitarán para reintentar)', async () => {
+        const a = admin({ svc_indice_plan: () => planConFoto() });
+        construirIndice.mockResolvedValue({ ...BUILD_OK, objeto_indice: null, errores: [{ id_plantilla: 41, motivo: 'x' }] });
+        await expect(reconstruirIndice({ admin: a })).rejects.toMatchObject({ code: 'INDICE_CONSTRUCCION_FALLIDA' });
+        expect(a.llamadas).not.toContain('svc_fotos_registro_listar');
+        expect(a.bucket.remove).not.toHaveBeenCalled();
+    });
+
+    it('si falla la activación en la BD NO se borra ninguna foto', async () => {
+        const a = admin({
+            svc_indice_plan: () => planConFoto(),
+            svc_indice_activar: () => errorDeNegocio('INDICE_PLAN_OBSOLETO', 'El plan cambió.'),
+        });
+        await expect(reconstruirIndice({ admin: a })).rejects.toMatchObject({ code: 'INDICE_PLAN_OBSOLETO' });
+        expect(a.llamadas).not.toContain('svc_fotos_registro_listar');
+        expect(a.bucket.remove).not.toHaveBeenCalled();
+    });
+
+    it('si falla el cambio final del servicio NO se borra ninguna foto (la reconstrucción se reintenta)', async () => {
+        const a = admin({ svc_indice_plan: () => planConFoto() });
+        activarIndice.mockResolvedValueOnce({}).mockRejectedValueOnce(new ApiError({ code: 'SERVICIO_NO_DISPONIBLE', message: 'x', status: 503 }));
+        await expect(reconstruirIndice({ admin: a })).rejects.toMatchObject({ details: { fase: 'activacion_servicio' } });
+        expect(a.llamadas).not.toContain('svc_fotos_registro_listar');
+    });
+
+    it('un fallo al borrar NO invalida la activación: queda activada y el job purgar-fotos-registro lo reintenta', async () => {
+        const a = admin({
+            svc_indice_plan: () => planConFoto(),
+            svc_fotos_registro_listar: () => ({ pendientes_total: 1, items: [{ id_plantilla: 41, objetos: [RUTA_NUEVA] }] }),
+        });
+        a.bucket.remove.mockResolvedValue({ error: { message: 'storage caído' } });
+        const r = await reconstruirIndice({ admin: a });
+        expect(r).toMatchObject({ estado: 'activada', version: 'v004', fotos_purgadas: null });
+        expect(a.llamadas).not.toContain('svc_fotos_registro_marcar'); // la ruta sigue en BD para el reintento
+        expect(a.llamadas.at(-1)).toBe('svc_bloqueo_liberar');
+    });
+
+    it('sin plantillas nuevas (todas en_base) no consulta ni borra nada', async () => {
+        const plan = {
+            ...PLAN,
+            totales: { activas: 1, nuevas: 0, en_base: 1, obsoletas: 1 },
+            entries: [{ id_plantilla: 12, id_alumno: 3, faiss_id: 1001, id_indice: 3, en_base: true, objeto_foto: null, objetos_foto: null }],
+        };
+        const a = admin({ svc_indice_plan: () => plan });
+        construirIndice.mockResolvedValue({ ...BUILD_OK, ntotal: 1, mapeo: [{ id_plantilla: 12, faiss_id: 1001 }] });
+        const r = await reconstruirIndice({ admin: a });
+        expect(r.estado).toBe('activada');
+        expect(a.llamadas).not.toContain('svc_fotos_registro_listar');
+    });
+});
+
+describe('reconstruirIndice: plantillas que ya no conservan su foto', () => {
+    it('PLANTILLAS_SIN_FOTO: una reconstrucción completa sobre plantillas ya purgadas se rechaza ANTES de llamar al servicio', async () => {
+        const plan = {
+            ...PLAN,
+            base: null,
+            motivo_sin_base: 'completa',
+            entries: [
+                { id_plantilla: 12, id_alumno: 3, faiss_id: 1, id_indice: 3, en_base: false, objeto_foto: null, objetos_foto: [null] },
+                { id_plantilla: 41, id_alumno: 17, faiss_id: 2, id_indice: 3, en_base: false, objeto_foto: null, objetos_foto: [null, null, null] },
+            ],
+        };
+        const a = admin({ svc_indice_plan: () => plan });
+        const e = await reconstruirIndice({ completa: true, admin: a }).catch((x) => x);
+        expect(e).toBeInstanceOf(ApiError);
+        expect(e).toMatchObject({ code: 'PLANTILLAS_SIN_FOTO', status: 409 });
+        expect(e.message).toContain('2 plantillas');
+        expect(e.details).toMatchObject({
+            fase: 'plan',
+            motivo_sin_base: 'completa',
+            plantillas: [{ id_plantilla: 12, id_alumno: 3 }, { id_plantilla: 41, id_alumno: 17 }],
+        });
+        expect(construirIndice).not.toHaveBeenCalled();
+        expect(a.llamadas).not.toContain('svc_indice_registrar');
+        expect(a.llamadas.at(-1)).toBe('svc_bloqueo_liberar');
+    });
+
+    it('con UNA sola plantilla sin foto el mensaje va en singular', async () => {
+        const plan = { ...PLAN, entries: [{ id_plantilla: 41, id_alumno: 17, faiss_id: 2, id_indice: null, en_base: false, objeto_foto: null, objetos_foto: [null] }] };
+        const e = await reconstruirIndice({ admin: admin({ svc_indice_plan: () => plan }) }).catch((x) => x);
+        expect(e.message).toContain('1 plantilla ya no conserva');
+    });
+
+    it('las plantillas en_base sin foto NO bloquean: se conservan con keep (su vector ya está en el JSON)', async () => {
+        const a = admin({ svc_indice_plan: () => planConFoto() });
+        await reconstruirIndice({ admin: a });
+        expect(construirIndice).toHaveBeenCalledWith(expect.objectContaining({
+            entries: [{ id_plantilla: 12, faiss_id: 1001, keep: true }, { id_plantilla: 41, faiss_id: 1043, objeto_foto: RUTA_NUEVA }],
+        }));
+    });
+});
+
+describe('revertirIndice: no deja plantillas sin vector', () => {
+    const planRevertir = (entries) => ({ ...PLAN, entries });
+
+    it('REVERSION_PERDERIA_PLANTILLAS: la versión destino no conoce una plantilla cuya foto ya se borró', async () => {
+        const a = admin({
+            svc_indice_plan: () => planRevertir([
+                { id_plantilla: 12, id_alumno: 3, faiss_id: 1001, id_indice: 4, en_base: true, objeto_foto: null, objetos_foto: null },
+                { id_plantilla: 41, id_alumno: 17, faiss_id: 1043, id_indice: 4, en_base: true, objeto_foto: null, objetos_foto: null },
+            ]),
+        });
+        // El manifiesto de v003 solo conoce la plantilla 12: la 41 se indexó después y su foto ya no existe.
+        const e = await revertirIndice({ idIndice: 3, version: 'v003', admin: a }).catch((x) => x);
+        expect(e).toBeInstanceOf(ApiError);
+        expect(e).toMatchObject({ code: 'REVERSION_PERDERIA_PLANTILLAS', status: 409 });
+        expect(e.details).toMatchObject({ fase: 'verificacion', version: 'v003', plantillas: [{ id_plantilla: 41, id_alumno: 17 }] });
+        expect(a.llamadas).not.toContain('svc_indice_revertir');
+        expect(activarIndice).not.toHaveBeenCalled(); // ni siquiera se precarga
+        expect(a.llamadas.at(-1)).toBe('svc_bloqueo_liberar');
+    });
+
+    it('si la plantilla que la versión destino no conoce AÚN conserva su foto, revertir es seguro (se reindexará)', async () => {
+        const a = admin({
+            svc_indice_plan: () => planRevertir([
+                { id_plantilla: 12, id_alumno: 3, faiss_id: 1001, id_indice: 4, en_base: true, objeto_foto: null, objetos_foto: null },
+                { id_plantilla: 41, id_alumno: 17, faiss_id: 1043, id_indice: null, en_base: false, objeto_foto: RUTA_NUEVA, objetos_foto: [RUTA_NUEVA] },
+            ]),
+        });
+        const r = await revertirIndice({ idIndice: 3, version: 'v003', admin: a });
+        expect(r.estado).toBe('revertida');
+    });
+
+    it('si todas las plantillas están en el manifiesto de la versión destino, revertir no se bloquea aunque no tengan foto', async () => {
+        const a = admin({
+            svc_indice_plan: () => planRevertir([{ id_plantilla: 12, id_alumno: 3, faiss_id: 1001, id_indice: 4, en_base: true, objeto_foto: null, objetos_foto: null }]),
+        });
+        expect((await revertirIndice({ idIndice: 3, version: 'v003', admin: a })).estado).toBe('revertida');
     });
 });

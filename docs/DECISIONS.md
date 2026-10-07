@@ -24,6 +24,7 @@ técnicamente y lo que sigue abierto. El SQL (`supabase/`) y `docs/API-RPC.md` s
 | 15 | Cuenta de servicio `servicio@susan.local` (rol `tecnico`, sin fila en Auth) | Los jobs asientan en bitácora (RN-08) sin inventar un usuario humano. Se oculta de las listas. |
 | 16 | QR (de SmartClass) **no** se incluye | La spec no lo contempla; el respaldo del reconocimiento es el pase de lista manual (RF-09). |
 | 17 | Tabla **`plantilla_foto`** (20.ª tabla; la spec tiene 19) y plantilla de **3 a 8 fotos promediadas** en un solo vector | Una foto sola da cosenos de 0.4–0.7 con fotos de salón y un mal registro no tiene salvaguarda. Con 5 fotos las lecturas bajo el umbral bajan a la mitad frente a una foto frontal buena y de 22.8 % a 3.7 % frente a una foto cualquiera (nivel duro). Se conserva RN-12: una fila activa de `plantilla_facial` y un `faiss_id`. Detalle en la sección 6. |
+| 18 | Las **fotos de registro son efímeras**: se borran del bucket en cuanto su vector queda en el JSON del índice en uso; `objeto_foto` admite NULL | Guardar un rostro que ya no se usa para nada es retención innecesaria de un dato biométrico (RNF-03). El único lector de la foto es la construcción del índice, así que se borra justo después de activar la versión que la contiene. Los recortes de la sesión NO cambian (evidencia de la revisión, RNF-05). Detalle en la sección 8. |
 
 ## 2. Decisiones técnicas
 
@@ -129,6 +130,8 @@ open redirect en `?next=`, inyección de fórmulas en CSV, secretos fuera del bu
 
 ### 6.2 Archivado y borrado (hallazgo verificado en el código)
 
+> Actualización: la extensión 18 (sección 8) borra las fotos de registro al indexarse y el job `purgar-fotos-registro` limpia las de plantillas archivadas; lo que sigue describe el estado previo.
+
 "Archivar" es solo `plantilla_facial.activa = false`, en `api_plantilla_registrar` (reemplazo) y en `api_consentimiento_revocar`. `vencer_consentimientos` NO archiva (la plantilla vencida sigue activa y sigue en el índice). Ninguna ruta borra fotos del bucket al archivar y la purga RNF-05 solo cubre recortes; todas las FK son `RESTRICT`; el único borrado es la compensación `eliminarObjetoSilencioso` si falla el registro. Las fotos extra replican EXACTO esa semántica: su estado es el de la plantilla padre y la compensación borra todas las subidas del intento. La brecha de retención y su seguimiento están en la sección 3 (punto 10).
 
 ### 6.3 Calibración y ganancia esperada
@@ -191,3 +194,33 @@ Método y limitaciones: `buffalo_s` real (el embedder del servicio) sobre 8 pers
 - **Consecuencias**: las pruebas que abren la paleta o esperan el reloj usan consultas asíncronas (`findBy…`). Pendiente conocido: `app/error.jsx` y `app/not-found.jsx`
   son grupos de chunks hermanos del layout `(app)` y Turbopack duplica en ellos `Link`, el núcleo de Lucide y `Button` (~12 KB gz en cada ruta).
   Ningún contrato (RPC, JSON, rutas) cambia.
+
+## 8. Fotos de registro efímeras (extensión 18)
+
+- **Contexto**: las fotos de `registro/` solo sirven para calcular el vector del alumno (el servicio las lee al construir el índice). Una vez que ese vector vive en el
+  JSON `indice/<version>.json`, la foto no tiene otro lector y dejarla en el bucket es guardar un rostro sin necesidad. Los recortes (`recortes/`) son otra cosa: son la
+  evidencia que ve el docente al revisar un caso y ya tienen su propia retención (RNF-05); esta extensión no los toca.
+- **Decisión**: la foto se **sube, se indexa y se borra**. Al activarse una versión del índice (último paso de `reconstruirIndice`, ya con el servicio apuntando a ella) se borran los
+  objetos de las plantillas que esa versión acaba de indexar y `objeto_foto` pasa a `NULL` en `plantilla_facial` y `plantilla_foto` (misma técnica que la purga de recortes: listar → borrar
+  objetos → marcar NULL; `svc_fotos_registro_listar` / `svc_fotos_registro_marcar`). El borrado nunca invalida la activación; si falla, lo reintenta el job `purgar-fotos-registro`,
+  que además limpia las fotos de plantillas **archivadas** (cierra la «brecha de retención» de 6.2) y las anteriores a la extensión.
+- **Qué NO se purga nunca**: la foto de una plantilla activa que aún no está en un índice activado. La SQL lo exige al listar y lo vuelve a comprobar al marcar.
+- **Consecuencias que hay que conocer** (son el precio de no guardar la foto):
+  - **La reconstrucción completa y el cambio de dimensión del modelo ya no son posibles sobre plantillas ya indexadas**: re-vectorizar exige la foto. `reconstruirIndice` responde
+    `409 PLANTILLAS_SIN_FOTO` (con la lista de plantillas y alumnos) ANTES de llamar al servicio; la salida es registrar de nuevo a esos alumnos. El incremental (`keep`) no se afecta.
+  - **No se puede revertir a una versión del índice que no conoce a una plantilla ya purgada**: `409 REVERSION_PERDERIA_PLANTILLAS`. Sin la foto ese alumno se quedaría sin vector y todo
+    build posterior fallaría. Revertir sigue siendo posible mientras todas las plantillas activas estén en el manifiesto de la versión destino.
+  - El administrador ya no puede ver la foto de registro (`api_documento_url_autorizar` responde `410 FOTO_NO_CONSERVADA`; la pantalla lo informa en vez de ofrecer un enlace roto) y la
+    revisión del docente ya no muestra la «foto de registro» junto a los recortes: la comparación es el score.
+  - Entre el registro y la activación del índice (segundos si el servicio responde) la foto sí está en el bucket; si el índice queda pendiente, permanece hasta la siguiente
+    reconstrucción exitosa. Es lo que permite reintentar sin pedirle al alumno otra captura.
+- **Alternativas descartadas**:
+
+  | Alternativa | Por qué no |
+  |---|---|
+  | Vectorizar en memoria al registrar y no subir nada al bucket | Un fallo del índice (servicio caído) perdería la única copia: habría que repetir la captura. Reescribe además el contrato entre registro, plan y build |
+  | Conservar la foto N días y purgarla por retención | Es lo que ya hacen los recortes, pero aquí no hay ningún lector durante esos días |
+  | Borrar también las fotos ya existentes en la propia migración | Un borrado irreversible de datos fuera de la BD no va dentro de una migración; lo hace el job (o `scripts`) cuando se decide |
+
+- **Despliegue**: SQL (`0237_fotos_registro_efimeras.sql`), después web; el servicio de reconocimiento no cambia. Las fotos que ya estaban en el bucket NO se borran solas: se limpian
+  ejecutando el job `purgar-fotos-registro` (o esperando a su cron).

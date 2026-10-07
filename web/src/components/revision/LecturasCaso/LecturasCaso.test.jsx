@@ -29,7 +29,7 @@ describe('LecturasCaso', () => {
         expect(screen.getAllByText('Válida').length).toBeGreaterThanOrEqual(2);
         expect(screen.getAllByText('No válida').length).toBeGreaterThanOrEqual(2);
         expect(tarjetas()).toHaveLength(2);
-        expect(screen.getByText('Sin foto de registro activa')).toBeInTheDocument();
+        expect(screen.getByText('La foto de registro no se conserva; solo se guarda el vector del rostro.')).toBeInTheDocument();
         // Es una gráfica hecha a mano: una columna por lectura con su score y sin el contenedor `data-slot="chart"` de la librería anterior.
         expect(columnas(container).map((c) => c.dataset.fila)).toEqual(['1', '2']);
         expect(container.querySelector('[data-slot="chart"]')).toBeNull();

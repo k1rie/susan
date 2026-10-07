@@ -301,6 +301,7 @@ Las funciones de `lib/api/biometria.js` no añaden envoltorios nuevos (siguen 72
 | `INDICE_MAPEO_INCOMPLETO` | El mapeo no corresponde al total de vectores del índice. | `count(mapeo) <> total_vectores` |
 | `INDICE_PLAN_OBSOLETO` | El plan cambió mientras se construía el índice; reintente. | Plantilla archivada/inexistente en el mapeo, o activa indexada que falta en el mapeo |
 | `INDICE_NO_REVERTIBLE` | La versión indicada no puede ponerse en uso. | Dimensión distinta o ya en uso con mapeo distinto |
+| `FOTO_NO_CONSERVADA` | La foto ya no se conserva: solo se guarda el vector del rostro en el índice. | `api_documento_url_autorizar` (tipos `plantilla` y `plantilla_foto`) sobre una foto ya purgada (ext. 18); HTTP 410, no asienta consulta |
 | `PARAMETRO_NO_ENCONTRADO` | El parámetro no existe. | Clave desconocida |
 | `PARAMETRO_VALOR_INVALIDO` | Texto con el rango (p. ej. "intervalo_muestreo_seg debe ser un entero entre 5 y 120.") | Valor fuera de tipo/rango o incoherente con otro parámetro |
 | `SERVICIO_NO_CONFIGURADO` | La cuenta de servicio del sistema no está configurada. | `app.id_cuenta_servicio()` sin fila |
@@ -972,6 +973,27 @@ Retorno de `listar`:
 
 Retorno de `marcar`: `{ "solicitadas": 500, "marcadas": 498 }`.
 
+### 3.20b `svc_fotos_registro_listar` y `svc_fotos_registro_marcar` (extensión 18)
+
+```sql
+CREATE FUNCTION public.svc_fotos_registro_listar(p_ids integer[] DEFAULT NULL, p_limit integer DEFAULT 200) RETURNS jsonb
+CREATE FUNCTION public.svc_fotos_registro_marcar(p_ids integer[]) RETURNS jsonb
+```
+
+- Llaman: `reconstruirIndice` (tras activar, con `p_ids` = las plantillas nuevas del build) y `POST /api/jobs/purgar-fotos-registro` (sin `p_ids`). Solo `service_role`, `SECURITY DEFINER`.
+- Mismo patrón que 3.20: (1) `listar`, (2) borrar objetos en Storage, (3) `marcar`. Si el proceso muere entre 2 y 3 la siguiente corrida vuelve a listar; borrar un objeto ausente no es error.
+- **Purgable** = plantilla con alguna foto no nula y (`id_indice IS NOT NULL` — su vector ya está en un índice activado — **o** `NOT activa` — archivada, no volverá al índice). Una plantilla activa sin indexar NUNCA es purgable: su foto es la única copia de su vector.
+- `listar` devuelve una fila por plantilla con TODOS sus objetos (la principal y las de `plantilla_foto`), para no dejar una plantilla a medias. `p_limit` cuenta plantillas (def. 200, máx. 1000). `p_ids` > 5000: `VALIDACION`.
+- `marcar` vuelve a comprobar la condición (una reversión entre listar y marcar deja la ruta intacta) y pone `objeto_foto = NULL` en `plantilla_facial` y en todas sus `plantilla_foto`. Conserva la fila (`faiss_id`, `id_indice`, `calidad`, `coseno_resto`). Idempotente. `p_ids` nulo o > 5000: `VALIDACION`.
+
+```json
+{ "pendientes_total": 412, "items": [ { "id_plantilla": 41, "objetos": ["registro/17/<uuid>.jpg", "registro/17/<uuid>.jpg"] } ] }
+```
+
+Retorno de `marcar`: `{ "solicitadas": 200, "marcadas": 198 }`.
+
+Otros contratos que cambian con la migración `0237`: `plantilla_facial.objeto_foto` y `plantilla_foto.objeto_foto` admiten `NULL`; `api_plantilla_alumno` añade `activa.foto_disponible` y `activa.fotos[].disponible` (aditivo; sigue sin emitir rutas); `api_documento_url_autorizar` añade el error `FOTO_NO_CONSERVADA`. `api_detecciones_caso.objeto_foto_registro` pasa a ser `null` una vez purgada la foto (la ruta ya lo admitía).
+
 ### 3.21 `svc_job_reconstruir_indice`
 
 ```sql
@@ -1193,7 +1215,23 @@ Administrador. Igual que el de `plantilla` con `urlDeDocumento('plantilla_foto')
 - "Archivar" = `plantilla_facial.activa = false`, y solo ocurre en `api_plantilla_registrar` (reemplazo) y en `api_consentimiento_revocar`. `app.vencer_consentimientos` NO archiva: la plantilla de un consentimiento vencido sigue activa y `svc_indice_plan` la sigue incluyendo con sus fotos.
 - Ninguna ruta borra fotos del bucket al archivar (§3.4: la foto anterior NO se borra); la purga RNF-05 solo cubre recortes; todas las FK son `RESTRICT`. El único borrado es la compensación `eliminarObjetoSilencioso` cuando falla el registro.
 - Las fotos extra siguen exactamente esa semántica: no tienen bandera propia, su estado es el de la plantilla padre; al archivar o revocar permanecen en la tabla y en el bucket; `svc_indice_plan` solo entrega fotos de plantillas ACTIVAS; la compensación borra TODAS las fotos subidas del intento.
-- **Brecha de retención** (preexistente, multiplicada por N con varias fotos): consulta de fotos de plantillas archivadas: `SELECT pf.objeto_foto FROM plantilla_foto pf JOIN plantilla_facial p USING (id_plantilla) WHERE NOT p.activa` (y, para consentimientos revocados o vencidos, `JOIN` con `consentimiento` por estatus). Seguimiento comprometido: un job `svc_job_purgar_fotos_archivadas` (listar, borrar objetos, marcar) con parámetro de retención; no se implementa aquí para no cambiar la semántica de archivado (RN-12). Ver `docs/DECISIONS.md` y `docs/RUNBOOK.md`.
+- **Brecha de retención** (preexistente, multiplicada por N con varias fotos; CERRADA por la extensión 18, ver §4.6 y `docs/DECISIONS.md` §8): consulta de fotos de plantillas archivadas: `SELECT pf.objeto_foto FROM plantilla_foto pf JOIN plantilla_facial p USING (id_plantilla) WHERE NOT p.activa` (y, para consentimientos revocados o vencidos, `JOIN` con `consentimiento` por estatus). Seguimiento comprometido: un job `svc_job_purgar_fotos_archivadas` (listar, borrar objetos, marcar) con parámetro de retención; no se implementa aquí para no cambiar la semántica de archivado (RN-12). Ver `docs/DECISIONS.md` y `docs/RUNBOOK.md`.
+
+### 4.6 Fotos de registro efímeras (extensión 18)
+
+- `reconstruirIndice` (`lib/server/indice.js`), al final y solo si todo salió bien (tras `activarIndice` en el servicio), llama a `purgarFotosRegistro` (`lib/server/fotosRegistro.js`) con los `id_plantilla` de las
+  entradas nuevas del build. El resultado trae `fotos_purgadas` (objetos borrados, o `null` si el borrado falló). **Un fallo del borrado no invalida la activación**: el índice ya está en uso y el job lo reintenta.
+- El borrado solo acepta rutas con la forma `registro/<id>/<uuid>.jpg` (`validarRutaObjeto`); cualquier otra se marca pero no se borra.
+- `POST /api/jobs/purgar-fotos-registro` (Bearer `CRON_SECRET`, `GET` y `POST`): barrido sin `p_ids`. Toma el bloqueo **del índice** (clave `indice`), no uno propio, para no correr mientras se reconstruye o revierte.
+  Respuesta `{ job, estado: 'ok', lotes, plantillas, objetos_borrados, marcadas, rutas_invalidas, pendientes_total, duracion_ms }` (o `estado: 'omitido'` si el bloqueo está ocupado).
+- Códigos de ruta nuevos (status explícito, no están en `STATUS_POR_CODIGO`), ambos 409 y con `details.plantillas: [{ id_plantilla, id_alumno }]`:
+
+| Código | Dónde | Cuándo |
+|---|---|---|
+| `PLANTILLAS_SIN_FOTO` | `reconstruirIndice` (también `POST /api/indice/reconstruir` y el job `reconstruir-indice`) | Alguna entrada que hay que construir desde su foto ya no la conserva (reconstrucción completa o cambio de dimensión sobre plantillas ya indexadas). Se rechaza antes de llamar al servicio. `details.fase = 'plan'` |
+| `REVERSION_PERDERIA_PLANTILLAS` | `revertirIndice` (`POST /api/indice/revertir`) | La versión destino no conoce una plantilla activa que ya no conserva su foto: quedaría sin vector. `details.fase = 'verificacion'` |
+
+- `FOTO_NO_CONSERVADA` (SQL) llega como HTTP 410 en `GET /api/documentos/plantilla/[id]` y `GET /api/documentos/plantilla_foto/[id]`; `lib/api/errors.js` lo registra en el grupo 410.
 
 ### 4.5 Compatibilidad y orden de despliegue
 
