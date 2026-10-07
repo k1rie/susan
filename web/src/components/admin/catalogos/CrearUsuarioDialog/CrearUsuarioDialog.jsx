@@ -1,89 +1,123 @@
 'use client';
 
-import { useId, useState } from 'react';
-import Button from '@/components/ui/Button';
+import { useRef, useState } from 'react';
 import Field from '@/components/ui/Field';
+import FormSection from '@/components/ui/FormSection';
 import Input from '@/components/ui/Input';
-import Modal from '@/components/ui/Modal';
-import Select from '@/components/ui/Select';
-import { useToast } from '@/components/ui/Toast';
+import { LIMITES } from '@/lib/formularios';
 import { crearUsuario } from '@/lib/http/admin.js';
-import { CORREO, mensajeDeError } from '../comun.js';
-import { ROLES_USUARIO, requiereVinculo } from './rolesUsuario.js';
+import PanelCatalogo from '../PanelCatalogo';
+import { useAltaCatalogo } from '../PanelCatalogo/useAltaCatalogo.js';
+import SelectorRol from '../SelectorRol';
+import { etiquetaRol, requiereVinculo } from './rolesUsuario.js';
+import { argumentosCrearUsuario, errorDeCampoUsuario, normalizarCorreoUsuario, validarUsuario } from './usuario.utils.js';
 import VinculoSelect from './VinculoSelect.jsx';
 
-// Crea la cuenta (RF-01): correo + rol + vínculo. Entrega la contraseña temporal a onCreado para que
-// el padre la muestre UNA sola vez; aquí no se guarda.
-export default function CrearUsuarioDialog({ open, onClose, onCreado }) {
+/**
+ * Crea la cuenta (RF-01) en un panel lateral: rol -> vínculo -> correo. El correo se prellena con el institucional del docente o
+ * alumno elegido (editable), y el servidor genera la contraseña temporal: llega a `onCreado(respuesta)` para que el padre la muestre UNA
+ * sola vez (PasswordTemporalModal); aquí no se guarda. La contraseña NO se captura (el contrato de la ruta no la acepta), así que no
+ * hay campo de contraseña: el panel lo dice con una línea.
+ *   inicial   { rol?, vinculo?: { value, label, description?, correo? } } para abrir con el vínculo y el correo ya puestos
+ *             (p. ej. desde «Crear cuenta de acceso» tras dar de alta a un docente).
+ */
+export default function CrearUsuarioDialog({ open, onClose, onCreado, inicial }) {
     if (!open) return null;
-    return <Formulario onClose={onClose} onCreado={onCreado} />;
+    return <Formulario onClose={onClose} onCreado={onCreado} inicial={inicial} />;
 }
 
-function Formulario({ onClose, onCreado }) {
-    const formId = useId();
-    const { toast } = useToast();
-    const [correo, setCorreo] = useState('');
-    const [rol, setRol] = useState('docente');
-    const [vinculo, setVinculo] = useState('');
-    const [errores, setErrores] = useState({});
-    const [guardando, setGuardando] = useState(false);
+function Formulario({ onClose, onCreado, inicial }) {
+    const vinculoInicial = inicial?.vinculo ?? null;
+    // Opción elegida (con su correo): no es un campo del formulario, solo la etiqueta del Combobox y la fuente del correo sugerido.
+    const [opcionVinculo, setOpcionVinculo] = useState(vinculoInicial);
+    // Correo sugerido por el vínculo y si la persona lo escribió a mano (si sí, elegir otro vínculo ya no lo pisa).
+    const [sugerido, setSugerido] = useState(vinculoInicial?.correo ? { correo: vinculoInicial.correo, de: vinculoInicial.label } : null);
+    const correoManual = useRef(false);
 
-    const enviar = async (ev) => {
-        ev.preventDefault();
-        const e = {};
-        if (!CORREO.test(correo.trim())) e.correo = 'Escriba un correo válido.';
-        if (requiereVinculo(rol) && !vinculo) e.vinculo = `Seleccione el ${rol} vinculado.`;
-        setErrores(e);
-        if (Object.keys(e).length) return;
-        setGuardando(true);
-        try {
-            const r = await crearUsuario({
-                correo: correo.trim(),
-                rol,
-                idDocente: rol === 'docente' ? Number(vinculo) : undefined,
-                idAlumno: rol === 'alumno' ? Number(vinculo) : undefined,
-            });
-            onCreado?.(r);
-        } catch (err) {
-            toast({ tone: 'danger', title: 'No se pudo crear la cuenta', message: mensajeDeError(err) });
-        } finally {
-            setGuardando(false);
+    const valoresIniciales = { rol: inicial?.rol ?? 'docente', vinculo: vinculoInicial?.value ?? '', correo: vinculoInicial?.correo ?? '' };
+    const { f, campo, formId, enviar } = useAltaCatalogo({
+        editando: false,
+        inicial: valoresIniciales,
+        validar: validarUsuario,
+        mapearError: errorDeCampoUsuario,
+        guardar: (v) => crearUsuario(argumentosCrearUsuario(v)),
+        onCreado,
+        onClose,
+    });
+
+    const rol = f.valores.rol;
+    const correo = campo('correo');
+    const vinculo = campo('vinculo');
+    const correoEsSugerido = Boolean(sugerido) && f.valores.correo === sugerido.correo;
+
+    const quitarSugerido = () => {
+        if (correoEsSugerido && !correoManual.current) f.setCampo('correo', '');
+        setSugerido(null);
+    };
+
+    const cambiarRol = (nuevo) => {
+        if (nuevo === rol) return;
+        f.setCampo('rol', nuevo);
+        f.setCampo('vinculo', '');
+        setOpcionVinculo(null);
+        quitarSugerido();
+    };
+
+    const cambiarVinculo = (valor, opcion) => {
+        f.setCampo('vinculo', valor);
+        setOpcionVinculo(opcion);
+        if (opcion?.correo) {
+            // El correo institucional del docente o alumno es el candidato natural: se pone solo si la persona no escribió uno.
+            if (!correoManual.current) f.setCampo('correo', opcion.correo);
+            setSugerido({ correo: opcion.correo, de: opcion.label });
+        } else {
+            quitarSugerido();
         }
     };
 
     return (
-        <Modal
-            open
-            onClose={guardando ? undefined : onClose}
+        <PanelCatalogo
+            f={f}
+            formId={formId}
+            onEnviar={enviar}
+            onClose={onClose}
             title="Nueva cuenta de usuario"
-            closeOnOverlay={false}
-            footer={
-                <>
-                    <Button variant="secondary" onClick={onClose} disabled={guardando}>
-                        Cancelar
-                    </Button>
-                    <Button type="submit" form={formId} loading={guardando}>
-                        Crear cuenta
-                    </Button>
-                </>
-            }
+            description="Se genera una contraseña temporal que verás una sola vez al terminar."
+            etiquetaCrear="Crear cuenta"
+            tituloError="No se pudo crear la cuenta"
         >
-            <form id={formId} onSubmit={enviar} noValidate className="flex flex-col gap-4">
-                <Field label="Correo" required error={errores.correo} hint="Se generará una contraseña temporal.">
-                    <Input type="email" value={correo} onChange={(e) => setCorreo(e.target.value)} autoComplete="off" />
+            {/* Si ya viene con vínculo (desde «Crear cuenta de acceso» tras un alta) el rol está decidido: se pliega para que el teléfono
+                muestre de entrada el vínculo y el correo en vez de cuatro tarjetas. */}
+            <FormSection title="Rol de la cuenta" collapsible defaultOpen={!vinculoInicial} summary={etiquetaRol(rol)}>
+                <Field as="fieldset" label="Rol" required reserveError>
+                    <SelectorRol label="Rol de la cuenta" name="rol" value={rol} onChange={cambiarRol} />
                 </Field>
-                <Field label="Rol" required>
-                    <Select
-                        value={rol}
+            </FormSection>
+            <FormSection title="Datos de la cuenta">
+                {requiereVinculo(rol) && (
+                    <VinculoSelect rol={rol} value={f.valores.vinculo} selected={opcionVinculo ?? undefined} onChange={cambiarVinculo} error={vinculo.error} />
+                )}
+                <Field
+                    label="Correo de acceso"
+                    required
+                    error={correo.error}
+                    hint={correoEsSugerido ? `Tomado del correo institucional de ${sugerido.de}. Puedes cambiarlo.` : 'Con este correo iniciará sesión.'}
+                    reserveError
+                >
+                    <Input
+                        {...correo.props}
+                        type="email"
+                        inputMode="email"
+                        maxLength={LIMITES.correo}
+                        transform={normalizarCorreoUsuario}
+                        autoComplete="off"
                         onChange={(e) => {
-                            setRol(e.target.value);
-                            setVinculo('');
+                            if (e.target.value !== sugerido?.correo) correoManual.current = true;
+                            correo.props.onChange(e);
                         }}
-                        options={ROLES_USUARIO}
                     />
                 </Field>
-                <VinculoSelect rol={rol} value={vinculo} onChange={setVinculo} error={errores.vinculo} />
-            </form>
-        </Modal>
+            </FormSection>
+        </PanelCatalogo>
     );
 }

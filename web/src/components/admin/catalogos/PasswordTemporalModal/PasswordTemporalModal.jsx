@@ -1,5 +1,6 @@
 'use client';
 
+import { Check, Copy } from 'lucide-react';
 import { useRef, useState } from 'react';
 import Alert from '@/components/ui/Alert';
 import Button from '@/components/ui/Button';
@@ -61,7 +62,17 @@ export default function PasswordTemporalModal({ open, correo, contrasena, titulo
                     />
                 </label>
                 <div className="flex flex-wrap items-center gap-3">
-                    <Button variant="secondary" onClick={copiar}>
+                    <Button
+                        variant="secondary"
+                        onClick={copiar}
+                        icon={
+                            copiada ? (
+                                <Check aria-hidden="true" className="size-4" strokeWidth={2} />
+                            ) : (
+                                <Copy aria-hidden="true" className="size-4" strokeWidth={1.75} />
+                            )
+                        }
+                    >
                         Copiar
                     </Button>
                     <span role="status" aria-live="polite" className="text-sm text-muted-foreground">
