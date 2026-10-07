@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import SesionClase from './SesionClase.jsx';
 import { ApiError } from '@/lib/api/errors.js';
 import { ahora } from '@/lib/api/plataforma.js';
-import { abrirSesion, sesionMonitor } from '@/lib/api/sesiones.js';
+import { abrirSesion, cerrarSesion, paseListaManual, sesionMonitor } from '@/lib/api/sesiones.js';
 
 vi.mock('@/lib/api/sesiones.js', () => ({ sesionMonitor: vi.fn(), abrirSesion: vi.fn(), cerrarSesion: vi.fn(), registrarManual: vi.fn(), paseListaManual: vi.fn() }));
 vi.mock('@/lib/api/plataforma.js', () => ({ ahora: vi.fn() }));
@@ -24,8 +24,17 @@ const programada = (extra = {}) => ({ sesion: { ...base, estatus: 'programada', 
 
 const delante = (a, b) => Boolean(a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING);
 
+// Pasa del paso 2 (la cámara) al 3 (revisar y cerrar) con el botón del panel y devuelve la tarjeta de decisión de cierre.
+const irARevision = async () => {
+    const panel = await screen.findByRole('region', { name: 'Pase de lista con cámara' });
+    fireEvent.click(within(panel).getByRole('button', { name: 'Revisar y cerrar' }));
+    return screen.findByRole('region', { name: 'Cierre del pase de lista' });
+};
+
 beforeEach(() => {
     sesionMonitor.mockReset();
+    cerrarSesion.mockReset();
+    paseListaManual.mockReset();
     abrirSesion.mockReset();
     ahora.mockReset().mockResolvedValue({ hora: '07:05:00', fecha: '2026-09-14', reloj_simulado: false });
 });
@@ -41,73 +50,40 @@ describe('SesionClase: sesión automática abierta (se pasa lista aquí)', () =>
         expect(screen.getByRole('link', { name: 'Volver al panel' })).toHaveAttribute('href', '/docente');
     });
 
-    it('el panel de pase de lista va PRIMERO: antes de las cifras, las gráficas y la tabla', async () => {
+    it('la captura va PRIMERO, tras la franja de pasos: sin cifras, gráficas, cámaras ni tabla a la vista (eso es la revisión)', async () => {
         sesionMonitor.mockResolvedValue(abiertaAuto());
         render(<SesionClase idSesion={19} />);
         const panel = await screen.findByRole('region', { name: 'Pase de lista con cámara' });
-        const cifras = screen.getAllByText('Inscritos')[0];
-        const grafica = screen.getByRole('group', { name: 'Asistencia de la sesión' });
-        const tabla = screen.getByRole('table', { name: 'Alumnos inscritos' });
-        expect(delante(panel, cifras)).toBe(true);
-        expect(delante(panel, grafica)).toBe(true);
-        expect(delante(panel, tabla)).toBe(true);
-        // El panel es lo primero después del encabezado: lo precede solo el h1.
-        expect(delante(screen.getByRole('heading', { level: 1 }), panel)).toBe(true);
+        const pasos = screen.getByRole('navigation', { name: 'Pasos para pasar lista' });
+        expect(delante(screen.getByRole('heading', { level: 1 }), pasos)).toBe(true);
+        expect(delante(pasos, panel)).toBe(true);
+        expect(screen.queryByRole('group', { name: 'Asistencia de la sesión' })).toBeNull();
+        expect(screen.queryByRole('table')).toBeNull();
+        expect(screen.queryByText('Cámaras del aula')).toBeNull();
+        expect(screen.queryByText('Ventana de tolerancia')).toBeNull();
+        expect(screen.queryByText('Inscritos')).toBeNull();
     });
 
-    it('el panel trae la cifra «N de M presentes», el chip de estado y las acciones; el cierre, bloqueado con su motivo', async () => {
+    it('la franja de pasos marca «Pasar lista» como el paso actual y «Abrir la sesión» como hecho', async () => {
+        sesionMonitor.mockResolvedValue(abiertaAuto());
+        render(<SesionClase idSesion={19} />);
+        const pasos = await screen.findByRole('navigation', { name: 'Pasos para pasar lista' });
+        expect(pasos).toHaveTextContent('Hecho: Abrir la sesión');
+        expect(pasos).toHaveTextContent('Paso actual: Pasar lista');
+        expect(pasos).toHaveTextContent('Pendiente: Revisar y cerrar');
+        expect(screen.getByText('Apunta la cámara al grupo: el sistema reconoce a los alumnos solo.')).toBeInTheDocument();
+    });
+
+    it('el panel trae la cifra «N de M presentes», el chip de estado y las acciones: «Revisar y cerrar» y registrar', async () => {
         sesionMonitor.mockResolvedValue(abiertaAuto());
         const { container } = render(<SesionClase idSesion={19} />);
         const panel = await screen.findByRole('region', { name: 'Pase de lista con cámara' });
         expect(within(panel).getByRole('status')).toHaveTextContent('En pausa');
         expect(container.querySelector('p[aria-live]')).toHaveTextContent('1 de 2 presentes');
-        const cerrar = within(panel).getByRole('button', { name: 'Cerrar pase de lista' });
-        expect(cerrar).toBeDisabled();
-        expect(cerrar).toHaveAccessibleDescription('El cierre se habilita al terminar la tolerancia: faltan 15 min.');
+        expect(within(panel).getByRole('button', { name: 'Revisar y cerrar' })).toBeEnabled();
         expect(within(panel).getByRole('button', { name: 'Registrar manualmente' })).toBeInTheDocument();
-    });
-
-    it('monitor con alumnos: «Sin lecturas» y el registro manual por fila (el motivo viaja con el botón)', async () => {
-        sesionMonitor.mockResolvedValue(abiertaAuto());
-        render(<SesionClase idSesion={19} />);
-        await waitFor(() => expect(screen.getByText('Sin lecturas')).toBeTruthy());
-        expect(screen.getByText('3/3')).toBeTruthy();
-        // Uno del panel y uno de la fila de Ana (sin lecturas válidas).
-        expect(screen.getAllByRole('button', { name: 'Registrar manualmente' })).toHaveLength(2);
-        expect(screen.getAllByText('Sin lecturas válidas')).toHaveLength(1);
-    });
-
-    it('4 cifras con icono (Inscritos, Presentes, Retardos, Sin registro), anillo, medidor y actividad (sin los 8 contadores)', async () => {
-        sesionMonitor.mockResolvedValue(abiertaAuto({ totales: { ...totales, capturas: 12, detecciones: 40, detecciones_validas: 31 } }));
-        render(<SesionClase idSesion={19} />);
-        await waitFor(() => expect(screen.getByText('Sin lecturas')).toBeTruthy());
-        for (const etiqueta of ['Inscritos', 'Presentes', 'Retardos', 'Sin registro']) {
-            const tarjeta = screen.getAllByText(etiqueta).map((n) => n.closest('div.group\\/stat, div.rounded-xl')).find((n) => n?.querySelector('svg'));
-            expect(tarjeta, etiqueta).toBeTruthy();
-            expect(tarjeta.querySelector('svg')).toHaveAttribute('aria-hidden', 'true');
-        }
-        expect(screen.queryByText('Detecciones validas')).toBeNull();
-        expect(screen.getByRole('group', { name: 'Asistencia de la sesión' })).toHaveAccessibleDescription('Presentes: 1 (50 %); Retardos: 0 (0 %); Sin registro: 1 (50 %); Pendientes: 0 (0 %)');
-        expect(screen.getByRole('group', { name: 'Actividad de reconocimiento' })).toHaveAccessibleDescription('Capturas: 12; Detecciones: 40; Det. válidas: 31');
-        expect(within(screen.getByRole('group', { name: 'Asistencia de la sesión' })).getByRole('meter', { name: 'Presentes ahora: 50 %' })).toHaveAccessibleDescription('1 de 2 inscritos');
-        expect(screen.getByRole('progressbar', { name: 'Avance de la ventana de tolerancia' })).toHaveAttribute('aria-valuenow', '25');
-    });
-
-    it('sin actividad, la gráfica de actividad avisa en lugar de quedar vacía', async () => {
-        sesionMonitor.mockResolvedValue(abiertaAuto());
-        render(<SesionClase idSesion={19} />);
-        await waitFor(() => expect(screen.getByText('Aún sin capturas')).toBeTruthy());
-        expect(screen.getByRole('group', { name: 'Actividad de reconocimiento' })).toHaveAccessibleDescription('Aún no hay capturas ni detecciones.');
-    });
-
-    it('terminada la tolerancia: el cierre se habilita y abre la confirmación', async () => {
-        sesionMonitor.mockResolvedValue(abiertaAuto({ sesion: { ...base, estatus: 'abierta', modo_registro: 'automatico', en_ventana: false, fase: 'fuera_de_ventana', minuto_actual: 21 } }));
-        render(<SesionClase idSesion={19} />);
-        const cerrar = await screen.findByRole('button', { name: 'Cerrar pase de lista' });
-        expect(cerrar).toBeEnabled();
-        expect(screen.getAllByRole('status')[0]).toHaveTextContent('Fuera de la ventana');
-        fireEvent.click(cerrar);
-        expect(await screen.findByText('Los alumnos sin lecturas quedan como ausentes.')).toBeInTheDocument();
+        // Cerrar no está aquí: revisar no cierra nada y el cierre vive en el paso 3.
+        expect(within(panel).queryByRole('button', { name: 'Cerrar pase de lista' })).toBeNull();
     });
 
     it('«Registrar manualmente» del panel abre el diálogo de registro', async () => {
@@ -119,66 +95,209 @@ describe('SesionClase: sesión automática abierta (se pasa lista aquí)', () =>
     });
 });
 
+describe('SesionClase: paso 3, revisar y cerrar (sesión automática)', () => {
+    it('«Revisar y cerrar» cambia de vista: el paso 3 pasa a ser el actual y la cámara sigue montada, solo oculta', async () => {
+        sesionMonitor.mockResolvedValue(abiertaAuto());
+        render(<SesionClase idSesion={19} />);
+        await irARevision();
+        const pasos = screen.getByRole('navigation', { name: 'Pasos para pasar lista' });
+        expect(within(pasos).getByRole('button', { name: /Revisar y cerrar/ })).toHaveAttribute('aria-current', 'step');
+        expect(screen.getByText('Revisa quién falta y cierra el pase de lista.')).toBeInTheDocument();
+        // La captura no se desmonta: la cámara sigue muestreando mientras dure la tolerancia, y volver a ella no la reinicia.
+        const panel = screen.getByRole('region', { name: 'Pase de lista con cámara', hidden: true });
+        expect(panel.parentElement).toHaveClass('hidden');
+    });
+
+    it('la decisión va primero: cuántos faltan y el cierre bloqueado, con su motivo, mientras dura la tolerancia', async () => {
+        sesionMonitor.mockResolvedValue(abiertaAuto());
+        render(<SesionClase idSesion={19} />);
+        const cierre = await irARevision();
+        expect(within(cierre).getByRole('heading', { name: 'Falta 1 alumno por registrar' })).toBeInTheDocument();
+        const cerrar = within(cierre).getByRole('button', { name: 'Cerrar pase de lista' });
+        expect(cerrar).toBeDisabled();
+        expect(cerrar).toHaveAccessibleDescription('El cierre se habilita al terminar la tolerancia: faltan 15 min. La cámara sigue reconociendo mientras revisas.');
+        expect(within(cierre).getByRole('button', { name: 'Volver a la cámara' })).toBeEnabled();
+    });
+
+    it('después de la decisión van las cifras y quién falta; el detalle técnico queda plegado hasta abrirlo', async () => {
+        sesionMonitor.mockResolvedValue(abiertaAuto({ totales: { ...totales, capturas: 12, detecciones: 40, detecciones_validas: 31 } }));
+        render(<SesionClase idSesion={19} />);
+        const cierre = await irARevision();
+        const grafica = screen.getByRole('group', { name: 'Asistencia de la sesión' });
+        const alumnos = screen.getByRole('region', { name: 'Alumnos' });
+        expect(delante(cierre, grafica)).toBe(true);
+        expect(delante(grafica, alumnos)).toBe(true);
+        // Tolerancia, actividad, cámaras y lecturas por alumno no se montan hasta abrir «Más detalle de la sesión».
+        expect(screen.queryByRole('table')).toBeNull();
+        expect(screen.queryByRole('progressbar', { name: 'Avance de la ventana de tolerancia' })).toBeNull();
+        fireEvent.click(screen.getByRole('button', { name: /Más detalle de la sesión/ }));
+        expect(screen.getByRole('table', { name: 'Alumnos inscritos' })).toBeInTheDocument();
+        expect(screen.getByRole('progressbar', { name: 'Avance de la ventana de tolerancia' })).toHaveAttribute('aria-valuenow', '25');
+        expect(screen.getByRole('region', { name: 'Cámaras del aula' })).toBeInTheDocument();
+        expect(screen.getByRole('group', { name: 'Actividad de reconocimiento' })).toHaveAccessibleDescription('Capturas: 12; Detecciones: 40; Det. válidas: 31');
+    });
+
+    it('4 cifras con icono (Inscritos, Presentes, Retardos, Sin registro), anillo y medidor «Presentes ahora» (sin los 8 contadores)', async () => {
+        sesionMonitor.mockResolvedValue(abiertaAuto());
+        render(<SesionClase idSesion={19} />);
+        await irARevision();
+        for (const etiqueta of ['Inscritos', 'Presentes', 'Retardos', 'Sin registro']) {
+            const tarjeta = screen.getAllByText(etiqueta).map((n) => n.closest('div.group\\/stat, div.rounded-xl')).find((n) => n?.querySelector('svg'));
+            expect(tarjeta, etiqueta).toBeTruthy();
+            expect(tarjeta.querySelector('svg')).toHaveAttribute('aria-hidden', 'true');
+        }
+        expect(screen.queryByText('Detecciones validas')).toBeNull();
+        expect(screen.getByRole('group', { name: 'Asistencia de la sesión' })).toHaveAccessibleDescription('Presentes: 1 (50 %); Retardos: 0 (0 %); Sin registro: 1 (50 %); Pendientes: 0 (0 %)');
+        expect(within(screen.getByRole('group', { name: 'Asistencia de la sesión' })).getByRole('meter', { name: 'Presentes ahora: 50 %' })).toHaveAccessibleDescription('1 de 2 inscritos');
+    });
+
+    it('sin actividad, la gráfica de actividad (dentro del detalle) avisa en lugar de quedar vacía', async () => {
+        sesionMonitor.mockResolvedValue(abiertaAuto());
+        render(<SesionClase idSesion={19} />);
+        await irARevision();
+        fireEvent.click(screen.getByRole('button', { name: /Más detalle de la sesión/ }));
+        expect(screen.getByText('Aún sin capturas')).toBeInTheDocument();
+        expect(screen.getByRole('group', { name: 'Actividad de reconocimiento' })).toHaveAccessibleDescription('Aún no hay capturas ni detecciones.');
+    });
+
+    it('«Sin registro» lista a quien falta, con sus lecturas, y permite registrarlo a mano desde su fila', async () => {
+        sesionMonitor.mockResolvedValue(abiertaAuto());
+        render(<SesionClase idSesion={19} />);
+        await irARevision();
+        const alumnos = screen.getByRole('region', { name: 'Alumnos' });
+        expect(within(alumnos).getByText('Ana')).toBeInTheDocument();
+        expect(within(alumnos).queryByText('Beto')).toBeNull();
+        expect(within(alumnos).getByText('E1 · 0/3 lecturas')).toBeInTheDocument();
+        fireEvent.click(within(alumnos).getByRole('button', { name: 'Registrar manualmente a Ana' }));
+        expect(await screen.findByRole('dialog')).toHaveTextContent('Registrar manualmente');
+        // «Todos» deja ver también a quien ya tiene registro.
+        fireEvent.click(within(alumnos).getByRole('button', { name: /Todos/ }));
+        expect(within(alumnos).getByText('Beto')).toBeInTheDocument();
+    });
+
+    it('terminada la tolerancia: el cierre se habilita, avisa qué pasa con quien falta y abre la confirmación', async () => {
+        sesionMonitor.mockResolvedValue(abiertaAuto({ sesion: { ...base, estatus: 'abierta', modo_registro: 'automatico', en_ventana: false, fase: 'fuera_de_ventana', minuto_actual: 21 } }));
+        render(<SesionClase idSesion={19} />);
+        const cierre = await irARevision();
+        const cerrar = within(cierre).getByRole('button', { name: 'Cerrar pase de lista' });
+        expect(cerrar).toBeEnabled();
+        expect(cerrar).toHaveAccessibleDescription('Si cierras ahora quedarán como ausentes. Puedes registrarlos a mano antes.');
+        expect(screen.getAllByRole('status')[0]).toHaveTextContent('Fuera de la ventana');
+        fireEvent.click(cerrar);
+        expect(await screen.findByText('Los alumnos sin lecturas quedan como ausentes.')).toBeInTheDocument();
+    });
+
+    it('si ya nadie falta, el titular lo dice y el cierre no advierte de ausentes', async () => {
+        const todos = alumnos.map((a) => ({ ...a, estado: 'presente', lecturas_validas: 3 }));
+        sesionMonitor.mockResolvedValue(abiertaAuto({ alumnos: todos, totales: { ...totales, presentes: 2, sin_registro: 0 }, sesion: { ...base, estatus: 'abierta', modo_registro: 'automatico', en_ventana: false, fase: 'fuera_de_ventana', minuto_actual: 21 } }));
+        render(<SesionClase idSesion={19} />);
+        const cierre = await irARevision();
+        expect(within(cierre).getByRole('heading', { name: 'Todos los alumnos tienen registro' })).toBeInTheDocument();
+        expect(within(cierre).getByRole('button', { name: 'Cerrar pase de lista' })).toHaveAccessibleDescription('Ya puedes cerrar el pase de lista.');
+    });
+
+    it('«Volver a la cámara» regresa al paso 2', async () => {
+        sesionMonitor.mockResolvedValue(abiertaAuto());
+        render(<SesionClase idSesion={19} />);
+        const cierre = await irARevision();
+        fireEvent.click(within(cierre).getByRole('button', { name: 'Volver a la cámara' }));
+        expect(screen.queryByRole('region', { name: 'Cierre del pase de lista' })).toBeNull();
+        expect(screen.getByRole('region', { name: 'Pase de lista con cámara' }).parentElement).not.toHaveClass('hidden');
+        expect(screen.getByRole('navigation', { name: 'Pasos para pasar lista' })).toHaveTextContent('Paso actual: Pasar lista');
+    });
+
+    it('los pasos de la franja también llevan de la cámara a la revisión y de vuelta', async () => {
+        sesionMonitor.mockResolvedValue(abiertaAuto());
+        render(<SesionClase idSesion={19} />);
+        const pasos = await screen.findByRole('navigation', { name: 'Pasos para pasar lista' });
+        fireEvent.click(within(pasos).getByRole('button', { name: /Revisar y cerrar/ }));
+        expect(await screen.findByRole('region', { name: 'Cierre del pase de lista' })).toBeInTheDocument();
+        fireEvent.click(within(pasos).getByRole('button', { name: /Pasar lista/ }));
+        expect(screen.queryByRole('region', { name: 'Cierre del pase de lista' })).toBeNull();
+    });
+});
+
 describe('SesionClase: llegar con ?pasar-lista=1', () => {
-    it('muestra la guía de 3 pasos y enfoca el panel', async () => {
+    it('enfoca el panel de captura, con la franja de pasos antes y el paso 2 como actual', async () => {
         sesionMonitor.mockResolvedValue(abiertaAuto());
         render(<SesionClase idSesion={19} pasarLista />);
-        const guia = await screen.findByRole('region', { name: 'Así se pasa lista' });
-        const pasos = within(guia).getAllByRole('listitem');
-        expect(pasos).toHaveLength(3);
-        expect(pasos[0]).toHaveTextContent('Sesión abierta');
-        expect(pasos[1]).toHaveTextContent('Apunta la cámara al grupo');
-        expect(pasos[2]).toHaveTextContent('Revisa y cierra');
-        expect(screen.getByRole('region', { name: 'Pase de lista con cámara' })).toHaveFocus();
-        // La guía va antes del panel.
-        expect(delante(guia, screen.getByRole('region', { name: 'Pase de lista con cámara' }))).toBe(true);
+        const panel = await screen.findByRole('region', { name: 'Pase de lista con cámara' });
+        const pasos = screen.getByRole('navigation', { name: 'Pasos para pasar lista' });
+        expect(within(pasos).getAllByRole('listitem')).toHaveLength(3);
+        expect(pasos).toHaveTextContent('Paso actual: Pasar lista');
+        expect(panel).toHaveFocus();
+        expect(delante(pasos, panel)).toBe(true);
     });
 
-    it('la guía se puede descartar y no vuelve con el siguiente sondeo', async () => {
-        sesionMonitor.mockResolvedValue(abiertaAuto());
-        render(<SesionClase idSesion={19} pasarLista />);
-        await screen.findByRole('region', { name: 'Así se pasa lista' });
-        fireEvent.click(screen.getByRole('button', { name: 'Ocultar la guía' }));
-        expect(screen.queryByRole('region', { name: 'Así se pasa lista' })).toBeNull();
-        expect(screen.getByRole('region', { name: 'Pase de lista con cámara' })).toBeInTheDocument();
-    });
-
-    it('sin el parámetro no hay guía ni foco forzado', async () => {
+    it('sin el parámetro la franja de pasos es la misma, pero no se fuerza el foco', async () => {
         sesionMonitor.mockResolvedValue(abiertaAuto());
         render(<SesionClase idSesion={19} />);
         const panel = await screen.findByRole('region', { name: 'Pase de lista con cámara' });
-        expect(screen.queryByRole('region', { name: 'Así se pasa lista' })).toBeNull();
+        expect(screen.getByRole('navigation', { name: 'Pasos para pasar lista' })).toBeInTheDocument();
         expect(panel).not.toHaveFocus();
     });
 
-    it('en una sesión manual la guía habla de marcar y guardar', async () => {
+    it('en una sesión manual la franja habla de marcar y de guardar', async () => {
         sesionMonitor.mockResolvedValue({ sesion: { ...base, estatus: 'abierta', modo_registro: 'manual', en_ventana: true, fase: 'presente', minuto_actual: 5 }, camaras: [], alumnos, totales });
         render(<SesionClase idSesion={19} pasarLista />);
-        const guia = await screen.findByRole('region', { name: 'Así se pasa lista' });
-        expect(guia).toHaveTextContent('Marca a cada alumno');
-        expect(guia).toHaveTextContent('Guarda y cierra');
-    });
-
-    it('en una sesión cerrada o programada la guía no aplica', async () => {
-        sesionMonitor.mockResolvedValue(programada());
-        render(<SesionClase idSesion={19} pasarLista />);
-        await screen.findByRole('button', { name: 'Abrir sesión y pasar lista' });
-        expect(screen.queryByRole('region', { name: 'Así se pasa lista' })).toBeNull();
+        const pasos = await screen.findByRole('navigation', { name: 'Pasos para pasar lista' });
+        expect(pasos).toHaveTextContent('Marcar alumnos');
+        expect(pasos).toHaveTextContent('Guardar y cerrar');
+        expect(pasos).not.toHaveTextContent('Revisar y cerrar');
     });
 });
 
 describe('SesionClase: sesión manual abierta', () => {
     const manual = () => ({ sesion: { ...base, estatus: 'abierta', modo_registro: 'manual', en_ventana: true, fase: 'presente', minuto_actual: 15 }, camaras: [], alumnos, totales });
 
-    it('el encabezado es «Pasar lista (manual)» y el pase manual es el contenido principal, con aviso', async () => {
+    it('el encabezado es «Pasar lista (manual)»; la franja de pasos y el avance reemplazan al aviso de modo manual', async () => {
         sesionMonitor.mockResolvedValue(manual());
         render(<SesionClase idSesion={19} />);
-        await waitFor(() => expect(screen.getByText('Sesión en modo manual')).toBeTruthy());
-        expect(screen.getByRole('heading', { level: 1, name: 'Pasar lista (manual)' })).toBeInTheDocument();
+        expect(await screen.findByRole('heading', { level: 1, name: 'Pasar lista (manual)' })).toBeInTheDocument();
+        expect(screen.getByRole('navigation', { name: 'Pasos para pasar lista' })).toHaveTextContent('Paso actual: Marcar alumnos');
+        expect(screen.queryByText('Sesión en modo manual')).toBeNull();
         expect(screen.getByRole('progressbar', { name: 'Alumnos marcados' })).toHaveAttribute('aria-valuetext', '1 de 2');
         // La sugerencia por hora se dice una vez (minuto 15 = retardo), no en una columna por fila.
         expect(screen.getByText('Sugerido a esta hora').parentElement).toHaveTextContent('Sugerido a esta hora Retardo');
         expect(screen.queryByRole('columnheader', { name: 'Sugerido' })).toBeNull();
+    });
+
+    it('marcar a un alumno es UN toque (botones Presente / Retardo / Ausente); otro toque lo desmarca y el avance lo sigue', async () => {
+        sesionMonitor.mockResolvedValue(manual());
+        render(<SesionClase idSesion={19} />);
+        const grupo = await screen.findByRole('group', { name: 'Estado de Ana' });
+        expect(within(grupo).getAllByRole('button').map((b) => b.textContent)).toEqual(['Presente', 'Retardo', 'Ausente']);
+        const presente = within(grupo).getByRole('button', { name: 'Presente' });
+        expect(presente).toHaveAttribute('aria-pressed', 'false');
+        expect(screen.queryByRole('combobox')).toBeNull();
+        fireEvent.click(presente);
+        expect(presente).toHaveAttribute('aria-pressed', 'true');
+        expect(screen.getByRole('progressbar', { name: 'Alumnos marcados' })).toHaveAttribute('aria-valuetext', '2 de 2');
+        // Con todos marcados el paso 3 («Guardar y cerrar») pasa a ser el actual.
+        expect(screen.getByRole('navigation', { name: 'Pasos para pasar lista' })).toHaveTextContent('Paso actual: Guardar y cerrar');
+        fireEvent.click(presente);
+        expect(presente).toHaveAttribute('aria-pressed', 'false');
+        expect(screen.getByRole('progressbar', { name: 'Alumnos marcados' })).toHaveAttribute('aria-valuetext', '1 de 2');
+        expect(screen.getByRole('navigation', { name: 'Pasos para pasar lista' })).toHaveTextContent('Paso actual: Marcar alumnos');
+    });
+
+    it('«Marcar restantes según la hora» marca a quien falta con la sugerencia y respeta lo ya marcado', async () => {
+        sesionMonitor.mockResolvedValue(manual());
+        render(<SesionClase idSesion={19} />);
+        fireEvent.click(await screen.findByRole('button', { name: 'Marcar restantes según la hora' }));
+        expect(within(screen.getByRole('group', { name: 'Estado de Ana' })).getByRole('button', { name: 'Retardo' })).toHaveAttribute('aria-pressed', 'true');
+        expect(within(screen.getByRole('group', { name: 'Estado de Beto' })).getByRole('button', { name: 'Presente' })).toHaveAttribute('aria-pressed', 'true');
+    });
+
+    it('«Guardar y cerrar sesión de clase» envía lo marcado y cierra la sesión', async () => {
+        sesionMonitor.mockResolvedValue(manual());
+        paseListaManual.mockResolvedValue({ procesados: 2 });
+        cerrarSesion.mockResolvedValue({});
+        render(<SesionClase idSesion={19} />);
+        fireEvent.click(await screen.findByRole('button', { name: 'Marcar restantes según la hora' }));
+        fireEvent.click(screen.getByRole('button', { name: 'Guardar y cerrar sesión de clase' }));
+        await waitFor(() => expect(cerrarSesion).toHaveBeenCalledWith({ idSesion: 19 }));
+        expect(paseListaManual).toHaveBeenCalledWith({ idSesion: 19, registros: [{ id_alumno: 1, estado: 'retardo' }, { id_alumno: 2, estado: 'presente' }] });
     });
 
     it('con la misma jerarquía de acciones: una primaria (guardar y cerrar) y secundarias', async () => {
@@ -209,21 +328,40 @@ describe('SesionClase: sesión programada', () => {
         expect(screen.queryByRole('group', { name: 'Asistencia de la sesión' })).toBeNull();
     });
 
+    it('la franja de pasos muestra el recorrido completo con «Abrir la sesión» como el paso actual', async () => {
+        sesionMonitor.mockResolvedValue(programada());
+        render(<SesionClase idSesion={19} />);
+        const pasos = await screen.findByRole('navigation', { name: 'Pasos para pasar lista' });
+        expect(pasos).toHaveTextContent('Paso actual: Abrir la sesión');
+        expect(pasos).toHaveTextContent('Pendiente: Pasar lista');
+        expect(pasos).toHaveTextContent('Pendiente: Revisar y cerrar');
+        // La tarjeta de abrir ya lo explica: la franja no repite la línea de detalle.
+        expect(pasos).not.toHaveTextContent('Ábrela para empezar');
+        expect(delante(pasos, screen.getByRole('heading', { name: 'Esta clase aún no está abierta' }))).toBe(true);
+    });
+
+    it('sin cámaras activas la franja habla de marcar alumnos', async () => {
+        sesionMonitor.mockResolvedValue(programada({ camaras: [] }));
+        render(<SesionClase idSesion={19} />);
+        expect(await screen.findByRole('navigation', { name: 'Pasos para pasar lista' })).toHaveTextContent('Marcar alumnos');
+    });
+
     it('sin cámaras activas explica que se pasará lista a mano', async () => {
         sesionMonitor.mockResolvedValue(programada({ camaras: [] }));
         render(<SesionClase idSesion={19} />);
         expect(await screen.findByText(/pasarás lista a mano/)).toBeInTheDocument();
     });
 
-    it('«Abrir sesión y pasar lista» abre la sesión y entra al pase con la guía', async () => {
+    it('«Abrir sesión y pasar lista» abre la sesión y entra al pase (paso 2) con el panel enfocado', async () => {
         sesionMonitor.mockResolvedValueOnce(programada()).mockResolvedValue(abiertaAuto());
         abrirSesion.mockResolvedValue({ id_sesion: 19, estatus: 'abierta', modo_registro: 'automatico' });
         render(<SesionClase idSesion={19} />);
         fireEvent.click(await screen.findByRole('button', { name: 'Abrir sesión y pasar lista' }));
         await waitFor(() => expect(abrirSesion).toHaveBeenCalledWith({ idSesion: 19 }));
-        // Ya abierta: el panel con la cámara y, como se llegó a pasar lista, la guía.
-        expect(await screen.findByRole('region', { name: 'Pase de lista con cámara' })).toBeInTheDocument();
-        expect(screen.getByRole('region', { name: 'Así se pasa lista' })).toBeInTheDocument();
+        // Ya abierta: el panel con la cámara, enfocado porque se llegó a pasar lista, y la franja en el paso 2.
+        const panel = await screen.findByRole('region', { name: 'Pase de lista con cámara' });
+        expect(panel).toHaveFocus();
+        expect(screen.getByRole('navigation', { name: 'Pasos para pasar lista' })).toHaveTextContent('Paso actual: Pasar lista');
         expect(screen.queryByRole('button', { name: 'Abrir sesión y pasar lista' })).toBeNull();
     });
 
@@ -258,6 +396,7 @@ describe('SesionClase: sesión cerrada y suspendida', () => {
         expect(screen.queryByRole('meter')).toBeNull();
         expect(screen.queryByRole('button', { name: 'Cerrar pase de lista' })).toBeNull();
         expect(screen.queryByRole('region', { name: 'Pase de lista con cámara' })).toBeNull();
+        expect(screen.queryByRole('navigation', { name: 'Pasos para pasar lista' })).toBeNull();
         for (const etiqueta of ['Inscritos', 'Presentes', 'Retardos', 'Ausentes', 'Justificados', 'Resolver en Revisión']) {
             const tarjeta = screen.getAllByText(etiqueta).map((n) => n.closest('div.rounded-xl, a.rounded-xl')).find((n) => n?.querySelector('svg'));
             expect(tarjeta, etiqueta).toBeTruthy();

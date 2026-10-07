@@ -28,7 +28,7 @@ const camaraIp = { id_camara: 3, tipo: 'ip', estatus: 'activa', posicion: 'fondo
 const alumnos = Array.from({ length: 6 }, (_, i) => ({ id_alumno: i + 1, nombre: `Alumno ${i + 1}`, inscripcion: 'activa' }));
 const totales = { inscritos: 6, presentes: 2, retardos: 1, sin_registro: 3, pendientes: 0 };
 
-const props = (extra = {}) => ({ sesion, camaras: [camaraNavegador], alumnos, totales, activo: true, onFin: vi.fn(), onCerrar: vi.fn(), onRegistrarManual: vi.fn(), ...extra });
+const props = (extra = {}) => ({ sesion, camaras: [camaraNavegador], alumnos, totales, activo: true, onFin: vi.fn(), onRevisar: vi.fn(), onRegistrarManual: vi.fn(), ...extra });
 const montar = (extra) => render(<CapturaContinua {...props(extra)} />);
 const avanzar = (ms) => act(async () => { await vi.advanceTimersByTimeAsync(ms); });
 const camaraLista = () => act(() => camara.props.onReady());
@@ -61,8 +61,10 @@ describe('CapturaContinua: el panel de pase de lista', () => {
         expect(within(panel).getByRole('status')).toHaveTextContent('En pausa'); // la cámara aún no está lista
         expect(within(panel).getByText(/de/, { selector: 'p[aria-live] span' })).toBeInTheDocument();
         expect(within(panel).getByText('Esperando la primera captura…')).toBeInTheDocument();
-        expect(within(panel).getByRole('button', { name: 'Cerrar pase de lista' })).toBeInTheDocument();
+        expect(within(panel).getByRole('button', { name: 'Revisar y cerrar' })).toBeInTheDocument();
         expect(within(panel).getByRole('button', { name: 'Registrar manualmente' })).toBeInTheDocument();
+        // El cierre vive en la revisión (paso 3): aquí solo se pasa a ella.
+        expect(within(panel).queryByRole('button', { name: 'Cerrar pase de lista' })).toBeNull();
     });
 
     it('la vista de cámara es 16:9 y se oculta el aviso propio de CameraCapture (el panel da el suyo, con salidas)', () => {
@@ -78,31 +80,30 @@ describe('CapturaContinua: el panel de pase de lista', () => {
         expect(screen.getByText('Cámara frente')).toBeInTheDocument();
     });
 
-    it('fuera de la ventana: «Fuera de la ventana», la cámara se apaga y ya se puede cerrar', () => {
+    it('fuera de la ventana: «Fuera de la ventana» y la cámara se apaga', () => {
         const p = props({ activo: false, sesion: { ...sesion, en_ventana: false } });
         render(<CapturaContinua {...p} />);
         expect(screen.getAllByRole('status')[0]).toHaveTextContent('Fuera de la ventana');
         expect(screen.getByTestId('camara-real')).toHaveAttribute('data-activa', 'false');
-        expect(screen.getByRole('button', { name: 'Cerrar pase de lista' })).toBeEnabled();
-        expect(screen.getByText(/ya puedes cerrar/)).toBeInTheDocument();
     });
 
-    it('en tolerancia el cierre está bloqueado y dice cuánto falta; no llama a onCerrar', () => {
+    it('«Revisar y cerrar» está disponible aun en plena tolerancia (revisar no cierra nada) y no trae notas de cierre', () => {
         const p = props();
         render(<CapturaContinua {...p} />);
-        const cerrar = screen.getByRole('button', { name: 'Cerrar pase de lista' });
-        expect(cerrar).toBeDisabled();
-        expect(cerrar).toHaveAccessibleDescription('El cierre se habilita al terminar la tolerancia: faltan 15 min.');
-        fireEvent.click(cerrar);
-        expect(p.onCerrar).not.toHaveBeenCalled();
+        const revisar = screen.getByRole('button', { name: 'Revisar y cerrar' });
+        expect(revisar).toBeEnabled();
+        expect(revisar).not.toHaveAccessibleDescription();
+        expect(screen.queryByText(/El cierre se habilita/)).toBeNull();
+        fireEvent.click(revisar);
+        expect(p.onRevisar).toHaveBeenCalledTimes(1);
     });
 
-    it('cerrar y registrar manualmente llaman a sus acciones', () => {
+    it('revisar y registrar manualmente llaman a sus acciones', () => {
         const p = props({ sesion: { ...sesion, en_ventana: false }, activo: false });
         render(<CapturaContinua {...p} />);
-        fireEvent.click(screen.getByRole('button', { name: 'Cerrar pase de lista' }));
+        fireEvent.click(screen.getByRole('button', { name: 'Revisar y cerrar' }));
         fireEvent.click(screen.getByRole('button', { name: 'Registrar manualmente' }));
-        expect(p.onCerrar).toHaveBeenCalledTimes(1);
+        expect(p.onRevisar).toHaveBeenCalledTimes(1);
         expect(p.onRegistrarManual).toHaveBeenCalledTimes(1);
     });
 
