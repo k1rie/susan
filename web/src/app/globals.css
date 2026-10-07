@@ -276,6 +276,15 @@
   body {
     max-width: 100vw;
     overflow-x: hidden;
+    /* `clip` recorta igual pero no crea un contenedor de scroll: sin él, `hidden` en html/body anula `position: sticky`
+       (la barra de acciones de los formularios). Los navegadores sin `clip` conservan `hidden`. */
+    overflow-x: clip;
+  }
+  /* La barra inferior del teléfono (BottomNav) tapa el campo enfocado al desplazar: reserva su alto al llevarlo a la vista. */
+  @media (max-width: 1023px) {
+    html {
+      scroll-padding-bottom: 7rem;
+    }
   }
   body {
     @apply bg-background text-foreground antialiased;

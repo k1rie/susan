@@ -3,6 +3,7 @@
 import clsx from 'clsx';
 import { Ellipsis, Search } from 'lucide-react';
 import Link from 'next/link';
+import { alNavegarProtegido } from '@/hooks/ui/useCambiosSinGuardar.js';
 import { itemActivo } from '../Sidebar/navItems.js';
 
 // Lugares a los lados del botón central, «Más» incluido.
@@ -61,7 +62,7 @@ export default function BottomNav({ items, pathname, onMas, onBuscar, accionCent
         const esActivo = href === activo;
         return (
             <li key={d.clave} className="min-w-0 flex-1">
-                <Link href={href} aria-current={esActivo ? 'page' : undefined} className={clsx(BASE_DESTINO, esActivo ? 'bg-accent text-foreground' : 'text-muted-foreground hover:text-foreground')}>
+                <Link href={href} onNavigate={alNavegarProtegido} aria-current={esActivo ? 'page' : undefined} className={clsx(BASE_DESTINO, esActivo ? 'bg-accent text-foreground' : 'text-muted-foreground hover:text-foreground')}>
                     {Icono && <Icono aria-hidden="true" className="size-5" strokeWidth={esActivo ? 2 : 1.75} />}
                     <span className={clsx('max-w-full truncate text-[11px] leading-tight', esActivo ? 'font-semibold' : 'font-medium')}>{label}</span>
                 </Link>
@@ -82,6 +83,7 @@ export default function BottomNav({ items, pathname, onMas, onBuscar, accionCent
                             // La etiqueta visible cuelga del círculo (dentro de la píldora): quien no conoce el icono sabe qué hace.
                             <Link
                                 href={central.href}
+                                onNavigate={alNavegarProtegido}
                                 aria-current={centralActiva ? 'page' : undefined}
                                 className="group absolute left-1/2 top-0 flex -translate-x-1/2 -translate-y-5 flex-col items-center gap-0.5 focus-visible:outline-none"
                             >
