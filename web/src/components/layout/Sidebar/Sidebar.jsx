@@ -4,6 +4,7 @@ import clsx from 'clsx';
 import { LayoutGrid, Lock, Search } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect } from 'react';
+import { alNavegarProtegido } from '@/hooks/ui/useCambiosSinGuardar.js';
 import BrandMark from '../BrandMark/BrandMark.jsx';
 import MenuCuenta from '../MenuCuenta/MenuCuenta.jsx';
 import { agruparNav, itemActivo } from './navItems.js';
@@ -40,7 +41,7 @@ export default function Sidebar({ items, pathname, open, onClose, proximos = [],
         const esActivo = href === activo;
         return (
             <li key={href}>
-                <Link href={href} onClick={onClose} aria-current={esActivo ? 'page' : undefined} className={fila(esActivo)}>
+                <Link href={href} onClick={onClose} onNavigate={alNavegarProtegido} aria-current={esActivo ? 'page' : undefined} className={fila(esActivo)}>
                     {Icono && <Icono aria-hidden="true" className={icono} strokeWidth={1.5} />}
                     <span className="truncate">{label}</span>
                 </Link>
@@ -99,7 +100,7 @@ export default function Sidebar({ items, pathname, open, onClose, proximos = [],
                                     const esActivo = pathname === href;
                                     return (
                                         <li key={id}>
-                                            <Link href={href} onClick={onClose} aria-current={esActivo ? 'page' : undefined} className={fila(esActivo)}>
+                                            <Link href={href} onClick={onClose} onNavigate={alNavegarProtegido} aria-current={esActivo ? 'page' : undefined} className={fila(esActivo)}>
                                                 <span className="flex size-6 shrink-0 items-center justify-center rounded-md" style={{ background: `var(--tono-${tono})` }}>
                                                     <Icono aria-hidden="true" className="size-3.5" strokeWidth={1.75} style={{ color: `var(--tono-${tono}-fg)` }} />
                                                 </span>
@@ -111,7 +112,7 @@ export default function Sidebar({ items, pathname, open, onClose, proximos = [],
                                     );
                                 })}
                                 <li>
-                                    <Link href="/modulos?filtro=pronto" onClick={onClose} className="flex min-h-9 items-center px-3 text-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/30 rounded-lg">
+                                    <Link href="/modulos?filtro=pronto" onClick={onClose} onNavigate={alNavegarProtegido} className="flex min-h-9 items-center px-3 text-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/30 rounded-lg">
                                         Ver todo
                                     </Link>
                                 </li>
@@ -121,7 +122,7 @@ export default function Sidebar({ items, pathname, open, onClose, proximos = [],
                 </div>
 
                 <nav aria-label="Cuenta y módulos" className="flex flex-col gap-0.5 px-3 pb-3 pt-2">
-                    <Link href="/modulos" onClick={onClose} aria-current={enModulos ? 'page' : undefined} className={fila(enModulos)}>
+                    <Link href="/modulos" onClick={onClose} onNavigate={alNavegarProtegido} aria-current={enModulos ? 'page' : undefined} className={fila(enModulos)}>
                         <LayoutGrid aria-hidden="true" className={icono} strokeWidth={1.5} />
                         <span>Módulos</span>
                     </Link>
