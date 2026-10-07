@@ -73,10 +73,8 @@ export default function SesionesHoy({ sesiones = [] }) {
         return null;
     };
 
-    // scroll-mt-20 bajo lg: la TopbarMovil es fixed y mide 56 px (h-14); con 16 px el salto al ancla dejaba el titular y el borde de la
-    // primera tarjeta tapados por la barra. Desde lg la barra se oculta y basta el aire de siempre.
     return (
-        <section id={ANCLA_SESIONES_HOY} aria-labelledby="t-sesiones-hoy" className="scroll-mt-20 lg:scroll-mt-4">
+        <section id={ANCLA_SESIONES_HOY} aria-labelledby="t-sesiones-hoy" className="scroll-mt-4">
             <h2 id="t-sesiones-hoy" className="mb-4 text-xl font-semibold tracking-tight">Todas las sesiones de hoy</h2>
             {sesiones.length === 0 ? (
                 <EmptyState title="Sin sesiones hoy" description="No tienes clases programadas hoy." />

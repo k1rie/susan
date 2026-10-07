@@ -8,7 +8,6 @@ import { construirComandos } from '../PaletaComandos/paleta.utils.js';
 import { ShellContext } from '../ShellContext.jsx';
 import Sidebar from '../Sidebar/Sidebar.jsx';
 import { accionCentralParaRol, navParaRol } from '../Sidebar/navItems.js';
-import TopbarMovil from '../TopbarMovil/TopbarMovil.jsx';
 
 // Carga diferida (presupuesto de JS inicial de /docente, docs/DECISIONS.md): la paleta solo hace falta al abrirla y el reloj de
 // demostración solo existe en modo local. React.lazy en vez de next/dynamic: no suma el runtime de next/dynamic al shell.
@@ -17,13 +16,14 @@ const PaletaComandos = lazy(cargarPaleta);
 const RelojDemo = lazy(() => import('../RelojDemo/RelojDemo.jsx'));
 
 // Estructura de las pantallas autenticadas (referencia: Dropbox Dash): lienzo crema con el riel a la izquierda y el contenido en un
-// panel blanco flotante de esquinas redondeadas que hace su propio scroll en escritorio; en móvil, barra superior + barra inferior
-// y el documento hace scroll. Incluye la paleta de comandos (⌘K). No consulta datos: `me` y `onSalir` los entrega quien lo usa.
+// panel blanco flotante de esquinas redondeadas que hace su propio scroll en escritorio; en móvil, solo la barra inferior (su «Más»
+// abre el cajón con búsqueda, módulos y cuenta) y el documento hace scroll. Incluye la paleta de comandos (⌘K). No consulta datos: `me` y `onSalir` los entrega quien lo usa.
 export default function AppShell({ me, relojSimulado = false, onSalir, children }) {
     const pathname = usePathname();
     const router = useRouter();
     const [menuAbierto, setMenuAbierto] = useState(false);
     const [paletaAbierta, setPaletaAbierta] = useState(false);
+    const abrirMenu = useCallback(() => setMenuAbierto(true), []);
     const cerrarMenu = useCallback(() => setMenuAbierto(false), []);
     const abrirPaleta = useCallback(() => setPaletaAbierta(true), []);
     const cerrarPaleta = useCallback(() => setPaletaAbierta(false), []);
@@ -81,7 +81,6 @@ export default function AppShell({ me, relojSimulado = false, onSalir, children 
                 >
                     Saltar al contenido
                 </a>
-                <TopbarMovil me={me} onMenu={() => setMenuAbierto((v) => !v)} onBuscar={abrirPaleta} onSalir={onSalir} />
                 <Sidebar
                     items={nav}
                     proximos={proximos.slice(0, 4)}
@@ -94,7 +93,7 @@ export default function AppShell({ me, relojSimulado = false, onSalir, children 
                 />
                 <main
                     id="contenido"
-                    className="min-h-dvh min-w-0 flex-1 bg-card pb-24 pt-14 lg:m-2 lg:ml-0 lg:min-h-0 lg:overflow-y-auto lg:overscroll-contain lg:rounded-2xl lg:border lg:border-border/60 lg:pb-0 lg:pt-0"
+                    className="min-h-dvh min-w-0 flex-1 bg-card pb-24 lg:m-2 lg:ml-0 lg:min-h-0 lg:overflow-y-auto lg:overscroll-contain lg:rounded-2xl lg:border lg:border-border/60 lg:pb-0"
                 >
                     {relojSimulado && (
                         // Reloj de demostración (solo desarrollo local): muestra la hora simulada y deja adelantarla para probar el ciclo de una sesión.
@@ -106,7 +105,7 @@ export default function AppShell({ me, relojSimulado = false, onSalir, children 
                     )}
                     <div className="mx-auto w-full max-w-[68rem] px-4 pb-16 pt-6 lg:px-12 lg:pt-10">{children}</div>
                 </main>
-                <BottomNav items={nav} pathname={pathname} onMas={() => setMenuAbierto(true)} onBuscar={abrirPaleta} accionCentral={accionCentral} />
+                <BottomNav items={nav} pathname={pathname} onMas={abrirMenu} onBuscar={abrirPaleta} accionCentral={accionCentral} />
                 {paletaAbierta && (
                     <Suspense fallback={null}>
                         <PaletaComandos open onClose={cerrarPaleta} comandos={comandos} onSalir={onSalir} />

@@ -47,7 +47,7 @@ export const NAV_POR_ROL = {
 
 // Acción del botón redondo central de la barra inferior móvil, por rol (un solo lugar). Forma: { href, label, icon }. Los roles que
 // no aparecen aquí conservan el botón por omisión de BottomNav: «Buscar o ir a» (abre la paleta de comandos). El docente pasa lista
-// a diario, así que su botón más grande y central lo lleva a /docente/pasar-lista; el buscador sigue en la barra superior.
+// a diario, así que su botón más grande y central lo lleva a /docente/pasar-lista; el buscador queda en el cajón («Más»).
 export const ACCION_CENTRAL_POR_ROL = {
     docente: { href: '/docente/pasar-lista', label: 'Pasar lista', icon: ScanFace },
 };

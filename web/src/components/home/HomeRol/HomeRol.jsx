@@ -45,7 +45,7 @@ export default function HomeRol({ children }) {
                 <Reveal as="p" delay={0.2} immediate className="max-w-xl text-base text-muted-foreground">
                     {texto.lema}
                 </Reveal>
-                {/* Docente en teléfono: el buscador ya está en la barra superior y su acción principal en el botón central de la barra
+                {/* Docente en teléfono: el buscador está en el cajón de «Más» y su acción principal en el botón central de la barra
                     inferior; este campo grande empujaba «Pasar lista» (la tarjeta del panel) por debajo del pliegue. */}
                 <Reveal delay={0.3} immediate className={clsx('mt-2 w-full', rol === 'docente' && 'hidden sm:block')}>
                     <CampoComando onAbrir={abrirPaleta} />
