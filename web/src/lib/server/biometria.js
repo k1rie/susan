@@ -120,6 +120,11 @@ export async function analizarConjunto(archivos, agrupacion) {
     return { ...conjunto, total: archivos.length, fotos };
 }
 
+/** Calidad de UNA toma (rostros, un solo rostro, pose, motivo de rechazo). Es lo que lee la detección en vivo del asistente. */
+export async function verificarUnaFoto(archivo) {
+    return conAlias(await verificarFotoServicio(comoBlob(archivo)));
+}
+
 /**
  * POST /api/plantilla/verificar (admin): solo calidad, no guarda nada.
  * - `foto`: camino heredado (una toma), no exige alumno ni consentimiento.
@@ -128,7 +133,7 @@ export async function analizarConjunto(archivos, agrupacion) {
  */
 export async function verificarFoto({ form, body = {}, rpc }) {
     const { foto, fotos } = fotosDeLaPeticion(form);
-    if (foto) return conAlias(await verificarFotoServicio(comoBlob(foto)));
+    if (foto) return verificarUnaFoto(foto);
 
     const faltan = ['id_alumno', 'id_consent'].filter((c) => body[c] === undefined);
     if (faltan.length > 0) {

@@ -7,7 +7,6 @@ import Button from '@/components/ui/Button';
 import Select from '@/components/ui/Select';
 import Spinner from '@/components/ui/Spinner';
 import { IS_LOCAL } from '@/config';
-import { verificarFoto } from '@/lib/http/biometria.js';
 import { PASOS_TOMA } from '../CapturaGuiadaPlantilla/capturaGuiada.utils.js';
 import { mensajeErrorPlantilla } from '../PlantillaFacialPanel/plantillaFacial.utils.js';
 import AnilloRostro from './AnilloRostro.jsx';
@@ -70,7 +69,9 @@ export default function PantallaCaptura({
     const muestras = useRef([]);
     const duraciones = useRef([]);
     // Lo que el muestreo lee en cada ciclo sin reiniciarse cuando cambian las props.
-    const actual = useRef({ capturar, ritmo, agregar: p.agregarToma, alListo: onPasoListo, control, depuracion, registrarMuestra: null });
+    const actual = useRef({
+        capturar, ritmo, agregar: p.agregarToma, verificarUna: p.verificarUna, alListo: onPasoListo, control, depuracion, registrarMuestra: null,
+    });
 
     const errorVerificacion = p.verificacion.error;
     const vista = vistaDePaso({ toma, fallo: Boolean(errorVerificacion) });
@@ -122,7 +123,9 @@ export default function PantallaCaptura({
     };
 
     useEffect(() => {
-        actual.current = { capturar, ritmo, agregar: p.agregarToma, alListo: onPasoListo, control, depuracion, registrarMuestra };
+        actual.current = {
+            capturar, ritmo, agregar: p.agregarToma, verificarUna: p.verificarUna, alListo: onPasoListo, control, depuracion, registrarMuestra,
+        };
     });
 
     // Muestreo: solo mientras se busca la foto del paso. Cada ciclo espera a que termine el anterior (no se apilan peticiones).
@@ -136,7 +139,7 @@ export default function PantallaCaptura({
         let malas = 0;
 
         const ciclo = async () => {
-            const { capturar: tomar, ritmo: r, agregar } = actual.current;
+            const { capturar: tomar, ritmo: r, agregar, verificarUna } = actual.current;
             let blob = null;
             try {
                 ({ blob } = await tomar());
@@ -149,7 +152,7 @@ export default function PantallaCaptura({
                 const limite = setTimeout(() => control.abort(), LIMITE_COMPROBACION_MS);
                 const inicio = performance.now();
                 try {
-                    resultado = await verificarFoto(blob, { signal: control.signal });
+                    resultado = await verificarUna(blob, { signal: control.signal });
                 } catch {
                     resultado = null;
                 } finally {

@@ -1,8 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const mocks = vi.hoisted(() => ({ miRegistro: vi.fn(), verificarMisFotos: vi.fn(), registrarMiPlantilla: vi.fn() }));
+const mocks = vi.hoisted(() => ({ miRegistro: vi.fn(), verificarMisFotos: vi.fn(), verificarMiFoto: vi.fn(), registrarMiPlantilla: vi.fn() }));
 vi.mock('@/lib/api/biometria.js', () => ({ miRegistro: mocks.miRegistro }));
-vi.mock('@/lib/http/autoservicio.js', () => ({ verificarMisFotos: mocks.verificarMisFotos, registrarMiPlantilla: mocks.registrarMiPlantilla }));
+vi.mock('@/lib/http/autoservicio.js', () => ({
+    verificarMisFotos: mocks.verificarMisFotos, verificarMiFoto: mocks.verificarMiFoto, registrarMiPlantilla: mocks.registrarMiPlantilla,
+}));
 
 import { API_PROPIA, consentimientosPropios, plantillaPropia } from './miRegistro.api.js';
 
@@ -35,6 +37,13 @@ describe('adaptadores del autoservicio', () => {
         expect(mocks.verificarMisFotos).toHaveBeenCalledWith(blobs, { signal: senal });
         await API_PROPIA.registrar({ idAlumno: 99, idConsent: 1, fotos: blobs });
         expect(mocks.registrarMiPlantilla).toHaveBeenCalledWith({ fotos: blobs });
+    });
+
+    it('verificarUna (la detección en vivo) va a la ruta del alumno: solo la toma y la señal, nunca la ruta del administrador', async () => {
+        const blob = new Blob(['a']);
+        const senal = new AbortController().signal;
+        await API_PROPIA.verificarUna(blob, { idAlumno: 99, signal: senal });
+        expect(mocks.verificarMiFoto).toHaveBeenCalledWith(blob, { signal: senal });
     });
 
     it('no permite el camino de una sola foto', () => expect(API_PROPIA.permiteUna).toBe(false));
