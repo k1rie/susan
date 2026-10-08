@@ -101,6 +101,7 @@ Acciones (vía `@/lib/http/biometria`, que llama a los Route Handlers):
 | Revocar consentimiento | `revocarConsentimiento({ idConsent })` | `POST /api/consentimientos/{id}/revocar` |
 | Ver documento / foto (URL firmada) | `solicitarUrlDocumento({ idAlumno, tipo, idRegistro })` | `POST /api/alumnos/{id}/documento-url` |
 | Verificar calidad de UNA foto (camino heredado) | `verificarFoto(blob)` | `POST /api/plantilla/verificar` (campo `foto`) |
+| Verificar calidad de UNA foto, como alumno (detección en vivo) | `verificarMiFoto(blob, { signal })` (`lib/http/autoservicio.js`) | `POST /api/yo/plantilla/verificar` (campo `foto`, §7.4). El asistente la usa vía `p.verificarUna`; nunca importa la ruta de un rol directamente: la del administrador responde 403 `NO_AUTORIZADO` a un alumno |
 | Verificar el conjunto de tomas (1 a 8 fotos) | `verificarFotos(blobs, { idAlumno, idConsent, signal })` | `POST /api/plantilla/verificar` (campo `fotos` repetido, §4.3) |
 | Registrar plantilla | `registrarPlantilla({ idAlumno, idConsent, foto })` (una foto) o `registrarPlantilla({ idAlumno, idConsent, fotos }, { signal })` (varias) | `POST /api/alumnos/{id}/plantilla` (§4.3) |
 | Abrir una foto de la plantilla (URL firmada) | `solicitarUrlDocumento({ tipo: 'plantilla_foto', idRegistro: id_foto })` | `GET /api/documentos/plantilla_foto/{id}` (§4.3) |
@@ -1294,7 +1295,7 @@ Todas: `handle({ roles: ['alumno'] })` → autenticar → autorizar → validar 
 |---|---|---|
 | `POST /api/yo/consentimiento` | JSON `{ version_aviso, acepto: true }` (`aceptarAvisoCuerpo`, `.strict()`) | 201 con el consentimiento (`{ id_consent, fecha_firma, vigencia_hasta, origen: 'alumno', version_aviso, ... }`). Genera la constancia PDF, la sube con ruta del servidor y registra; si el registro falla borra el PDF |
 | `POST /api/yo/consentimiento/revocar` | sin cuerpo | 200 `{ consentimientos_revocados, plantillas_archivadas, requiere_reconstruccion, indice? }`; reconstruye el índice si había plantillas indexadas |
-| `POST /api/yo/plantilla/verificar` | multipart `fotos` (JPEG, repetido, 1 a 8) | 200, la misma forma que `POST /api/plantilla/verificar` con `fotos`. Exige consentimiento vigente y cupo diario; no guarda nada |
+| `POST /api/yo/plantilla/verificar` | multipart `fotos` (JPEG, repetido, 1 a 8) **o** `foto` (una sola; nunca ambos: 422) | 200, la misma forma que `POST /api/plantilla/verificar` con `fotos` (conjunto) o con `foto` (una toma: `{ rostros, un_solo_rostro, calidad, motivo_rechazo, motivo_codigo }`). `foto` es la detección en vivo del asistente. Los dos caminos exigen consentimiento vigente y cupo diario; no guardan nada |
 | `POST /api/yo/plantilla` | multipart `fotos` (JPEG, repetido, 3 a 8) | 201 con la plantilla + `indice` + `muestra`. Orden: consentimiento vigente y cupo → calidad del conjunto → **rostro no repetido** → subir → `api_mi_plantilla_registrar` → reconstruir el índice. No hay camino de una sola foto |
 
 Códigos de error nuevos (todos en `STATUS_POR_CODIGO`):

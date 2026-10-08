@@ -11,7 +11,7 @@ import { ApiError } from '@/lib/api/errors';
 import { VERSION_AVISO } from '@/lib/avisoBiometrico';
 import {
     agruparDuplicadas, analizarConjunto, comoBlob, fotosDeLaPeticion, indiceSinMuestras, muestraDe, reconstruirSinFallar,
-    registrarVariasFotos,
+    registrarVariasFotos, verificarUnaFoto,
 } from './biometria.js';
 import { generarConstancia } from './constancia.js';
 import { reconocer } from './recognition.js';
@@ -79,10 +79,17 @@ export async function revocarConsentimientoPropio({ rpc, admin, ip }) {
     return { ...resultado, indice: indiceSinMuestras(await reconstruirSinFallar(await admin())) };
 }
 
-/** POST /api/yo/plantilla/verificar: calidad y consistencia del conjunto de tomas (no guarda nada). Misma forma que la del admin. */
+/**
+ * POST /api/yo/plantilla/verificar: no guarda nada. Misma forma que la del admin, con las mismas guardas del alumno (activo,
+ * consentimiento vigente y cupo) en los dos caminos:
+ *  - `fotos`: calidad y consistencia del conjunto de tomas.
+ *  - `foto`: calidad de UNA toma. Es la detección en vivo del asistente, que muestrea cámara cada ~600 ms; sin este camino el
+ *    alumno tendría que llamar a la ruta del administrador y recibiría siempre NO_AUTORIZADO.
+ */
 export async function verificarFotosPropias({ rpc, form }) {
     exigirPuedeRegistrarRostro(await rpc('api_mi_registro'));
-    const { fotos } = fotosDeLaPeticion(form);
+    const { foto, fotos } = fotosDeLaPeticion(form);
+    if (foto) return verificarUnaFoto(foto);
     return analizarConjunto(fotos, agruparDuplicadas(fotos));
 }
 

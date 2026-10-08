@@ -6,11 +6,12 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const mocks = vi.hoisted(() => ({
     consentimientosAlumno: vi.fn(),
     plantillaAlumno: vi.fn(),
+    verificarFoto: vi.fn(),
     verificarFotos: vi.fn(),
     registrarPlantilla: vi.fn(),
 }));
 vi.mock('@/lib/api/biometria.js', () => ({ consentimientosAlumno: mocks.consentimientosAlumno, plantillaAlumno: mocks.plantillaAlumno }));
-vi.mock('@/lib/http/biometria.js', () => ({ verificarFotos: mocks.verificarFotos, registrarPlantilla: mocks.registrarPlantilla }));
+vi.mock('@/lib/http/biometria.js', () => ({ verificarFoto: mocks.verificarFoto, verificarFotos: mocks.verificarFotos, registrarPlantilla: mocks.registrarPlantilla }));
 
 import usePlantillaFacial, { API_ADMIN } from './usePlantillaFacial.js';
 
@@ -29,12 +30,13 @@ const propia = {
     consentimientos: vi.fn(),
     plantilla: vi.fn(),
     verificar: vi.fn(),
+    verificarUna: vi.fn(),
     registrar: vi.fn(),
     permiteUna: false,
 };
 
 beforeEach(() => {
-    for (const m of [...Object.values(mocks), propia.consentimientos, propia.plantilla, propia.verificar, propia.registrar]) m.mockReset();
+    for (const m of [...Object.values(mocks), propia.consentimientos, propia.plantilla, propia.verificar, propia.verificarUna, propia.registrar]) m.mockReset();
     mocks.consentimientosAlumno.mockResolvedValue(CONSENT);
     mocks.plantillaAlumno.mockResolvedValue(SIN_PLANTILLA);
     mocks.verificarFotos.mockImplementation(async (blobs) => conjunto(blobs.length));
@@ -59,7 +61,7 @@ describe('usePlantillaFacial: API del administrador (por omisión)', () => {
     it('API_ADMIN usa las llamadas de siempre y permite el camino de una foto', () => {
         expect(API_ADMIN).toMatchObject({
             consentimientos: mocks.consentimientosAlumno, plantilla: mocks.plantillaAlumno,
-            verificar: mocks.verificarFotos, registrar: mocks.registrarPlantilla, permiteUna: true,
+            verificar: mocks.verificarFotos, verificarUna: mocks.verificarFoto, registrar: mocks.registrarPlantilla, permiteUna: true,
         });
     });
 
@@ -89,6 +91,13 @@ describe('usePlantillaFacial: API propia (autoservicio)', () => {
         expect(propia.registrar).toHaveBeenCalledTimes(1);
         expect(propia.registrar.mock.calls[0][0].fotos).toHaveLength(3);
         for (const m of Object.values(mocks)) expect(m).not.toHaveBeenCalled();
+    });
+
+    it('expone verificarUna (la detección en vivo) de SU api: la del alumno, no la del administrador', async () => {
+        const hook = renderHook(() => usePlantillaFacial({ api: propia }));
+        expect(hook.result.current.verificarUna).toBe(propia.verificarUna);
+        const admin = renderHook(() => usePlantillaFacial({ idAlumno: 17 }));
+        expect(admin.result.current.verificarUna).toBe(mocks.verificarFoto);
     });
 
     it('permiteUna: false -> nunca ofrece el camino de una sola foto', async () => {

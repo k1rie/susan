@@ -6,6 +6,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 vi.mock('@/lib/backend', () => ({ getServerBackend: vi.fn(), getAdminBackend: vi.fn() }));
 vi.mock('@/lib/server/recognition', async (importar) => ({
     ...(await importar()),
+    verificarFotoServicio: vi.fn(),
     verificarFotosServicio: vi.fn(),
     reconocer: vi.fn(),
     construirIndice: vi.fn(),
@@ -17,7 +18,7 @@ vi.mock('@/lib/server/recognition', async (importar) => ({
 import { getAdminBackend, getServerBackend } from '@/lib/backend';
 import { ApiError } from '@/lib/api/errors';
 import { VERSION_AVISO } from '@/lib/avisoBiometrico';
-import { activarIndice, construirIndice, infoIndice, manifiestoIndice, reconocer, verificarFotosServicio } from '@/lib/server/recognition';
+import { activarIndice, construirIndice, infoIndice, manifiestoIndice, reconocer, verificarFotoServicio, verificarFotosServicio } from '@/lib/server/recognition';
 import { reiniciarCacheVigencia } from '@/lib/server/storage';
 import { BYTES_JPEG, YO, archivo, crearBackend, errorDeNegocio, fotosDistintas, pedir } from '@/lib/server/testing';
 import { POST as postAceptar } from './yo/consentimiento/route.js';
@@ -99,6 +100,9 @@ beforeEach(() => {
     reiniciarCacheVigencia();
     vi.spyOn(console, 'error').mockImplementation(() => {});
     verificarFotosServicio.mockImplementation(async (blobs) => { eventos.push('calidad_conjunto'); return conjunto(blobs.length); });
+    verificarFotoServicio.mockImplementation(async () => ({
+        rostros: 1, un_solo_rostro: true, calidad: CALIDAD_FOTO, motivo_rechazo: null, motivo_codigo: null,
+    }));
     reconocer.mockImplementation(async () => { eventos.push('dedupe'); return { index_version: 'v003', elapsed_ms: 5, image: { width: 1, height: 1 }, faces: [] }; });
     construirIndice.mockResolvedValue({ version: 'v004', objeto_indice: 'indice/v004.json', dimension: 512, ntotal: 1, mapeo: MAPEO, errores: [] });
     activarIndice.mockResolvedValue({ version: 'v004', ntotal: 1, dimension: 512, active: true, preloaded: false });
@@ -251,6 +255,40 @@ describe('POST /api/yo/plantilla/verificar', () => {
     it('solo el alumno', async () => {
         preparar({ registro: CON_CONSENTIMIENTO, me: YO.docente });
         expect((await verificar()).status).toBe(403);
+    });
+});
+
+describe('POST /api/yo/plantilla/verificar con UNA foto (detección en vivo)', () => {
+    const verificarUna = () => postVerificar(pedir('/api/yo/plantilla/verificar', { form: { foto: jpg(fotosDistintas(1)[0]) } }));
+
+    it('el alumno recibe la calidad de esa toma (la forma de una foto, con el alias tamano_rostro) y no se guarda nada', async () => {
+        preparar({ registro: CON_CONSENTIMIENTO });
+        const res = await verificarUna();
+        expect(res.status).toBe(200);
+        expect(await res.json()).toMatchObject({ rostros: 1, un_solo_rostro: true, calidad: { tamano_rostro_px: 210, tamano_rostro: 210 } });
+        expect(verificarFotoServicio).toHaveBeenCalledTimes(1);
+        expect(verificarFotosServicio).not.toHaveBeenCalled();
+        expect(admin.bucket.upload).not.toHaveBeenCalled();
+    });
+
+    it('sin consentimiento vigente: 409 y no se procesa su rostro (RN-13)', async () => {
+        const res = await verificarUna();
+        expect(res.status).toBe(409);
+        expect((await res.json()).error.code).toBe('RN_13_CONSENTIMIENTO_NO_VIGENTE');
+        expect(verificarFotoServicio).not.toHaveBeenCalled();
+    });
+
+    it("'foto' y 'fotos' a la vez: 422, no se adivina cuál quiso decir", async () => {
+        preparar({ registro: CON_CONSENTIMIENTO });
+        const res = await postVerificar(pedir('/api/yo/plantilla/verificar', { form: { foto: jpg(fotosDistintas(1)[0]), fotos: lote(3) } }));
+        expect(res.status).toBe(422);
+        expect(verificarFotoServicio).not.toHaveBeenCalled();
+    });
+
+    it('solo el alumno', async () => {
+        preparar({ registro: CON_CONSENTIMIENTO, me: YO.admin });
+        expect((await verificarUna()).status).toBe(403);
+        expect(verificarFotoServicio).not.toHaveBeenCalled();
     });
 });
 

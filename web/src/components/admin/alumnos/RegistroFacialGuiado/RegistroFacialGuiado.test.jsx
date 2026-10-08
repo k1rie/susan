@@ -12,6 +12,7 @@ const mocks = vi.hoisted(() => ({
     plantillaAlumno: vi.fn(),
     verificarFoto: vi.fn(),
     verificarFotos: vi.fn(),
+    verificarFotoPropia: vi.fn(),
     registrarPlantilla: vi.fn(),
     capture: vi.fn(),
     restart: vi.fn(),
@@ -749,6 +750,7 @@ describe('RegistroFacialGuiado: autoservicio (propio)', () => {
         consentimientos: mocks.consentimientosAlumno,
         plantilla: mocks.plantillaAlumno,
         verificar: mocks.verificarFotos,
+        verificarUna: mocks.verificarFotoPropia,
         registrar: mocks.registrarPlantilla,
         permiteUna: false,
     };
@@ -764,6 +766,23 @@ describe('RegistroFacialGuiado: autoservicio (propio)', () => {
         expect(screen.getByText(/Mírate en la cámara/)).toBeInTheDocument();
         expect(screen.queryByText('Ana Pérez')).not.toBeInTheDocument();
         expect(screen.getByRole('button', { name: 'Comenzar' })).toBeEnabled();
+    });
+
+    // Regresión: el muestreo en vivo importaba la ruta del administrador y a un alumno le respondía NO_AUTORIZADO en cada muestra, así
+    // que la detección automática nunca funcionaba («No se pudo comprobar la calidad en vivo»). Cada rol debe usar SU comprobación.
+    it('la detección en vivo usa la comprobación del alumno y nunca la del administrador', async () => {
+        mocks.verificarFotoPropia.mockImplementation(async () => respuestaCalidad());
+        render(<ArnesPropio />);
+        await screen.findByRole('dialog', { name: 'Registro facial' });
+        fireEvent.click(screen.getByRole('button', { name: 'Comenzar' }));
+        await screen.findByRole('heading', { name: 'De frente' });
+        await esperarPaso('Gira a la izquierda');
+        expect(mocks.verificarFotoPropia.mock.calls.length).toBeGreaterThanOrEqual(2);
+        const [blob, opciones] = mocks.verificarFotoPropia.mock.calls[0];
+        expect(blob).toBeInstanceOf(Blob);
+        expect(opciones.signal).toBeInstanceOf(AbortSignal);
+        expect(mocks.verificarFoto).not.toHaveBeenCalled();
+        expect(screen.queryByText(/No se pudo comprobar la calidad en vivo/)).not.toBeInTheDocument();
     });
 
     it('sin permiso de cámara solo ofrece reintentar: no hay salida por archivo', async () => {
