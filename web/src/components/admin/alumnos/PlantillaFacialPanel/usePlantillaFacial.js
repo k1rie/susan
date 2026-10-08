@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useApiQuery } from '@/hooks/data';
 import { consentimientosAlumno, plantillaAlumno } from '@/lib/api/biometria.js';
-import { registrarPlantilla, verificarFotos } from '@/lib/http/biometria.js';
+import { registrarPlantilla, verificarFoto, verificarFotos } from '@/lib/http/biometria.js';
 import { numerarTomas, ordenarTomas } from '../CapturaGuiadaPlantilla/capturaGuiada.utils.js';
 import {
     anuncioCambios, aplicarRechazoRegistro, aplicarResultadoConjunto, estadoIndiceTrasRegistro, MAXIMO_FOTOS, MINIMO_FOTOS,
@@ -13,15 +13,19 @@ import {
 const SIN_VERIFICACION = { clave: null, resultado: null, error: null };
 
 /**
- * Las cuatro llamadas del flujo. Por omisión son las del administrador (sobre un alumno concreto); el autoservicio del alumno pasa las
+ * Las llamadas del flujo. Por omisión son las del administrador (sobre un alumno concreto); el autoservicio del alumno pasa las
  * suyas (components/alumno/MiRegistro/miRegistro.api.js), que no llevan id_alumno ni id_consent: salen de la sesión. Las funciones deben
  * tener referencia estable (de módulo): `consentimientos` y `plantilla` van a useApiQuery.
+ *   verificar   calidad y consistencia del conjunto de tomas.
+ *   verificarUna  calidad de UNA toma: es la detección en vivo del asistente (PantallaCaptura). Cada rol usa SU ruta: la del
+ *               administrador responde NO_AUTORIZADO a un alumno, así que nada del asistente debe importarla directo.
  *   permiteUna  false: sin el camino de «una sola foto» (es un recurso del administrador).
  */
 export const API_ADMIN = {
     consentimientos: consentimientosAlumno,
     plantilla: plantillaAlumno,
     verificar: verificarFotos,
+    verificarUna: verificarFoto,
     registrar: registrarPlantilla,
     permiteUna: true,
 };
@@ -268,7 +272,7 @@ export default function usePlantillaFacial({ idAlumno, version = 0, onCambio, ap
     return {
         consentimientos, plantilla, vigente, activa,
         tomas, ordenadas, modo, setModo, agregarToma, quitarToma, repetirToma, limpiar,
-        verificacion, minimo, maximo, aceptadas, anuncio,
+        verificacion, verificarUna: api.verificarUna, minimo, maximo, aceptadas, anuncio,
         envio, registro, sondeando,
         puedeRegistrar, puedeRegistrarUna, registrar, registrarUna, reintentarEnvio,
     };
