@@ -22,6 +22,16 @@ export function verificarMisFotos(blobs, { signal } = {}) {
     return postForm('/api/yo/plantilla/verificar', form, { signal });
 }
 
+/**
+ * POST /api/yo/plantilla/verificar con UNA sola toma (campo `foto`): la forma de verificarFoto del administrador
+ * ({ rostros, un_solo_rostro, calidad, motivo_rechazo, motivo_codigo }). Es la detección en vivo del asistente. No guarda nada.
+ */
+export function verificarMiFoto(blob, { signal } = {}) {
+    const form = new FormData();
+    form.append('foto', blob, 'foto.jpg');
+    return postForm('/api/yo/plantilla/verificar', form, { signal });
+}
+
 /** POST /api/yo/plantilla con 3 a 8 tomas -> plantilla registrada + `indice` ({ estado, version }) + `muestra`. */
 export function registrarMiPlantilla({ fotos }, { signal } = {}) {
     const form = new FormData();
