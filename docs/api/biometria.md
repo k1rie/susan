@@ -101,7 +101,7 @@ Acciones (vía `@/lib/http/biometria`, que llama a los Route Handlers):
 | Revocar consentimiento | `revocarConsentimiento({ idConsent })` | `POST /api/consentimientos/{id}/revocar` |
 | Ver documento / foto (URL firmada) | `solicitarUrlDocumento({ idAlumno, tipo, idRegistro })` | `POST /api/alumnos/{id}/documento-url` |
 | Verificar calidad de UNA foto (camino heredado) | `verificarFoto(blob)` | `POST /api/plantilla/verificar` (campo `foto`) |
-| Verificar calidad de UNA foto, como alumno (detección en vivo) | `verificarMiFoto(blob, { signal })` (`lib/http/autoservicio.js`) | `POST /api/yo/plantilla/verificar` (campo `foto`, §7.4) |
+| Verificar calidad de UNA foto, como alumno (detección en vivo) | `verificarMiFoto(blob, { signal })` (`lib/http/autoservicio.js`) | `POST /api/yo/plantilla/verificar` (campo `foto`, §7.4). El asistente la usa vía `p.verificarUna`; nunca importa la ruta de un rol directamente: la del administrador responde 403 `NO_AUTORIZADO` a un alumno |
 | Verificar el conjunto de tomas (1 a 8 fotos) | `verificarFotos(blobs, { idAlumno, idConsent, signal })` | `POST /api/plantilla/verificar` (campo `fotos` repetido, §4.3) |
 | Registrar plantilla | `registrarPlantilla({ idAlumno, idConsent, foto })` (una foto) o `registrarPlantilla({ idAlumno, idConsent, fotos }, { signal })` (varias) | `POST /api/alumnos/{id}/plantilla` (§4.3) |
 | Abrir una foto de la plantilla (URL firmada) | `solicitarUrlDocumento({ tipo: 'plantilla_foto', idRegistro: id_foto })` | `GET /api/documentos/plantilla_foto/{id}` (§4.3) |
