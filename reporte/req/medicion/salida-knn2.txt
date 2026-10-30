@@ -1,0 +1,7 @@
+# Medición propia (2026-10-30). Script: reporte/req/medicion/knn2.py. Mismo entorno que salida-knn.txt. 300 repeticiones por fila. Conjunto permitido fijo (50 o 60 alumnos, como un grupo real) y N = 5 000 frente a 20 000 vectores.
+{'n': 5000, 'consultas': 1, 'permitidos': 50, 'p50': 0.042, 'p95': 0.072}
+{'n': 20000, 'consultas': 1, 'permitidos': 50, 'p50': 0.111, 'p95': 0.144}
+razon p50 2.64 razon p95 2.0
+{'n': 5000, 'consultas': 60, 'permitidos': 60, 'p50': 0.46, 'p95': 0.771}
+{'n': 20000, 'consultas': 60, 'permitidos': 60, 'p50': 2.711, 'p95': 24.022}
+razon p50 5.89 razon p95 31.16

@@ -1,0 +1,376 @@
+[
+  {
+    "id": "RF-01",
+    "texto_corto": "Alta, consulta, modificación y baja lógica de alumnos, docentes, materias y grupos por periodo sin duplicar matrícula, empleado ni correo",
+    "parte": "SW + BD",
+    "estado": "Parcial",
+    "evidencia": "api_alumno/docente/materia/grupo_guardar y *_cambiar_estatus (0201, 0203); UNIQUE en 0003; AlumnoForm, DocenteForm, GrupoForm; api_b1_01 y _03 (matrícula duplicada).",
+    "faltante": "Falta la baja de materias y de grupos: no existe RPC, botón ni DELETE para ellos (solo hay modificar y, en el grupo, dar de baja a sus inscritos). Alta, consulta, modificación y baja lógica de alumnos y docentes, y el rechazo de duplicados (matrícula, empleado, correo, clave por materia y periodo), sí están completos y probados. Es una carencia menor.",
+    "prioridad": "MUST",
+    "modulo": "M1. Gestión académica",
+    "trazabilidad": {
+      "rn": "— (alcance)",
+      "bpmn": "BPMN-03",
+      "pantallas": "P-06, P-09",
+      "tablas": "ALUMNO, DOCENTE, MATERIA, GRUPO"
+    },
+    "nota": "La baja de un docente se rechaza si aún tiene sesiones por impartir (DOCENTE_CON_GRUPOS). Las altas y bajas de catálogo no dejan bitácora (DECISIONS §3.5); RF-01 no lo exige."
+  },
+  {
+    "id": "RF-02",
+    "texto_corto": "Inscribir alumnos en un grupo y darlos de baja (N:M) sin duplicados; solo las inscripciones activas entran a la búsqueda y al cierre",
+    "parte": "SW + BD",
+    "estado": "Implementado",
+    "evidencia": "api_inscribir, api_baja_inscripcion, api_inscritos (0204); uq_inscripcion_alumno_grupo; InscribirAlumno, InscripcionesTabla; api_b1_04 (segunda inscripción rechazada).",
+    "faltante": null,
+    "prioridad": "MUST",
+    "modulo": "M1. Gestión académica",
+    "trazabilidad": {
+      "rn": "RN-01",
+      "bpmn": "—",
+      "pantallas": "P-09",
+      "tablas": "INSCRIPCION, ALUMNO, GRUPO"
+    },
+    "nota": "Extensión: la reinscripción tras una baja reactiva la misma fila; importación masiva por CSV (api_importar_inscripciones)."
+  },
+  {
+    "id": "RF-03",
+    "texto_corto": "En sesión automática pedir una captura a cada cámara activa cada 15 s hasta el fin de la tolerancia y registrar cámara, hora y rostros",
+    "parte": "SW + IA + BD",
+    "estado": "Parcial",
+    "evidencia": "useMuestreoSesion (navegador) -> POST /api/sesiones/[id]/captura -> /v1/recognize -> svc_crear_captura (0135); useMuestreoSesion.test (19), captura.test (22), api_a_sesiones_05.",
+    "faltante": "El muestreo lo dispara el navegador del docente (no hay temporizador en el servidor): si cierra la pestaña se detiene. Cada ciclo espera el intervalo DESPUÉS de terminar el envío, así que el periodo real es mayor que 15 s: con ~0.5 s de latencia salen ~78 capturas en 20 min, no 80 ± 1 (cálculo a partir del código, no medición). El criterio «80 ± 1 capturas por cámara» no tiene prueba ni medición: la BD de demostración solo trae 13 capturas de semilla. Además, la ruta de cámara IP nunca se probó con una cámara real (DEMO.md §7); solo con pruebas automáticas.",
+    "prioridad": "MUST",
+    "modulo": "M3. Captura y reconocimiento",
+    "trazabilidad": {
+      "rn": "— (alcance)",
+      "bpmn": "BPMN-01",
+      "pantallas": "P-02, P-03",
+      "tablas": "SESION_CLASE, CAMARA, CAPTURA"
+    },
+    "nota": "Registro de cámara, marca de tiempo y número de rostros: implementado y probado (idempotente por cámara y marca; rechaza fuera de la ventana de tolerancia). Las cámaras IP se atienden en serie dentro del mismo ciclo."
+  },
+  {
+    "id": "RF-04",
+    "texto_corto": "Por cada rostro generar un vector de 512-d y buscar su vecino solo entre plantillas de inscritos con consentimiento; descartar el vector",
+    "parte": "IA + SW + BD",
+    "estado": "Implementado",
+    "evidencia": "svc_alumnos_candidatos (0135) -> /v1/recognize (allowed_faiss_ids) -> svc_registrar_detecciones; test_api (no incluido nunca es candidato, sin vector en la respuesta); api_a_sesiones_03.",
+    "faltante": null,
+    "prioridad": "MUST",
+    "modulo": "M3. Captura y reconocimiento",
+    "trazabilidad": {
+      "rn": "— (alcance)",
+      "bpmn": "BPMN-01",
+      "pantallas": "P-03",
+      "tablas": "CAPTURA, DETECCION, INDICE_FAISS, PLANTILLA_FACIAL, INSCRIPCION, CONSENTIMIENTO"
+    },
+    "nota": "Las pruebas pytest usan el embedder determinista «fake»; las 6 con InsightFace real (-m ml) no se ejecutaron aquí. El equipo reporta pruebas con rostros reales de la librería (DEMO.md §7, DECISIONS §6.3), pero no con una webcam física del plantel ni con 20 000 plantillas; no lo verifiqué."
+  },
+  {
+    "id": "RF-05",
+    "texto_corto": "Marcar válida y atribuir la detección solo si el score alcanza el umbral_similitud vigente (0.850); bajo el umbral queda solo de evidencia",
+    "parte": "BD + IA",
+    "estado": "Implementado",
+    "evidencia": "svc_registrar_detecciones compara con app.param_num(umbral_similitud); api_a_sesiones_03 y _05 y review_sql_03: 0.849 no válida y no cuenta, 0.850 válida.",
+    "faltante": null,
+    "prioridad": "MUST",
+    "modulo": "M3. Captura y reconocimiento",
+    "trazabilidad": {
+      "rn": "RN-04",
+      "bpmn": "BPMN-01",
+      "pantallas": "P-03",
+      "tablas": "DETECCION, PLANTILLA_FACIAL, PARAMETRO_SISTEMA"
+    },
+    "nota": "El score es (coseno+1)/2 (DECISIONS #4). La semilla trae 0.850; en la demostración local se calibró a 0.700 (DEMO.md §9, RUNBOOK §5)."
+  },
+  {
+    "id": "RF-06",
+    "texto_corto": "Un registro de asistencia por alumno y sesión: la primera detección válida lo crea pendiente, las demás suman conteo; en manual, el docente",
+    "parte": "BD + SW",
+    "estado": "Implementado",
+    "evidencia": "uq_asistencia_sesion_alumno (0005); svc_registrar_detecciones y app.registrar_asistencia_manual (0132); api_a_sesiones_03 (varias lecturas, un registro) y _02.",
+    "faltante": null,
+    "prioridad": "MUST",
+    "modulo": "M4. Registro de asistencia",
+    "trazabilidad": {
+      "rn": "RN-02",
+      "bpmn": "BPMN-01",
+      "pantallas": "P-03, P-04",
+      "tablas": "ASISTENCIA, DETECCION"
+    },
+    "nota": null
+  },
+  {
+    "id": "RF-07",
+    "texto_corto": "Confirmar presente o retardo con 3 detecciones válidas en capturas distintas; con 1 o 2 queda pendiente y va a la cola de revisión",
+    "parte": "BD",
+    "estado": "Implementado",
+    "evidencia": "app.lecturas_validas (capturas distintas, 0130); confirmación en svc_registrar_detecciones y app.cerrar_sesion; api_a_sesiones_03/_05 (2 lecturas pendiente, 3 presente), review_sql_03.",
+    "faltante": null,
+    "prioridad": "MUST",
+    "modulo": "M4. Registro de asistencia",
+    "trazabilidad": {
+      "rn": "RN-05",
+      "bpmn": "BPMN-01",
+      "pantallas": "P-03, P-05",
+      "tablas": "ASISTENCIA, DETECCION, PARAMETRO_SISTEMA"
+    },
+    "nota": null
+  },
+  {
+    "id": "RF-08",
+    "texto_corto": "Asignar presente en [0,10) min y retardo en [10,20] min según la primera detección válida; el pase manual sugiere con los mismos límites",
+    "parte": "BD + SW",
+    "estado": "Implementado",
+    "evidencia": "app.estado_por_minuto y minuto_de_sesion (0130), estado_sugerido; api_a_sesiones_05 y review_sql_03: 9:59 presente, 10:00 y 20:00 retardo, 20:01 rechazada.",
+    "faltante": null,
+    "prioridad": "MUST",
+    "modulo": "M4. Registro de asistencia",
+    "trazabilidad": {
+      "rn": "RN-03",
+      "bpmn": "BPMN-01",
+      "pantallas": "P-03, P-04",
+      "tablas": "ASISTENCIA, SESION_CLASE"
+    },
+    "nota": "Pasada la tolerancia el pase manual sugiere «ausente» (DECISIONS #11)."
+  },
+  {
+    "id": "RF-09",
+    "texto_corto": "Abrir sesión solo en horario y aula del grupo; sin cámaras activas abre en manual; en automática el docente registra a quien no consintió",
+    "parte": "SW + BD",
+    "estado": "Implementado",
+    "evidencia": "api_abrir_sesion (0131: FUERA_DE_HORARIO, modo según cámaras activas), app.registrar_asistencia_manual (0132); AbrirSesion, PaseListaManual, RegistroManualDialog; api_a_sesiones_01/_02.",
+    "faltante": null,
+    "prioridad": "MUST",
+    "modulo": "M4. Registro de asistencia",
+    "trazabilidad": {
+      "rn": "RN-06",
+      "bpmn": "BPMN-01",
+      "pantallas": "P-02, P-03, P-04",
+      "tablas": "SESION_CLASE, HORARIO_GRUPO, CAMARA, ASISTENCIA"
+    },
+    "nota": "En sesión automática el registro manual se rechaza si el alumno tiene consentimiento y lecturas válidas (ALUMNO_CON_LECTURAS)."
+  },
+  {
+    "id": "RF-10",
+    "texto_corto": "Al cerrar la sesión (a su hora de fin o antes por el docente) crear ausentes, dejar pendientes a quien tiene 1-2 lecturas y asentar bitácora",
+    "parte": "BD + SW",
+    "estado": "Parcial",
+    "evidencia": "app.cerrar_sesion (0133), api_cerrar_sesion, svc_job_cerrar_sesiones (0234), /api/jobs/cerrar-sesiones; CierreSesionDialog; api_a_sesiones_03/_04, api_b2_05, jobs.test.js (24).",
+    "faltante": "La ejecución periódica del cierre no está configurada: el repositorio no trae vercel.json, flujo de GitHub Actions ni pg_cron, y RUNBOOK §4 solo la sugiere. Sin ella la sesión no se cierra sola a su hora de fin. El cierre por el docente y el job (idéntico efecto) sí están implementados y probados.",
+    "prioridad": "MUST",
+    "modulo": "M4. Registro de asistencia",
+    "trazabilidad": {
+      "rn": "RN-07",
+      "bpmn": "BPMN-01",
+      "pantallas": "P-03, P-04",
+      "tablas": "SESION_CLASE, INSCRIPCION, ASISTENCIA, BITACORA_AUDITORIA"
+    },
+    "nota": "Pasa a Implementado en cuanto se programe /api/jobs/cerrar-sesiones (p. ej. cada 5 min); no hay que escribir lógica nueva."
+  },
+  {
+    "id": "RF-11",
+    "texto_corto": "El docente corrige un registro (incluido un pendiente) hasta 48 h tras el fin, con bitácora; al vencer, los pendientes pasan a ausente",
+    "parte": "BD + SW",
+    "estado": "Parcial",
+    "evidencia": "api_corregir_asistencia (0121, RN_08_PLAZO_VENCIDO), app.resolver_pendientes_vencidos (0120), svc_job_resolver_pendientes; CasoPendiente; api_c_10 (47 h sí, 49 h no), api_c_12.",
+    "faltante": "La resolución automática de pendientes vencidos depende de /api/jobs/resolver-pendientes y nada la programa en el repositorio (mismo faltante que RF-10). La corrección manual dentro de las 48 h, con origen «corrección» y bitácora del valor anterior y nuevo, está completa y probada.",
+    "prioridad": "MUST",
+    "modulo": "M5. Revisión y justificantes",
+    "trazabilidad": {
+      "rn": "RN-08",
+      "bpmn": "BPMN-02",
+      "pantallas": "P-05",
+      "tablas": "ASISTENCIA, SESION_CLASE, BITACORA_AUDITORIA"
+    },
+    "nota": "Solo se puede corregir en sesiones cerradas (SESION_NO_CERRADA). Pasa a Implementado al programar el job."
+  },
+  {
+    "id": "RF-12",
+    "texto_corto": "Alumno o docente registra un justificante (motivo y documento privado); el docente lo aprueba o rechaza; queda justificado sin borrar nada",
+    "parte": "SW + BD",
+    "estado": "Parcial",
+    "evidencia": "api_registrar_justificante, api_resolver_justificante (0121); /api/justificantes/documento; RegistrarJustificanteForm, JustificanteCard; api_c_11 (RES-01 conserva registro y detecciones).",
+    "faltante": "El docente no tiene pantalla para registrar un justificante en nombre del alumno: la RPC (p_id_alumno), la ruta de subida y el cliente http lo admiten y están probados, pero ningún componente los invoca (solo el portal del alumno). El flujo alumno registra y docente aprueba o rechaza funciona de punta a punta.",
+    "prioridad": "SHOULD",
+    "modulo": "M5. Revisión y justificantes",
+    "trazabilidad": {
+      "rn": "RN-09",
+      "bpmn": "BPMN-02",
+      "pantallas": "P-05, P-08",
+      "tablas": "JUSTIFICANTE, ASISTENCIA, USUARIO, BITACORA_AUDITORIA"
+    },
+    "nota": null
+  },
+  {
+    "id": "RF-13",
+    "texto_corto": "Calcular por alumno y grupo las faltas equivalentes = ausencias + ⌊retardos ÷ 3⌋, sin alterar los registros y sin contar los justificados",
+    "parte": "BD + SW",
+    "estado": "Implementado",
+    "evidencia": "v_resumen_asistencia (0100, faltas_equivalentes); api_reporte_grupo, api_alumno_resumen; api_c_00 («2 ausencias + 7 retardos = 4» y la justificada no cuenta).",
+    "faltante": null,
+    "prioridad": "SHOULD",
+    "modulo": "M6. Acumulados y alertas",
+    "trazabilidad": {
+      "rn": "RN-10",
+      "bpmn": "BPMN-01",
+      "pantallas": "P-07",
+      "tablas": "ASISTENCIA, INSCRIPCION; vista v_resumen_asistencia"
+    },
+    "nota": null
+  },
+  {
+    "id": "RF-14",
+    "texto_corto": "Tras cada cierre, corrección o justificante recalcular el % de faltas; sobre 20 % quitar derecho a examen y notificar; restituirlo si baja",
+    "parte": "BD",
+    "estado": "Implementado",
+    "evidencia": "app.recalcular_inscripcion y recalcular_grupo (0100) llamadas desde cerrar_sesion, api_corregir_asistencia, api_resolver_justificante; api_c_00: 9/48 = 18.75 % conserva, 10/48 = 20.83 % pierde.",
+    "faltante": null,
+    "prioridad": "SHOULD",
+    "modulo": "M6. Acumulados y alertas",
+    "trazabilidad": {
+      "rn": "RN-11",
+      "bpmn": "BPMN-01",
+      "pantallas": "P-02, P-07",
+      "tablas": "INSCRIPCION, SESION_CLASE, HORARIO_GRUPO, BITACORA_AUDITORIA; vista v_resumen_asistencia"
+    },
+    "nota": "La «notificación» es un asiento de bitácora (accion = notificacion, solo cuando el derecho cambia) más alertas en el panel del docente (api_alertas_docente); no hay correo ni push (módulo Notificaciones marcado «pronto»)."
+  },
+  {
+    "id": "RF-15",
+    "texto_corto": "Registrar plantilla facial solo con consentimiento firmado y vigente; foto con un solo rostro vectorizable, guardada en bucket privado",
+    "parte": "SW + BD + IA",
+    "estado": "Implementado",
+    "evidencia": "POST /api/alumnos/[id]/plantilla, app.plantilla_registrar (0239, RN_13_CONSENTIMIENTO_NO_VIGENTE), /v1/photo/check-set; api_b2_01/_02, biometria.test.js (50), test_api.py.",
+    "faltante": null,
+    "prioridad": "MUST",
+    "modulo": "M2. Registro biométrico",
+    "trazabilidad": {
+      "rn": "RN-13",
+      "bpmn": "BPMN-03",
+      "pantallas": "P-06",
+      "tablas": "CONSENTIMIENTO, PLANTILLA_FACIAL"
+    },
+    "nota": "Extensiones: plantilla de 3 a 8 fotos promediadas y autoservicio del alumno (DECISIONS §6 y §9). El texto del aviso de privacidad es borrador y falta la revisión jurídica (DECISIONS §3.3). No se ejecutaron las pruebas pytest con modelo real."
+  },
+  {
+    "id": "RF-16",
+    "texto_corto": "Al registrar plantilla nueva: archivar la anterior, construir otra versión del índice con faiss_id y activarla de forma atómica",
+    "parte": "IA + BD + SW",
+    "estado": "Implementado",
+    "evidencia": "app.plantilla_registrar (archiva); svc_indice_plan/registrar/activar (0233); servicio /v1/index/build y /activate; ux_plantilla_facial_activa, ux_indice_faiss_en_uso; api_b2_04/_06; pytest atómico.",
+    "faltante": null,
+    "prioridad": "MUST",
+    "modulo": "M2. Registro biométrico",
+    "trazabilidad": {
+      "rn": "RN-12",
+      "bpmn": "BPMN-03",
+      "pantallas": "P-06",
+      "tablas": "PLANTILLA_FACIAL, INDICE_FAISS"
+    },
+    "nota": "El índice vive en memoria de un solo proceso: con varias instancias hay que activar la versión en cada una (DECISIONS §3.7). Tras purgar las fotos de registro ya no hay reconstrucción COMPLETA, solo incremental (DECISIONS §8)."
+  },
+  {
+    "id": "RF-17",
+    "texto_corto": "Reportes por alumno, grupo y periodo: presentes, retardos, ausencias, justificadas, faltas equiv., % y derecho a examen; pantalla y CSV",
+    "parte": "SW + BD",
+    "estado": "Implementado",
+    "evidencia": "api_reporte_filtros/grupo/periodo (0102); ReporteAsistencia, FiltrosReporte, BotonesExportar, reporteCsv.utils; api_c_20 (totales = conteo directo), ReporteAsistencia.test.",
+    "faltante": null,
+    "prioridad": "MUST",
+    "modulo": "M7. Reportes y consultas",
+    "trazabilidad": {
+      "rn": "— (alcance)",
+      "bpmn": "—",
+      "pantallas": "P-07",
+      "tablas": "ASISTENCIA, GRUPO; vista v_resumen_asistencia"
+    },
+    "nota": "El CSV se arma en el navegador con los datos cargados (recorre todas las páginas) y neutraliza fórmulas. Además se puede imprimir o guardar como PDF."
+  },
+  {
+    "id": "RF-18",
+    "texto_corto": "Cola del docente con pendientes y justificantes de sus grupos, con lecturas, score, recortes por URL firmada y plazo; se resuelve desde ahí",
+    "parte": "SW + BD",
+    "estado": "Implementado",
+    "evidencia": "api_cola_revision, api_detecciones_caso (0122); /api/casos/[id]/detecciones (bitácora antes de firmar); ColaRevision, LecturasCaso, RecorteFirmado; revision.test.js, api_c_13, review_sql_01.",
+    "faltante": null,
+    "prioridad": "MUST",
+    "modulo": "M5. Revisión y justificantes",
+    "trazabilidad": {
+      "rn": "— (alcance)",
+      "bpmn": "BPMN-02",
+      "pantallas": "P-02, P-05",
+      "tablas": "ASISTENCIA, JUSTIFICANTE, DETECCION"
+    },
+    "nota": "Las URL firmadas (300 s como máximo) no se probaron contra Supabase Storage real (ver salvedad 1)."
+  },
+  {
+    "id": "RF-19",
+    "texto_corto": "Limitar al docente a sus grupos y asentar en bitácora cada consulta a datos biométricos o de asistencia con usuario, registro, fecha e IP",
+    "parte": "BD + SW",
+    "estado": "Parcial",
+    "evidencia": "RLS en las 20 tablas + app.puede_ver_grupo; review_sql_01 (IDOR en las RPC); svc_registrar_consulta_revision y api_documento_url_autorizar asientan «consulta»; revision.test.js.",
+    "faltante": "Solo se asientan las consultas de recortes, de documentos de justificantes y de fotos y consentimientos. Las lecturas de asistencia (reportes, historial, monitor) no dejan asiento «consulta»: es una decisión de diseño documentada en 0102 (son RPC de solo lectura). La IP se toma de x-forwarded-for y solo es confiable si el proxy la reescribe (DECISIONS §4).",
+    "prioridad": "MUST",
+    "modulo": "M8. Usuarios y seguridad",
+    "trazabilidad": {
+      "rn": "— (privacidad)",
+      "bpmn": "Transversal",
+      "pantallas": "P-01, P-02, P-05",
+      "tablas": "USUARIO, GRUPO, BITACORA_AUDITORIA"
+    },
+    "nota": "Los dos criterios de verificación del RF (grupo ajeno rechazado; abrir un recorte deja asiento en bitácora) sí están cubiertos por pruebas."
+  },
+  {
+    "id": "RF-20",
+    "texto_corto": "Autenticar con correo institucional vía Supabase Auth sin contraseñas en el esquema, autorizar por rol; cuentas creadas por el administrador",
+    "parte": "SW + BD",
+    "estado": "Implementado",
+    "evidencia": "LoginForm, lib/api/auth.js, proxy.js, app.exigir_rol (CUENTA_INACTIVA); POST /api/admin/usuarios; tabla usuario sin contraseña; auth.test (11), route.test (32), realmode.test (14), api_b1_05.",
+    "faltante": null,
+    "prioridad": "MUST",
+    "modulo": "M8. Usuarios y seguridad",
+    "trazabilidad": {
+      "rn": "— (privacidad)",
+      "bpmn": "Transversal",
+      "pantallas": "P-01",
+      "tablas": "USUARIO"
+    },
+    "nota": "Salvedad: probado con el adaptador local y un GoTrue simulado (scripts/fake-supabase.mjs); la introducción del RUNBOOK dice que no se ha ejecutado contra un proyecto Supabase real. Una cuenta inactiva es rechazada en el login y la sesión se cierra."
+  },
+  {
+    "id": "RF-21",
+    "texto_corto": "El alumno ve en el portal su historial por materia (estado por sesión, acumulados, % de faltas vs. el 20 %), solo lo propio y sin imágenes",
+    "parte": "SW + BD",
+    "estado": "Implementado",
+    "evidencia": "api_alumno_resumen, api_alumno_historial (0102); PortalAlumno, HistorialMateria, BarraFaltas; api_c_20 (sin rutas objeto_*, grupo ajeno NO_AUTORIZADO), PortalAlumno.test.",
+    "faltante": null,
+    "prioridad": "SHOULD",
+    "modulo": "M7. Reportes y consultas",
+    "trazabilidad": {
+      "rn": "— (problema 02)",
+      "bpmn": "—",
+      "pantallas": "P-08",
+      "tablas": "ASISTENCIA, INSCRIPCION; vista v_resumen_asistencia"
+    },
+    "nota": null
+  },
+  {
+    "id": "RF-22",
+    "texto_corto": "Administrar aulas, cámaras (frente o fondo, IP, estatus) y horario semanal del grupo; una cámara por posición y fin posterior al inicio",
+    "parte": "SW + BD",
+    "estado": "Implementado",
+    "evidencia": "api_aula_guardar, api_camara_guardar (0202), api_horario_guardar, api_generar_sesiones (0203); uq_camara_aula_posicion; AulaForm, CamaraForm, HorarioEditor; api_b1_02/_03.",
+    "faltante": null,
+    "prioridad": "MUST",
+    "modulo": "M1. Gestión académica",
+    "trazabilidad": {
+      "rn": "RN-06",
+      "bpmn": "—",
+      "pantallas": "P-09",
+      "tablas": "AULA, CAMARA, HORARIO_GRUPO, GRUPO, SESION_CLASE"
+    },
+    "nota": "Extensión: cámara tipo «navegador» (webcam del docente) además de la IP (DECISIONS #2). Las sesiones se generan cuando el administrador lo pide, rango de hasta 366 días."
+  }
+]

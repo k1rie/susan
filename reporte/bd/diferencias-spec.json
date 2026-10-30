@@ -1,0 +1,33 @@
+{
+  "tablas_fuera_de_la_spec": [
+    {
+      "tabla": "plantilla_foto",
+      "columnas": 6
+    }
+  ],
+  "columnas_extra": [
+    {
+      "tabla": "camara",
+      "columna": "tipo"
+    },
+    {
+      "tabla": "consentimiento",
+      "columna": "origen"
+    },
+    {
+      "tabla": "consentimiento",
+      "columna": "version_aviso"
+    },
+    {
+      "tabla": "plantilla_facial",
+      "columna": "origen"
+    }
+  ],
+  "columnas_faltantes": [],
+  "totales": {
+    "tablas_spec": 19,
+    "columnas_spec": 125,
+    "tablas_bd": 20,
+    "columnas_bd": 135
+  }
+}
