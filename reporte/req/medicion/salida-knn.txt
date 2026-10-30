@@ -1,0 +1,9 @@
+# Medición propia (2026-10-30). Script: reporte/req/medicion/knn.py. Entorno: Linux x86_64, Intel Xeon 2.10 GHz, 4 vCPU, Python 3.11.15, faiss-cpu 1.15.1, numpy 2.4.6.
+# Vectores aleatorios normalizados de 512 dimensiones; busca con LoadedIndex.search del repositorio (IndexIDMap2 + IndexFlatIP + IDSelectorBatch). 200 repeticiones por fila; tiempos en ms por llamada (todas las consultas del lote juntas).
+{'n': 5000, 'consultas': 1, 'permitidos': 500, 'p50': 0.31, 'p95': 0.52, 'max': 0.66}
+{'n': 5000, 'consultas': 60, 'permitidos': 500, 'p50': 1.16, 'p95': 2.08, 'max': 5.87}
+{'n': 20000, 'consultas': 1, 'permitidos': 2000, 'p50': 0.88, 'p95': 1.37, 'max': 1.8}
+{'n': 20000, 'consultas': 60, 'permitidos': 2000, 'p50': 9.35, 'p95': 13.57, 'max': 41.14}
+{'n': 20000, 'consultas': 60, 'permitidos': 20000, 'p50': 39.41, 'p95': 65.71, 'max': 88.2}
+{'n': 20000, 'consultas': 1, 'permitidos': 20000, 'p50': 6.36, 'p95': 10.15, 'max': 16.42}
+razon p95 20000/5000 (60 consultas, todos permitidos): 5.04 {'n': 5000, 'consultas': 60, 'permitidos': 5000, 'p50': 9.3, 'p95': 12.97, 'max': 39.95} {'n': 20000, 'consultas': 60, 'permitidos': 20000, 'p50': 42.1, 'p95': 65.36, 'max': 122.96}

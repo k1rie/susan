@@ -1,0 +1,224 @@
+{
+  "generado": "2026-10-30 04:23 UTC",
+  "commit": "f742bb4",
+  "conteos": {
+    "Esquemas (sin los del sistema)": {
+      "sql": "select count(*) from pg_namespace where nspname not like 'pg\\_%' and nspname <> 'information_schema'",
+      "valor": 6
+    },
+    "Tablas base en `public`": {
+      "sql": "select count(*) from pg_class c join pg_namespace n on n.oid = c.relnamespace where n.nspname = 'public' and c.relkind = 'r'",
+      "valor": 20
+    },
+    "Vistas en `public`": {
+      "sql": "select count(*) from pg_class c join pg_namespace n on n.oid = c.relnamespace where n.nspname = 'public' and c.relkind = 'v'",
+      "valor": 1
+    },
+    "Tablas base en `app` (internas)": {
+      "sql": "select count(*) from pg_class c join pg_namespace n on n.oid = c.relnamespace where n.nspname = 'app' and c.relkind = 'r'",
+      "valor": 2
+    },
+    "Columnas de las tablas de `public`": {
+      "sql": "select count(*) from pg_attribute a join pg_class c on c.oid = a.attrelid join pg_namespace n on n.oid = c.relnamespace\n where n.nspname = 'public' and c.relkind = 'r' and a.attnum > 0 and not a.attisdropped",
+      "valor": 135
+    },
+    "Columnas NOT NULL": {
+      "sql": "select count(*) from pg_attribute a join pg_class c on c.oid = a.attrelid join pg_namespace n on n.oid = c.relnamespace\n where n.nspname = 'public' and c.relkind = 'r' and a.attnum > 0 and not a.attisdropped and a.attnotnull",
+      "valor": 113
+    },
+    "Columnas GENERATED ALWAYS AS IDENTITY": {
+      "sql": "select count(*) from pg_attribute a join pg_class c on c.oid = a.attrelid join pg_namespace n on n.oid = c.relnamespace\n where n.nspname = 'public' and c.relkind = 'r' and a.attnum > 0 and not a.attisdropped and a.attidentity = 'a'",
+      "valor": 19
+    },
+    "Columnas binarias o de arreglo (RNF-03)": {
+      "sql": "select count(*) from pg_attribute a join pg_class c on c.oid = a.attrelid join pg_namespace n on n.oid = c.relnamespace\n where n.nspname = 'public' and c.relkind = 'r' and a.attnum > 0 and not a.attisdropped and exists (select 1 from pg_type t where t.oid = a.atttypid and (t.typname = 'bytea' or t.typcategory = 'A'))",
+      "valor": 0
+    },
+    "Llaves primarias": {
+      "sql": "select count(*) from pg_constraint c join pg_namespace n on n.oid = c.connamespace where n.nspname = 'public' and c.contype = 'p'",
+      "valor": 20
+    },
+    "Llaves foráneas": {
+      "sql": "select count(*) from pg_constraint c join pg_namespace n on n.oid = c.connamespace where n.nspname = 'public' and c.contype = 'f'",
+      "valor": 26
+    },
+    "  de ellas ON DELETE RESTRICT": {
+      "sql": "select count(*) from pg_constraint c join pg_namespace n on n.oid = c.connamespace where n.nspname = 'public' and c.contype = 'f' and c.confdeltype = 'r'",
+      "valor": 25
+    },
+    "  de ellas ON DELETE CASCADE": {
+      "sql": "select count(*) from pg_constraint c join pg_namespace n on n.oid = c.connamespace where n.nspname = 'public' and c.contype = 'f' and c.confdeltype = 'c'",
+      "valor": 1
+    },
+    "Restricciones UNIQUE": {
+      "sql": "select count(*) from pg_constraint c join pg_namespace n on n.oid = c.connamespace where n.nspname = 'public' and c.contype = 'u'",
+      "valor": 21
+    },
+    "Restricciones CHECK": {
+      "sql": "select count(*) from pg_constraint c join pg_namespace n on n.oid = c.connamespace where n.nspname = 'public' and c.contype = 'c'",
+      "valor": 35
+    },
+    "Índices en `public` (todos)": {
+      "sql": "select count(*) from pg_index i join pg_class t on t.oid = i.indrelid join pg_namespace n on n.oid = t.relnamespace where n.nspname = 'public'",
+      "valor": 64
+    },
+    "  únicos parciales (sin restricción)": {
+      "sql": "select count(*) from pg_index i join pg_class t on t.oid = i.indrelid join pg_namespace n on n.oid = t.relnamespace where n.nspname = 'public' and i.indisunique and i.indpred is not null",
+      "valor": 3
+    },
+    "  de apoyo no únicos (ix_*)": {
+      "sql": "select count(*) from pg_index i join pg_class t on t.oid = i.indrelid join pg_namespace n on n.oid = t.relnamespace where n.nspname = 'public' and not i.indisunique",
+      "valor": 20
+    },
+    "Tipos ENUM": {
+      "sql": "select count(distinct t.oid) from pg_type t join pg_namespace n on n.oid = t.typnamespace join pg_enum e on e.enumtypid = t.oid where n.nspname = 'public'",
+      "valor": 14
+    },
+    "Valores en total de los ENUM": {
+      "sql": "select count(*) from pg_enum e join pg_type t on t.oid = e.enumtypid join pg_namespace n on n.oid = t.typnamespace where n.nspname = 'public'",
+      "valor": 50
+    },
+    "Funciones en `public` (RPC)": {
+      "sql": "select count(*) from pg_proc p join pg_namespace n on n.oid = p.pronamespace where n.nspname = 'public'",
+      "valor": 98
+    },
+    "  prefijo api_ (las llama la interfaz)": {
+      "sql": "select count(*) from pg_proc p join pg_namespace n on n.oid = p.pronamespace where n.nspname = 'public' and p.proname like 'api\\_%'",
+      "valor": 76
+    },
+    "  prefijo svc_ (solo service_role)": {
+      "sql": "select count(*) from pg_proc p join pg_namespace n on n.oid = p.pronamespace where n.nspname = 'public' and p.proname like 'svc\\_%'",
+      "valor": 22
+    },
+    "  SECURITY DEFINER": {
+      "sql": "select count(*) from pg_proc p join pg_namespace n on n.oid = p.pronamespace where n.nspname = 'public' and p.prosecdef",
+      "valor": 60
+    },
+    "  SECURITY INVOKER": {
+      "sql": "select count(*) from pg_proc p join pg_namespace n on n.oid = p.pronamespace where n.nspname = 'public' and not p.prosecdef",
+      "valor": 38
+    },
+    "Funciones en `app` (lógica interna)": {
+      "sql": "select count(*) from pg_proc p join pg_namespace n on n.oid = p.pronamespace where n.nspname = 'app'",
+      "valor": 87
+    },
+    "  de ellas funciones de disparador (trg_*)": {
+      "sql": "select count(*) from pg_proc p join pg_namespace n on n.oid = p.pronamespace where n.nspname = 'app' and p.prorettype = 'trigger'::regtype",
+      "valor": 7
+    },
+    "Disparadores (no internos) en `public`": {
+      "sql": "select count(*) from pg_trigger t join pg_class c on c.oid = t.tgrelid join pg_namespace n on n.oid = c.relnamespace where not t.tgisinternal and n.nspname = 'public'",
+      "valor": 7
+    },
+    "Tablas con RLS habilitado en `public`": {
+      "sql": "select count(*) from pg_class c join pg_namespace n on n.oid = c.relnamespace where n.nspname = 'public' and c.relkind = 'r' and c.relrowsecurity",
+      "valor": 20
+    },
+    "Políticas RLS en `public`": {
+      "sql": "select count(*) from pg_policies where schemaname = 'public'",
+      "valor": 39
+    },
+    "Políticas en `storage` (RESTRICTIVE)": {
+      "sql": "select count(*) from pg_policies where schemaname = 'storage'",
+      "valor": 1
+    },
+    "Privilegios de `anon` sobre tablas de `public`": {
+      "sql": "select count(*) from information_schema.role_table_grants where table_schema = 'public' and grantee = 'anon'",
+      "valor": 0
+    },
+    "Privilegios de `authenticated` distintos de SELECT": {
+      "sql": "select count(*) from information_schema.role_table_grants where table_schema = 'public' and grantee = 'authenticated' and privilege_type <> 'SELECT'",
+      "valor": 0
+    },
+    "`service_role` puede INSERT en bitacora_auditoria (0 = no)": {
+      "sql": "select has_table_privilege('service_role', 'public.bitacora_auditoria', 'INSERT')::int",
+      "valor": 0
+    },
+    "Parámetros en parametro_sistema": {
+      "sql": "select count(*) from public.parametro_sistema",
+      "valor": 12
+    },
+    "Migraciones registradas": {
+      "sql": "select count(*) from supabase_migrations.schema_migrations",
+      "valor": 43
+    }
+  },
+  "filas_por_tabla_ahora": {
+    "alumno": 76,
+    "asistencia": 1296,
+    "aula": 3,
+    "bitacora_auditoria": 147,
+    "camara": 5,
+    "captura": 13,
+    "consentimiento": 77,
+    "deteccion": 199,
+    "docente": 4,
+    "grupo": 4,
+    "horario_grupo": 12,
+    "indice_faiss": 1,
+    "inscripcion": 75,
+    "justificante": 20,
+    "materia": 5,
+    "parametro_sistema": 12,
+    "plantilla_facial": 75,
+    "plantilla_foto": 75,
+    "sesion_clase": 146,
+    "usuario": 31
+  },
+  "filas_por_tabla_semilla": {
+    "alumno": 75,
+    "asistencia": 1296,
+    "aula": 2,
+    "bitacora_auditoria": 147,
+    "camara": 4,
+    "captura": 13,
+    "consentimiento": 77,
+    "deteccion": 199,
+    "docente": 3,
+    "grupo": 3,
+    "horario_grupo": 9,
+    "indice_faiss": 1,
+    "inscripcion": 75,
+    "justificante": 20,
+    "materia": 4,
+    "parametro_sistema": 12,
+    "plantilla_facial": 75,
+    "plantilla_foto": 75,
+    "sesion_clase": 146,
+    "usuario": 31
+  },
+  "filas_de_prueba": {
+    "alumno": [
+      "ZZPRUEBA1"
+    ],
+    "docente": [
+      "ZZD01"
+    ],
+    "materia": [
+      "ZZP101"
+    ],
+    "aula": [
+      "ZZ-P1"
+    ],
+    "grupo": [
+      "ZZ1"
+    ]
+  },
+  "prefijos": {
+    "ix": 20,
+    "uq": 21,
+    "pk": 20,
+    "ux": 3,
+    "ck": 35,
+    "fk": 26
+  },
+  "migraciones": 43,
+  "lineas_migraciones": 9946,
+  "pruebas": {
+    "archivos": 37,
+    "positivas": 1508,
+    "negativas": 953,
+    "fallos": 0
+  },
+  "funciones_sin_archivo": []
+}

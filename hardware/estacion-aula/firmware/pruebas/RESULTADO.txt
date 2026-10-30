@@ -1,0 +1,244 @@
+Pruebas del firmware - Estación de aula SUSAN
+fecha:  2026-10-30T04:45:04Z
+g++:    g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+estas pruebas se ejecutan en el PC; NO hay ejecución en hardware físico
+
+== 0. protocolo.h como C++11 estricto (el estándar del IDE de Arduino)
+OK: sin errores ni avisos
+
+== estricto : g++ -std=c++17 -Wall -Wextra -Werror -O2 test_protocolo.cpp
+== Pruebas de protocolo.h (lógica pura)
+  ok   linea_completa_y_crlf
+  ok   lineas_vacias_se_ignoran
+  ok   linea_de_64_bytes_es_valida_y_65_se_descarta_entera
+  ok   flujo_sin_salto_de_linea_no_desborda_ni_bloquea
+  ok   caracteres_de_control_descartan_la_linea
+  ok   bytes_altos_utf8_pasan_al_analizador
+  ok   linea_valida_queda_disponible_hasta_el_siguiente_byte
+  ok   ping
+  ok   ping_mal_formado_se_ignora
+  ok   ses_valido
+  ok   ses_extremos_y_vacio
+  ok   ses_mal_formado_se_ignora
+  ok   ses_textos_se_truncan_a_16_y_se_translitera
+  ok   res_ok_con_y_sin_nombre
+  ok   res_dup_noreg_err
+  ok   res_desconocido_o_mal_formado_se_ignora
+  ok   comandos_desconocidos_y_basura_se_ignoran
+  ok   linea_de_mas_de_64_no_se_analiza
+  ok   ajustar_trunca_a_16_columnas
+  ok   ajustar_quita_espacios_de_los_extremos_tambien_tras_truncar
+  ok   ajustar_transliterara_todo_el_bloque_latin1
+  ok   ajustar_casos_del_proyecto
+  ok   ajustar_secuencias_no_representables_dan_un_solo_signo
+  ok   ajustar_multibyte_en_el_limite_de_16
+  ok   ajustar_controles_se_vuelven_espacio
+  ok   ajustarN_usa_exactamente_n_bytes
+  ok   uid_hex_mayusculas_sin_separadores
+  ok   linea_uid
+  ok   linea_uid_rechaza_tamanos_invalidos_y_buferes_chicos
+  ok   lector_vivo_segun_version
+  ok   uint_a_texto
+  ok   primer_uid_se_acepta
+  ok   mismo_uid_dentro_de_2s_se_ignora_aunque_se_haya_retirado
+  ok   mismo_uid_sin_retirar_la_tarjeta_nunca_cuenta
+  ok   la_retirada_exige_sondeos_consecutivos_sin_tarjeta
+  ok   uid_distinto_se_acepta_de_inmediato
+  ok   antirrebote_correcto_al_dar_la_vuelta_millis
+  ok   enlace_con_trafico_vence_a_los_30s_exactos
+  ok   enlace_sin_trafico_desde_el_arranque
+  ok   enlace_correcto_al_dar_la_vuelta_millis
+  ok   espera_de_respuesta_vence_a_los_3s
+  ok   parpadeo_lento_500_de_cada_2000
+  ok   pulsador_una_pulsacion_estable_cuenta_una_vez
+  ok   pulsador_rebotes_cortos_no_cuentan
+  ok   pulsador_limite_de_30ms
+  ok   pulsador_ya_pulsado_al_encender_no_cuenta_y_dos_pulsaciones_son_dos
+  ok   pitido_ok_un_tono_corto
+  ok   pitido_dup_dos_tonos_cortos
+  ok   pitido_noreg_un_tono_largo_grave
+  ok   secuenciador_detener_apaga_y_no_deja_tono_colgado
+  ok   secuenciador_reiniciar_reemplaza_la_secuencia_y_sin_secuencia_apaga
+  ok   secuenciador_no_acumula_error_si_el_ciclo_se_atrasa
+  ok   secuenciador_correcto_al_dar_la_vuelta_millis
+  ok   efectos_por_resultado
+  ok   evento_de_cada_comando
+  ok   led_parpadeo_rapido_alterna_cada_200ms
+  ok   pagina_sesion_materia_arriba_grupo_y_cuenta_abajo
+  ok   pagina_sesion_grupo_largo_se_recorta_y_deja_una_columna
+  ok   pagina_sesion_sin_sesion_enlace_perdido_y_esperando
+  ok   sesion_con_campos_vacios_cierra_la_sesion
+  ok   paginas_ultima_y_estacion
+  ok   pantallas_de_eventos
+  ok   ninguna_pantalla_excede_16_columnas
+  ok   un_millon_de_bytes_aleatorios_no_rompen_el_ensamblador_ni_el_analizador
+  ok   lineas_aleatorias_con_forma_de_comando_no_producen_textos_largos
+-- 65 casos, 0 fallidos, 6138 afirmaciones
+
+== sanitizadores : g++ -std=c++17 -Wall -Wextra -O1 -g -fsanitize=address,undefined -fno-sanitize-recover=all test_protocolo.cpp
+== Pruebas de protocolo.h (lógica pura)
+  ok   linea_completa_y_crlf
+  ok   lineas_vacias_se_ignoran
+  ok   linea_de_64_bytes_es_valida_y_65_se_descarta_entera
+  ok   flujo_sin_salto_de_linea_no_desborda_ni_bloquea
+  ok   caracteres_de_control_descartan_la_linea
+  ok   bytes_altos_utf8_pasan_al_analizador
+  ok   linea_valida_queda_disponible_hasta_el_siguiente_byte
+  ok   ping
+  ok   ping_mal_formado_se_ignora
+  ok   ses_valido
+  ok   ses_extremos_y_vacio
+  ok   ses_mal_formado_se_ignora
+  ok   ses_textos_se_truncan_a_16_y_se_translitera
+  ok   res_ok_con_y_sin_nombre
+  ok   res_dup_noreg_err
+  ok   res_desconocido_o_mal_formado_se_ignora
+  ok   comandos_desconocidos_y_basura_se_ignoran
+  ok   linea_de_mas_de_64_no_se_analiza
+  ok   ajustar_trunca_a_16_columnas
+  ok   ajustar_quita_espacios_de_los_extremos_tambien_tras_truncar
+  ok   ajustar_transliterara_todo_el_bloque_latin1
+  ok   ajustar_casos_del_proyecto
+  ok   ajustar_secuencias_no_representables_dan_un_solo_signo
+  ok   ajustar_multibyte_en_el_limite_de_16
+  ok   ajustar_controles_se_vuelven_espacio
+  ok   ajustarN_usa_exactamente_n_bytes
+  ok   uid_hex_mayusculas_sin_separadores
+  ok   linea_uid
+  ok   linea_uid_rechaza_tamanos_invalidos_y_buferes_chicos
+  ok   lector_vivo_segun_version
+  ok   uint_a_texto
+  ok   primer_uid_se_acepta
+  ok   mismo_uid_dentro_de_2s_se_ignora_aunque_se_haya_retirado
+  ok   mismo_uid_sin_retirar_la_tarjeta_nunca_cuenta
+  ok   la_retirada_exige_sondeos_consecutivos_sin_tarjeta
+  ok   uid_distinto_se_acepta_de_inmediato
+  ok   antirrebote_correcto_al_dar_la_vuelta_millis
+  ok   enlace_con_trafico_vence_a_los_30s_exactos
+  ok   enlace_sin_trafico_desde_el_arranque
+  ok   enlace_correcto_al_dar_la_vuelta_millis
+  ok   espera_de_respuesta_vence_a_los_3s
+  ok   parpadeo_lento_500_de_cada_2000
+  ok   pulsador_una_pulsacion_estable_cuenta_una_vez
+  ok   pulsador_rebotes_cortos_no_cuentan
+  ok   pulsador_limite_de_30ms
+  ok   pulsador_ya_pulsado_al_encender_no_cuenta_y_dos_pulsaciones_son_dos
+  ok   pitido_ok_un_tono_corto
+  ok   pitido_dup_dos_tonos_cortos
+  ok   pitido_noreg_un_tono_largo_grave
+  ok   secuenciador_detener_apaga_y_no_deja_tono_colgado
+  ok   secuenciador_reiniciar_reemplaza_la_secuencia_y_sin_secuencia_apaga
+  ok   secuenciador_no_acumula_error_si_el_ciclo_se_atrasa
+  ok   secuenciador_correcto_al_dar_la_vuelta_millis
+  ok   efectos_por_resultado
+  ok   evento_de_cada_comando
+  ok   led_parpadeo_rapido_alterna_cada_200ms
+  ok   pagina_sesion_materia_arriba_grupo_y_cuenta_abajo
+  ok   pagina_sesion_grupo_largo_se_recorta_y_deja_una_columna
+  ok   pagina_sesion_sin_sesion_enlace_perdido_y_esperando
+  ok   sesion_con_campos_vacios_cierra_la_sesion
+  ok   paginas_ultima_y_estacion
+  ok   pantallas_de_eventos
+  ok   ninguna_pantalla_excede_16_columnas
+  ok   un_millon_de_bytes_aleatorios_no_rompen_el_ensamblador_ni_el_analizador
+  ok   lineas_aleatorias_con_forma_de_comando_no_producen_textos_largos
+-- 65 casos, 0 fallidos, 6138 afirmaciones
+
+== estricto : g++ -std=c++17 -Wall -Wextra -Werror -O2 test_sketch.cpp
+== Escenarios del sketch estacion_aula.ino con hardware simulado
+  ok   arranque_hello_leds_pitido_y_pantalla
+  ok   ping_responde_pong
+  ok   sesion_se_muestra_en_el_lcd
+  ok   sesion_con_acentos_se_translitera
+  ok   tarjeta_envia_uid_y_res_ok_enciende_verde_con_un_pitido
+  ok   res_dup_enciende_ambar_con_dos_pitidos_cortos
+  ok   res_noreg_enciende_rojo_con_pitido_largo
+  ok   res_err_parpadea_rojo_sin_pitido
+  ok   res_err_muestra_el_motivo
+  ok   si_la_pc_no_responde_a_los_3s_avisa_error_local
+  ok   res_sin_haber_leido_tarjeta_tambien_se_muestra
+  ok   nombre_utf8_se_translitera_en_res
+  ok   tarjeta_olvidada_sobre_el_lector_genera_una_sola_lectura
+  ok   tarjeta_que_vuelve_a_idle_tras_el_wupa_tampoco_repite
+  ok   tarjeta_que_no_obedece_halt_tampoco_repite
+  ok   tarjeta_que_reaparece_sola_en_idle_cada_700ms_no_repite_lecturas
+  ok   mismo_uid_retirado_y_vuelto_a_pasar_antes_de_2s_se_ignora
+  ok   uid_distinto_se_acepta_de_inmediato
+  ok   uid_de_7_bytes
+  ok   a_los_30s_de_silencio_muestra_sin_conexion_y_ambar_lento_y_se_recupera
+  ok   sin_conexion_aparece_en_la_pagina_de_sesion_aunque_se_hayan_llegado_ses
+  ok   si_la_pc_nunca_habla_pasa_de_esperando_a_sin_conexion_a_los_30s
+  ok   un_comando_desconocido_no_cuenta_como_vida_de_la_pc
+  ok   ses_y_res_validos_tambien_cuentan_como_vida_de_la_pc
+  ok   linea_de_100_bytes_se_ignora_y_la_siguiente_funciona
+  ok   ses_de_64_bytes_se_acepta_y_de_65_se_ignora
+  ok   basura_y_comandos_ajenos_no_generan_salida_ni_cambian_nada
+  ok   avalancha_de_bytes_no_deja_sin_atender_al_lector
+  ok   boton_cambia_de_pagina_y_avisa_btn_sin_mas_efectos
+  ok   boton_rebotes_y_pulsaciones_muy_cortas_no_cuentan
+  ok   boton_pulsado_al_encender_no_cuenta
+  ok   pagina_de_ultima_lectura_muestra_el_uid
+  ok   lcd_en_la_direccion_0x3F
+  ok   sin_lcd_la_estacion_sigue_atendiendo_la_pc_y_las_tarjetas
+  ok   si_el_lcd_aparece_despues_se_inicializa_en_el_mantenimiento
+  ok   lector_sin_respuesta_avisa_con_led_rojo_y_pagina_2_y_se_recupera
+  ok   lector_que_se_desconecta_se_detecta_en_el_mantenimiento
+  ok   todo_funciona_al_cruzar_la_vuelta_de_millis
+-- 38 casos, 0 fallidos
+
+== sanitizadores : g++ -std=c++17 -Wall -Wextra -O1 -g -fsanitize=address,undefined -fno-sanitize-recover=all test_sketch.cpp
+== Escenarios del sketch estacion_aula.ino con hardware simulado
+  ok   arranque_hello_leds_pitido_y_pantalla
+  ok   ping_responde_pong
+  ok   sesion_se_muestra_en_el_lcd
+  ok   sesion_con_acentos_se_translitera
+  ok   tarjeta_envia_uid_y_res_ok_enciende_verde_con_un_pitido
+  ok   res_dup_enciende_ambar_con_dos_pitidos_cortos
+  ok   res_noreg_enciende_rojo_con_pitido_largo
+  ok   res_err_parpadea_rojo_sin_pitido
+  ok   res_err_muestra_el_motivo
+  ok   si_la_pc_no_responde_a_los_3s_avisa_error_local
+  ok   res_sin_haber_leido_tarjeta_tambien_se_muestra
+  ok   nombre_utf8_se_translitera_en_res
+  ok   tarjeta_olvidada_sobre_el_lector_genera_una_sola_lectura
+  ok   tarjeta_que_vuelve_a_idle_tras_el_wupa_tampoco_repite
+  ok   tarjeta_que_no_obedece_halt_tampoco_repite
+  ok   tarjeta_que_reaparece_sola_en_idle_cada_700ms_no_repite_lecturas
+  ok   mismo_uid_retirado_y_vuelto_a_pasar_antes_de_2s_se_ignora
+  ok   uid_distinto_se_acepta_de_inmediato
+  ok   uid_de_7_bytes
+  ok   a_los_30s_de_silencio_muestra_sin_conexion_y_ambar_lento_y_se_recupera
+  ok   sin_conexion_aparece_en_la_pagina_de_sesion_aunque_se_hayan_llegado_ses
+  ok   si_la_pc_nunca_habla_pasa_de_esperando_a_sin_conexion_a_los_30s
+  ok   un_comando_desconocido_no_cuenta_como_vida_de_la_pc
+  ok   ses_y_res_validos_tambien_cuentan_como_vida_de_la_pc
+  ok   linea_de_100_bytes_se_ignora_y_la_siguiente_funciona
+  ok   ses_de_64_bytes_se_acepta_y_de_65_se_ignora
+  ok   basura_y_comandos_ajenos_no_generan_salida_ni_cambian_nada
+  ok   avalancha_de_bytes_no_deja_sin_atender_al_lector
+  ok   boton_cambia_de_pagina_y_avisa_btn_sin_mas_efectos
+  ok   boton_rebotes_y_pulsaciones_muy_cortas_no_cuentan
+  ok   boton_pulsado_al_encender_no_cuenta
+  ok   pagina_de_ultima_lectura_muestra_el_uid
+  ok   lcd_en_la_direccion_0x3F
+  ok   sin_lcd_la_estacion_sigue_atendiendo_la_pc_y_las_tarjetas
+  ok   si_el_lcd_aparece_despues_se_inicializa_en_el_mantenimiento
+  ok   lector_sin_respuesta_avisa_con_led_rojo_y_pagina_2_y_se_recupera
+  ok   lector_que_se_desconecta_se_detecta_en_el_mantenimiento
+  ok   todo_funciona_al_cruzar_la_vuelta_de_millis
+-- 38 casos, 0 fallidos
+
+== Mutaciones: cada cambio rompe el firmware a propósito y las pruebas DEBEN fallar
+  detectada ( test_protocolo test_sketch ):  silencio de la PC de 30 s a 60 s
+  detectada ( test_protocolo test_sketch ):  antirrebote de UID de 2 s a 0
+  detectada ( test_protocolo test_sketch ):  la tarjeta ya no necesita retirarse
+  detectada ( test_protocolo ):  líneas de 65 bytes aceptadas
+  detectada ( test_protocolo test_sketch ):  ya no se transliteran los acentos
+  detectada ( test_protocolo test_sketch ):  el pitido de OK pasa a 1000 Hz
+  detectada ( test_protocolo test_sketch ):  RES DUP deja de ser ámbar
+  detectada ( test_sketch ):  el botón deja de enviar BTN
+  detectada ( test_sketch ):  la retirada nunca se detecta bien (sondeo siempre 'ausente')
+  detectada ( test_sketch ):  se usa delay() dentro de loop()
+  detectada ( test_sketch ):  la PC desconocida cuenta como viva
+
+RESULTADO GLOBAL: TODO CORRECTO

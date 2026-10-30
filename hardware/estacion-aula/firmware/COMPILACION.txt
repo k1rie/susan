@@ -1,0 +1,121 @@
+COMPILACION DEL FIRMWARE - Estacion de aula SUSAN
+Fecha del registro: 2026-10-30 (UTC)
+Archivo generado a mano con la salida de firmware/compilar-avr.sh y de
+firmware/pruebas/simavr/ejecutar-simavr.sh; los bloques "SALIDA" son literales.
+
+RESUMEN HONESTO
+  SI se verifico:
+    - El sketch estacion_aula.ino COMPILA Y ENLAZA para Arduino UNO (ATmega328P,
+      16 MHz) con avr-gcc 7.3.0, el nucleo "Arduino AVR Boards" 1.8.6 y las
+      librerias REALES MFRC522 1.4.12 y LiquidCrystal_I2C 1.1.4. El codigo propio
+      se compilo con -Wall -Wextra: 0 errores y 0 avisos.
+    - Uso de memoria (ver abajo): flash 14122 B de 32256 (43,1 %); SRAM estatica
+      1227 B de 2048 (59,9 %), quedan unos 820 B para pila y monton.
+    - El binario compilado se EJECUTO en el simulador de instrucciones simavr
+      (ver el segundo bloque): HELLO, PING/PONG, entradas hostiles, boton, LED,
+      tono de arranque y regla de 30 s. Es un modelo minimo: sin LCD (no hay
+      esclavo I2C), sin tarjetas RFID, MFRC522 reducido a un esclavo SPI que solo
+      contesta VersionReg y "sin tarjeta".
+  NO se verifico:
+    - Nada en hardware fisico: no se grabo en ninguna placa, no se conecto
+      ningun MFRC522, LCD, LED, zumbador ni pulsador reales.
+    - No se uso arduino-cli ni el IDE de Arduino. El binario sale de un build
+      MANUAL que replica las banderas del platform.txt del nucleo 1.8.6; el
+      compilador de Ubuntu (gcc-avr 1:7.3.0+Atmel3.7.0-1) no es identico al que
+      empaqueta el IDE, asi que el tamano exacto puede variar unos bytes.
+    - La version de LiquidCrystal_I2C usada es la rama master de
+      marcoschwartz/LiquidCrystal_I2C (1.1.4); el Administrador de bibliotecas
+      puede ofrecer otra version del mismo autor original. El sketch solo usa
+      constructor(dir, cols, filas), init(), backlight(), clear(), setCursor() y
+      print(), presentes en ambas.
+    - "Compila" no implica "funciona": ver README.md (tabla de estado).
+
+RUTAS PARA OBTENER arduino-cli QUE SE INTENTARON (todas desde este entorno)
+    - github.com/arduino/arduino-cli/releases (y api.github.com): el proxy de
+      salida responde 403.
+    - downloads.arduino.cc (instalador oficial, indices de paquetes y de
+      librerias): sin conexion; el proxy registra 403 para arduino.cc.
+    - PlatformIO (dl.platformio.org, registry.platformio.org): sin conexion.
+    - PyPI: no hay paquete "arduino-cli" (pip: "No matching distribution").
+    - npm: el paquete "arduino-cli" es solo un envoltorio JavaScript que exige
+      tener ya el binario instalado; no lo incluye.
+    - Si alcanzaron: los repositorios de Ubuntu (apt) y raw.githubusercontent.com.
+  Por eso se uso la ruta (b) del encargo, mejorada: paquetes de Ubuntu gcc-avr,
+  avr-libc, binutils-avr y arduino-core-avr (el nucleo real, no stubs) y las
+  librerias reales bajadas de raw.githubusercontent.com (MFRC522 por la etiqueta
+  1.4.12; LiquidCrystal_I2C por master, con sha256 fijados en el script). No
+  hay cabeceras falsas: lo que se comprobo es la compilacion contra el codigo
+  fuente real de las dos librerias y del nucleo.
+
+COMO REPETIRLO
+    sudo apt install gcc-avr avr-libc binutils-avr arduino-core-avr
+    firmware/compilar-avr.sh [directorio_de_trabajo]
+    sudo apt install libsimavr-dev        # solo para la ejecucion en simavr
+    firmware/pruebas/simavr/ejecutar-simavr.sh <directorio>/build/estacion_aula.elf
+  Con acceso normal a internet basta:
+    arduino-cli compile --fqbn arduino:avr:uno firmware/estacion_aula
+
+SALIDA 1: firmware/compilar-avr.sh
+------------------------------------------------------------------------
+== Entorno
+fecha:        2026-10-30T04:44:51Z
+avr-g++:      avr-g++ (GCC) 7.3.0
+avr-libc:     1:2.0.0+Atmel3.7.0-1
+nucleo AVR:   /usr/share/arduino/hardware/arduino/avr (platform.txt: version=1.8.6)
+== Librerías (sha256)
+bcb6372c98c0ecaa5255c389d1aab846d049fb5a2771307fa38c94ca9fea26cb  MFRC522/src/MFRC522.cpp
+f89dc0fd87ee32bb4b0a821b4aaf5d987e7d13c4317adab4a262919a699279e6  MFRC522/src/MFRC522.h
+cff602ee6ac7404acf8eab99ca621a8e0ee641a219cfd87ec877cf03eb973a6f  LiquidCrystal_I2C/LiquidCrystal_I2C.h
+d777dcd59a66951254658017d1135b6f8e571c2bcf6e3b7d4042582da6280006  LiquidCrystal_I2C/LiquidCrystal_I2C.cpp
+== Compilando núcleo, SPI, Wire y librerías de terceros (sin avisos: -w, como el IDE por omisión)
+== Compilando el sketch con -Wall -Wextra (los avisos de NUESTRO código sí se ven)
+sketch: compilado sin errores
+== Enlazando
+== Tamaño (UNO: 32256 bytes de flash útiles, 2048 de SRAM)
+AVR Memory Usage
+----------------
+Device: atmega328p
+
+Program:   14122 bytes (43.1% Full)
+(.text + .data + .bootloader)
+
+Data:       1227 bytes (59.9% Full)
+(.data + .bss + .noinit)
+
+
+.data                        524   8388864
+.text                      13598         0
+.bss                         703   8389388
+hex: /tmp/claude-0/-home-user-susan/40436e6d-ab3e-5c65-9b75-f6742b8df0d9/scratchpad/avr-final2/build/estacion_aula.hex (39736 bytes de texto Intel HEX)
+RESULTADO: COMPILACION CORRECTA (no implica que funcione en hardware: ver README)
+
+------------------------------------------------------------------------
+
+SALIDA 2: firmware/pruebas/simavr/ejecutar-simavr.sh (binario de la SALIDA 1)
+------------------------------------------------------------------------
+fecha: 2026-10-30T04:44:54Z
+simavr: libsimavr-dev 1.6+dfsg-3build2
+elf:    /tmp/claude-0/-home-user-susan/40436e6d-ab3e-5c65-9b75-f6742b8df0d9/scratchpad/avr-final2/build/estacion_aula.elf (08d258fc14d9d809...)
+Loaded 13598 .text at address 0x0
+Loaded 524 .data
+Ejecución del binario en simavr (ATmega328P, 16 MHz)
+-- Arranque
+  ok    un único HELLO tras el arranque
+     (primer byte por el puerto serie a los 53.4 ms de simulación)
+  ok    los tres LED se encienden en la prueba de arranque
+  ok    y se apagan al terminar (sin LED de falla: el lector simulado contesta)
+  ok    el zumbador (D8) recibe el tono de arranque por tone()
+-- PING/PONG y entradas hostiles
+  ok    PING -> PONG
+  ok    línea de 100 bytes ignorada y el PING siguiente sí se atiende
+  ok    comandos ajenos, mal formados y SES/RES válidos no generan salida
+-- Pulsador
+  ok    una pulsación de 3 s envía un único BTN
+  ok    un rebote de 8 ms no envía nada
+-- Regla de los 30 s (la PC calla)
+  ok    a los 29 s de silencio el LED ámbar sigue apagado
+  ok    después de 30 s el ámbar parpadea lento (3 ciclos de 2 s en 6 s)
+  ok    la PC vuelve: PONG y el ámbar se apaga
+
+Tiempo simulado total: 45.6 s; 12 comprobaciones, 0 fallidas
+------------------------------------------------------------------------

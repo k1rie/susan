@@ -1,0 +1,19 @@
+﻿id,senal,pin_uno,puerto_avr,componente,pin_componente,sentido,nivel,cable,nota
+SPI-SS,SS (selección de esclavo),D10,PB2,U2 MFRC522,SDA (SS),UNO → módulo,5 V → 3.3 V,violeta,Divisor R1 1 kΩ + R5 2 kΩ; activo en bajo
+SPI-SCK,SCK (reloj SPI),D13,PB5,U2 MFRC522,SCK,UNO → módulo,5 V → 3.3 V,dorado,Divisor R2 1 kΩ + R6 2 kΩ; comparte pin con el LED L de la placa
+SPI-MOSI,MOSI (datos hacia el módulo),D11,PB3,U2 MFRC522,MOSI,UNO → módulo,5 V → 3.3 V,azul,Divisor R3 1 kΩ + R7 2 kΩ
+SPI-MISO,MISO (datos desde el módulo),D12,PB4,U2 MFRC522,MISO,módulo → UNO,3.3 V directo,verde,Sin divisor: el UNO lee 3.3 V como 1 (VIH = 0.6×VCC = 3.0 V); margen pequeño
+RC522-RST,RST (reinicio del módulo),D9,PB1,U2 MFRC522,RST,UNO → módulo,5 V → 3.3 V,gris,Divisor R4 1 kΩ + R8 2 kΩ
+RC522-IRQ,IRQ (no se usa),-,-,U2 MFRC522,IRQ,sin conexión,-,-,Dejar sin conectar
+RC522-3V3,Alimentación 3.3 V,3V3,-,U2 MFRC522,3.3V,alimentación,3.3 V,naranja,Regulador del UNO (150 mA máx.); C1 100 nF + C2 10 µF junto al módulo
+RC522-GND,Tierra del módulo,GND,-,U2 MFRC522,GND,alimentación,0 V,negro,Tierra común
+LCD-SDA,SDA (I2C),A4,PC4,U3 LCD I2C,SDA,bidireccional,5 V,cian,Pull-up de 4.7–10 kΩ a 5 V ya incluido en la mochila
+LCD-SCL,SCL (I2C),A5,PC5,U3 LCD I2C,SCL,UNO → LCD,5 V,rosa,Pull-up incluido en la mochila; dirección 0x27 o 0x3F
+LCD-5V,Alimentación 5 V,5V,-,U3 LCD I2C,VCC,alimentación,5 V,rojo,C3 100 µF entre 5 V y GND cerca del LCD
+LCD-GND,Tierra del LCD,GND,-,U3 LCD I2C,GND,alimentación,0 V,negro,Tierra común
+LED-VERDE,LED verde (resultado OK),D5,PD5,R9 220 Ω + LED1,ánodo (vía R9),UNO → LED,5 V,verde azulado,Cátodo a GND; unos 14 mA
+LED-AMBAR,LED ámbar (duplicado / sin conexión),D6,PD6,R10 220 Ω + LED2,ánodo (vía R10),UNO → LED,5 V,verde azulado,Cátodo a GND; unos 14 mA
+LED-ROJO,LED rojo (no registrada / error),D7,PD7,R11 220 Ω + LED3,ánodo (vía R11),UNO → LED,5 V,verde azulado,Cátodo a GND; unos 14 mA
+ZUMBADOR,Zumbador,D8,PB0,R12 100 Ω + BZ1,terminal + (vía R12),UNO → zumbador,5 V,verde azulado,Pasivo con tone() (Timer2); terminal − a GND
+BOTON,Pulsador de página,D2,PD2,SW1,terminal 1,pulsador → UNO,5 V (pull-up) / 0 V,café,INPUT_PULLUP interno; terminal 2 a GND; nunca cierra sesiones
+GND-DER,Tierra de LED / zumbador / pulsador,GND,-,LED1-3 cátodos + BZ1 − + SW1 terminal 2,GND,alimentación,0 V,negro,Bus de tierra común del lado derecho

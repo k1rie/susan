@@ -1,0 +1,119 @@
+Pruebas del puente serie - Estación de aula SUSAN
+fecha:  2026-10-30T04:44:06Z
+node:   v22.22.0   serialport: 13.0.0   socat: socat version 1.8.0.0 on 03 Jul 2026 12:45:49
+Las pruebas usan un dispositivo en memoria y un par de pseudo-terminales (pty): NO hay Arduino físico.
+
+== 1. node --test pruebas/*.test.mjs  (con serialport instalado en puente/tools)
+ok 1 - puente real <-> estación virtual por pty
+    ok 1 - transliterar quita acentos y lo no representable pasa a ?
+    ok 2 - ajustar recorta a 16 columnas sin espacios en los extremos
+    ok 3 - enmascarar UID y matrícula
+ok 2 - texto
+    ok 1 - analizarLinea reconoce HELLO, UID, BTN y PONG
+    ok 2 - analizarLinea descarta lo mal formado
+    ok 3 - el ensamblador une trozos, tolera CRLF y descarta líneas de más de 64 bytes
+    ok 4 - un flujo sin salto de línea no acumula memoria sin límite
+ok 3 - líneas de la estación
+    ok 1 - armarSes ajusta, transliera y marca sin sesión con campos vacíos
+    ok 2 - armarRes
+    ok 3 - lineaValidaParaEstacion
+ok 4 - líneas hacia la estación
+    ok 1 - el CSV de demostración trae 3 filas ficticias
+    ok 2 - filas inválidas y repetidas se avisan sin romper la carga
+ok 5 - credenciales
+    ok 1 - HELLO provoca el envío de SES
+    ok 2 - tarjeta conocida: registra una vez, responde RES OK y actualiza SES
+    ok 3 - tarjeta ya registrada: RES DUP y no vuelve a llamar al registro
+    ok 4 - la misma tarjeta dentro de 2 s se ignora (sin respuesta, sin registro)
+    ok 5 - el rebote de un UID no bloquea a otro alumno
+    ok 6 - UID desconocido: RES NOREG, sin registrar
+    ok 7 - sin sesión abierta: RES ERR con motivo, sin registrar
+    ok 8 - si el registro falla o no se confirma: RES ERR y no cuenta como presente
+    ok 9 - dos lecturas simultáneas del mismo alumno con tarjetas distintas registran una sola vez
+    ok 10 - BTN solo se registra: no hay respuesta ni cambio de sesión
+    ok 11 - líneas desconocidas, basura y demasiado largas se ignoran sin romper nada
+    ok 12 - un UID partido en trozos del puerto se reensambla
+    ok 13 - cerrar y abrir la sesión se refleja en SES
+    ok 14 - todo lo que el puente escribió cumple el protocolo
+    ok 15 - el registro (stub) recibe la matrícula y solo informa
+ok 6 - flujo con la estación simulada
+    ok 1 - por omisión no aparecen UID, matrícula ni nombre completos
+    ok 2 - --verboso (solo datos ficticios) sí los muestra
+ok 7 - privacidad de los registros
+    ok 1 - latido: PING y SES cada 10 s
+    ok 2 - si no llega HELLO en 3 s se sincroniza igualmente
+    ok 3 - 30 s sin que la estación diga nada: enlace perdido; vuelve al recibir un PONG
+    ok 4 - mientras la estación contesta los PING el enlace nunca se pierde
+    ok 5 - si la estación nunca habla, a los 30 s desde el inicio el enlace es perdido
+    ok 6 - detener() cancela todos los temporizadores
+ok 8 - tiempos con temporizadores falsos
+    ok 1 - sin argumentos termina con código 2 y explica qué falta
+    ok 2 - --ayuda
+    ok 3 - opciones desconocidas y baud inválido
+    ok 4 - --simulado --guion recorre el flujo completo y termina bien
+    ok 5 - --listar no falla aunque no haya udevadm ni placas
+    ok 6 - sin serialport instalado, abrir un puerto real da un mensaje claro # SKIP serialport sí está instalado
+ok 9 - línea de comandos
+# tests 42
+# suites 8
+# pass 41
+# fail 0
+# cancelled 0
+# skipped 1
+# todo 0
+
+== 2. Lo mismo SIN serialport (se omiten las pruebas que lo necesitan)
+ok 1 - puente real <-> estación virtual por pty # SKIP serialport no está instalado
+    ok 5 - --listar no falla aunque no haya udevadm ni placas # SKIP serialport no está instalado
+# tests 42
+# suites 8
+# pass 40
+# fail 0
+# cancelled 0
+# skipped 2
+# todo 0
+
+== 3. node puente-serial.mjs --simulado --guion
+[puente] 3 tarjeta(s) en la tabla; sesión ABIERTA (simulada por JSON/bandera)
+[puente] aviso: registrarPresencia() es un STUB; no se escribe nada en la base de datos
+
+> Se enciende la estación (la placa manda HELLO)
+[puente] estación conectada (firmware 1.0); se envía la sesión
+[estacion] LCD pagina 1: "Programacion Ava" / "3o N" ... 0/30
+
+> Alumno 1 acerca su tarjeta
+[puente] aviso: [STUB] registrarPresencia(***001): solo se registra en pantalla, NO se escribe en la base de datos
+[puente] UID ****0001 (alumno ***001): presente (1/30)
+[estacion] LED verde, 1 pitido corto | LCD: "Registrado" / "Ana Demo"
+[estacion] LCD pagina 1: "Programacion Ava" / "3o N" ... 1/30
+
+> La misma tarjeta rebota 150 ms después (se ignora, sin respuesta)
+[puente] depurar: UID ****0001 repetido en menos de 2 s: ignorado
+
+> 2,2 s después la misma tarjeta vuelve a acercarse (ya estaba presente)
+[puente] UID ****0001 (alumno ***001): ya estaba presente
+[estacion] LED ambar, 2 pitidos cortos | LCD: "Ya registrado" / "Ana Demo"
+
+> Alumno 2 acerca su tarjeta
+[puente] aviso: [STUB] registrarPresencia(***002): solo se registra en pantalla, NO se escribe en la base de datos
+[puente] UID ****0002 (alumno ***002): presente (2/30)
+[estacion] LED verde, 1 pitido corto | LCD: "Registrado" / "Luis Demo"
+[estacion] LCD pagina 1: "Programacion Ava" / "3o N" ... 2/30
+
+> Tarjeta que no está en la tabla
+[puente] UID ****C0DE: tarjeta no registrada
+[estacion] LED rojo, 1 pitido largo | LCD: "Tarjeta no" / "registrada"
+
+> El docente pulsa el botón de la estación (solo cambia la página del LCD)
+[puente] BTN: la estación cambió de página en su LCD (el botón nunca cierra sesiones)
+
+> El docente CIERRA la sesión en la aplicación web (la estación no puede hacerlo)
+[estacion] LCD pagina 1: "Sin sesion" / "abierta"
+
+> Una tarjeta llega con la sesión cerrada
+[puente] UID ****0002: no hay sesión abierta
+[estacion] LED rojo parpadeando, sin sonido | LCD: "Error" / "Sin sesion abier"
+
+> Se desconecta el cable: la estación deja de contestar PING
+
+Resumen: 2 presente(s) en la sesión simulada; líneas enviadas a la estación: 9; infracciones del protocolo: 0
