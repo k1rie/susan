@@ -1,0 +1,179 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1681" height="863" viewBox="0 0 1681 863">
+<rect width="100%" height="100%" fill="#ffffff"/>
+<text x="40" y="52" font-family="'DejaVu Sans', 'Liberation Sans', sans-serif" font-size="22" font-weight="700" fill="#1d2733">SUSAN · Modelo entidad-relación</text>
+<text x="40" y="76" font-family="'DejaVu Sans', 'Liberation Sans', sans-serif" font-size="14" fill="#5d6876">Área A · Catálogo académico · generado de la base de datos (PostgreSQL 16, esquema public)</text>
+<g stroke="#4a5563" stroke-width="1.3" fill="none" stroke-linecap="round" stroke-linejoin="round">
+<polyline points="472,402 394,402 394,598 326,598"/>
+<line x1="460" y1="402" x2="472" y2="395.5"/><line x1="460" y1="402" x2="472" y2="402"/><line x1="460" y1="402" x2="472" y2="408.5"/><circle cx="454.5" cy="402" r="4" fill="#fff"/>
+<line x1="333" y1="603" x2="333" y2="593"/><line x1="338" y1="603" x2="338" y2="593"/>
+</g>
+<g stroke="#4a5563" stroke-width="1.3" fill="none" stroke-linecap="round" stroke-linejoin="round">
+<polyline points="472,382 410,382 410,350 382,350"/>
+<line x1="460" y1="382" x2="472" y2="375.5"/><line x1="460" y1="382" x2="472" y2="382"/><line x1="460" y1="382" x2="472" y2="388.5"/><circle cx="454.5" cy="382" r="4" fill="#fff"/>
+<line x1="389" y1="355" x2="389" y2="345"/><line x1="394" y1="355" x2="394" y2="345"/>
+</g>
+<g stroke="#4a5563" stroke-width="1.3" fill="none" stroke-linecap="round" stroke-linejoin="round">
+<polyline points="472,366 414,366 414,150 337,150"/>
+<line x1="460" y1="366" x2="472" y2="359.5"/><line x1="460" y1="366" x2="472" y2="366"/><line x1="460" y1="366" x2="472" y2="372.5"/><circle cx="454.5" cy="366" r="4" fill="#fff"/>
+<line x1="344" y1="155" x2="344" y2="145"/><line x1="349" y1="155" x2="349" y2="145"/>
+</g>
+<g stroke="#4a5563" stroke-width="1.3" fill="none" stroke-linecap="round" stroke-linejoin="round">
+<polyline points="871,158 794,158 794,342 769,342"/>
+<line x1="859" y1="158" x2="871" y2="151.5"/><line x1="859" y1="158" x2="871" y2="158"/><line x1="859" y1="158" x2="871" y2="164.5"/><circle cx="853.5" cy="158" r="4" fill="#fff"/>
+<line x1="776" y1="347" x2="776" y2="337"/><line x1="781" y1="347" x2="781" y2="337"/>
+</g>
+<g stroke="#4a5563" stroke-width="1.3" fill="none" stroke-linecap="round" stroke-linejoin="round">
+<polyline points="1186,590 1250,590 1250,574 1276,574"/>
+<line x1="1198" y1="590" x2="1186" y2="596.5"/><line x1="1198" y1="590" x2="1186" y2="590"/><line x1="1198" y1="590" x2="1186" y2="583.5"/><circle cx="1203.5" cy="590" r="4" fill="#fff"/>
+<line x1="1269" y1="569" x2="1269" y2="579"/><line x1="1264" y1="569" x2="1264" y2="579"/>
+</g>
+<g stroke="#4a5563" stroke-width="1.3" fill="none" stroke-linecap="round" stroke-linejoin="round">
+<polyline points="859,606 794,606 794,354 769,354"/>
+<line x1="847" y1="606" x2="859" y2="599.5"/><line x1="847" y1="606" x2="859" y2="606"/><line x1="847" y1="606" x2="859" y2="612.5"/><circle cx="841.5" cy="606" r="4" fill="#fff"/>
+<line x1="776" y1="359" x2="776" y2="349"/><line x1="781" y1="359" x2="781" y2="349"/>
+</g>
+<rect x="85" y="114" width="252" height="126" rx="5" fill="#eaf0f7" stroke="#3d5a80" stroke-width="1.4"/>
+<path d="M85 142 V119 Q85 114 90 114 H332 Q337 114 337 119 V142 Z" fill="#3d5a80"/>
+<text x="94" y="133" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="13.5" font-weight="700" fill="#ffffff">materia</text>
+<text x="94" y="155" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="11" font-weight="700" fill="#1d2733">PK</text>
+<text x="139.15" y="155" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="12.5" font-weight="700" fill="#1d2733">id_materia</text>
+<text x="328" y="155" text-anchor="end" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="11.5" fill="#5d6876">integer</text>
+<text x="94" y="173" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="11" font-weight="700" fill="#7a4a00">UQ</text>
+<text x="139.15" y="173" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="12.5" font-weight="400" fill="#1d2733">clave</text>
+<text x="328" y="173" text-anchor="end" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="11.5" fill="#5d6876">varchar(8)</text>
+<text x="139.15" y="191" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="12.5" font-weight="400" fill="#1d2733">nombre</text>
+<text x="328" y="191" text-anchor="end" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="11.5" fill="#5d6876">varchar(80)</text>
+<text x="139.15" y="209" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="12.5" font-weight="400" fill="#1d2733">creditos</text>
+<text x="328" y="209" text-anchor="end" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="11.5" fill="#5d6876">smallint</text>
+<text x="139.15" y="227" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="12.5" font-weight="400" fill="#1d2733">horas_semana</text>
+<text x="328" y="227" text-anchor="end" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="11.5" fill="#5d6876">smallint</text>
+<rect x="40" y="311" width="342" height="162" rx="5" fill="#eaf0f7" stroke="#3d5a80" stroke-width="1.4"/>
+<path d="M40 339 V316 Q40 311 45 311 H377 Q382 311 382 316 V339 Z" fill="#3d5a80"/>
+<text x="49" y="330" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="13.5" font-weight="700" fill="#ffffff">docente</text>
+<text x="49" y="352" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="11" font-weight="700" fill="#1d2733">PK</text>
+<text x="94.15" y="352" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="12.5" font-weight="700" fill="#1d2733">id_docente</text>
+<text x="373" y="352" text-anchor="end" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="11.5" fill="#5d6876">integer</text>
+<text x="49" y="370" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="11" font-weight="700" fill="#7a4a00">UQ</text>
+<text x="94.15" y="370" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="12.5" font-weight="400" fill="#1d2733">num_empleado</text>
+<text x="373" y="370" text-anchor="end" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="11.5" fill="#5d6876">varchar(10)</text>
+<text x="94.15" y="388" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="12.5" font-weight="400" fill="#1d2733">apellido_paterno</text>
+<text x="373" y="388" text-anchor="end" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="11.5" fill="#5d6876">varchar(40)</text>
+<text x="94.15" y="406" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="12.5" font-weight="400" fill="#1d2733">apellido_materno?</text>
+<text x="373" y="406" text-anchor="end" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="11.5" fill="#5d6876">varchar(40)</text>
+<text x="94.15" y="424" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="12.5" font-weight="400" fill="#1d2733">nombres</text>
+<text x="373" y="424" text-anchor="end" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="11.5" fill="#5d6876">varchar(60)</text>
+<text x="49" y="442" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="11" font-weight="700" fill="#7a4a00">UQ</text>
+<text x="94.15" y="442" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="12.5" font-weight="400" fill="#1d2733">correo_institucional</text>
+<text x="373" y="442" text-anchor="end" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="11.5" fill="#5d6876">varchar(120)</text>
+<text x="94.15" y="460" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="12.5" font-weight="400" fill="#1d2733">estatus</text>
+<text x="373" y="460" text-anchor="end" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="11.5" fill="#5d6876">estatus_docente</text>
+<rect x="97" y="562" width="229" height="108" rx="5" fill="#eaf0f7" stroke="#3d5a80" stroke-width="1.4"/>
+<path d="M97 590 V567 Q97 562 102 562 H321 Q326 562 326 567 V590 Z" fill="#3d5a80"/>
+<text x="106" y="581" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="13.5" font-weight="700" fill="#ffffff">aula</text>
+<text x="106" y="603" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="11" font-weight="700" fill="#1d2733">PK</text>
+<text x="151.15" y="603" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="12.5" font-weight="700" fill="#1d2733">id_aula</text>
+<text x="317" y="603" text-anchor="end" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="11.5" fill="#5d6876">integer</text>
+<text x="106" y="621" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="11" font-weight="700" fill="#7a4a00">UQ</text>
+<text x="151.15" y="621" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="12.5" font-weight="400" fill="#1d2733">clave</text>
+<text x="317" y="621" text-anchor="end" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="11.5" fill="#5d6876">varchar(10)</text>
+<text x="151.15" y="639" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="12.5" font-weight="400" fill="#1d2733">edificio</text>
+<text x="317" y="639" text-anchor="end" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="11.5" fill="#5d6876">varchar(40)</text>
+<text x="151.15" y="657" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="12.5" font-weight="400" fill="#1d2733">capacidad</text>
+<text x="317" y="657" text-anchor="end" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="11.5" fill="#5d6876">smallint</text>
+<rect x="472" y="310" width="297" height="164" rx="5" fill="#eaf0f7" stroke="#3d5a80" stroke-width="1.4"/>
+<path d="M472 338 V315 Q472 310 477 310 H764 Q769 310 769 315 V338 Z" fill="#3d5a80"/>
+<text x="481" y="329" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="13.5" font-weight="700" fill="#ffffff">grupo</text>
+<text x="481" y="351" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="11" font-weight="700" fill="#1d2733">PK</text>
+<text x="526.15" y="351" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="12.5" font-weight="700" fill="#1d2733">id_grupo</text>
+<text x="760" y="351" text-anchor="end" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="11.5" fill="#5d6876">integer</text>
+<text x="481" y="369" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="11" font-weight="700" fill="#1f4e79">FK</text>
+<text x="526.15" y="369" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="12.5" font-weight="400" fill="#1d2733">id_materia</text>
+<text x="760" y="369" text-anchor="end" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="11.5" fill="#5d6876">integer</text>
+<text x="481" y="387" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="11" font-weight="700" fill="#1f4e79">FK</text>
+<text x="526.15" y="387" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="12.5" font-weight="400" fill="#1d2733">id_docente</text>
+<text x="760" y="387" text-anchor="end" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="11.5" fill="#5d6876">integer</text>
+<text x="481" y="405" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="11" font-weight="700" fill="#1f4e79">FK</text>
+<text x="526.15" y="405" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="12.5" font-weight="400" fill="#1d2733">id_aula</text>
+<text x="760" y="405" text-anchor="end" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="11.5" fill="#5d6876">integer</text>
+<text x="526.15" y="423" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="12.5" font-weight="400" fill="#1d2733">clave_grupo</text>
+<text x="760" y="423" text-anchor="end" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="11.5" fill="#5d6876">varchar(8)</text>
+<text x="526.15" y="441" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="12.5" font-weight="400" fill="#1d2733">periodo</text>
+<text x="760" y="441" text-anchor="end" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="11.5" fill="#5d6876">varchar(10)</text>
+<line x1="478" y1="448" x2="763" y2="448" stroke="#3d5a80" stroke-opacity="0.35" stroke-width="1"/>
+<text x="481" y="461" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="11" font-style="italic" fill="#5d6876">UQ (id_materia, clave_grupo, periodo)</text>
+<rect x="871" y="104" width="304" height="146" rx="5" fill="#eaf0f7" stroke="#3d5a80" stroke-width="1.4"/>
+<path d="M871 132 V109 Q871 104 876 104 H1170 Q1175 104 1175 109 V132 Z" fill="#3d5a80"/>
+<text x="880" y="123" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="13.5" font-weight="700" fill="#ffffff">horario_grupo</text>
+<text x="880" y="145" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="11" font-weight="700" fill="#1d2733">PK</text>
+<text x="925.15" y="145" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="12.5" font-weight="700" fill="#1d2733">id_horario</text>
+<text x="1166" y="145" text-anchor="end" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="11.5" fill="#5d6876">integer</text>
+<text x="880" y="163" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="11" font-weight="700" fill="#1f4e79">FK</text>
+<text x="925.15" y="163" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="12.5" font-weight="400" fill="#1d2733">id_grupo</text>
+<text x="1166" y="163" text-anchor="end" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="11.5" fill="#5d6876">integer</text>
+<text x="925.15" y="181" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="12.5" font-weight="400" fill="#1d2733">dia_semana</text>
+<text x="1166" y="181" text-anchor="end" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="11.5" fill="#5d6876">smallint</text>
+<text x="925.15" y="199" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="12.5" font-weight="400" fill="#1d2733">hora_inicio</text>
+<text x="1166" y="199" text-anchor="end" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="11.5" fill="#5d6876">time</text>
+<text x="925.15" y="217" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="12.5" font-weight="400" fill="#1d2733">hora_fin</text>
+<text x="1166" y="217" text-anchor="end" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="11.5" fill="#5d6876">time</text>
+<line x1="877" y1="224" x2="1169" y2="224" stroke="#3d5a80" stroke-opacity="0.35" stroke-width="1"/>
+<text x="880" y="237" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="11" font-style="italic" fill="#5d6876">UQ (id_grupo, dia_semana, hora_inicio)</text>
+<rect x="859" y="534" width="327" height="164" rx="5" fill="#eaf0f7" stroke="#3d5a80" stroke-width="1.4"/>
+<path d="M859 562 V539 Q859 534 864 534 H1181 Q1186 534 1186 539 V562 Z" fill="#3d5a80"/>
+<text x="868" y="553" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="13.5" font-weight="700" fill="#ffffff">inscripcion</text>
+<text x="868" y="575" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="11" font-weight="700" fill="#1d2733">PK</text>
+<text x="913.15" y="575" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="12.5" font-weight="700" fill="#1d2733">id_inscripcion</text>
+<text x="1177" y="575" text-anchor="end" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="11.5" fill="#5d6876">integer</text>
+<text x="868" y="593" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="11" font-weight="700" fill="#1f4e79">FK</text>
+<text x="913.15" y="593" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="12.5" font-weight="400" fill="#1d2733">id_alumno</text>
+<text x="1177" y="593" text-anchor="end" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="11.5" fill="#5d6876">integer</text>
+<text x="868" y="611" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="11" font-weight="700" fill="#1f4e79">FK</text>
+<text x="913.15" y="611" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="12.5" font-weight="400" fill="#1d2733">id_grupo</text>
+<text x="1177" y="611" text-anchor="end" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="11.5" fill="#5d6876">integer</text>
+<text x="913.15" y="629" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="12.5" font-weight="400" fill="#1d2733">fecha_alta</text>
+<text x="1177" y="629" text-anchor="end" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="11.5" fill="#5d6876">date</text>
+<text x="913.15" y="647" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="12.5" font-weight="400" fill="#1d2733">estatus</text>
+<text x="1177" y="647" text-anchor="end" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="11.5" fill="#5d6876">estatus_inscripcion</text>
+<text x="913.15" y="665" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="12.5" font-weight="400" fill="#1d2733">derecho_examen</text>
+<text x="1177" y="665" text-anchor="end" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="11.5" fill="#5d6876">boolean</text>
+<line x1="865" y1="672" x2="1180" y2="672" stroke="#3d5a80" stroke-opacity="0.35" stroke-width="1"/>
+<text x="868" y="685" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="11" font-style="italic" fill="#5d6876">UQ (id_alumno, id_grupo)</text>
+<rect x="1276" y="535" width="335" height="162" rx="5" fill="#eaf0f7" stroke="#3d5a80" stroke-width="1.4"/>
+<path d="M1276 563 V540 Q1276 535 1281 535 H1606 Q1611 535 1611 540 V563 Z" fill="#3d5a80"/>
+<text x="1285" y="554" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="13.5" font-weight="700" fill="#ffffff">alumno</text>
+<text x="1285" y="576" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="11" font-weight="700" fill="#1d2733">PK</text>
+<text x="1330.15" y="576" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="12.5" font-weight="700" fill="#1d2733">id_alumno</text>
+<text x="1602" y="576" text-anchor="end" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="11.5" fill="#5d6876">integer</text>
+<text x="1285" y="594" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="11" font-weight="700" fill="#7a4a00">UQ</text>
+<text x="1330.15" y="594" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="12.5" font-weight="400" fill="#1d2733">matricula</text>
+<text x="1602" y="594" text-anchor="end" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="11.5" fill="#5d6876">varchar(10)</text>
+<text x="1330.15" y="612" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="12.5" font-weight="400" fill="#1d2733">apellido_paterno</text>
+<text x="1602" y="612" text-anchor="end" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="11.5" fill="#5d6876">varchar(40)</text>
+<text x="1330.15" y="630" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="12.5" font-weight="400" fill="#1d2733">apellido_materno?</text>
+<text x="1602" y="630" text-anchor="end" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="11.5" fill="#5d6876">varchar(40)</text>
+<text x="1330.15" y="648" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="12.5" font-weight="400" fill="#1d2733">nombres</text>
+<text x="1602" y="648" text-anchor="end" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="11.5" fill="#5d6876">varchar(60)</text>
+<text x="1285" y="666" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="11" font-weight="700" fill="#7a4a00">UQ</text>
+<text x="1330.15" y="666" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="12.5" font-weight="400" fill="#1d2733">correo_institucional</text>
+<text x="1602" y="666" text-anchor="end" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="11.5" fill="#5d6876">varchar(120)</text>
+<text x="1330.15" y="684" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="12.5" font-weight="400" fill="#1d2733">estatus</text>
+<text x="1602" y="684" text-anchor="end" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="11.5" fill="#5d6876">estatus_alumno</text>
+<line x1="40" y1="728" x2="1641" y2="728" stroke="#c9ced6" stroke-width="1"/>
+<g stroke="#4a5563" stroke-width="1.3" fill="none" stroke-linecap="round"><line x1="70" y1="756" x2="148" y2="756"/><line x1="82" y1="756" x2="70" y2="762.5"/><line x1="82" y1="756" x2="70" y2="756"/><line x1="82" y1="756" x2="70" y2="749.5"/><circle cx="87.5" cy="756" r="4" fill="#fff"/><line x1="141" y1="751" x2="141" y2="761"/><line x1="136" y1="751" x2="136" y2="761"/></g>
+<text x="164" y="760" font-family="'DejaVu Sans', 'Liberation Sans', sans-serif" font-size="12" fill="#1d2733">FK obligatoria: el padre es exactamente uno; el hijo, cero o muchos (1:N)</text>
+<g stroke="#4a5563" stroke-width="1.3" fill="none" stroke-linecap="round"><line x1="70" y1="780" x2="148" y2="780"/><line x1="82" y1="780" x2="70" y2="786.5"/><line x1="82" y1="780" x2="70" y2="780"/><line x1="82" y1="780" x2="70" y2="773.5"/><circle cx="87.5" cy="780" r="4" fill="#fff"/><line x1="141" y1="775" x2="141" y2="785"/><circle cx="134.5" cy="780" r="4" fill="#fff"/></g>
+<text x="164" y="784" font-family="'DejaVu Sans', 'Liberation Sans', sans-serif" font-size="12" fill="#1d2733">FK que admite nulo: el padre es cero o uno</text>
+<g stroke="#4a5563" stroke-width="1.3" fill="none" stroke-linecap="round"><line x1="70" y1="804" x2="148" y2="804"/><line x1="77" y1="809" x2="77" y2="799"/><circle cx="83.5" cy="804" r="4" fill="#fff"/><line x1="141" y1="799" x2="141" y2="809"/><line x1="136" y1="799" x2="136" y2="809"/></g>
+<text x="164" y="808" font-family="'DejaVu Sans', 'Liberation Sans', sans-serif" font-size="12" fill="#1d2733">FK única (UNIQUE) en el hijo: relación 1:0..1</text>
+<line x1="740" y1="756" x2="780" y2="756" stroke="#4a5563" stroke-width="1.3" stroke-dasharray="6 4"/><text x="792" y="760" font-family="'DejaVu Sans', 'Liberation Sans', sans-serif" font-size="12" fill="#1d2733">Relación entre áreas funcionales distintas</text>
+<text x="740" y="784" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="12" fill="#1d2733"><tspan font-weight="700">PK</tspan> llave primaria   <tspan font-weight="700" fill="#1f4e79">FK</tspan> llave foránea   <tspan font-weight="700" fill="#7a4a00">UQ</tspan> único</text>
+<text x="740" y="808" font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="12" fill="#1d2733">nombre? admite nulo   UQ (a, b) único compuesto</text>
+<rect x="70" y="831" width="15" height="15" rx="2" fill="#3d5a80"/>
+<text x="92" y="843" font-family="'DejaVu Sans', 'Liberation Sans', sans-serif" font-size="12" fill="#1d2733">A · Catálogo académico</text>
+<rect x="278.4" y="831" width="15" height="15" rx="2" fill="#3f7d6e"/>
+<text x="300.4" y="843" font-family="'DejaVu Sans', 'Liberation Sans', sans-serif" font-size="12" fill="#1d2733">B · Operación de la clase</text>
+<rect x="508.4" y="831" width="15" height="15" rx="2" fill="#8a5a2b"/>
+<text x="530.4" y="843" font-family="'DejaVu Sans', 'Liberation Sans', sans-serif" font-size="12" fill="#1d2733">C · Captura y módulo biométrico</text>
+<rect x="781.6" y="831" width="15" height="15" rx="2" fill="#6b4e8a"/>
+<text x="803.6" y="843" font-family="'DejaVu Sans', 'Liberation Sans', sans-serif" font-size="12" fill="#1d2733">D · Seguridad y configuración</text>
+</svg>

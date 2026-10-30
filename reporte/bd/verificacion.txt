@@ -1,0 +1,22 @@
+# Verificación de los extractos de código (generada por verificar-cuerpo.mjs y verificar-contra-bd.mjs)
+# 1) Cada extracto de codigo-cuerpo.sql es idéntico, byte a byte, a su rango de líneas en supabase/migrations:
+ok     [ 1] 0005_tablas_operacion.sql 3-73 (71 líneas, 4478 bytes)
+ok     [ 2] 0006_tablas_biometria.sql 32-50 (19 líneas, 1285 bytes)
+ok     [ 3] 0006_tablas_biometria.sql 84-102 (19 líneas, 1209 bytes)
+ok     [ 4] 0007_indices.sql 5-11 (7 líneas, 580 bytes)
+ok     [ 5] 0100_reportes_base.sql 11-74 (64 líneas, 2982 bytes)
+ok     [ 6] 0020_triggers.sql 24-53 (30 líneas, 1312 bytes)
+ok     [ 7] 0020_triggers.sql 217-249 (33 líneas, 1557 bytes)
+ok     [ 8] 0030_rls_grants.sql 119-129 (11 líneas, 729 bytes)
+ok     [ 9] 0030_rls_grants.sql 185-187 (3 líneas, 199 bytes)
+ok     [10] 0130_sesiones_helpers.sql 24-34 (11 líneas, 591 bytes)
+ok     [11] 0133_api_sesion_cierre.sql 14-128 (115 líneas, 5874 bytes)
+ok     [12] 0133_api_sesion_cierre.sql 137-148 (12 líneas, 378 bytes)
+extractos=12 fallos=0 bytes_verificados=21174
+# 2) El cuerpo de cada función citada es el que corre en la base viva (pg_proc.prosrc):
+ok     app.cerrar_sesion  (versiones en la BD: 1)
+ok     public.api_cerrar_sesion  (versiones en la BD: 1)
+ok     app.estado_por_minuto  (versiones en la BD: 1)
+ok     app.trg_asistencia_rn01  (versiones en la BD: 1)
+ok     app.trg_bitacora_sin_cambios  (versiones en la BD: 1)
+ok     app.trg_bitacora_sin_truncate  (versiones en la BD: 1)

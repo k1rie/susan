@@ -1,0 +1,367 @@
+# Requerimientos no funcionales y reglas de negocio: estado en `origin/main`
+
+Base: commit `f742bb4` de `origin/main`, revisado el 2026-10-30. Fuente: `docs/spec/Avance1.txt` (Tabla 2: reglas de negocio; Tabla 5: requerimientos no funcionales con su métrica). Datos en `rnf-rn.json`; método y límites de la revisión en `resumen-rnf-rn.md`.
+
+Estados: **Implementado** (el mecanismo existe, está conectado y tiene prueba o evidencia medida), **Parcial** (falta una parte del texto o de la métrica; se dice cuál), **Pendiente** (nada o solo esquema), **No medido** (existe pero no hay medición que cumpla la métrica; se dice cómo medirlo). Ante la duda se eligió el estado más bajo. Partes: SW (aplicación web y rutas), BD (PostgreSQL), IA (servicio de reconocimiento); no se usa HW.
+
+## Resumen
+
+| Tipo | Implementado | Parcial | Pendiente | No medido | Total |
+|---|---|---|---|---|---|
+| RNF | 7 | 6 | 0 | 1 | 14 |
+| RN | 12 | 1 | 0 | 0 | 13 |
+| Total | 19 | 7 | 0 | 1 | 27 |
+
+## Requerimientos no funcionales (RNF-01 a RNF-14)
+
+| ID | Requerimiento | Parte | Estado | Evidencia principal |
+|---|---|---|---|---|
+| RNF-01 | k-NN ≤ 50 ms (p95) con hasta 20 000 vectores; captura completa de hasta 60 rostros ≤ 7.5 s | IA + SW | **No medido** | LoadedIndex.search (index.py, IndexFlatIP + IDSelectorBatch); medición propia: k-NN con 20 000 vectores, p95 1.4 ms (1 consulta, 2 000 permitidos); test_latencia_busqueda_20000 pasa. |
+| RNF-02 | umbral_similitud y min_detecciones_validas calibrables en PARAMETRO_SISTEMA sin tocar esquema ni código; cada cambio en bitácora | BD + SW | **Implementado** | api_parametro_actualizar (0232) valida rango y asienta cambio_parametro; svc_registrar_detecciones y trg_asistencia_ciclo leen app.param_num; api_b2_03; editor en /tecnico. |
+| RNF-03 | Ningún vector ni imagen de rostro en la base relacional (solo faiss_id y rutas objeto_*) | BD + IA | **Implementado** | Consulta propia a la BD viva: 0 columnas bytea, arreglo, vector u oid en 20 tablas; schema_01_estructura lo prueba; la respuesta del servicio no trae vector (test_api); sinVectores() en la web. |
+| RNF-04 | Objetos del bucket solo por URL firmada de vigencia ≤ 300 s; 0 objetos públicos | SW + BD | **Implementado** | Bucket susan-private con public=false y política RESTRICTIVE (0090); ttlUrlFirmada/segundosEfectivos acotan a 300 s (lib/server/storage.js); schema_06 y storage.test.js (15) pasan. |
+| RNF-05 | Recortes de rostro eliminados automáticamente a los 7 días; DETECCION.objeto_recorte pasa a NULL | BD + SW | **Parcial** | svc_job_purgar_recortes_listar/_marcar (0234) y /api/jobs/purgar-recortes (listar, borrar objeto, marcar NULL); api_b2_05 y jobs.test.js (24) pasan. Ningún cron lo dispara. |
+| RNF-06 | Ningún reconocimiento sin consentimiento vigente; sin él, pase de lista manual | BD + SW + IA | **Implementado** | Tres capas: svc_alumnos_candidatos (solo inscritos con consentimiento vigente), allowed_faiss_ids en el servicio y es_valida con consentimiento_vigente (0135); trg_plantilla_rn13; pase manual. |
+| RNF-07 | Disponibilidad ≥ 99 % en horario de clases; el pase manual no depende del servicio de reconocimiento | SW + IA | **Parcial** | Aislamiento verificado: api_registrar_manual no usa el servicio (solo 5 módulos de lib/server lo usan); un 503 muestra «Reconocimiento no disponible» y sigue (useMuestreoSesion.test). Sin medir 99 %. |
+| RNF-08 | Correcciones, justificantes, cambios de parámetros y consultas biométricas siempre en bitácora de solo inserción | BD + SW | **Implementado** | app.bitacora en aplicar_correccion, api_resolver_justificante, api_parametro_actualizar y las RPC de URL firmada; trg_bitacora_sin_cambios/_sin_truncate (ENABLE ALWAYS); api_c_10/_11, api_b2_03. |
+| RNF-09 | Reconstruir el índice con 20 000 plantillas en ≤ 10 min sin interrumpir; búsqueda con 20 000 ≤ 2× la de 5 000 | IA + BD | **Parcial** | Cambio atómico probado: ux_indice_faiss_en_uso, svc_indice_activar, test_activate_atomico_con_busquedas_concurrentes. Sin medir 20 000 plantillas; la razón 20 000/5 000 medida supera 2×. |
+| RNF-10 | FK, UNIQUE y CHECK declarados; ninguna detección, asistencia o plantilla huérfana | BD | **Implementado** | Consulta propia a pg_constraint: 26 FK (25 RESTRICT), 21 UNIQUE, 35 CHECK, 20 PK, todas validadas; schema_02_restricciones: 11 positivas y 79 negativas, 0 fallos. |
+| RNF-11 | Un docente resuelve un pendiente en ≤ 3 interacciones; SUS ≥ 68 con al menos 5 docentes | SW | **Parcial** | ResolverComo: abrir el caso + un clic en «Resolver como…» = 2 interacciones (3 con comentario); ResolverComo.test.jsx lo documenta. Prueba SUS no aplicada (DECISIONS §3.8). |
+| RNF-12 | Esquema relacional independiente del lenguaje o framework del servicio de reconocimiento | BD | **Implementado** | Consulta propia: funciones solo en sql y plpgsql, extensiones plpgsql/pgcrypto/pg_trgm, sin tipos ni columnas propios de Python; el índice es JSON en el bucket. Sin prueba automática. |
+| RNF-13 | Interfaz funcional desde 360 px en las dos últimas versiones de Chrome, Edge, Firefox y Safari | SW | **Parcial** | Regla 360 px (CLAUDE.md, SISTEMA.md) y recorrido manual por rol (DESIGN_PROGRESS F8, F11); Next 16 apunta a Chrome/Edge 111+, Firefox 111+, Safari 16.4+. Sin prueba automática ni otros navegadores. |
+| RNF-14 | Respaldo diario de la base (RPO ≤ 24 h, RTO ≤ 4 h); índice FAISS reconstruible desde las plantillas activas | BD + IA | **Parcial** | RUNBOOK §1.5 indica activar respaldos diarios o PITR en Supabase (sin script ni ensayo); reconstruirIndice incremental probado (indice.test 32, api_b2_06). La reconstrucción completa ya no es posible. |
+
+## Reglas de negocio (RN-01 a RN-13)
+
+| ID | Requerimiento | Parte | Estado | Evidencia principal |
+|---|---|---|---|---|
+| RN-01 | Un alumno solo registra asistencia en sesiones de grupos donde tiene inscripción activa | BD | **Implementado** | trg_asistencia_rn01 (0020): exige inscripción activa con FOR SHARE y rechaza con 23514 rn01_asistencia_inscripcion_activa; schema_03_triggers: 5 rechazos y 2 casos válidos. |
+| RN-02 | Varias detecciones del mismo alumno generan un único registro de asistencia por sesión | BD | **Implementado** | uq_asistencia_sesion_alumno UNIQUE(id_sesion,id_alumno) (0005); svc_registrar_detecciones reutiliza la fila (FOR UPDATE, idempotente); schema_02 (23505) y review_sql_03 L1-L4. |
+| RN-03 | Estado por la hora de la primera detección válida: presente en 10 minutos, retardo hasta el minuto 20 | BD | **Implementado** | app.estado_por_minuto (0130) usada por svc_registrar_detecciones y app.cerrar_sesion; review_sql_03 M1-M4 y api_a_sesiones_05: 9:59 presente, 10:00 y 20:00 retardo, 20:01 rechazada. |
+| RN-04 | Una detección se atribuye al vecino más cercano del índice FAISS solo si su score es ≥ 0.850 | IA + BD | **Implementado** | Servicio: vecino más cercano (k=1) entre candidatos permitidos; svc_registrar_detecciones: es_valida = score >= umbral_similitud (0.850) y plantilla activa; api_a_sesiones_05 (0.849 no, 0.850 sí). |
+| RN-05 | Asistencia confirmada con ≥ 3 detecciones válidas en capturas distintas; con 1 o 2 queda pendiente de revisión | BD | **Implementado** | trg_asistencia_ciclo (0020: rn05_*) exige el mínimo para confirmar; app.lecturas_validas cuenta capturas distintas (0130); schema_03_triggers, review_sql_03 L1-L4. |
+| RN-06 | Una sesión solo se abre en el horario y el aula del grupo; sin cámara activa en el aula, pase manual | BD + SW | **Implementado** | api_abrir_sesion (0131): FUERA_DE_HORARIO y modo manual sin cámaras activas; sesiones solo desde horario_grupo (api_generar_sesiones); trg_captura_rn06; api_a_sesiones_01, schema_03. |
+| RN-07 | Al cerrar la sesión, los inscritos sin detecciones suficientes quedan como ausentes | BD + SW | **Parcial** | app.cerrar_sesion (0133) crea ausente sin hora al inscrito sin registro y deja pendientes a quienes tienen 1-2 lecturas; api_a_sesiones_04, review_sql_03 K1. Falta el cron del cierre. |
+| RN-08 | El docente corrige un registro hasta 48 h después de la sesión; toda corrección guarda el valor anterior en bitácora | BD + SW | **Implementado** | api_corregir_asistencia (0121): RN_08_PLAZO_VENCIDO tras horas_limite_correccion y app.aplicar_correccion asienta valor anterior y nuevo; api_c_10: 47 h y 48 h sí, 48 h + 1 s y 49 h no. |
+| RN-09 | Un justificante aprobado cambia el estado a justificado sin borrar el registro ni las detecciones | BD + SW | **Implementado** | api_resolver_justificante (0121) + trg_asistencia_ciclo (rn09_*): solo ausente o retardo pasan a justificado, con origen correccion; api_c_11 RES-01 conserva registro y detecciones. |
+| RN-10 | Tres retardos en la misma materia equivalen a una ausencia | BD | **Implementado** | v_resumen_asistencia (0100): faltas_equivalentes = ausencias + floor(retardos / retardos_por_ausencia); api_c_00 (2 ausencias + 7 retardos = 4) y review_sql_03 R1-R3. |
+| RN-11 | Al superar 20 % de ausencias en el periodo se pierde el derecho a examen y se notifica al docente | BD + SW | **Implementado** | app.recalcular_inscripcion (0100): derecho_examen = NOT supera_limite (exacto) y asiento notificacion solo al cambiar; api_alertas_docente; api_c_00 (9/48 conserva, 10/48 pierde), review_sql_03 E1-E2. |
+| RN-12 | Una sola plantilla activa por alumno; al registrar una nueva, la anterior se archiva y el índice se reconstruye | BD + IA | **Implementado** | ux_plantilla_facial_activa (índice único parcial, 0007); api_plantilla_registrar archiva antes de insertar; reconstruirIndice activa versión nueva (ux_indice_faiss_en_uso); schema_02, api_b2_02/_04. |
+| RN-13 | No se registra la plantilla facial de un alumno sin consentimiento firmado y vigente | BD | **Implementado** | fk_plantilla_consent con id_consent NOT NULL (0006) + trg_plantilla_rn13 (0020: del mismo alumno, vigente y en fecha); consentimiento.objeto_documento NOT NULL; schema_03: 7 rechazos. |
+
+## Lo que no está en Implementado, uno por uno
+
+**RNF-01 (No medido).** No hay medición de la captura completa (detección + vectorización + búsqueda + subida de recortes) con hasta 60 rostros, que es la métrica de 7.5 s. Lo único del repositorio es detección + vectorización de 16.9 ms de media por imagen de 1280x960 en macOS arm64 (DECISIONS §6.3), sin la escena de 60 rostros. Riesgo visto en el código, no medido: /v1/recognize sube cada recorte a Storage uno tras otro dentro de la misma petición (main.py), hasta 60 subidas en serie contra Storage remoto. La prueba del repositorio usa el mínimo de 10 corridas, no el percentil 95. Cómo medirlo: con EMBEDDER=insightface y Storage real, enviar a /v1/recognize fotogramas con 1, 10, 30 y 60 rostros (al menos 100 peticiones por caso), tomar elapsed_ms de la respuesta y calcular el p95 (objetivo ≤ 7500 ms); y medir la búsqueda con un índice de 20 000 vectores y al menos 1 000 consultas para el p95 por vector (objetivo ≤ 50 ms).
+
+**RNF-05 (Parcial).** «Automáticamente» no se cumple todavía: el repositorio no trae programador de tareas (sin vercel.json, flujo de GitHub Actions ni pg_cron; el RUNBOOK §4 solo sugiere `0 3 * * *`). Hasta que alguien dispare /api/jobs/purgar-recortes con CRON_SECRET, los recortes de más de 7 días siguen en el bucket y objeto_recorte no pasa a NULL. La lógica de la purga está completa y probada; falta configurar el cron (mismo faltante que RF-10 y RF-11) y probarla contra Storage real. Como diseño, la spec guarda también los recortes de rostros no reconocidos (RF-04), de modo que la purga es la única barrera de minimización de esos recortes.
+
+**RNF-07 (Parcial).** La métrica de disponibilidad (≥ 99 % de lunes a sábado, 07:00-21:00, unos 50 minutos de interrupción semanal como máximo) no se ha medido ni se puede medir todavía: no hay despliegue ni monitoreo en el repositorio, y el camino contra Supabase real no se ha ejecutado. Cómo medirla: una sonda externa cada minuto a /api/salud y a /health (más una lectura mínima a la base) durante al menos un periodo, y calcular minutos con respuesta correcta entre minutos del horario de clases. Además, la tolerancia a fallos de la base y de Auth depende del proveedor y no está probada; el cierre automático de sesiones depende del programador sin configurar (RF-10).
+
+**RNF-09 (Parcial).** (1) No se ha medido la reconstrucción con 20 000 plantillas (≤ 10 min): falta incluir la subida de unos 55 MB al bucket (que además exige subir el tope de Storage, RUNBOOK §1.6) y la vectorización de las fotos nuevas. La reconstrucción completa ya no es posible sobre plantillas indexadas porque sus fotos se borran (409 PLANTILLAS_SIN_FOTO, DECISIONS §8); antes de esa extensión el equipo estimaba unos 28 min para 20 000 plantillas de 5 fotos (cálculo de DECISIONS §3.11, no medición). (2) El criterio «búsqueda con 20 000 ≤ 2× la de 5 000» no se cumple como razón: la búsqueda es exhaustiva (IndexFlatIP) y crece casi linealmente. Mi medición (reporte/req/medicion/salida-knn2.txt, conjunto permitido fijo de 50 o 60 alumnos): p50 con 5 000 y 20 000 vectores de 0.042 y 0.111 ms para una consulta (×2.6) y de 0.46 y 2.71 ms para 60 consultas (×5.9); la máquina es compartida y en corridas repetidas la razón varió entre 2.6 y 5.9, siempre mayor que 2. En valor absoluto todo queda por debajo de 3 ms, así que el efecto práctico es nulo; conviene reformular la métrica en términos absolutos (por ejemplo, ≤ 50 ms con 20 000) o medirla con el hardware de producción.
+
+**RNF-11 (Parcial).** La prueba SUS (≥ 68 con al menos 5 docentes) no se ha hecho: DECISIONS §3.8 la deja pendiente junto con un piloto en 1-2 grupos, y la variante de 360 px se verificó en pantallas, no con usuarios. Tampoco se cronometraron ni contaron interacciones con docentes reales; el «≤ 3» se cumple por diseño, no por observación. Cómo medirla: aplicar el cuestionario SUS de 10 reactivos (puntuación 0 a 100) tras una tarea guiada (abrir sesión, revisar un pendiente, cerrar) a al menos 5 docentes, y registrar las interacciones por caso.
+
+**RNF-13 (Parcial).** No hay evidencia de pruebas en Firefox, Safari ni Edge, ni prueba automática de ancho (jsdom no calcula diseño; no hay Playwright ni Cypress en devDependencies). La revisión a 360 px es manual y de un solo navegador. Funciones que dependen del navegador y merecen prueba propia: la cámara (getUserMedia) en la sesión y en el registro facial, y MediaPipe (WebAssembly) en el registro guiado. Cómo verificarlo: Playwright con Chromium, Firefox y WebKit y viewport de 360x640 sobre login, Home, sesión en vivo, revisión, reportes y portal del alumno, comprobando que scrollWidth no exceda clientWidth, y una pasada manual en Edge y Safari reales. No ejecuté ninguna aplicación en navegador.
+
+**RNF-14 (Parcial).** (1) El respaldo diario de la base es una configuración externa (Supabase) que nunca se ha activado ni verificado: RPO ≤ 24 h y RTO ≤ 4 h no se han ensayado, y el RUNBOOK admite que el camino contra Supabase real no se ha ejecutado. Además, los bytes de los índices JSON y de los documentos de consentimiento viven en el bucket, no en las tablas, y el RUNBOOK no dice cómo respaldarlos. (2) «El índice FAISS es reconstruible a partir de las plantillas activas» dejó de ser cierto para plantillas ya indexadas: desde la extensión 18 (DECISIONS §8, fotos de registro efímeras) la foto se borra al activar el índice que la contiene y una reconstrucción completa responde 409 PLANTILLAS_SIN_FOTO (indice.js, línea 92). Los vectores solo existen dentro de los JSON del índice en el bucket; si se pierden, hay que volver a registrar a los alumnos. Es una compensación consciente con la minimización de RNF-03, pero contradice el texto de RNF-14: el equipo debe decidir entre respaldar los índices del bucket o reformular el requisito.
+
+**RN-07 (Parcial).** La regla en sí está completa y probada, pero su disparo automático a la hora de fin no existe todavía: depende de /api/jobs/cerrar-sesiones y ningún programador lo invoca (sin vercel.json, GitHub Actions ni pg_cron; RUNBOOK §4 sugiere `*/5 * * * *`). Mientras el docente no cierre la sesión a mano, queda abierta y sus inscritos sin lecturas no reciben el registro ausente. Es el mismo faltante que RF-10. Se marca Parcial por esa dependencia, aunque el texto de la regla («al cerrar») sí se cumple.
+
+## Detalle de la evidencia por requerimiento
+
+### Requerimientos no funcionales
+
+#### RNF-01 · No medido
+
+- **Texto en la especificación:** Rendimiento. La búsqueda y el procesamiento de cada captura no acumulan rezago entre capturas sucesivas.
+- **Métrica según la especificación:** Búsqueda k-NN por vector ≤ 50 ms (p95) con índice de hasta 20 000 vectores; procesamiento completo de una captura (detección + vectorización + búsqueda de hasta 60 rostros) ≤ 7.5 s, menos de la mitad del intervalo de muestreo de 15 s.
+- **Parte:** IA + SW
+- **Evidencia:**
+  - Servicio de reconocimiento: recognition-service/app/index.py (IndexIDMap2 sobre IndexFlatIP, búsqueda restringida con IDSelectorBatch) y main.py (/v1/recognize devuelve elapsed_ms).
+  - Medición propia (reporte/req/medicion/salida-knn.txt, 4 vCPU Xeon 2.1 GHz, faiss-cpu 1.15.1, vectores sintéticos de 512 dimensiones, 200 repeticiones): con 20 000 vectores y 2 000 permitidos, una consulta tarda p50 0.88 ms y p95 1.37 ms; un lote de 60 consultas, p50 9.35 ms y p95 13.57 ms. Con los 20 000 permitidos (peor caso, irreal para un grupo), una consulta p95 10.15 ms y un lote de 60 p95 65.71 ms (≈ 1.1 ms por rostro).
+  - Prueba del repositorio recognition-service/tests/test_api.py::test_latencia_busqueda_20000_vectores: pasa (la ejecuté), pero afirma min(tiempos) < 50, no el p95.
+  - DECISIONS §2 y recognition-service/README.md declaran ≈ 1 ms con 20 000 vectores; coincide en orden de magnitud con mi medición.
+  - Sin rezago entre capturas (parte cualitativa del requisito): el navegador no lanza otra captura hasta que termina la anterior (CameraCapture.jsx, useMuestreoSesion) y el servidor limita a una captura por cámara cada intervalo/2 (rateLimit.js, captura.test.js).
+- **Nota:** Mis cifras de k-NN usan vectores aleatorios y una máquina compartida; sirven como cota del orden de magnitud, no como medición de producción.
+
+#### RNF-02 · Implementado
+
+- **Texto en la especificación:** Precisión y configurabilidad. Umbral y mínimo de detecciones calibrables con datos reales.
+- **Métrica según la especificación:** umbral_similitud (0.850) y min_detecciones_validas (3) en PARAMETRO_SISTEMA; cambiarlos no requiere modificar esquema ni código; cada cambio queda en bitácora.
+- **Parte:** BD + SW
+- **Evidencia:**
+  - parametro_sistema con 12 filas (consulta propia): umbral_similitud 0.850 y min_detecciones_validas 3 entre ellas; tipos y rangos en app.parametro_meta (0040: umbral 0.500 a 0.999, lecturas 1 a 10).
+  - Los valores se leen en cada ejecución con app.param_num: svc_registrar_detecciones (0135, umbral y mínimo), trg_asistencia_ciclo (0020, mínimo) y app.cerrar_sesion (0133). Cambiarlos no exige migración ni despliegue.
+  - public.api_parametro_actualizar (0232, solo rol técnico): valida con app.validar_parametro, actualiza con usuario y fecha, y llama app.bitacora(cambio_parametro) con valor anterior y nuevo; si el valor no cambia no escribe nada.
+  - Pruebas: api_b2_03_parametros_camaras.sql (asiento con anterior y nuevo, sin asiento cuando no hay cambio); componente web ParametrosEditor.
+  - authenticated solo tiene SELECT sobre parametro_sistema (consulta propia a information_schema.role_table_grants): la única vía de escritura de la aplicación es la RPC.
+- **Nota:** Un UPDATE directo con service_role o con el propietario de la base no pasa por la RPC y no deja asiento (parametro_sistema no tiene disparador de auditoría). La tolerancia, el límite de presente y el intervalo se copian a cada sesión al generarla (api_generar_sesiones): un cambio solo afecta a las sesiones nuevas, como advierte la propia RPC. El umbral de la base de demostración local se bajó a 0.700 (DEMO.md §9); el valor por omisión del repositorio sigue en 0.850.
+
+#### RNF-03 · Implementado
+
+- **Texto en la especificación:** Privacidad del dato biométrico. Ningún vector ni imagen de rostro en la base relacional.
+- **Métrica según la especificación:** 0 vectores e imágenes en la base relacional (solo faiss_id y rutas objeto_*). Verificable por revisión del esquema.
+- **Parte:** BD + IA
+- **Evidencia:**
+  - Consulta propia en information_schema.columns de la base viva (PostgreSQL 16.14, 43 de 43 migraciones): ninguna columna de tipo bytea, arreglo, vector, oid ni real/float; extensiones instaladas solo plpgsql, pgcrypto y pg_trgm (sin pgvector).
+  - Columnas jsonb existentes: bitacora_auditoria.valor_anterior y valor_nuevo, y plantilla_foto.calidad. Esta última tiene ck_plantilla_foto_calidad: lista blanca de cuatro claves escalares (brillo, nitidez, tamano_rostro_px, frontal) vía app.calidad_foto_valida (0235); api_b2_07_plantilla_fotos.sql prueba que una clave «vector» se rechaza.
+  - Lo que guarda la base de un rostro: plantilla_facial.faiss_id (bigint) y rutas varchar objeto_foto, plantilla_foto.objeto_foto, deteccion.objeto_recorte, consentimiento.objeto_documento. Los vectores viven en el JSON del índice en el bucket (susan-faiss-json/1).
+  - Prueba automática: supabase/tests/schema_01_estructura.sql, «RNF-03: ninguna columna binaria ni de arreglo» (la salida guardada en reporte/bd/pruebas-sql.txt muestra 0 fallos).
+  - El vector de consulta no sale del servicio: recognition-service/tests/test_api.py (línea 64) comprueba que la respuesta no contiene «embedding» ni «vector»; la web lo elimina a cualquier profundidad con sinVectores() (recognition.js; recognition.test.js, 30 pruebas, pasan).
+- **Nota:** Una columna de texto podría guardar un vector en base64; ninguna ruta del código lo hace y el esquema no lo impide con un CHECK. Las fotos de registro se suben al bucket y se borran en cuanto su vector queda en un índice activado (DECISIONS §8).
+
+#### RNF-04 · Implementado
+
+- **Texto en la especificación:** Acceso a objetos. Objetos del bucket servidos solo por URL firmada.
+- **Métrica según la especificación:** Acceso solo por URL firmada con vigencia ≤ 300 s; 0 objetos públicos en el bucket.
+- **Parte:** SW + BD
+- **Evidencia:**
+  - Migración 0090: bucket susan-private con public = false (se reafirma en ON CONFLICT) y política RESTRICTIVE susan_private_solo_servicio que cierra el bucket a anon y authenticated; solo el servidor, con service_role, sube y firma. Consulta propia: storage.buckets muestra public = f y un límite de 52 428 800 bytes (0091).
+  - Código: lib/server/storage.js, urlFirmada() usa createSignedUrl con segundosEfectivos() = max(1, min(solicitado, vigencia, 300)); MAX_URL_SEGUNDOS = 300. Además app.parametro_meta fija el máximo de vigencia_url_firmada_seg en 300 y las RPC devuelven least(parámetro, 300).
+  - Pruebas: schema_06_api_storage.sql (bucket privado, anon y authenticated sin acceso aun con una política permisiva); lib/server/storage.test.js «TTL de URL firmada (RNF-04: <= 300 s)» (15 pruebas, las ejecuté: pasan).
+  - Todas las URL se emiten tras autorizar y asentar la consulta en bitácora (api_documento_url_autorizar, svc_registrar_consulta_revision).
+- **Nota:** Salvedad de despliegue: la política y las URL firmadas se probaron contra los stubs de Storage de PostgreSQL local, el adaptador local y un servidor Supabase simulado; el camino contra un proyecto Supabase real no se ha ejecutado (RUNBOOK, introducción). En modo local el adaptador de disco no impone el tope de 300 s por sí mismo (lo impone el llamador); ese modo está cerrado en producción.
+
+#### RNF-05 · Parcial
+
+- **Texto en la especificación:** Retención y minimización. Eliminación automática de los recortes al cumplir su retención.
+- **Métrica según la especificación:** Recortes eliminados automáticamente a los 7 días (parámetro dias_retencion_recortes); DETECCION.objeto_recorte pasa a NULL.
+- **Parte:** BD + SW
+- **Evidencia:**
+  - SQL (0234): svc_job_purgar_recortes_listar devuelve los recortes de capturas más viejas que dias_retencion_recortes (7 días exactos aún se conservan); svc_job_purgar_recortes_marcar pone objeto_recorte = NULL y conserva la fila de la detección (plantilla, score, es_valida).
+  - Web (lib/server/jobs.js): el job borra primero los objetos y marca después, con bloqueo contra disparos solapados, y solo borra rutas con la forma recortes/...; es idempotente.
+  - Pruebas: api_b2_05_jobs.sql (a 7 días exactos se conserva, 1 s después vence, idempotente, la detección reciente conserva su recorte); lib/server/jobs.test.js (24 pruebas, las ejecuté: pasan).
+- **Nota:** Misma salvedad que RNF-04 sobre Supabase real.
+
+#### RNF-06 · Implementado
+
+- **Texto en la especificación:** Consentimiento. Ningún reconocimiento sin consentimiento vigente; en su ausencia, pase manual (RN-06, RN-13).
+- **Métrica según la especificación:** 0 operaciones de reconocimiento sin consentimiento vigente; degradación automática a pase manual.
+- **Parte:** BD + SW + IA
+- **Evidencia:**
+  - Capa 1, candidatos: svc_alumnos_candidatos (0135) entrega solo las plantillas activas de inscritos activos con consentimiento vigente; captura.js (paso 2) las pasa al servicio como allowed_faiss_ids y el servicio busca solo entre ellas (index.py, IDSelectorBatch; test_no_incluido_nunca_es_candidato).
+  - Capa 2, red de seguridad en la base: svc_registrar_detecciones marca es_valida solo si la plantilla está activa, el alumno inscrito y app.consentimiento_vigente(id_consent) es verdadero.
+  - Capa 3, alta de plantilla: fk_plantilla_consent NOT NULL y trg_plantilla_rn13 (RN-13).
+  - Degradación a manual: el pase manual existe en sesiones automáticas para quien no tiene consentimiento (trg_asistencia_ciclo lo permite; RegistroManualDialog, «Registra manualmente a quien falte» en CapturaContinua).
+  - Pruebas: api_a_sesiones_05_svc.sql (consentimiento revocado y vencido por fecha excluyen al alumno, inscripción en baja también); schema_03_triggers (RN-13); review_sql_03 (vigencia por fecha local, Z6-Z7).
+- **Nota:** La detección de rostros ocurre sobre todo el fotograma y guarda un recorte de cada rostro detectado, también de personas sin consentimiento o no inscritas, durante 7 días (RF-04 de la spec lo prevé); lo que se impide es identificarlas. Entre la revocación y la siguiente versión del índice el vector sigue dentro del índice, pero ya no es candidato.
+
+#### RNF-07 · Parcial
+
+- **Texto en la especificación:** Disponibilidad. Plataforma disponible en el horario de clases; una falla del reconocimiento no impide registrar.
+- **Métrica según la especificación:** ≥ 99 % durante el horario de clases (lunes a sábado, 07:00-21:00); el pase de lista manual no depende del servicio de reconocimiento.
+- **Parte:** SW + IA
+- **Evidencia:**
+  - Aislamiento del pase manual: la captura manual llama api_registrar_manual por lib/api/sesiones.js directo a la base; dentro de lib/server solo admin.js, autoservicio.js, biometria.js, captura.js e indice.js usan el cliente del servicio de reconocimiento (recognition.js); apertura y cierre de sesión no lo usan.
+  - Degradación en la interfaz: ante un 503 el muestreo no se detiene, marca servicioNoDisponible y muestra «Reconocimiento no disponible. Registra manualmente a quien falte. Se reintentará en cada ciclo» (useMuestreoSesion.test.jsx, CapturaContinua.test.jsx; ejecuté useMuestreoSesion.test: 19 pasan).
+  - Sondas de vida: GET /api/salud (web) y GET /health (servicio de reconocimiento). El proxy devuelve 503 AUTH_NO_DISPONIBLE sin expulsar al usuario si Auth falla (DECISIONS §4).
+- **Nota:** La mitad del requisito que se puede verificar por código (la falla del reconocimiento no impide registrar) sí se cumple; por eso no se marca Pendiente.
+
+#### RNF-08 · Implementado
+
+- **Texto en la especificación:** Trazabilidad y auditoría. Registro de toda operación sensible con usuario, fecha y valor anterior (RN-08).
+- **Métrica según la especificación:** 100 % de correcciones, resoluciones de justificantes, cambios de parámetros y consultas biométricas registradas en BITACORA_AUDITORIA (solo inserción).
+- **Parte:** BD + SW
+- **Evidencia:**
+  - Correcciones: app.aplicar_correccion asienta correccion con valor anterior y nuevo (api_c_10, COR-01 y COR-05; COR-03 comprueba que un rechazo no deja asiento). Justificantes: aprobacion_justificante y rechazo_justificante (api_c_11, RES-01). Parámetros: cambio_parametro (api_b2_03). Consultas biométricas: consulta en api_documento_url_autorizar (0231, 0235, 0237) y svc_registrar_consulta_revision (0121), siempre antes de firmar.
+  - Solo inserción: disparadores trg_bitacora_sin_cambios (UPDATE/DELETE) y trg_bitacora_sin_truncate (TRUNCATE) con ENABLE ALWAYS (también con session_replication_role = replica); authenticated y service_role solo tienen SELECT sobre bitacora_auditoria (consulta propia). Pruebas: schema_03_triggers (UPDATE, DELETE, TRUNCATE, TRUNCATE ... CASCADE y modo replica, todos rechazados con 23000).
+  - La bitácora guarda además notificacion (RN-11), cierre_sesion, alta_plantilla, alta_consentimiento y revocacion_consentimiento: el tipo accion_bitacora tiene 10 valores en la base viva (la spec fija 8; DECISIONS §1 #19).
+- **Nota:** Endurecimiento pendiente, fuera de las cuatro categorías de la métrica y documentado por el equipo (review_sql_04_auditoria.sql, DECISIONS §4): cambio de rol o estatus de cuenta, baja de alumno, revocación hecha por el administrador y pase manual del docente no dejan asiento (AU1 a AU5); la IP de la bitácora la declara el llamador (p_ip) y solo es confiable si el proxy reescribe x-forwarded-for. Un UPDATE directo de parametro_sistema con service_role o propietario no pasa por la RPC.
+
+#### RNF-09 · Parcial
+
+- **Texto en la especificación:** Escalabilidad. Reconstrucción del índice al crecer las plantillas, sin degradar la búsqueda.
+- **Métrica según la especificación:** Reconstrucción del índice con 20 000 plantillas ≤ 10 min sin interrumpir la versión en uso (cambio atómico de en_uso); el tiempo de búsqueda con 20 000 vectores no supera 2× el tiempo con 5 000.
+- **Parte:** IA + BD
+- **Evidencia:**
+  - Sin interrumpir la versión en uso: svc_indice_activar apaga la versión anterior y enciende la nueva en una transacción, y ux_indice_faiss_en_uso (índice único parcial) impide dos en uso (schema_02: «RNF-09: dos versiones del indice en uso», api_b2_04 línea 191). En el servicio, IndexManager.activate carga la versión nueva antes de mover el puntero (index.py); pytest test_activate_atomico_con_busquedas_concurrentes (la ejecuté: pasa) alterna versiones con 4 hilos de búsqueda y no ve estados mezclados.
+  - Reconstrucción incremental: build con keep conserva los vectores existentes byte a byte (test_build_conserva_vectores_keep, pasa) y solo vectoriza las fotos nuevas.
+  - Medición propia de la parte de CPU del servicio con 20 000 vectores sintéticos (reporte/req/medicion/salida-idx.txt): el JSON pesa 54.7 MB; serializar 0.35 s, validar 0.31 s y cargar en FAISS 0.03 s (≈ 0.7 s en total), sin red ni vectorización de fotos nuevas.
+- **Nota:** La parte de «sin interrumpir la versión en uso» sí está cumplida; por eso el estado es Parcial y no Pendiente.
+
+#### RNF-10 · Implementado
+
+- **Texto en la especificación:** Integridad referencial. Ningún registro ligado a un alumno, sesión o grupo inexistente.
+- **Métrica según la especificación:** FK, UNIQUE y CHECK declarados en el modelo lógico; ninguna detección, asistencia o plantilla huérfana.
+- **Parte:** BD
+- **Evidencia:**
+  - Consulta propia a pg_constraint (esquema public, base viva): 20 PK, 26 FK, 21 UNIQUE y 35 CHECK; ninguna restricción NOT VALID. Además tres índices únicos parciales (ux_plantilla_facial_activa, ux_indice_faiss_en_uso, ux_justificante_pendiente). Coincide con reporte/bd/resumen.md.
+  - Las 26 llaves foráneas son ON DELETE RESTRICT salvo fk_horario_grupo (CASCADE, horario del grupo). Detecciones, asistencias y plantillas dependen de capturas/sesiones, alumnos y consentimientos con FK RESTRICT (fk_deteccion_captura, fk_deteccion_plantilla, fk_asistencia_alumno, fk_asistencia_sesion, fk_plantilla_alumno, fk_plantilla_consent).
+  - Pruebas: schema_02_restricciones.sql (cada rechazo con su SQLSTATE y el nombre de la restricción: 23514, 23505, 23503) y schema_03_triggers.sql; la salida guardada (reporte/bd/pruebas-sql.txt) muestra 37 archivos, 1508 pruebas positivas y 953 negativas, 0 fallos.
+- **Nota:** Las rutas objeto_* son referencias blandas a objetos del bucket: ninguna FK puede garantizar que el objeto exista.
+
+#### RNF-11 · Parcial
+
+- **Texto en la especificación:** Usabilidad. Revisión de la sesión y de pendientes sin capacitación técnica adicional.
+- **Métrica según la especificación:** Un docente resuelve un caso pendiente en ≤ 3 interacciones; puntuación SUS ≥ 68 en prueba con al menos 5 docentes.
+- **Parte:** SW
+- **Evidencia:**
+  - Diseño: en la cola de revisión el docente abre el caso (CasoPendiente) y pulsa «Resolver como Presente/Retardo/Ausente» (ResolverComo.jsx): un clic ejecuta la decisión sin diálogo y el estado sugerido viene resaltado. El comentario es opcional.
+  - Prueba de componente: ResolverComo.test.jsx, «resuelve con un solo clic (abrir caso + 1 clic <= 3 interacciones)»; la ejecuté y pasa (7 pruebas).
+
+#### RNF-12 · Implementado
+
+- **Texto en la especificación:** Portabilidad. Modelo de datos independiente del lenguaje del servicio de reconocimiento.
+- **Métrica según la especificación:** El esquema relacional no depende del lenguaje o framework del servicio de reconocimiento; verificable por revisión: ningún tipo, función ni columna propia de ese lenguaje.
+- **Parte:** BD
+- **Evidencia:**
+  - Revisión propia de la base viva: pg_proc de los esquemas public y app (98 + 87 funciones) usa solo los lenguajes sql y plpgsql; sin plpython ni extensiones ajenas (pg_extension: plpgsql, pgcrypto, pg_trgm); grep de «python», «numpy» y «pickle» en supabase/migrations no encuentra nada.
+  - El contrato entre servicio y base es neutro: ids enteros (faiss_id bigint), rutas de texto y el formato de índice susan-faiss-json/1 (JSON con vectores float32 en base64) que cualquier lenguaje puede leer; la base nunca importa nada del servicio.
+- **Nota:** Es un criterio por revisión (así lo dice la spec); no existe una prueba automática que impida que alguien agregue una función en otro lenguaje. La tabla se llama indice_faiss (nombre de la biblioteca, no del lenguaje).
+
+#### RNF-13 · Parcial
+
+- **Texto en la especificación:** Compatibilidad (nuevo). Interfaz web responsiva en los navegadores de uso común.
+- **Métrica según la especificación:** Funcional desde 360 px de ancho, en las dos últimas versiones de Chrome, Edge, Firefox y Safari.
+- **Parte:** SW
+- **Evidencia:**
+  - Regla del proyecto: «Toda pantalla nueva debe verse bien a 360 px» (CLAUDE.md, docs/design/SISTEMA.md punto 3); muchos componentes tienen variante de teléfono (por ejemplo FilaAlumno, ListadoAulas, ResumenAdmin) con comentarios sobre los 360 px.
+  - Verificación manual registrada por el equipo: recorrido desktop + 360 px por rol (DESIGN_PROGRESS F8) y revisión a 360 px, en claro y oscuro, en un navegador real para las gráficas (F11); los registros del equipo solo mencionan Chrome (el del panel integrado, en las mediciones de tiempo de ejecución).
+  - Navegadores: la documentación de Next 16 incluida en el proyecto (web/node_modules/next/dist/docs/03-architecture/supported-browsers.md) fija como objetivo Chrome 111+, Edge 111+, Firefox 111+ y Safari 16.4+, que son anteriores a «las dos últimas versiones» exigidas; package.json no define browserslist propio.
+
+#### RNF-14 · Parcial
+
+- **Texto en la especificación:** Respaldo y recuperación (nuevo). Respaldo periódico de la base y recuperación del índice.
+- **Métrica según la especificación:** Respaldo diario de la base (RPO ≤ 24 h, RTO ≤ 4 h); el índice FAISS es reconstruible a partir de las plantillas activas.
+- **Parte:** BD + IA
+- **Evidencia:**
+  - Respaldo: solo existe la indicación de RUNBOOK §1 paso 5 («activa los respaldos diarios (RPO ≤ 24 h) o PITR»). No hay script de respaldo o restauración, configuración ni prueba en el repositorio (búsqueda de respaldo, backup, pg_dump y restaurar en supabase/, scripts/ y web/src).
+  - Índice: POST /api/indice/reconstruir (reconstruirIndice, lib/server/indice.js) y el job reconstruir-indice reconstruyen o indexan lo pendiente; probados en indice.test.js (32, las ejecuté: pasan) y api_b2_06_flujo_indice.sql.
+
+### Reglas de negocio
+
+#### RN-01 · Implementado
+
+- **Texto en la especificación:** Un alumno solo puede registrar asistencia en sesiones de grupos donde tenga una inscripción activa.
+- **Mecanismo según la especificación:** Disparador que exige inscripción activa (esquema físico). Implementa RF-02, RF-04 y RNF-10.
+- **Parte:** BD
+- **Evidencia:**
+  - Disparador trg_asistencia_rn01 (BEFORE INSERT o UPDATE de id_sesion/id_alumno en asistencia): busca la inscripción activa del alumno en el grupo de la sesión y la bloquea con FOR SHARE hasta el fin de la transacción para que una baja simultánea no se cuele.
+  - Pruebas (schema_03_triggers.sql): alumno no inscrito, inscripción en baja, cambio de alumno, cambio de sesión a otro grupo y baja de la inscripción antes de insertar; todos rechazados con 23514:rn01_asistencia_inscripcion_activa. Un inscrito activo sí recibe asistencia y un UPDATE de otras columnas no estorba.
+  - Refuerzo en capas superiores: svc_alumnos_candidatos solo ofrece inscritos activos (api_a_sesiones_05) y la RLS limita lo que ve cada rol.
+
+#### RN-02 · Implementado
+
+- **Texto en la especificación:** Aunque el muestreo produzca varias detecciones del mismo alumno, la sesión genera un único registro de asistencia.
+- **Mecanismo según la especificación:** UNIQUE(id_sesion, id_alumno) en ASISTENCIA. Implementa RF-06 y RNF-10.
+- **Parte:** BD
+- **Evidencia:**
+  - Restricción uq_asistencia_sesion_alumno (0005). La prueba schema_02_restricciones.sql comprueba el rechazo 23505 de una asistencia duplicada.
+  - svc_registrar_detecciones (0135) busca la fila del alumno con FOR UPDATE, la actualiza (conteo y hora mínima) y solo inserta si no existe; reenviar la misma captura no cuenta de nuevo (review_sql_03: L1 tres detecciones en una captura = una lectura, L4 la misma captura reenviada tres veces = una lectura).
+
+#### RN-03 · Implementado
+
+- **Texto en la especificación:** El estado se asigna por la hora de la primera detección válida: presente en los primeros 10 minutos, retardo hasta el minuto 20.
+- **Mecanismo según la especificación:** Sin restricción de base de datos en la spec; se implementa por RF-08 y RF-03.
+- **Parte:** BD
+- **Evidencia:**
+  - app.estado_por_minuto(limite, tolerancia, minuto): presente si minuto < limite_presente_min (10), retardo si limite ≤ minuto ≤ tolerancia_min (20), NULL fuera de la ventana. svc_registrar_detecciones aplica el minuto de la PRIMERA lectura válida (hora_registro) cuando se completan las lecturas mínimas, no el de la que completa el mínimo.
+  - Las capturas posteriores al minuto 20 se rechazan con FUERA_DE_VENTANA (svc_crear_captura).
+  - Pruebas de límites (review_sql_03_spec_limites.sql): M1 primera lectura a 9 min 59 s = presente; M2 a 10 min exactos = retardo; M3 minuto 20 exacto = retardo (inclusive); M4 a 20 min 1 s la captura se rechaza. api_a_sesiones_05_svc repite 9:59/10:00.
+- **Nota:** Los límites (10 y 20) se copian a cada sesión al generarla; cambiar el parámetro solo afecta a sesiones nuevas.
+
+#### RN-04 · Implementado
+
+- **Texto en la especificación:** Una detección se atribuye al alumno del vecino más cercano que devuelve el índice FAISS, y solo si su score es mayor o igual a 0.850.
+- **Mecanismo según la especificación:** Sin restricción de base de datos en la spec; se implementa por RF-05 y RNF-02 (parámetro umbral_similitud).
+- **Parte:** IA + BD
+- **Evidencia:**
+  - Servicio (index.py): búsqueda exhaustiva de k=1 por producto interno restringida a los ids permitidos; devuelve faiss_id y score = (coseno + 1) / 2 a 3 decimales.
+  - Base (svc_registrar_detecciones, 0135): guarda candidato y score en deteccion siempre (ck_deteccion_candidato) y marca es_valida solo si el score redondeado a 3 decimales es ≥ umbral_similitud y la plantilla está activa, el alumno inscrito y el consentimiento vigente.
+  - Pruebas: api_a_sesiones_05_svc.sql («0.8494 se redondea a 0.849 y no vale»; «0.8495 se redondea a 0.850 y vale») y review_sql_03 U1/U2; recognition-service test_umbral_y_score_formula.
+- **Nota:** El score es (coseno + 1) / 2 y no el coseno crudo (DECISIONS §1 #4): con el coseno de ArcFace el 0.850 casi nunca se alcanzaría. Con rostros reales el equipo considera demasiado exigente el 0.850 (coseno 0.70) y calibró 0.700 en su base local de demostración (RUNBOOK §5, DEMO.md §9); la calibración con datos reales del plantel sigue abierta (DECISIONS §3.1). La regla está implementada; su valor no está calibrado.
+
+#### RN-05 · Implementado
+
+- **Texto en la especificación:** La asistencia se confirma con al menos tres detecciones válidas del mismo alumno en capturas distintas; con una o dos queda pendiente de revisión del docente.
+- **Mecanismo según la especificación:** Sin restricción de base de datos en la spec; se implementa por RF-07, RF-18 y RNF-02 (parámetro min_detecciones_validas).
+- **Parte:** BD
+- **Evidencia:**
+  - trg_asistencia_ciclo (0020): un registro automático nace pendiente (rn05_asistencia_nace_pendiente), no regresa a pendiente y pasa de pendiente a presente o retardo solo si conteo_detecciones ≥ min_detecciones_validas (rn05_asistencia_confirmacion_lecturas); el sistema automático no reclasifica un presente confirmado (rn05_asistencia_cambio_requiere_humano).
+  - app.lecturas_validas (0130) cuenta capturas DISTINTAS con una detección válida del alumno: dos detecciones en la misma captura valen una; svc_registrar_detecciones y app.cerrar_sesion recalculan el conteo desde deteccion.
+  - Con una o dos lecturas el registro queda pendiente y va a la cola de revisión (RF-18); el docente lo resuelve (RN-08). Pruebas: schema_03_triggers (confirmar con 1 o 2 lecturas rechazado, con 3 aceptado) y review_sql_03 (L2: dos cámaras en el mismo instante son dos capturas; L3: tres capturas distintas confirman presente).
+- **Nota:** El disparador compara el contador conteo_detecciones; que las lecturas sean de capturas distintas lo garantiza el código que recalcula el contador desde deteccion. Una escritura directa con service_role o propietario con un contador falso pasaría el disparador.
+
+#### RN-06 · Implementado
+
+- **Texto en la especificación:** Una sesión solo se abre en el horario y el aula del grupo; si ninguna cámara del aula está activa, se habilita el pase de lista manual.
+- **Mecanismo según la especificación:** Disparador: la cámara de cada captura pertenece al aula del grupo. Implementa RF-09, RF-22 y RNF-07.
+- **Parte:** BD + SW
+- **Evidencia:**
+  - Horario: api_abrir_sesion rechaza con FUERA_DE_HORARIO fuera de [hora_inicio, hora_fin) en hora del plantel; la única función que crea sesiones es api_generar_sesiones (0203), que las deriva de horario_grupo; api_horario_guardar rechaza choques con otros grupos del mismo aula y periodo (HORARIO_CHOQUE).
+  - Aula: trg_captura_rn06 (0020) rechaza con 23514 rn06_captura_camara_aula una captura cuya cámara no es del aula del grupo; trg_asistencia_ciclo rechaza registros automáticos en sesiones de pase manual (rn06_asistencia_automatico_en_sesion_manual).
+  - Manual: api_abrir_sesion fija modo_registro = automatico si hay cámaras activas en el aula y manual si no.
+  - Pruebas: api_a_sesiones_01_panel_abrir.sql (un segundo antes, en hora_fin y otro día se rechazan; modo según cámaras), schema_03_triggers (RN-06) y review_sql_03 (Z3-Z4, zona horaria cerca de medianoche UTC).
+
+#### RN-07 · Parcial
+
+- **Texto en la especificación:** Al cerrar la sesión, los alumnos inscritos sin detecciones suficientes quedan marcados como ausentes.
+- **Mecanismo según la especificación:** Sin restricción de base de datos en la spec; se implementa por RF-10 (cierre a la hora de fin por el programador de tareas, o antes por el docente).
+- **Parte:** BD + SW
+- **Evidencia:**
+  - app.cerrar_sesion (0133), invocada por api_cerrar_sesion (docente) y svc_job_cerrar_sesiones: consolida las lecturas, confirma pendientes con lecturas suficientes, inserta un registro ausente (hora NULL, origen según el modo de la sesión) para cada inscrito activo sin registro, deja pendientes a quienes tienen una o dos lecturas, cierra, asienta cierre_sesion y recalcula el grupo.
+  - Pruebas: api_a_sesiones_04_cierre_suspension.sql; review_sql_03 K1 («el cierre crea ausente al inscrito sin registro»); schema_03_triggers: el ausente de cierre nace automático en sesión automática y manual en sesión manual.
+- **Nota:** La spec (RF-10) y el código dejan pendientes, no ausentes, a quienes tienen una o dos detecciones; es coherente con RN-05.
+
+#### RN-08 · Implementado
+
+- **Texto en la especificación:** El docente puede corregir un registro hasta 48 horas después de la sesión; toda corrección conserva el valor anterior en bitácora, con usuario y fecha.
+- **Mecanismo según la especificación:** Sin restricción de base de datos en la spec; se implementa por RF-11 y RNF-08.
+- **Parte:** BD + SW
+- **Evidencia:**
+  - api_corregir_asistencia (0121): solo el docente titular, sesión cerrada, plazo app.limite_correccion(fecha, hora_fin) con horas_limite_correccion (48); fuera del plazo responde RN_08_PLAZO_VENCIDO. app.aplicar_correccion (0120) fija origen correccion y llama app.bitacora(correccion) con estado, origen, hora y conteo anteriores y nuevos, usuario y fecha; recalcula el derecho a examen.
+  - Pruebas: api_c_10_revision_correcciones.sql (COR-01 a 47 h con asiento; COR-02 a 48 h exactas se acepta; COR-03 y COR-04 rechazan a 48 h + 1 s y 49 h sin asiento; COR-05 conserva la hora original en la bitácora; COR-19 con el parámetro en 24 h); review_sql_03 Z8 (plazo cerca de medianoche).
+- **Nota:** El plazo y la bitácora los aplica la RPC, no un disparador de la tabla: una escritura directa con service_role o propietario los evadiría. La resolución automática de pendientes a las 48 h (RF-11) sí depende del programador sin configurar, pero no forma parte del texto de esta regla.
+
+#### RN-09 · Implementado
+
+- **Texto en la especificación:** Un justificante aprobado cambia el estado a justificado sin eliminar el registro original ni las detecciones que lo respaldan.
+- **Mecanismo según la especificación:** Sin restricción de base de datos en la spec; se implementa por RF-12 y RNF-08.
+- **Parte:** BD + SW
+- **Evidencia:**
+  - trg_asistencia_ciclo: un registro no nace justificado (rn09_asistencia_nace_justificada), solo un ausente o retardo se justifica (rn09_asistencia_justificar_solo_falta_o_retardo), con origen correccion (rn09_asistencia_justificar_con_correccion) y un justificado ya no cambia (rn09_asistencia_justificado_inmutable). El rol authenticated solo tiene SELECT sobre asistencia y deteccion (consulta propia) y el código no contiene ningún DELETE sobre asistencia.
+  - api_resolver_justificante (0121) aprueba o rechaza, asienta aprobacion_justificante o rechazo_justificante y recalcula el derecho a examen.
+  - Pruebas: schema_03_triggers (RN-09, 6 rechazos y 2 casos válidos) y api_c_11_revision_justificantes.sql (RES-01: «no se borra ni el registro ni capturas/detecciones»; RES-02: un retardo justificado conserva su hora).
+- **Nota:** El docente no tiene pantalla para registrar un justificante por el alumno (RF-12 Parcial); el alumno sí lo registra desde su portal y el docente lo aprueba.
+
+#### RN-10 · Implementado
+
+- **Texto en la especificación:** Tres retardos en la misma materia equivalen a una ausencia.
+- **Mecanismo según la especificación:** Sin restricción de base de datos en la spec; se implementa por RF-13 (faltas equivalentes = ausencias + ⌊retardos ÷ 3⌋).
+- **Parte:** BD
+- **Evidencia:**
+  - Vista v_resumen_asistencia (0100), por inscripción (alumno y grupo): faltas_equivalentes = ausencias + floor(retardos / retardos_por_ausencia), sin contar justificados ni pendientes; el divisor es el parámetro retardos_por_ausencia (3).
+  - Pruebas: api_c_00_recalculo.sql («2 ausencias + 7 retardos = 4 faltas equivalentes»; con retardos_por_ausencia = 2 suman 5); review_sql_03 R1 (3 retardos = 1), R2 (5 = 1, piso), R3 (6 = 2).
+- **Nota:** La suma es por inscripción (grupo del periodo), que es como la define RF-13.
+
+#### RN-11 · Implementado
+
+- **Texto en la especificación:** Al superar el 20 % de ausencias en el periodo, el alumno pierde derecho a examen y el sistema notifica al docente.
+- **Mecanismo según la especificación:** Sin restricción de base de datos en la spec; se implementa por RF-14 (la notificación es un asiento «notificacion» en bitácora, Tabla de acciones de la spec).
+- **Parte:** BD + SW
+- **Evidencia:**
+  - v_resumen_asistencia calcula supera_limite = faltas_equivalentes * 100 > porcentaje_max_ausencias * sesiones_programadas (sin redondeo: exactamente el límite conserva el derecho; sesiones suspendidas excluidas del denominador).
+  - app.recalcular_inscripcion (reversible, idempotente) actualiza inscripcion.derecho_examen y asienta notificacion en bitácora solo si cambia; se llama tras cierre, corrección y justificante. El docente ve las alertas (sin derecho o a una falta del límite) en su panel (api_docente_panel, api_alertas_docente).
+  - Pruebas: api_c_00_recalculo.sql (9 faltas de 48 = 18.75 % conserva; la décima, 20.83 %, retira el derecho y notifica una sola vez); review_sql_03 E1 y E2; api_c_20_reportes (alertas).
+- **Nota:** La «notificación» es un asiento en bitácora y una alerta dentro del panel del docente; no hay correo ni notificación push. Es lo que define la spec (acción notificacion de BITACORA_AUDITORIA).
+
+#### RN-12 · Implementado
+
+- **Texto en la especificación:** Cada alumno mantiene una sola plantilla activa; al dar de alta una nueva, la anterior se archiva y el índice FAISS se reconstruye con una versión nueva.
+- **Mecanismo según la especificación:** Índice único parcial por alumno con plantilla activa. Implementa RF-16 y RNF-09.
+- **Parte:** BD + IA
+- **Evidencia:**
+  - ux_plantilla_facial_activa: UNIQUE (id_alumno) WHERE activa (0007). La prueba schema_02 rechaza una segunda plantilla activa con 23505:ux_plantilla_facial_activa; api_b2_02 comprueba que insertar sin archivar falla.
+  - api_plantilla_registrar (0231; reescrita en 0235 para 3 a 8 fotos y en 0239, cuya app.plantilla_registrar es la versión vigente) archiva la plantilla activa anterior (UPDATE activa = false, sin borrar sus datos) y después inserta la nueva en una sola transacción; asienta alta_plantilla.
+  - Reconstrucción: lib/server/biometria.js reconstruye el índice al registrar («se reconstruye ya; si no se puede, la plantilla queda pendiente de indexar») con una versión nueva que se activa con cambio atómico (svc_indice_activar, ux_indice_faiss_en_uso). Pruebas: api_b2_04_indice y api_b2_06_flujo_indice.
+- **Nota:** Si el servicio de reconocimiento no responde en el momento del alta, la plantilla queda activa pero sin indexar hasta la siguiente reconstrucción (job reconstruir-indice, sin cron configurado).
+
+#### RN-13 · Implementado
+
+- **Texto en la especificación:** No se registra la plantilla facial de un alumno sin consentimiento firmado y vigente.
+- **Mecanismo según la especificación:** FK obligatoria id_consent en PLANTILLA_FACIAL y disparador de vigencia. Implementa RF-15 y RNF-06.
+- **Parte:** BD
+- **Evidencia:**
+  - plantilla_facial.id_consent es NOT NULL con FK RESTRICT (consulta propia). consentimiento.objeto_documento (el documento firmado) es NOT NULL y ck_consentimiento_vigencia exige vigencia_hasta > fecha_firma.
+  - trg_plantilla_rn13 (0020): el consentimiento debe ser del mismo alumno (rn13_plantilla_consentimiento_ajeno, siempre) y, al activar la plantilla, estar vigente (estatus) y en fecha con app.hoy() (rn13_plantilla_consentimiento_no_vigente, _vencido). Se permite archivar una plantilla cuyo consentimiento ya se revocó.
+  - Pruebas: schema_03_triggers.sql (consentimiento ajeno, revocado, vencido por fecha con estatus vigente, estatus vencido, reactivar con consentimiento revocado y dos reasignaciones a consentimiento ajeno: 7 rechazos, y el caso válido) y api_b2_01_consentimiento / api_b2_02_plantilla.

@@ -1,0 +1,995 @@
+[
+  {
+    "slug": "login-vacio",
+    "nombre": "f01-login-vacio.png",
+    "escenario": "login",
+    "form": "Inicio de sesión (LoginForm)",
+    "estado": "Vacío",
+    "ruta": "/login"
+  },
+  {
+    "slug": "login-errores-blur",
+    "nombre": "f02-login-errores-blur.png",
+    "escenario": "login",
+    "form": "Inicio de sesión (LoginForm)",
+    "estado": "Errores de validación al salir de los campos",
+    "ruta": "/login"
+  },
+  {
+    "slug": "login-errores-envio",
+    "nombre": "f03-login-errores-envio.png",
+    "escenario": "login",
+    "form": "Inicio de sesión (LoginForm)",
+    "estado": "Envío incompleto: errores en ambos campos y foco en el primero",
+    "ruta": "/login"
+  },
+  {
+    "slug": "login-credenciales-incorrectas",
+    "nombre": "f04-login-credenciales-incorrectas.png",
+    "escenario": "login",
+    "form": "Inicio de sesión (LoginForm)",
+    "estado": "Error del servidor: credenciales incorrectas (se conserva lo escrito)",
+    "ruta": "/login"
+  },
+  {
+    "slug": "login-lleno-valido",
+    "nombre": "f05-login-lleno-valido.png",
+    "escenario": "login",
+    "form": "Inicio de sesión (LoginForm)",
+    "estado": "Lleno y válido, contraseña visible (listo para enviar)",
+    "ruta": "/login"
+  },
+  {
+    "slug": "recuperar-vacio",
+    "nombre": "f06-recuperar-vacio.png",
+    "escenario": "auth",
+    "form": "Recuperar contraseña (RecuperarForm)",
+    "estado": "Vacío",
+    "ruta": "/recuperar",
+    "recorte": false
+  },
+  {
+    "slug": "recuperar-error",
+    "nombre": "f07-recuperar-error.png",
+    "escenario": "auth",
+    "form": "Recuperar contraseña (RecuperarForm)",
+    "estado": "Envío con un correo sin @: error concreto junto al campo",
+    "ruta": "/recuperar",
+    "recorte": false
+  },
+  {
+    "slug": "recuperar-exito",
+    "nombre": "f08-recuperar-exito.png",
+    "escenario": "auth",
+    "form": "Recuperar contraseña (RecuperarForm)",
+    "estado": "Éxito: «Revisa tu correo» con mensaje neutro, «Reenviar enlace» con cuenta atrás de 60 s y «Usar otro correo»",
+    "ruta": "/recuperar",
+    "recorte": false
+  },
+  {
+    "slug": "cambiar-clave-vacio",
+    "nombre": "f09-cambiar-clave-vacio.png",
+    "escenario": "auth",
+    "form": "Cambiar contraseña (CambiarContrasenaForm)",
+    "estado": "Vacío: un solo campo con requisitos en vivo (sin confirmación), «Mostrar» y aviso de Bloq Mayús",
+    "ruta": "/cambiar-contrasena",
+    "recorte": false
+  },
+  {
+    "slug": "cambiar-clave-parcial",
+    "nombre": "f10-cambiar-clave-parcial.png",
+    "escenario": "auth",
+    "form": "Cambiar contraseña (CambiarContrasenaForm)",
+    "estado": "Contraseña de solo letras: «2 de 3 requisitos» y falta el número (no se envía)",
+    "ruta": "/cambiar-contrasena",
+    "recorte": false
+  },
+  {
+    "slug": "cambiar-clave-valida",
+    "nombre": "f11-cambiar-clave-valida.png",
+    "escenario": "auth",
+    "form": "Cambiar contraseña (CambiarContrasenaForm)",
+    "estado": "Cumple los 3 requisitos (no se envía: el administrador de demostración conserva su contraseña)",
+    "ruta": "/cambiar-contrasena",
+    "recorte": false
+  },
+  {
+    "slug": "alumno-alta-1-identidad-vacio",
+    "nombre": "f12-alumno-alta-1-identidad-vacio.png",
+    "escenario": "alumno-alta",
+    "form": "Alta de alumno (asistente de 3 pasos, AltaAlumno)",
+    "estado": "Paso 1 Identidad, vacío",
+    "ruta": "/admin/alumnos/nuevo",
+    "recorte": false
+  },
+  {
+    "slug": "alumno-alta-1-identidad-errores",
+    "nombre": "f13-alumno-alta-1-identidad-errores.png",
+    "escenario": "alumno-alta",
+    "form": "Alta de alumno (asistente de 3 pasos, AltaAlumno)",
+    "estado": "Paso 1 Identidad, «Siguiente» con campos vacíos (errores y resumen «Revisa este paso»)",
+    "ruta": "/admin/alumnos/nuevo",
+    "recorte": false
+  },
+  {
+    "slug": "alumno-alta-1-matricula-duplicada",
+    "nombre": "f14-alumno-alta-1-matricula-duplicada.png",
+    "escenario": "alumno-alta",
+    "form": "Alta de alumno (asistente de 3 pasos, AltaAlumno)",
+    "estado": "Paso 1 Identidad, matrícula repetida detectada antes de crear (con enlace a la ficha del alumno existente)",
+    "ruta": "/admin/alumnos/nuevo",
+    "recorte": false
+  },
+  {
+    "slug": "alumno-alta-1-identidad-valido",
+    "nombre": "f15-alumno-alta-1-identidad-valido.png",
+    "escenario": "alumno-alta",
+    "form": "Alta de alumno (asistente de 3 pasos, AltaAlumno)",
+    "estado": "Paso 1 Identidad, lleno y válido (matrícula normalizada a mayúsculas, «Matrícula disponible»)",
+    "ruta": "/admin/alumnos/nuevo",
+    "recorte": false
+  },
+  {
+    "slug": "alumno-alta-2-contacto-vacio",
+    "nombre": "f16-alumno-alta-2-contacto-vacio.png",
+    "escenario": "alumno-alta",
+    "form": "Alta de alumno (asistente de 3 pasos, AltaAlumno)",
+    "estado": "Paso 2 Contacto y acceso, vacío",
+    "ruta": "/admin/alumnos/nuevo",
+    "recorte": false
+  },
+  {
+    "slug": "alumno-alta-2-contacto-error",
+    "nombre": "f17-alumno-alta-2-contacto-error.png",
+    "escenario": "alumno-alta",
+    "form": "Alta de alumno (asistente de 3 pasos, AltaAlumno)",
+    "estado": "Paso 2 Contacto y acceso, «Siguiente» con un correo inválido",
+    "ruta": "/admin/alumnos/nuevo",
+    "recorte": false
+  },
+  {
+    "slug": "alumno-alta-2-contacto-valido",
+    "nombre": "f18-alumno-alta-2-contacto-valido.png",
+    "escenario": "alumno-alta",
+    "form": "Alta de alumno (asistente de 3 pasos, AltaAlumno)",
+    "estado": "Paso 2 Contacto y acceso, correo válido (normalizado a minúsculas) y «Crear su cuenta al terminar» activado",
+    "ruta": "/admin/alumnos/nuevo",
+    "recorte": false
+  },
+  {
+    "slug": "alumno-alta-3-revision",
+    "nombre": "f19-alumno-alta-3-revision.png",
+    "escenario": "alumno-alta",
+    "form": "Alta de alumno (asistente de 3 pasos, AltaAlumno)",
+    "estado": "Paso 3 Revisión con «Editar» por sección (la cuenta de acceso queda para después)",
+    "ruta": "/admin/alumnos/nuevo",
+    "recorte": false
+  },
+  {
+    "slug": "alumno-alta-4-exito",
+    "nombre": "f20-alumno-alta-4-exito.png",
+    "escenario": "alumno-alta",
+    "form": "Alta de alumno (asistente de 3 pasos, AltaAlumno)",
+    "estado": "Éxito: «Alumno creado» con siguientes pasos (consentimiento, plantilla facial, grupo, cuenta)",
+    "ruta": "/admin/alumnos/nuevo",
+    "recorte": false
+  },
+  {
+    "slug": "ficha-datos-sin-cambios",
+    "nombre": "f21-ficha-datos-sin-cambios.png",
+    "escenario": "alumno-ficha",
+    "form": "Datos del alumno (AlumnoForm en la ficha)",
+    "estado": "Ficha sin cambios: secciones Identidad, Contacto y Estado; guardar apagado con su motivo (recorte de la tarjeta)",
+    "ruta": "/admin/alumnos/77",
+    "recorte": true
+  },
+  {
+    "slug": "ficha-datos-errores",
+    "nombre": "f22-ficha-datos-errores.png",
+    "escenario": "alumno-ficha",
+    "form": "Datos del alumno (AlumnoForm en la ficha)",
+    "estado": "Edición con errores (apellido vacío y correo incompleto) y «2 cambios sin guardar»; no se guarda (recorte de la tarjeta)",
+    "ruta": "/admin/alumnos/77",
+    "recorte": true
+  },
+  {
+    "slug": "ficha-estatus-baja",
+    "nombre": "f23-ficha-estatus-baja.png",
+    "escenario": "alumno-ficha",
+    "form": "Datos del alumno (AlumnoForm en la ficha)",
+    "estado": "Cambio de estatus a «Baja temporal»: aviso con el efecto sobre sus inscripciones y «1 cambio sin guardar»; no se guarda (recorte de la tarjeta)",
+    "ruta": "/admin/alumnos/77",
+    "recorte": true
+  },
+  {
+    "slug": "consentimiento-vacio",
+    "nombre": "f24-consentimiento-vacio.png",
+    "escenario": "alumno-ficha",
+    "form": "Consentimiento informado (FormularioConsentimiento en la ficha)",
+    "estado": "Formulario vacío: fecha de firma, vigencia y documento PDF (zona de arrastre con reglas visibles; recorte del formulario)",
+    "ruta": "/admin/alumnos/77",
+    "recorte": true
+  },
+  {
+    "slug": "consentimiento-errores",
+    "nombre": "f25-consentimiento-errores.png",
+    "escenario": "alumno-ficha",
+    "form": "Consentimiento informado (FormularioConsentimiento en la ficha)",
+    "estado": "Envío vacío: errores en fecha de firma, vigencia y documento (recorte del formulario)",
+    "ruta": "/admin/alumnos/77",
+    "recorte": true
+  },
+  {
+    "slug": "consentimiento-valido",
+    "nombre": "f26-consentimiento-valido.png",
+    "escenario": "alumno-ficha",
+    "form": "Consentimiento informado (FormularioConsentimiento en la ficha)",
+    "estado": "Firma con «Hoy» (reloj del plantel), vigencia sugerida de 1 año y PDF cargado; no se envía (recorte del formulario)",
+    "ruta": "/admin/alumnos/77",
+    "recorte": true
+  },
+  {
+    "slug": "ficha-cuenta-acceso",
+    "nombre": "f27-ficha-cuenta-acceso.png",
+    "escenario": "alumno-ficha",
+    "form": "Cuenta de acceso (CuentaAccesoPanel en la ficha)",
+    "estado": "Alumno sin cuenta: se explica qué se creará y se ofrece «Crear cuenta de acceso» (recorte de la tarjeta)",
+    "ruta": "/admin/alumnos/77",
+    "recorte": true
+  },
+  {
+    "slug": "aula-vacio",
+    "nombre": "f28-aula-vacio.png",
+    "escenario": "catalogos",
+    "form": "Alta de aula (AulaForm en PanelLateral)",
+    "estado": "Panel lateral «Nueva aula», vacío",
+    "ruta": "/admin/aulas"
+  },
+  {
+    "slug": "aula-errores",
+    "nombre": "f29-aula-errores.png",
+    "escenario": "catalogos",
+    "form": "Alta de aula (AulaForm en PanelLateral)",
+    "estado": "Envío vacío: errores junto a cada campo, foco en el primero y motivo en el pie («Revisa los campos marcados»)",
+    "ruta": "/admin/aulas"
+  },
+  {
+    "slug": "aula-valido",
+    "nombre": "f30-aula-valido.png",
+    "escenario": "catalogos",
+    "form": "Alta de aula (AulaForm en PanelLateral)",
+    "estado": "Lleno y válido (valores normalizados al salir del campo, «Válido» donde aplica)",
+    "ruta": "/admin/aulas"
+  },
+  {
+    "slug": "aula-exito",
+    "nombre": "f31-aula-exito.png",
+    "escenario": "catalogos",
+    "form": "Alta de aula (AulaForm en PanelLateral)",
+    "estado": "Éxito: «Aula ZZ-P1 creada» con siguiente paso y salidas",
+    "ruta": "/admin/aulas"
+  },
+  {
+    "slug": "materia-vacio",
+    "nombre": "f32-materia-vacio.png",
+    "escenario": "catalogos",
+    "form": "Alta de materia (MateriaForm en PanelLateral)",
+    "estado": "Panel lateral «Nueva materia», vacío",
+    "ruta": "/admin/materias"
+  },
+  {
+    "slug": "materia-errores",
+    "nombre": "f33-materia-errores.png",
+    "escenario": "catalogos",
+    "form": "Alta de materia (MateriaForm en PanelLateral)",
+    "estado": "Envío vacío: errores junto a cada campo, foco en el primero y motivo en el pie («Revisa los campos marcados»)",
+    "ruta": "/admin/materias"
+  },
+  {
+    "slug": "materia-valido",
+    "nombre": "f34-materia-valido.png",
+    "escenario": "catalogos",
+    "form": "Alta de materia (MateriaForm en PanelLateral)",
+    "estado": "Lleno y válido (valores normalizados al salir del campo, «Válido» donde aplica)",
+    "ruta": "/admin/materias"
+  },
+  {
+    "slug": "materia-exito",
+    "nombre": "f35-materia-exito.png",
+    "escenario": "catalogos",
+    "form": "Alta de materia (MateriaForm en PanelLateral)",
+    "estado": "Éxito: «Materia ZZP101 creada» con siguientes pasos",
+    "ruta": "/admin/materias"
+  },
+  {
+    "slug": "docente-vacio",
+    "nombre": "f36-docente-vacio.png",
+    "escenario": "catalogos",
+    "form": "Alta de docente (DocenteForm en PanelLateral)",
+    "estado": "Panel lateral «Nuevo docente», vacío",
+    "ruta": "/admin/docentes"
+  },
+  {
+    "slug": "docente-errores",
+    "nombre": "f37-docente-errores.png",
+    "escenario": "catalogos",
+    "form": "Alta de docente (DocenteForm en PanelLateral)",
+    "estado": "Envío vacío: errores junto a cada campo, foco en el primero y motivo en el pie («Revisa los campos marcados»)",
+    "ruta": "/admin/docentes"
+  },
+  {
+    "slug": "docente-valido",
+    "nombre": "f38-docente-valido.png",
+    "escenario": "catalogos",
+    "form": "Alta de docente (DocenteForm en PanelLateral)",
+    "estado": "Lleno y válido (valores normalizados al salir del campo, «Válido» donde aplica)",
+    "ruta": "/admin/docentes"
+  },
+  {
+    "slug": "docente-exito",
+    "nombre": "f39-docente-exito.png",
+    "escenario": "catalogos",
+    "form": "Alta de docente (DocenteForm en PanelLateral)",
+    "estado": "Éxito del alta de docente con siguientes pasos (crear cuenta de acceso)",
+    "ruta": "/admin/docentes"
+  },
+  {
+    "slug": "usuario-vacio",
+    "nombre": "f40-usuario-vacio.png",
+    "escenario": "usuarios",
+    "form": "Nueva cuenta de usuario (CrearUsuarioDialog en PanelLateral)",
+    "estado": "Panel lateral «Nueva cuenta de usuario», vacío (tarjetas de rol con su descripción)",
+    "ruta": "/admin/usuarios",
+    "recorte": false
+  },
+  {
+    "slug": "usuario-errores",
+    "nombre": "f41-usuario-errores.png",
+    "escenario": "usuarios",
+    "form": "Nueva cuenta de usuario (CrearUsuarioDialog en PanelLateral)",
+    "estado": "Envío vacío: errores del vínculo y del correo",
+    "ruta": "/admin/usuarios",
+    "recorte": false
+  },
+  {
+    "slug": "usuario-valido",
+    "nombre": "f42-usuario-valido.png",
+    "escenario": "usuarios",
+    "form": "Nueva cuenta de usuario (CrearUsuarioDialog en PanelLateral)",
+    "estado": "Docente elegido con búsqueda remota; el correo se prellena con el institucional del vínculo (editable); no se envía",
+    "ruta": "/admin/usuarios",
+    "recorte": false
+  },
+  {
+    "slug": "usuario-cambiar-rol-menu",
+    "nombre": "f43-usuario-cambiar-rol-menu.png",
+    "escenario": "usuarios",
+    "form": "Cambiar rol de una cuenta (AccionesUsuario, Modal full-mobile)",
+    "estado": "Modal «Cambiar rol» abierto desde el menú «⋯» de la fila; guardar apagado hasta elegir otro rol",
+    "ruta": "/admin/usuarios",
+    "recorte": false
+  },
+  {
+    "slug": "usuario-cambiar-rol-elegido",
+    "nombre": "f44-usuario-cambiar-rol-elegido.png",
+    "escenario": "usuarios",
+    "form": "Cambiar rol de una cuenta (AccionesUsuario, Modal full-mobile)",
+    "estado": "Rol nuevo elegido (Técnico): se habilita guardar y se avisa qué pasa con el vínculo actual; no se envía",
+    "ruta": "/admin/usuarios",
+    "recorte": false
+  },
+  {
+    "slug": "grupo-alta-1-datos-vacio",
+    "nombre": "f45-grupo-alta-1-datos-vacio.png",
+    "escenario": "grupo-alta",
+    "form": "Alta de grupo (asistente de 3 pasos, AsistenteGrupo)",
+    "estado": "Paso 1 Materia y docente, vacío (periodo sugerido según el reloj del plantel)",
+    "ruta": "/admin/grupos/nuevo"
+  },
+  {
+    "slug": "grupo-alta-1-datos-errores",
+    "nombre": "f46-grupo-alta-1-datos-errores.png",
+    "escenario": "grupo-alta",
+    "form": "Alta de grupo (asistente de 3 pasos, AsistenteGrupo)",
+    "estado": "Paso 1, «Siguiente» con campos vacíos (errores y resumen «Revisa este paso»)",
+    "ruta": "/admin/grupos/nuevo"
+  },
+  {
+    "slug": "grupo-alta-1-datos-valido",
+    "nombre": "f47-grupo-alta-1-datos-valido.png",
+    "escenario": "grupo-alta",
+    "form": "Alta de grupo (asistente de 3 pasos, AsistenteGrupo)",
+    "estado": "Paso 1, lleno y válido (selectores con búsqueda, clave en mayúsculas, resumen vivo a la derecha)",
+    "ruta": "/admin/grupos/nuevo"
+  },
+  {
+    "slug": "grupo-alta-2-aula-vacio",
+    "nombre": "f48-grupo-alta-2-aula-vacio.png",
+    "escenario": "grupo-alta",
+    "form": "Alta de grupo (asistente de 3 pasos, AsistenteGrupo)",
+    "estado": "Paso 2 Aula y horario, vacío (horario opcional con atajos de días)",
+    "ruta": "/admin/grupos/nuevo"
+  },
+  {
+    "slug": "grupo-alta-2-aula-errores",
+    "nombre": "f49-grupo-alta-2-aula-errores.png",
+    "escenario": "grupo-alta",
+    "form": "Alta de grupo (asistente de 3 pasos, AsistenteGrupo)",
+    "estado": "Paso 2, «Siguiente» sin aula (error junto al campo y resumen)",
+    "ruta": "/admin/grupos/nuevo"
+  },
+  {
+    "slug": "grupo-alta-2-aula-franja",
+    "nombre": "f50-grupo-alta-2-aula-franja.png",
+    "escenario": "grupo-alta",
+    "form": "Alta de grupo (asistente de 3 pasos, AsistenteGrupo)",
+    "estado": "Paso 2, aula elegida y franja Lun-Mié-Vie 07:00-08:00 (duración, comparación con las horas de la materia y vista semanal)",
+    "ruta": "/admin/grupos/nuevo"
+  },
+  {
+    "slug": "grupo-alta-3-revision",
+    "nombre": "f51-grupo-alta-3-revision.png",
+    "escenario": "grupo-alta",
+    "form": "Alta de grupo (asistente de 3 pasos, AsistenteGrupo)",
+    "estado": "Paso 3 Revisión con «Editar» por sección (materia/docente, aula y horario)",
+    "ruta": "/admin/grupos/nuevo"
+  },
+  {
+    "slug": "grupo-alta-4-exito",
+    "nombre": "f52-grupo-alta-4-exito.png",
+    "escenario": "grupo-alta",
+    "form": "Alta de grupo (asistente de 3 pasos, AsistenteGrupo)",
+    "estado": "Éxito: «Grupo ZZ1 creado» con siguientes pasos (generar sesiones, inscribir alumnos, cámara del aula)",
+    "ruta": "/admin/grupos/nuevo"
+  },
+  {
+    "slug": "grupo-datos-sin-cambios",
+    "nombre": "f53-grupo-datos-sin-cambios.png",
+    "escenario": "grupo-detalle",
+    "form": "Datos del grupo (GrupoForm, pestaña Datos)",
+    "estado": "Edición sin cambios: «Guardar cambios» apagado y el motivo escrito («Aún no hay cambios que guardar»)",
+    "ruta": "/admin/grupos/4",
+    "mantenerScroll": true
+  },
+  {
+    "slug": "grupo-datos-errores",
+    "nombre": "f54-grupo-datos-errores.png",
+    "escenario": "grupo-detalle",
+    "form": "Datos del grupo (GrupoForm, pestaña Datos)",
+    "estado": "Edición con cambios inválidos: errores al salir de los campos y «2 cambios sin guardar» (no se guarda)",
+    "ruta": "/admin/grupos/4",
+    "mantenerScroll": true
+  },
+  {
+    "slug": "grupo-horario-editor",
+    "nombre": "f55-grupo-horario-editor.png",
+    "escenario": "grupo-detalle",
+    "form": "Horario semanal (HorarioEditor / HorarioSemanal, pestaña Horario)",
+    "estado": "Horario guardado: franja Lun-Mié-Vie 07:00-08:00, total semanal y vista semanal",
+    "ruta": "/admin/grupos/4?tab=horario",
+    "mantenerScroll": true
+  },
+  {
+    "slug": "grupo-horario-errores",
+    "nombre": "f56-grupo-horario-errores.png",
+    "escenario": "grupo-detalle",
+    "form": "Horario semanal (HorarioEditor / HorarioSemanal, pestaña Horario)",
+    "estado": "Hora de fin anterior a la de inicio: error en línea y «Cambios sin guardar» (no se guarda)",
+    "ruta": "/admin/grupos/4?tab=horario"
+  },
+  {
+    "slug": "grupo-generar-sesiones",
+    "nombre": "f57-grupo-generar-sesiones.png",
+    "escenario": "grupo-detalle",
+    "form": "Generar sesiones (GenerarSesiones, pestaña Horario)",
+    "estado": "Rango de fechas con atajos, fecha a omitir agregada y vista previa («Generar N sesiones»); no se envía",
+    "ruta": "/admin/grupos/4?tab=horario",
+    "mantenerScroll": true
+  },
+  {
+    "slug": "grupo-capacidad-cambio",
+    "nombre": "f58-grupo-capacidad-cambio.png",
+    "escenario": "grupo-detalle",
+    "form": "Capacidad del aula (CapacidadForm, pestaña Aula y cámaras)",
+    "estado": "Capacidad editada (25 → 10): «Cambios sin guardar» y botón de guardar habilitado; no se envía",
+    "ruta": "/admin/grupos/4?tab=aula"
+  },
+  {
+    "slug": "camara-vacio",
+    "nombre": "f59-camara-vacio.png",
+    "escenario": "grupo-detalle",
+    "form": "Alta de cámara (CamaraForm en PanelLateral)",
+    "estado": "Panel lateral «Agregar cámara», vacío (tipo Cámara IP, estatus Activa)",
+    "ruta": "/admin/grupos/4?tab=aula"
+  },
+  {
+    "slug": "camara-errores",
+    "nombre": "f60-camara-errores.png",
+    "escenario": "grupo-detalle",
+    "form": "Alta de cámara (CamaraForm en PanelLateral)",
+    "estado": "Envío sin dirección IP: error junto al campo",
+    "ruta": "/admin/grupos/4?tab=aula"
+  },
+  {
+    "slug": "camara-ip-invalida",
+    "nombre": "f61-camara-ip-invalida.png",
+    "escenario": "grupo-detalle",
+    "form": "Alta de cámara (CamaraForm en PanelLateral)",
+    "estado": "Dirección IP con formato inválido (999.1.1.1)",
+    "ruta": "/admin/grupos/4?tab=aula"
+  },
+  {
+    "slug": "camara-valido",
+    "nombre": "f62-camara-valido.png",
+    "escenario": "grupo-detalle",
+    "form": "Alta de cámara (CamaraForm en PanelLateral)",
+    "estado": "Dirección IP válida (10.20.12.99), lista para guardar",
+    "ruta": "/admin/grupos/4?tab=aula"
+  },
+  {
+    "slug": "camara-guardada",
+    "nombre": "f63-camara-guardada.png",
+    "escenario": "grupo-detalle",
+    "form": "Alta de cámara (CamaraForm en PanelLateral)",
+    "estado": "Tras guardar: la cámara aparece en su posición (con «Probar conexión» disponible)",
+    "ruta": "/admin/grupos/4?tab=aula"
+  },
+  {
+    "slug": "inscribir-busqueda",
+    "nombre": "f64-inscribir-busqueda.png",
+    "escenario": "grupo-detalle",
+    "form": "Inscribir alumnos (InscribirAlumno, pestaña Inscripciones)",
+    "estado": "Búsqueda remota de alumnos con opciones de dos líneas (nombre; matrícula y avisos)",
+    "ruta": "/admin/grupos/4?tab=inscripciones"
+  },
+  {
+    "slug": "inscribir-lista",
+    "nombre": "f65-inscribir-lista.png",
+    "escenario": "grupo-detalle",
+    "form": "Inscribir alumnos (InscribirAlumno, pestaña Inscripciones)",
+    "estado": "Dos alumnos elegidos en la lista y botón «Inscribir 2 alumnos» (no se envía)",
+    "ruta": "/admin/grupos/4?tab=inscripciones"
+  },
+  {
+    "slug": "importar-csv-1-archivo-vacio",
+    "nombre": "f66-importar-csv-1-archivo-vacio.png",
+    "escenario": "grupo-detalle",
+    "form": "Importar inscripciones desde CSV (ImportarCsv, modal de 4 pasos)",
+    "estado": "Paso 1 Archivo, vacío (plantilla descargable y zona de arrastre)",
+    "ruta": "/admin/grupos/4?tab=inscripciones"
+  },
+  {
+    "slug": "importar-csv-1-archivo-cargado",
+    "nombre": "f67-importar-csv-1-archivo-cargado.png",
+    "escenario": "grupo-detalle",
+    "form": "Importar inscripciones desde CSV (ImportarCsv, modal de 4 pasos)",
+    "estado": "Paso 1 Archivo, CSV de demostración cargado",
+    "ruta": "/admin/grupos/4?tab=inscripciones"
+  },
+  {
+    "slug": "importar-csv-2-revision",
+    "nombre": "f68-importar-csv-2-revision.png",
+    "escenario": "grupo-detalle",
+    "form": "Importar inscripciones desde CSV (ImportarCsv, modal de 4 pasos)",
+    "estado": "Paso 2 Revisión: contadores, errores agrupados por causa y vista previa (el servidor aún no recibe nada)",
+    "ruta": "/admin/grupos/4?tab=inscripciones"
+  },
+  {
+    "slug": "importar-csv-3-confirmar",
+    "nombre": "f69-importar-csv-3-confirmar.png",
+    "escenario": "grupo-detalle",
+    "form": "Importar inscripciones desde CSV (ImportarCsv, modal de 4 pasos)",
+    "estado": "Paso 3 Confirmar: qué pasará y cupo; no se confirma la importación",
+    "ruta": "/admin/grupos/4?tab=inscripciones"
+  },
+  {
+    "slug": "justificante-vacio",
+    "nombre": "f70-justificante-vacio.png",
+    "escenario": "justificante",
+    "form": "Registrar justificante (RegistrarJustificanteForm, alumno)",
+    "estado": "Vacío: 3 bloques numerados (falta, motivo, documento) y la barra dice qué falta; con 2 faltas se ven como tarjetas",
+    "ruta": "/alumno",
+    "recorte": true
+  },
+  {
+    "slug": "justificante-errores",
+    "nombre": "f71-justificante-errores.png",
+    "escenario": "justificante",
+    "form": "Registrar justificante (RegistrarJustificanteForm, alumno)",
+    "estado": "Envío incompleto: errores en los tres bloques y el foco en el primero (el botón no se apaga)",
+    "ruta": "/alumno",
+    "recorte": true
+  },
+  {
+    "slug": "justificante-valido",
+    "nombre": "f72-justificante-valido.png",
+    "escenario": "justificante",
+    "form": "Registrar justificante (RegistrarJustificanteForm, alumno)",
+    "estado": "Lleno y válido: falta elegida, motivo con contador y miniatura del documento; la barra dice «Todo listo para enviar»",
+    "ruta": "/alumno",
+    "recorte": true
+  },
+  {
+    "slug": "justificante-exito",
+    "nombre": "f73-justificante-exito.png",
+    "escenario": "justificante",
+    "form": "Registrar justificante (RegistrarJustificanteForm, alumno)",
+    "estado": "Éxito dentro de la tarjeta: «Justificante enviado» (Pendiente) con siguientes pasos",
+    "ruta": "/alumno",
+    "recorte": true
+  },
+  {
+    "slug": "justificante-selector-faltas",
+    "nombre": "f74-justificante-selector-faltas.png",
+    "escenario": "justificante",
+    "form": "Registrar justificante (RegistrarJustificanteForm, alumno)",
+    "estado": "Con más de 4 faltas la elección es un selector con búsqueda (opciones con fecha, materia y estado en texto)",
+    "ruta": "/alumno",
+    "mantenerScroll": true,
+    "recorte": false
+  },
+  {
+    "slug": "cuenta-clave-temporal",
+    "nombre": "f75-cuenta-clave-temporal.png",
+    "escenario": "cuenta-y-registro",
+    "form": "Cuenta de acceso del alumno: contraseña temporal (PasswordTemporalModal)",
+    "estado": "Tras crear la cuenta: la contraseña temporal se muestra una sola vez, con «Copiar» (cuenta de prueba que se elimina al terminar; la clave se enmascara en la captura)",
+    "ruta": "/admin/alumnos/78",
+    "recorte": false
+  },
+  {
+    "slug": "ficha-cuenta-creada",
+    "nombre": "f76-ficha-cuenta-creada.png",
+    "escenario": "cuenta-y-registro",
+    "form": "Cuenta de acceso (CuentaAccesoPanel en la ficha)",
+    "estado": "Después de crear la cuenta: la tarjeta pasa a «Cuenta activa» con su correo",
+    "ruta": "/admin/alumnos/78",
+    "recorte": true
+  },
+  {
+    "slug": "activar-1-contrasena-vacio",
+    "nombre": "f77-activar-1-contrasena-vacio.png",
+    "escenario": "cuenta-y-registro",
+    "form": "Activar cuenta (Onboarding, asistente de 4 pasos)",
+    "estado": "Paso 1 Contraseña, vacío (requisitos con icono y texto)",
+    "ruta": "/activar-cuenta",
+    "recorte": false
+  },
+  {
+    "slug": "activar-1-contrasena-error",
+    "nombre": "f78-activar-1-contrasena-error.png",
+    "escenario": "cuenta-y-registro",
+    "form": "Activar cuenta (Onboarding, asistente de 4 pasos)",
+    "estado": "Paso 1, envío vacío: error junto al campo",
+    "ruta": "/activar-cuenta",
+    "recorte": false
+  },
+  {
+    "slug": "activar-1-contrasena-parcial",
+    "nombre": "f79-activar-1-contrasena-parcial.png",
+    "escenario": "cuenta-y-registro",
+    "form": "Activar cuenta (Onboarding, asistente de 4 pasos)",
+    "estado": "Paso 1, contraseña parcial: requisitos en vivo («1 de 3»)",
+    "ruta": "/activar-cuenta",
+    "recorte": false
+  },
+  {
+    "slug": "activar-1-contrasena-valida",
+    "nombre": "f80-activar-1-contrasena-valida.png",
+    "escenario": "cuenta-y-registro",
+    "form": "Activar cuenta (Onboarding, asistente de 4 pasos)",
+    "estado": "Paso 1, contraseña válida (3 de 3 requisitos) y visible con «Mostrar»",
+    "ruta": "/activar-cuenta",
+    "recorte": false
+  },
+  {
+    "slug": "activar-2-estilo",
+    "nombre": "f81-activar-2-estilo.png",
+    "escenario": "cuenta-y-registro",
+    "form": "Activar cuenta (Onboarding, asistente de 4 pasos)",
+    "estado": "Paso 2 Estilo: color del avatar (se guarda por navegador)",
+    "ruta": "/activar-cuenta",
+    "recorte": false
+  },
+  {
+    "slug": "activar-3-guia",
+    "nombre": "f82-activar-3-guia.png",
+    "escenario": "cuenta-y-registro",
+    "form": "Activar cuenta (Onboarding, asistente de 4 pasos)",
+    "estado": "Paso 3 Guía de SUSAN según el rol (alumno)",
+    "ruta": "/activar-cuenta",
+    "recorte": false
+  },
+  {
+    "slug": "activar-4-privacidad",
+    "nombre": "f83-activar-4-privacidad.png",
+    "escenario": "cuenta-y-registro",
+    "form": "Activar cuenta (Onboarding, asistente de 4 pasos)",
+    "estado": "Paso 4 Privacidad: el botón final está apagado y el motivo se escribe junto a él",
+    "ruta": "/activar-cuenta",
+    "recorte": false
+  },
+  {
+    "slug": "activar-4-privacidad-aceptada",
+    "nombre": "f84-activar-4-privacidad-aceptada.png",
+    "escenario": "cuenta-y-registro",
+    "form": "Activar cuenta (Onboarding, asistente de 4 pasos)",
+    "estado": "Paso 4, acuse marcado: se habilita «Empezar a usar SUSAN»",
+    "ruta": "/activar-cuenta",
+    "recorte": false
+  },
+  {
+    "slug": "registro-facial-1-aviso",
+    "nombre": "f85-registro-facial-1-aviso.png",
+    "escenario": "cuenta-y-registro",
+    "form": "Mi registro facial (MiRegistro: aviso de consentimiento y asistente de rostro)",
+    "estado": "Paso 1 Aviso y consentimiento: texto del aviso por secciones y declaración de aceptación",
+    "ruta": "/alumno/registro",
+    "recorte": false
+  },
+  {
+    "slug": "registro-facial-1-aviso-error",
+    "nombre": "f86-registro-facial-1-aviso-error.png",
+    "escenario": "cuenta-y-registro",
+    "form": "Mi registro facial (MiRegistro: aviso de consentimiento y asistente de rostro)",
+    "estado": "Aceptar sin marcar la declaración: error junto a la casilla",
+    "ruta": "/alumno/registro",
+    "mantenerScroll": true,
+    "recorte": false
+  },
+  {
+    "slug": "registro-facial-1-aviso-marcado",
+    "nombre": "f87-registro-facial-1-aviso-marcado.png",
+    "escenario": "cuenta-y-registro",
+    "form": "Mi registro facial (MiRegistro: aviso de consentimiento y asistente de rostro)",
+    "estado": "Declaración marcada y botón «Aceptar y continuar» (registra el consentimiento propio)",
+    "ruta": "/alumno/registro",
+    "mantenerScroll": true,
+    "recorte": false
+  },
+  {
+    "slug": "registro-facial-2-rostro",
+    "nombre": "f88-registro-facial-2-rostro.png",
+    "escenario": "cuenta-y-registro",
+    "form": "Mi registro facial (MiRegistro: aviso de consentimiento y asistente de rostro)",
+    "estado": "Paso 2 Tu rostro: indicaciones y «Registrar mi rostro» (consentimiento ya registrado)",
+    "ruta": "/alumno/registro",
+    "recorte": false
+  },
+  {
+    "slug": "registro-facial-3-asistente-intro",
+    "nombre": "f89-registro-facial-3-asistente-intro.png",
+    "escenario": "cuenta-y-registro",
+    "form": "Mi registro facial (MiRegistro: aviso de consentimiento y asistente de rostro)",
+    "estado": "Asistente de cámara: portada con consejos y «Comenzar»",
+    "ruta": "/alumno/registro",
+    "recorte": false
+  },
+  {
+    "slug": "registro-facial-3-captura",
+    "nombre": "f90-registro-facial-3-captura.png",
+    "escenario": "cuenta-y-registro",
+    "form": "Mi registro facial (MiRegistro: aviso de consentimiento y asistente de rostro)",
+    "estado": "Toma guiada con la cámara (cámara falsa de Chromium: sin rostro, la toma no se completa)",
+    "ruta": "/alumno/registro",
+    "recorte": false
+  },
+  {
+    "slug": "revision-justificante-caso",
+    "nombre": "f91-revision-justificante-caso.png",
+    "escenario": "revision",
+    "form": "Resolver justificante (JustificanteCard + ConfirmDialog con motivo)",
+    "estado": "Caso abierto: motivo del justificante, lecturas bajo demanda y botones «Aprobar» / «Rechazar»",
+    "ruta": "/docente/revision?pestana=justificantes",
+    "mantenerScroll": true,
+    "recorte": false
+  },
+  {
+    "slug": "revision-rechazar-vacio",
+    "nombre": "f92-revision-rechazar-vacio.png",
+    "escenario": "revision",
+    "form": "Resolver justificante (JustificanteCard + ConfirmDialog con motivo)",
+    "estado": "Diálogo «Rechazar justificante» con el comentario obligatorio, vacío",
+    "ruta": "/docente/revision?pestana=justificantes",
+    "recorte": false
+  },
+  {
+    "slug": "revision-rechazar-error",
+    "nombre": "f93-revision-rechazar-error.png",
+    "escenario": "revision",
+    "form": "Resolver justificante (JustificanteCard + ConfirmDialog con motivo)",
+    "estado": "Confirmar sin comentario: «Escribe el motivo para continuar.» con borde rojo y foco en el campo (no se rechaza)",
+    "ruta": "/docente/revision?pestana=justificantes",
+    "recorte": false
+  },
+  {
+    "slug": "revision-rechazar-lleno",
+    "nombre": "f94-revision-rechazar-lleno.png",
+    "escenario": "revision",
+    "form": "Resolver justificante (JustificanteCard + ConfirmDialog con motivo)",
+    "estado": "Comentario escrito: listo para confirmar (se cancela, no se rechaza)",
+    "ruta": "/docente/revision?pestana=justificantes",
+    "recorte": false
+  },
+  {
+    "slug": "pase-lista-panel",
+    "nombre": "f95-pase-lista-panel.png",
+    "escenario": "pase-manual",
+    "form": "Pasar lista (PasosPaseLista + panel de la sesión)",
+    "estado": "Sesión 3A abierta con la franja de 3 pasos, la vista de cámara y los botones «Revisar y cerrar» / «Registrar manualmente»",
+    "ruta": "/docente/sesiones/19?pasar-lista=1",
+    "recorte": false
+  },
+  {
+    "slug": "registro-manual-vacio",
+    "nombre": "f96-registro-manual-vacio.png",
+    "escenario": "pase-manual",
+    "form": "Registrar manualmente (RegistroManualDialog)",
+    "estado": "Diálogo vacío: alumno (selector con búsqueda) y estado con la sugerencia según la hora",
+    "ruta": "/docente/sesiones/19?pasar-lista=1",
+    "recorte": false
+  },
+  {
+    "slug": "registro-manual-errores",
+    "nombre": "f97-registro-manual-errores.png",
+    "escenario": "pase-manual",
+    "form": "Registrar manualmente (RegistroManualDialog)",
+    "estado": "Envío sin elegir alumno: error junto al selector",
+    "ruta": "/docente/sesiones/19?pasar-lista=1",
+    "recorte": false
+  },
+  {
+    "slug": "registro-manual-valido",
+    "nombre": "f98-registro-manual-valido.png",
+    "escenario": "pase-manual",
+    "form": "Registrar manualmente (RegistroManualDialog)",
+    "estado": "Alumno elegido y estado Presente sugerido; listo para registrar (no se envía)",
+    "ruta": "/docente/sesiones/19?pasar-lista=1",
+    "recorte": false
+  },
+  {
+    "slug": "tecnico-camaras",
+    "nombre": "f99-tecnico-camaras.png",
+    "escenario": "consola-tecnico",
+    "form": "Consola técnica: cámaras (CamarasEstado, SegmentedControl + ConfirmDialog)",
+    "estado": "Pestaña Cámaras: resumen y una tarjeta por cámara con su estatus como control segmentado (texto + color)",
+    "ruta": "/tecnico",
+    "recorte": false
+  },
+  {
+    "slug": "tecnico-camaras-confirmar",
+    "nombre": "f100-tecnico-camaras-confirmar.png",
+    "escenario": "consola-tecnico",
+    "form": "Consola técnica: cámaras (CamarasEstado, SegmentedControl + ConfirmDialog)",
+    "estado": "Cambiar el estatus pide confirmación con el nombre de la cámara y la consecuencia; se cancela (no se aplica)",
+    "ruta": "/tecnico",
+    "recorte": false
+  },
+  {
+    "slug": "tecnico-parametros",
+    "nombre": "f101-tecnico-parametros.png",
+    "escenario": "consola-tecnico",
+    "form": "Consola técnica: parámetros del sistema (ParametrosEditor / ParametroFila)",
+    "estado": "Pestaña Parámetros: 12 parámetros en 4 secciones, con unidad, rango válido, valor de fábrica y marca «Crítico»",
+    "ruta": "/tecnico",
+    "recorte": false
+  },
+  {
+    "slug": "tecnico-parametro-error",
+    "nombre": "f102-tecnico-parametro-error.png",
+    "escenario": "consola-tecnico",
+    "form": "Consola técnica: parámetros del sistema (ParametrosEditor / ParametroFila)",
+    "estado": "Valor fuera de rango (1.5 en un parámetro de 0.500 a 0.999): error en línea y «Sin guardar»; no se envía",
+    "ruta": "/tecnico",
+    "recorte": false
+  },
+  {
+    "slug": "tecnico-parametro-confirmar",
+    "nombre": "f103-tecnico-parametro-confirmar.png",
+    "escenario": "consola-tecnico",
+    "form": "Consola técnica: parámetros del sistema (ParametrosEditor / ParametroFila)",
+    "estado": "Cambio válido (0.850 a 0.900): confirmación con el aviso del parámetro crítico; se cancela (no se guarda)",
+    "ruta": "/tecnico",
+    "recorte": false
+  },
+  {
+    "slug": "tecnico-indice",
+    "nombre": "f104-tecnico-indice.png",
+    "escenario": "consola-tecnico",
+    "form": "Consola técnica: índice facial (IndiceFacialPanel + ConfirmDialog)",
+    "estado": "Pestaña Índice facial: versión en uso, plantillas indexadas y «Reconstruir índice»",
+    "ruta": "/tecnico",
+    "recorte": false
+  },
+  {
+    "slug": "tecnico-indice-reconstruir",
+    "nombre": "f105-tecnico-indice-reconstruir.png",
+    "escenario": "consola-tecnico",
+    "form": "Consola técnica: índice facial (IndiceFacialPanel + ConfirmDialog)",
+    "estado": "Diálogo de reconstrucción con casilla «Reconstrucción completa»; se cancela (no se ejecuta)",
+    "ruta": "/tecnico",
+    "recorte": false
+  },
+  {
+    "slug": "filtros-alumnos",
+    "nombre": "f106-filtros-alumnos.png",
+    "escenario": "filtros",
+    "form": "Filtros del listado de alumnos (BarraFiltros)",
+    "estado": "Búsqueda con retraso («Díaz»), filtro de estatus con su chip activo, «Limpiar» y conteo de resultados",
+    "ruta": "/admin/alumnos",
+    "recorte": false
+  },
+  {
+    "slug": "filtros-reporte",
+    "nombre": "f107-filtros-reporte.png",
+    "escenario": "filtros",
+    "form": "Filtros del reporte de asistencia (FiltrosReporte)",
+    "estado": "Periodo, grupo y alumno (el alumno se habilita al elegir grupo)",
+    "ruta": "/reportes",
+    "recorte": false
+  },
+  {
+    "slug": "filtros-analitica",
+    "nombre": "f108-filtros-analitica.png",
+    "escenario": "filtros",
+    "form": "Selección de grupo para la analítica (SelectorGrupo)",
+    "estado": "Periodo y grupo a analizar",
+    "ruta": "/analitica",
+    "recorte": false
+  },
+  {
+    "slug": "filtros-bitacora-rango-invertido",
+    "nombre": "f109-filtros-bitacora-rango-invertido.png",
+    "escenario": "filtros",
+    "form": "Filtros de la bitácora (BitacoraTabla: Combobox, RangoFechas)",
+    "estado": "Rango de fechas invertido: se explica junto a las fechas y no se aplica (la lista conserva el último filtro válido)",
+    "ruta": "/admin/bitacora",
+    "recorte": false
+  },
+  {
+    "slug": "movil-login-errores",
+    "nombre": "f110-movil-login-errores.png",
+    "escenario": "moviles",
+    "form": "Inicio de sesión (LoginForm), móvil",
+    "estado": "Móvil 390x844: envío vacío con errores en ambos campos",
+    "ruta": "/login",
+    "recorte": false
+  },
+  {
+    "slug": "movil-alumno-alta-paso1",
+    "nombre": "f111-movil-alumno-alta-paso1.png",
+    "escenario": "moviles",
+    "form": "Alta de alumno (asistente), móvil",
+    "estado": "Móvil 390x844: paso 1 con el progreso compacto («Paso 1 de 3») y las acciones al pie",
+    "ruta": "/admin/alumnos/nuevo",
+    "recorte": false
+  },
+  {
+    "slug": "movil-alumno-alta-paso2",
+    "nombre": "f112-movil-alumno-alta-paso2.png",
+    "escenario": "moviles",
+    "form": "Alta de alumno (asistente), móvil",
+    "estado": "Móvil 390x844: paso 2 Contacto y acceso con el interruptor de cuenta activado (no se crea ningún alumno)",
+    "ruta": "/admin/alumnos/nuevo",
+    "recorte": false
+  },
+  {
+    "slug": "movil-aula-panel-errores",
+    "nombre": "f113-movil-aula-panel-errores.png",
+    "escenario": "moviles",
+    "form": "Alta de aula (PanelLateral a pantalla completa), móvil",
+    "estado": "Móvil 390x844: el panel lateral ocupa toda la pantalla; envío vacío con errores y el motivo en el pie",
+    "ruta": "/admin/aulas",
+    "recorte": false
+  },
+  {
+    "slug": "movil-justificante",
+    "nombre": "f114-movil-justificante.png",
+    "escenario": "moviles",
+    "form": "Registrar justificante (RegistrarJustificanteForm), móvil",
+    "estado": "Móvil 390x844: tarjetas de falta, motivo con ideas para empezar y zona de documento (con botón «Tomar foto» en pantallas táctiles)",
+    "ruta": "/alumno",
+    "mantenerScroll": true,
+    "recorte": false
+  }
+]

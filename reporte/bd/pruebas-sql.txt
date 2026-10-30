@@ -1,0 +1,45 @@
+# Salida de scripts/test-sql.sh (commit f742bb4 de origin/main), ejecutado el 2026-10-30T03:57Z contra PostgreSQL 16 local; BD temporal, ya eliminada.
+# Se conserva la salida completa (el script solo imprime una linea por archivo y el resumen final).
+ok    api_a_sesiones_01_panel_abrir.sql        pos=56 neg=20
+ok    api_a_sesiones_02_manual.sql             pos=27 neg=27
+ok    api_a_sesiones_03_ciclo_auto.sql         pos=41 neg=6
+ok    api_a_sesiones_04_cierre_suspension.sql  pos=23 neg=17
+ok    api_a_sesiones_05_svc.sql                pos=33 neg=25
+ok    api_b1_01_catalogos.sql                  pos=48 neg=46
+ok    api_b1_02_aulas_camaras.sql              pos=26 neg=40
+ok    api_b1_03_grupos_horario.sql             pos=55 neg=48
+ok    api_b1_04_inscripciones.sql              pos=37 neg=26
+ok    api_b1_05_usuarios_bitacora.sql          pos=55 neg=49
+ok    api_b2_01_consentimiento.sql             pos=32 neg=31
+ok    api_b2_02_plantilla.sql                  pos=38 neg=34
+ok    api_b2_03_parametros_camaras.sql         pos=73 neg=38
+ok    api_b2_04_indice.sql                     pos=79 neg=55
+ok    api_b2_05_jobs.sql                       pos=80 neg=24
+ok    api_b2_06_flujo_indice.sql               pos=30 neg=2
+ok    api_b2_07_plantilla_fotos.sql            pos=124 neg=52
+ok    api_b2_08_fotos_efimeras.sql             pos=39 neg=8
+ok    api_b3_01_autoservicio.sql               pos=54 neg=42
+ok    api_c_00_recalculo.sql                   pos=38 neg=3
+ok    api_c_10_revision_correcciones.sql       pos=16 neg=18
+ok    api_c_11_revision_justificantes.sql      pos=19 neg=39
+ok    api_c_12_revision_job.sql                pos=11 neg=15
+ok    api_c_13_revision_lecturas.sql           pos=87 neg=31
+ok    api_c_20_reportes.sql                    pos=118 neg=35
+ok    review_sql_01_idor.sql                   pos=5 neg=0
+ok    review_sql_02_reglas.sql                 pos=18 neg=44
+ok    review_sql_03_spec_limites.sql           pos=24 neg=2
+ok    review_sql_04_auditoria.sql              pos=7 neg=0
+ok    review_sql_05_abuso.sql                  pos=2 neg=4
+ok    schema_00_humo.sql                       pos=3 neg=0
+ok    schema_01_estructura.sql                 pos=50 neg=0
+ok    schema_02_restricciones.sql              pos=11 neg=79
+ok    schema_03_triggers.sql                   pos=21 neg=37
+ok    schema_04_rls.sql                        pos=24 neg=24
+ok    schema_05_helpers.sql                    pos=68 neg=24
+ok    schema_06_api_storage.sql                pos=36 neg=8
+----
+archivos=37 con_fallas=0 | pruebas positivas=1508 negativas=953 fallos=0
+
+real	0m13.209s
+user	0m1.326s
+sys	0m1.120s

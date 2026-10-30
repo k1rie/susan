@@ -1,0 +1,9 @@
+# Tarjetas de DEMOSTRACION: todos los datos son FICTICIOS (UID, matricula y nombre).
+# No son alumnos reales. Formato: UID,matricula,nombre_corto
+#  - UID: hexadecimal en mayusculas, sin separadores (4, 7 o 10 bytes).
+#  - nombre_corto: se muestra tal cual en el LCD (16 columnas, sin acentos).
+#  - Sin comillas ni comas dentro de los campos.
+UID,matricula,nombre_corto
+04DE0001,DEMO0001,Ana Demo
+04DE0002,DEMO0002,Luis Demo
+04DE0003,DEMO0003,Sofia Demo
