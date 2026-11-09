@@ -53,7 +53,8 @@ export default function ModoAutomatico({ iniciarAlCargar = false }) {
     return (
         // z-[46]: por encima del riel lateral (z-[44]/z-[45]) y de la barra inferior móvil (z-40); por debajo de diálogos (z-50) y avisos.
         <div className="fixed inset-0 z-[46] overflow-y-auto bg-background">
-            <div className="mx-auto flex min-h-full max-w-6xl flex-col gap-4 p-4 sm:p-6">
+            {/* La captura (llenarAlto) mide su cámara contra el viewport: desde `md` la pantalla no hace scroll. */}
+            <div className="mx-auto flex min-h-full max-w-[120rem] flex-col gap-3 p-3 sm:gap-4 sm:p-5">
                 <header className="flex items-center justify-between gap-3">
                     <div className="min-w-0">
                         <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Modo automático{hora ? ` · ${hhmm(hora)}` : ''}</p>
@@ -145,6 +146,7 @@ function ClaseEnCurso({ sesion, siguiente, onCambio, onIrA }) {
             }}
             onRevisar={() => onIrA(sesion.id_sesion)}
             onRegistrarManual={() => onIrA(sesion.id_sesion)}
+            llenarAlto
         />
     );
 }

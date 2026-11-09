@@ -134,4 +134,26 @@ describe('CameraCapture', () => {
         await act(async () => {});
         expect(cargarDetector).not.toHaveBeenCalled();
     });
+
+    it('claseVista reemplaza el 4:3 y selectorSuperpuesto pone el selector de cámara dentro de la caja del video', async () => {
+        const { stream } = flujoFalso();
+        prepararNavegador(vi.fn().mockResolvedValue(stream));
+        navigator.mediaDevices.enumerateDevices.mockResolvedValue([
+            { kind: 'videoinput', deviceId: 'cam-1', label: 'Frente' },
+            { kind: 'videoinput', deviceId: 'cam-2', label: 'Fondo' },
+        ]);
+        const { unmount } = render(<CameraCapture claseVista="aspect-video" selectorSuperpuesto showShutter={false} />);
+        const caja = screen.getByLabelText('Vista previa de la cámara').parentElement;
+        expect(caja).toHaveClass('aspect-video');
+        expect(caja).not.toHaveClass('aspect-[4/3]');
+        const selector = await screen.findByRole('combobox', { name: 'Cámara' });
+        expect(caja).toContainElement(selector);
+        unmount();
+
+        // Sin la opción, el selector va debajo de la caja (fuera de ella), como antes.
+        render(<CameraCapture showShutter={false} />);
+        const cajaNormal = screen.getByLabelText('Vista previa de la cámara').parentElement;
+        expect(cajaNormal).toHaveClass('aspect-[4/3]');
+        expect(cajaNormal).not.toContainElement(await screen.findByRole('combobox', { name: 'Cámara' }));
+    });
 });
