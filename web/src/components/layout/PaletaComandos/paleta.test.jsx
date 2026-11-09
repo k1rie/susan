@@ -19,7 +19,7 @@ describe('utilidades de la paleta', () => {
     });
     it('construye navegación, módulos próximos y cuenta, con descripción tomada del módulo activo', () => {
         const c = comandosDocente();
-        expect(c.filter((x) => x.grupo === 'Ir a').map((x) => x.href)).toEqual(['/docente', '/docente/pasar-lista', '/docente/revision', '/reportes', '/analitica', '/modulos']);
+        expect(c.filter((x) => x.grupo === 'Ir a').map((x) => x.href)).toEqual(['/docente', '/docente/pasar-lista', '/docente/revision', '/docente/modo-automatico', '/reportes', '/analitica', '/modulos']);
         expect(c.find((x) => x.href === '/analitica').descripcion).toMatch(/proyección/i);
         expect(c.find((x) => x.href === '/docente/pasar-lista')).toMatchObject({ titulo: 'Pasar lista', descripcion: expect.stringMatching(/cámara/i) });
         expect(c.filter((x) => x.pronto).every((x) => x.href.startsWith('/modulos/'))).toBe(true);

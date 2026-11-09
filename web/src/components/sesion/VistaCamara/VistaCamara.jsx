@@ -1,5 +1,5 @@
 import clsx from 'clsx';
-import { FlaskConical, Pause, ScanFace, TimerOff } from 'lucide-react';
+import { FlaskConical, Pause, ScanFace, TimerOff, Users } from 'lucide-react';
 
 // Estado del reconocimiento en la vista de la cámara: texto + icono (nunca solo color).
 const ESTADOS = {
@@ -13,10 +13,12 @@ const CHIP = 'inline-flex max-w-full items-center gap-1.5 rounded-full bg-foregr
 // Marco de la vista de cámara del pase de lista: lo que se ve (video real o el lienzo de la cámara simulada) con chips superpuestos.
 //   estado         = reconociendo | pausa | fuera: el chip de arriba a la izquierda (se anuncia al cambiar: role="status")
 //   etiquetaFuente = «Cámara frente» (arriba a la derecha) · simulada = la fuente es la cámara simulada (se dice con icono y texto)
+//   rostros        = cuántas caras ve ahora el detector del navegador (abajo a la izquierda); null = sin detector o aún cargando. Es la
+//                    retroalimentación inmediata para el grupo: confirma que la cámara los ve antes de que el servidor los reconozca.
 //   enmarcar       = true: `children` va dentro de una caja 16:9 con esquinas redondeadas (lienzo, aviso); false: `children` ya trae su propia
 //                    caja (CameraCapture, que CapturaContinua fuerza a 16:9) y aquí solo se le superponen los chips.
 // Los chips no reciben clics (pointer-events-none): no tapan los controles del video.
-export default function VistaCamara({ estado = 'pausa', etiquetaFuente, simulada = false, enmarcar = false, children, className }) {
+export default function VistaCamara({ estado = 'pausa', etiquetaFuente, simulada = false, enmarcar = false, rostros = null, children, className }) {
     const { etiqueta, icono: Icono, latido } = ESTADOS[estado] ?? ESTADOS.pausa;
     return (
         <div className={clsx('relative', className)}>
@@ -33,6 +35,14 @@ export default function VistaCamara({ estado = 'pausa', etiquetaFuente, simulada
                     </span>
                 )}
             </div>
+            {rostros != null && (
+                <div className="pointer-events-none absolute bottom-3 left-3">
+                    <span data-rostros={rostros} className={CHIP}>
+                        <Users aria-hidden="true" strokeWidth={1.75} className="size-3.5 shrink-0" />
+                        {rostros === 0 ? 'Sin rostros a la vista' : `${rostros} ${rostros === 1 ? 'rostro detectado' : 'rostros detectados'}`}
+                    </span>
+                </div>
+            )}
         </div>
     );
 }
