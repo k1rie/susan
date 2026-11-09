@@ -69,7 +69,8 @@ describe('CapturaContinua: el panel de pase de lista', () => {
 
     it('la vista de cámara es 16:9 y se oculta el aviso propio de CameraCapture (el panel da el suyo, con salidas)', () => {
         montar();
-        expect(screen.getByTestId('camara-real').className).toContain('[&>div.relative]:aspect-video');
+        expect(camara.props.claseVista).toBe('aspect-video');
+        expect(camara.props.selectorSuperpuesto).toBe(true);
         expect(screen.getByTestId('camara-real').className).toContain('[&>[role=alert]]:hidden');
     });
 
