@@ -19,12 +19,35 @@ import VistaCamara from '../VistaCamara';
 import { estadoVista, fuentesDeCaptura, nombreCamara } from './capturaContinua.utils.js';
 import useMuestreoSesion from './useMuestreoSesion.js';
 
-// El video de CameraCapture es 4:3 y trae su propio aviso de error. Aquí la vista es 16:9 (la cámara del aula es ancha) y el aviso de error
-// lo da SinAccesoCamara, con las salidas: se fuerza el 16:9 sobre su caja (`div.relative`, la única con esa clase) y se oculta su aviso.
-const CLASES_CAMARA = '[&>div.relative]:aspect-video [&>[role=alert]]:hidden';
+// La vista es 16:9 (la cámara del aula es ancha). CameraCapture recibe la caja 16:9 por `claseVista` y su aviso de error se oculta: lo da
+// SinAccesoCamara, con las salidas.
+const CLASE_CAMARA = '[&>[role=alert]]:hidden';
 // Con la cámara en error, CameraCapture esconde su caja (hidden) y su aviso: sin esto la vista quedaría en alto 0 y los chips de estado
 // (posicionados arriba) flotarían sobre los controles de abajo. Se conserva el marco 16:9 y se pone el motivo dentro.
 const MARCO_VISTA = 'aspect-video overflow-hidden rounded-xl bg-foreground';
+// Desde `md` la cámara es lo que más se ve. La fila (cámara | cifra y acciones) es un contenedor de ancho y el escenario de la cámara mide
+//   alto = mín(alto disponible del viewport, (ancho de la fila - columna derecha) * 9/16 + barra)
+// es decir, el mayor 16:9 que cabe sin recortar la imagen, sin scroll de la página y sin dejar blanco bajo el video. El escenario es a su
+// vez contenedor de tamaño: la vista + su barra miden ancho = mín(ancho, (alto - barra) * 16/9) y se centran (pantallas muy anchas).
+// 17.25rem = columna derecha (w-64) + separación (gap-5). 3.5rem = barra de controles bajo el video (casilla de 44 px + separación).
+// Alto disponible: en el modo automático (llenarAlto) el viewport menos su encabezado (~10rem); en la pantalla de la sesión, menos el
+// encabezado de la página y la franja de pasos (~21rem); con un mínimo para ventanas bajas. Las clases van completas (Tailwind no ve
+// clases armadas en tiempo de ejecución); `_` = espacio dentro de calc().
+const ALTO_ESCENARIO = {
+    pagina: {
+        barra: 'md:h-[min(max(24rem,calc(100dvh_-_21rem)),calc((100cqw_-_17.25rem)*9/16_+_3.5rem))]',
+        sola: 'md:h-[min(max(24rem,calc(100dvh_-_21rem)),calc((100cqw_-_17.25rem)*9/16))]',
+    },
+    llenar: {
+        barra: 'md:h-[min(max(20rem,calc(100dvh_-_10rem)),calc((100cqw_-_17.25rem)*9/16_+_3.5rem))]',
+        sola: 'md:h-[min(max(20rem,calc(100dvh_-_10rem)),calc((100cqw_-_17.25rem)*9/16))]',
+    },
+};
+const ESCENARIO = 'md:flex md:min-w-0 md:flex-1 md:flex-col md:items-center md:[container-type:size]';
+const ENCUADRE = {
+    barra: 'flex w-full flex-col gap-2 md:w-[min(100cqw,calc((100cqh_-_3.5rem)*16/9))]',
+    sola: 'flex w-full flex-col gap-2 md:w-[min(100cqw,calc(100cqh*16/9))]',
+};
 
 // Mensaje dentro del marco de la vista cuando no hay imagen que mostrar (sin cámara activa, solo IP o cámara en error).
 function SinVista({ texto, className }) {
@@ -45,7 +68,9 @@ function SinVista({ texto, className }) {
 //   simulado = api_ahora().reloj_simulado: habilita el simulador de cámara (solo desarrollo; en producción siempre es false)
 //   onFin = el servidor dijo «deja de muestrear» · onRevisar = pasa a la revisión · onRegistrarManual = abre el diálogo que vive en MonitorSesion
 //   enfocar = se llegó con ?pasar-lista=1: al montarse el panel recibe el foco y, si hace falta, se desplaza hasta verlo
-export default function CapturaContinua({ sesion, camaras = [], alumnos = [], totales = {}, activo, simulado = false, onFin, onRevisar, onRegistrarManual, enfocar = false }) {
+//   llenarAlto = la pantalla es solo este panel (modo automático, a pantalla completa): desde `md` la cámara toma casi todo el alto del
+//                viewport; sin él se descuenta el encabezado y la franja de pasos de la sesión (ALTO_ESCENARIO)
+export default function CapturaContinua({ sesion, camaras = [], alumnos = [], totales = {}, activo, simulado = false, onFin, onRevisar, onRegistrarManual, enfocar = false, llenarAlto = false }) {
     const { toast } = useToast();
     const idTitulo = useId();
     const fuentes = fuentesDeCaptura(camaras);
@@ -113,9 +138,11 @@ export default function CapturaContinua({ sesion, camaras = [], alumnos = [], to
                     showShutter={false}
                     facingMode="environment"
                     allowDeviceSelect
+                    selectorSuperpuesto
+                    claseVista="aspect-video"
                     detectarRostros
                     onDeteccion={setDeteccion}
-                    className={CLASES_CAMARA}
+                    className={CLASE_CAMARA}
                     onReady={() => {
                         setCamaraLista(true);
                         setErrorCamara(null);
@@ -132,8 +159,36 @@ export default function CapturaContinua({ sesion, camaras = [], alumnos = [], to
         medio = <SinVista texto={camarasIp.length > 0 ? 'Sin vista previa: se toman fotogramas de las cámaras IP del aula.' : 'No hay una cámara activa en este dispositivo.'} className="size-full" />;
     }
 
+    const controles = [];
+    if (!simulacionEncendida && fuentes.navegador.length > 0) {
+        controles.push(<Checkbox key="usar" label="Usar la cámara de este dispositivo" checked={usarNavegador} onChange={(e) => setUsarNavegador(e.target.checked)} />);
+        if (usarNavegador && fuentes.navegador.length > 1) {
+            controles.push(
+                <Select
+                    key="aula"
+                    aria-label="Cámara del aula a usar"
+                    className="w-auto max-w-full sm:max-w-64"
+                    value={idNavegador ?? ''}
+                    onChange={(e) => setIdElegido(Number(e.target.value))}
+                    options={fuentes.navegador.map((c) => ({ value: c.id_camara, label: nombreCamara(c) }))}
+                />,
+            );
+        }
+    }
+    const notas = [
+        camarasIp.length > 0 && `Cámaras IP activas: ${camarasIp.length}.`,
+        sinFuentes && 'Sin fuentes de captura activas: registra manualmente a los alumnos.',
+        muestreo.limitado && 'El servidor pidió espaciar las capturas; se reintenta en el siguiente ciclo.',
+    ].filter(Boolean);
+    const hayBarra = controles.length > 0 || notas.length > 0;
+
     return (
-        <section ref={panelRef} tabIndex={-1} aria-labelledby={idTitulo} className="flex flex-col gap-4 rounded-xl border border-border bg-card p-4 outline-none focus-visible:ring-4 focus-visible:ring-ring/30 sm:p-5">
+        <section
+            ref={panelRef}
+            tabIndex={-1}
+            aria-labelledby={idTitulo}
+            className="flex flex-col gap-3 rounded-xl border border-border bg-card p-3 outline-none focus-visible:ring-4 focus-visible:ring-ring/30 sm:p-4"
+        >
             <h2 id={idTitulo} className="sr-only">
                 Pase de lista con cámara
             </h2>
@@ -179,32 +234,35 @@ export default function CapturaContinua({ sesion, camaras = [], alumnos = [], to
                 />
             )}
 
-            <div className="grid grid-cols-1 gap-5 lg:grid-cols-5 lg:gap-6">
-                <div className="flex min-w-0 flex-col gap-3 lg:col-span-3">
-                    <VistaCamara
-                        estado={estado}
-                        etiquetaFuente={nombreCamara(camaraElegida)}
-                        simulada={simulacionEncendida}
-                        enmarcar={enmarcar}
-                        rostros={navegadorEnUso && !camaraConError && deteccion?.estado === 'listo' ? deteccion.cantidad : null}
-                        className={camaraConError ? MARCO_VISTA : undefined}
-                    >
-                        {medio}
-                    </VistaCamara>
-                    {!simulacionEncendida && fuentes.navegador.length > 0 && (
-                        <div className="flex flex-col gap-1">
-                            {usarNavegador && fuentes.navegador.length > 1 && (
-                                <Select aria-label="Cámara del aula a usar" value={idNavegador ?? ''} onChange={(e) => setIdElegido(Number(e.target.value))} options={fuentes.navegador.map((c) => ({ value: c.id_camara, label: nombreCamara(c) }))} />
-                            )}
-                            <Checkbox label="Usar la cámara de este dispositivo" checked={usarNavegador} onChange={(e) => setUsarNavegador(e.target.checked)} />
-                        </div>
-                    )}
-                    {camarasIp.length > 0 && <p className="text-sm text-muted-foreground">Cámaras IP activas: {camarasIp.length}.</p>}
-                    {sinFuentes && <p className="text-sm text-muted-foreground">Sin fuentes de captura activas: registra manualmente a los alumnos.</p>}
-                    {muestreo.limitado && <p className="text-sm text-muted-foreground">El servidor pidió espaciar las capturas; se reintenta en el siguiente ciclo.</p>}
+            {/* Desde `md` (tableta horizontal y escritorio): cámara a la izquierda con todo el alto; a la derecha, la cifra y las acciones en una columna angosta. Teléfono: la
+                cámara primero a todo el ancho, debajo la cifra y las acciones (a la vista sin desplazarse en 360 x 740). */}
+            <div className="flex flex-col gap-4 md:flex-row md:gap-5 md:[container-type:inline-size]">
+                <div className={clsx('min-w-0', ESCENARIO, ALTO_ESCENARIO[llenarAlto ? 'llenar' : 'pagina'][hayBarra ? 'barra' : 'sola'])}>
+                    <div className={ENCUADRE[hayBarra ? 'barra' : 'sola']}>
+                        <VistaCamara
+                            estado={estado}
+                            etiquetaFuente={nombreCamara(camaraElegida)}
+                            simulada={simulacionEncendida}
+                            enmarcar={enmarcar}
+                            rostros={navegadorEnUso && !camaraConError && deteccion?.estado === 'listo' ? deteccion.cantidad : null}
+                            className={camaraConError ? MARCO_VISTA : undefined}
+                        >
+                            {medio}
+                        </VistaCamara>
+                        {hayBarra && (
+                            <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+                                {controles}
+                                {notas.map((n) => (
+                                    <p key={n} className="text-sm text-muted-foreground">
+                                        {n}
+                                    </p>
+                                ))}
+                            </div>
+                        )}
+                    </div>
                 </div>
 
-                <div className="flex min-w-0 flex-col gap-5 lg:col-span-2 lg:justify-between">
+                <div className="flex min-w-0 flex-col gap-4 md:w-64 md:shrink-0 md:justify-between md:overflow-y-auto">
                     <ResumenPaseLista totales={totales} ultima={muestreo.ultima} enviando={muestreo.enviando} activo={activo} />
                     <AccionesPaseLista
                         apilado

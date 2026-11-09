@@ -35,6 +35,7 @@ describe('mostrarBotonEn', () => {
         expect(mostrarBotonEn('/reportes')).toBe(true);
         expect(mostrarBotonEn('/docente/pasar-lista')).toBe(false);
         expect(mostrarBotonEn('/docente/sesiones/3')).toBe(false);
+        expect(mostrarBotonEn('/docente/modo-automatico')).toBe(false);
     });
 });
 

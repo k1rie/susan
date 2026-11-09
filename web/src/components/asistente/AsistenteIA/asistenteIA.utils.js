@@ -12,8 +12,9 @@ export const SUGERENCIAS_DOCENTE = Object.freeze([
 export const MAX_TEXTO = 2000;
 export const MAX_MENSAJES = 20;
 
-// Pantallas con la acción principal abajo (pase de lista y sesión en vivo con cámara): ahí el botón flotante no se dibuja.
-const RUTAS_SIN_BOTON = [/^\/docente\/pasar-lista(\/|$)/, /^\/docente\/sesiones\/[^/]+/];
+// Pantallas con la acción principal abajo (pase de lista y sesión en vivo con cámara) y el modo automático (terminal del aula a pantalla
+// completa): ahí el botón flotante no se dibuja.
+const RUTAS_SIN_BOTON = [/^\/docente\/pasar-lista(\/|$)/, /^\/docente\/sesiones\/[^/]+/, /^\/docente\/modo-automatico(\/|$)/];
 
 export const mostrarBotonEn = (pathname) => !RUTAS_SIN_BOTON.some((r) => r.test(pathname || ''));
 
