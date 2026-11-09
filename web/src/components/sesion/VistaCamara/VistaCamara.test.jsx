@@ -44,4 +44,15 @@ describe('VistaCamara', () => {
         expect(container.querySelector('.pointer-events-none')).not.toBeNull();
         container.querySelectorAll('svg').forEach((svg) => expect(svg).toHaveAttribute('aria-hidden', 'true'));
     });
+
+    it('con rostros dice cuántas caras ve el detector; sin dato (null) no muestra el chip', () => {
+        const { rerender, container } = render(<VistaCamara rostros={null} />);
+        expect(container.querySelector('[data-rostros]')).toBeNull();
+        rerender(<VistaCamara rostros={0} />);
+        expect(screen.getByText('Sin rostros a la vista')).toBeInTheDocument();
+        rerender(<VistaCamara rostros={1} />);
+        expect(screen.getByText('1 rostro detectado')).toBeInTheDocument();
+        rerender(<VistaCamara rostros={4} />);
+        expect(screen.getByText('4 rostros detectados')).toBeInTheDocument();
+    });
 });

@@ -305,7 +305,7 @@ Las funciones de `lib/api/biometria.js` no añaden envoltorios nuevos (siguen 72
 | `INDICE_NO_REVERTIBLE` | La versión indicada no puede ponerse en uso. | Dimensión distinta o ya en uso con mapeo distinto |
 | `FOTO_NO_CONSERVADA` | La foto ya no se conserva: solo se guarda el vector del rostro en el índice. | `api_documento_url_autorizar` (tipos `plantilla` y `plantilla_foto`) sobre una foto ya purgada (ext. 18); HTTP 410, no asienta consulta |
 | `PARAMETRO_NO_ENCONTRADO` | El parámetro no existe. | Clave desconocida |
-| `PARAMETRO_VALOR_INVALIDO` | Texto con el rango (p. ej. "intervalo_muestreo_seg debe ser un entero entre 5 y 120.") | Valor fuera de tipo/rango o incoherente con otro parámetro |
+| `PARAMETRO_VALOR_INVALIDO` | Texto con el rango (p. ej. "intervalo_muestreo_seg debe ser un entero entre 1 y 120.") | Valor fuera de tipo/rango o incoherente con otro parámetro |
 | `SERVICIO_NO_CONFIGURADO` | La cuenta de servicio del sistema no está configurada. | `app.id_cuenta_servicio()` sin fila |
 | `BLOQUEO_OCUPADO` | El recurso está en uso por otro proceso. | Solo informativo: `svc_bloqueo_adquirir` devuelve `false`, no lanza |
 

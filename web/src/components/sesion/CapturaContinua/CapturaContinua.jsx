@@ -54,6 +54,9 @@ export default function CapturaContinua({ sesion, camaras = [], alumnos = [], to
     const [usarNavegador, setUsarNavegador] = useState(true);
     const [camaraLista, setCamaraLista] = useState(false);
     const [errorCamara, setErrorCamara] = useState(null);
+    // Detector de rostros del navegador sobre la vista: recuadros en cada cara y el recuento en un chip. Solo retroalimentación para el
+    // grupo (que vean que la cámara los encuentra); lo que cuenta para la asistencia sigue siendo el reconocimiento del servidor.
+    const [deteccion, setDeteccion] = useState(null);
     const camaraRef = useRef(null);
     const panelRef = useRef(null);
 
@@ -110,6 +113,8 @@ export default function CapturaContinua({ sesion, camaras = [], alumnos = [], to
                     showShutter={false}
                     facingMode="environment"
                     allowDeviceSelect
+                    detectarRostros
+                    onDeteccion={setDeteccion}
                     className={CLASES_CAMARA}
                     onReady={() => {
                         setCamaraLista(true);
@@ -176,7 +181,14 @@ export default function CapturaContinua({ sesion, camaras = [], alumnos = [], to
 
             <div className="grid grid-cols-1 gap-5 lg:grid-cols-5 lg:gap-6">
                 <div className="flex min-w-0 flex-col gap-3 lg:col-span-3">
-                    <VistaCamara estado={estado} etiquetaFuente={nombreCamara(camaraElegida)} simulada={simulacionEncendida} enmarcar={enmarcar} className={camaraConError ? MARCO_VISTA : undefined}>
+                    <VistaCamara
+                        estado={estado}
+                        etiquetaFuente={nombreCamara(camaraElegida)}
+                        simulada={simulacionEncendida}
+                        enmarcar={enmarcar}
+                        rostros={navegadorEnUso && !camaraConError && deteccion?.estado === 'listo' ? deteccion.cantidad : null}
+                        className={camaraConError ? MARCO_VISTA : undefined}
+                    >
                         {medio}
                     </VistaCamara>
                     {!simulacionEncendida && fuentes.navegador.length > 0 && (
