@@ -40,7 +40,7 @@ SELECT t.throws($q$ SELECT app.validar_parametro('umbral_similitud', '1.5') $q$,
 SELECT t.throws($q$ SELECT app.validar_parametro('umbral_similitud', '0.1') $q$, 'P0001:PARAMETRO_VALOR_INVALIDO', 'umbral por debajo del minimo');
 SELECT t.throws($q$ SELECT app.validar_parametro('umbral_similitud', '0.85555') $q$, 'P0001:PARAMETRO_VALOR_INVALIDO', 'umbral con mas de 3 decimales');
 SELECT t.throws($q$ SELECT app.validar_parametro('umbral_similitud', 'abc') $q$, 'P0001:PARAMETRO_VALOR_INVALIDO', 'umbral no numerico');
-SELECT t.throws($q$ SELECT app.validar_parametro('intervalo_muestreo_seg', '4') $q$, 'P0001:PARAMETRO_VALOR_INVALIDO:entre 5 y 120', 'intervalo 4 s (el mensaje indica el rango)');
+SELECT t.throws($q$ SELECT app.validar_parametro('intervalo_muestreo_seg', '0') $q$, 'P0001:PARAMETRO_VALOR_INVALIDO:entre 1 y 120', 'intervalo 0 s (el mensaje indica el rango)');
 SELECT t.throws($q$ SELECT app.validar_parametro('intervalo_muestreo_seg', '121') $q$, 'P0001:PARAMETRO_VALOR_INVALIDO', 'intervalo 121 s');
 SELECT t.throws($q$ SELECT app.validar_parametro('intervalo_muestreo_seg', '15.5') $q$, 'P0001:PARAMETRO_VALOR_INVALIDO', 'entero con decimales');
 SELECT t.throws($q$ SELECT app.validar_parametro('intervalo_muestreo_seg', '-1') $q$, 'P0001:PARAMETRO_VALOR_INVALIDO', 'entero negativo');
