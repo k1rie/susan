@@ -22,6 +22,8 @@ export const serverEnv = () => ({
     recognitionUrl: (process.env.RECOGNITION_SERVICE_URL || 'http://127.0.0.1:8000').replace(/\/$/, ''),
     recognitionApiKey: process.env.RECOGNITION_SERVICE_API_KEY || '',
     cronSecret: process.env.CRON_SECRET || '',
+    // Claude API del asistente de IA. Solo servidor: nunca con prefijo NEXT_PUBLIC_. Vacía = asistente desactivado.
+    anthropicApiKey: process.env.ANTHROPIC_API_KEY || '',
     localDatabaseUrl: process.env.LOCAL_DATABASE_URL || 'postgres://localhost:54329/susan',
     localStorageDir: process.env.LOCAL_STORAGE_DIR || (process.env.SUSAN_LOCAL_DIR ? `${process.env.SUSAN_LOCAL_DIR}/storage` : '.local/storage'),
     // En producción NO hay valor por defecto (el modo local está deshabilitado); así el secreto de desarrollo no viaja en ningún bundle.

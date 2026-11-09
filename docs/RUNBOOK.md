@@ -40,6 +40,7 @@ Variables (ver `web/.env.example`). **Ninguna con prefijo `NEXT_PUBLIC_` es secr
 | `SUPABASE_SERVICE_ROLE_KEY` | Solo servidor: Route Handlers y jobs |
 | `RECOGNITION_SERVICE_URL`, `RECOGNITION_SERVICE_API_KEY` | Servicio de reconocimiento y su clave (la misma `API_KEY` del servicio) |
 | `CRON_SECRET` | Bearer de `/api/jobs/*` (si está vacío los jobs responden 401) |
+| `ANTHROPIC_API_KEY` | Solo servidor: Claude API del asistente de IA (`docs/api/asistente.md`). Vacía = asistente desactivado con aviso |
 | `CAMERA_SNAPSHOT_PATH` | Ruta del fotograma de cámaras IP (`/snapshot.jpg`) |
 
 `SUSAN_LOCAL` **no debe** definirse en producción (las rutas `/api/_local/*` además devuelven 404 con `NODE_ENV=production`).
