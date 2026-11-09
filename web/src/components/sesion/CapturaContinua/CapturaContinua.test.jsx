@@ -300,6 +300,17 @@ describe('CapturaContinua: avisos del muestreo', () => {
         expect(screen.getByText('Muestreo detenido')).toBeInTheDocument();
     });
 
+    it('la cámara del navegador lleva el detector de rostros y el chip cuenta las caras cuando el detector está listo', async () => {
+        montar();
+        expect(camara.props.detectarRostros).toBe(true);
+        await camaraLista();
+        expect(screen.queryByText(/rostros? detectados?|Sin rostros a la vista/)).toBeNull();
+        act(() => camara.props.onDeteccion({ estado: 'listo', cantidad: 3 }));
+        expect(screen.getByText('3 rostros detectados')).toBeInTheDocument();
+        act(() => camara.props.onDeteccion({ estado: 'no-disponible', cantidad: 0 }));
+        expect(screen.queryByText(/rostros detectados|Sin rostros a la vista/)).toBeNull();
+    });
+
     it('la última captura se muestra con rostros, válidos y cuánto hace', async () => {
         montar();
         await camaraLista();

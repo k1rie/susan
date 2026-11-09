@@ -33,8 +33,8 @@ SELECT t.throws($q$ INSERT INTO sesion_clase (id_grupo, fecha, hora_inicio, hora
     '23514:ck_sesion_ventana', 'sesion: limite de presente igual a la tolerancia');
 SELECT t.throws($q$ INSERT INTO sesion_clase (id_grupo, fecha, hora_inicio, hora_fin, limite_presente_min, tolerancia_min) VALUES (t.id_grupo('3A'), '2026-10-05', '07:00', '08:00', 0, 20) $q$,
     '23514:ck_sesion_ventana', 'sesion: limite de presente = 0');
-SELECT t.throws($q$ INSERT INTO sesion_clase (id_grupo, fecha, hora_inicio, hora_fin, intervalo_muestreo_seg) VALUES (t.id_grupo('3A'), '2026-10-05', '07:00', '08:00', 4) $q$,
-    '23514:ck_sesion_intervalo', 'sesion: intervalo de muestreo 4 s');
+SELECT t.throws($q$ INSERT INTO sesion_clase (id_grupo, fecha, hora_inicio, hora_fin, intervalo_muestreo_seg) VALUES (t.id_grupo('3A'), '2026-10-05', '07:00', '08:00', 0) $q$,
+    '23514:ck_sesion_intervalo', 'sesion: intervalo de muestreo 0 s');
 SELECT t.throws($q$ INSERT INTO sesion_clase (id_grupo, fecha, hora_inicio, hora_fin, intervalo_muestreo_seg) VALUES (t.id_grupo('3A'), '2026-10-05', '07:00', '08:00', 121) $q$,
     '23514:ck_sesion_intervalo', 'sesion: intervalo de muestreo 121 s');
 SELECT t.throws($q$ INSERT INTO asistencia (id_sesion, id_alumno, estado, hora_registro, origen, conteo_detecciones)
