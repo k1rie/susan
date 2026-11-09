@@ -368,6 +368,25 @@ describe('POST /api/yo/plantilla', () => {
             expect((await registrar()).status).toBe(201);
         });
 
+        it('si el servicio perdió el índice (INDEX_NOT_LOADED) carga la versión en uso de la BD y reintenta', async () => {
+            const sinIndice = new ApiError({ code: 'INDEX_NOT_LOADED', message: 'El índice facial aún no está cargado.', status: 409 });
+            reconocer.mockRejectedValueOnce(sinIndice).mockImplementation(resultado(0.31));
+            const res = await registrar();
+            expect(res.status).toBe(201);
+            expect(activarIndice).toHaveBeenCalledWith({ version: 'v004' });
+            expect(reconocer).toHaveBeenCalledTimes(4); // la toma fallida se repite y luego las otras dos
+        });
+
+        it('si tras sincronizar el índice sigue sin cargar, falla cerrado y sincroniza una sola vez', async () => {
+            reconocer.mockRejectedValue(new ApiError({ code: 'INDEX_NOT_LOADED', message: 'x', status: 409 }));
+            const res = await registrar();
+            expect(res.status).toBe(409);
+            expect((await res.json()).error.code).toBe('INDEX_NOT_LOADED');
+            expect(activarIndice).toHaveBeenCalledTimes(1);
+            expect(admin.bucket.upload).not.toHaveBeenCalled();
+            expect(usuario.llamadas).not.toContain('api_mi_plantilla_registrar');
+        });
+
         it('si el servicio de reconocimiento falla al buscar, no se guarda nada (falla cerrado)', async () => {
             reconocer.mockRejectedValue(new ApiError({ code: 'SERVICIO_RECONOCIMIENTO_NO_DISPONIBLE', message: 'x', status: 503 }));
             const res = await registrar();
