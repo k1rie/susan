@@ -57,6 +57,13 @@ Crea en Auth las cuentas de la semilla con el **mismo uuid** de la tabla `usuari
 
 **Primer administrador de un proyecto real** (sin semilla): `node scripts/bootstrap-admin.mjs --email admin@tu-dominio.mx` (crea la cuenta de Auth + fila `usuario`).
 
+**Ronda de pruebas con el equipo / presentación** (base hospedada, sin reloj simulado):
+1. `node scripts/reinicio-pruebas.mjs` deja solo `admin@`, `docente@` y 6 alumnos `@susan.test`. Vacía la base: lee su encabezado antes de usarlo.
+2. `node scripts/datos-presentacion.mjs --ejecutar [--fechas AAAA-MM-DD,AAAA-MM-DD]` crea 3 clases del docente (5A, 5B y 5C; aulas
+   `DEMO-A/B/C` con cámara de navegador) con sesiones de 1 hora de 06:00 a 23:40, desfasadas 20 min, e inscribe a todos los alumnos.
+   Como el muestreo dura los primeros 20 min de cada sesión, siempre hay una sesión en su ventana de pase de lista. Sin `--fechas`
+   usa los próximos 2 días de lunes a sábado. Es idempotente: para otros días, vuelve a correrlo con esas fechas.
+
 ## 4. Reloj de demostración (recomendado para probar)
 
 La semilla narra el **lunes 14-sep-2026 07:12**. Con el reloj real no habría sesiones "de hoy" para abrir. Pega en el SQL Editor `supabase/demo/demo_clock_on.sql`

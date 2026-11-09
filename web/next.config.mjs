@@ -51,6 +51,17 @@ const nextConfig = {
     // Cada dev-server paralelo puede usar su propio directorio de build (NEXT_DIST_DIR=.next-xyz.nosync).
     distDir: process.env.NEXT_DIST_DIR || '.next',
 
+    // La terminal del aula (Raspberry Pi, docs/RASPBERRY.md) abre el servidor de desarrollo por el nombre .local de
+    // esta computadora; Next bloquea en desarrollo los origenes distintos de localhost. SUSAN_DEV_ORIGINS agrega otros
+    // (separados por comas, sin esquema ni puerto), por ejemplo la IP de la red local.
+    allowedDevOrigins: [
+        '*.local',
+        ...(process.env.SUSAN_DEV_ORIGINS || '')
+            .split(',')
+            .map((s) => s.trim())
+            .filter(Boolean),
+    ],
+
     // `pg` solo se usa en el adaptador local (src/lib/local) y en scripts: nunca en el bundle.
     serverExternalPackages: ['pg'],
 

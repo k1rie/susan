@@ -1,0 +1,6 @@
+[Desktop Entry]
+Type=Application
+Name=SUSAN kiosco
+Comment=Abre SUSAN a pantalla completa en la terminal del aula
+Exec=/home/susan/.local/bin/susan-kiosco.sh
+X-GNOME-Autostart-enabled=true
