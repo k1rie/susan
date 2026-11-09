@@ -39,7 +39,7 @@ export function armarUrl(url, query) {
 }
 
 /** Construye el ApiError de una respuesta no OK: { error: { code, message, details? } } o, si no, uno por status. */
-async function errorDeRespuesta(respuesta) {
+export async function errorDeRespuesta(respuesta) {
     let cuerpo = null;
     try {
         cuerpo = await respuesta.json();

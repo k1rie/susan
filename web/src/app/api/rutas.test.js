@@ -8,6 +8,7 @@ const RUTAS = {
     'admin/camaras/[id]/probar': ['POST'],
     'admin/usuarios': ['POST'],
     'admin/usuarios/[id]/restablecer': ['POST'],
+    'asistente': ['POST'],
     'alumnos/[id]/plantilla': ['POST'],
     'casos/[id]/detecciones': ['GET'],
     'consentimientos': ['POST'],
