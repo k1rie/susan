@@ -9,7 +9,7 @@ describe('navegación por rol', () => {
     it('define los ítems de cada rol según plataforma.md', () => {
         expect(navParaRol('administrador')).toHaveLength(12);
         // «Pasar lista» va justo después del Panel (la acción diaria del docente no se esconde en un grupo)
-        expect(navParaRol('docente').map((i) => i.href)).toEqual(['/docente', '/docente/pasar-lista', '/docente/revision', '/docente/laboratorios', '/reportes', '/analitica']);
+        expect(navParaRol('docente').map((i) => i.href)).toEqual(['/docente', '/docente/pasar-lista', '/docente/revision', '/docente/laboratorios', '/docente/modo-automatico', '/reportes', '/analitica']);
         expect(navParaRol('alumno').map((i) => i.href)).toEqual(['/alumno', '/alumno/registro']);
         expect(navParaRol('tecnico').map((i) => i.label)).toEqual(['Consola técnica']);
         expect(navParaRol('otro')).toEqual([]);

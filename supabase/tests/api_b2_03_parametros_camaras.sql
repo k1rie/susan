@@ -47,9 +47,9 @@ SELECT t.throws($q$ SELECT public.api_parametro_actualizar('umbral_similitud', '
 SELECT t.throws($q$ SELECT public.api_parametro_actualizar('umbral_similitud', NULL) $q$, 'P0001:PARAMETRO_VALOR_INVALIDO', 'valor nulo');
 SELECT t.throws($q$ SELECT public.api_parametro_actualizar('umbral_similitud', '0.8; DROP TABLE alumno') $q$, 'P0001:PARAMETRO_VALOR_INVALIDO', 'inyeccion en valor');
 -- enteros
-SELECT t.lives_rb($q$ SELECT public.api_parametro_actualizar('intervalo_muestreo_seg', '5') $q$, 'intervalo 5 valido');
+SELECT t.lives_rb($q$ SELECT public.api_parametro_actualizar('intervalo_muestreo_seg', '1') $q$, 'intervalo 1 valido (0242)');
 SELECT t.lives_rb($q$ SELECT public.api_parametro_actualizar('intervalo_muestreo_seg', '120') $q$, 'intervalo 120 valido');
-SELECT t.throws($q$ SELECT public.api_parametro_actualizar('intervalo_muestreo_seg', '4') $q$, 'P0001:PARAMETRO_VALOR_INVALIDO', 'intervalo 4');
+SELECT t.throws($q$ SELECT public.api_parametro_actualizar('intervalo_muestreo_seg', '0') $q$, 'P0001:PARAMETRO_VALOR_INVALIDO', 'intervalo 0');
 SELECT t.throws($q$ SELECT public.api_parametro_actualizar('intervalo_muestreo_seg', '121') $q$, 'P0001:PARAMETRO_VALOR_INVALIDO', 'intervalo 121');
 SELECT t.throws($q$ SELECT public.api_parametro_actualizar('intervalo_muestreo_seg', '15.5') $q$, 'P0001:PARAMETRO_VALOR_INVALIDO', 'intervalo decimal');
 SELECT t.throws($q$ SELECT public.api_parametro_actualizar('intervalo_muestreo_seg', '-1') $q$, 'P0001:PARAMETRO_VALOR_INVALIDO', 'intervalo negativo');

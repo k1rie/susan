@@ -249,6 +249,7 @@ Definición única en `web/src/components/layout/Sidebar/nav.config.js` (`NAV_PO
 | administrador | Sistema (solo consulta) | `/tecnico` | `Wrench` |
 | docente | Panel | `/docente` | `LayoutDashboard` |
 | docente | Revisión | `/docente/revision` | `ClipboardCheck` |
+| docente | Modo automático | `/docente/modo-automatico` | `MonitorPlay` |
 | docente | Reportes | `/reportes` | `FileBarChart` |
 | docente | Analítica | `/analitica` | `ChartLine` |
 | alumno | Mi asistencia | `/alumno` | `UserCheck` |
