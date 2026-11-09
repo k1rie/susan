@@ -14,6 +14,7 @@ import {
     registrarVariasFotos, verificarUnaFoto,
 } from './biometria.js';
 import { generarConstancia } from './constancia.js';
+import { sincronizarIndice } from './indice.js';
 import { reconocer } from './recognition.js';
 import { eliminarObjetoSilencioso, rutaObjeto, subirObjeto } from './storage.js';
 
@@ -105,14 +106,27 @@ export function indicesAComparar(n, max = MAX_COMPARACIONES) {
  * mismo servicio y el mismo umbral que el pase de lista: lo que aquí se rechaza es justo lo que allá se atribuiría a otra persona.
  * El mensaje no revela de quién es el rostro.
  */
-async function exigirRostroNuevo({ rpc, svc, archivos, idAlumno }) {
+async function exigirRostroNuevo({ rpc, svc, admin, archivos, idAlumno }) {
     const otros = await svc('svc_faiss_ids_otros_alumnos', { idAlumno });
     const ids = otros?.faiss_ids;
     if (!Array.isArray(ids) || ids.length === 0) return; // índice vacío o primer alumno: nada con qué comparar
     const parametros = await rpc('api_parametros_publicos');
     const umbral = Number(parametros?.umbral_similitud ?? UMBRAL_POR_OMISION);
+    let sincronizado = false;
+    const buscar = async (imagen) => {
+        try {
+            return await reconocer({ imagen, allowedFaissIds: ids, maxFaces: 1 });
+        } catch (e) {
+            // El servicio pierde el índice en memoria al reiniciarse o despertar (Railway duerme instancias) y la carga al arrancar
+            // puede fallar. La BD sí tiene una versión en uso: se carga una vez y se reintenta. Si tampoco se puede, falla cerrado.
+            if (e?.code !== 'INDEX_NOT_LOADED' || sincronizado) throw e;
+            sincronizado = true;
+            await sincronizarIndice({ admin: await admin() });
+            return reconocer({ imagen, allowedFaissIds: ids, maxFaces: 1 });
+        }
+    };
     for (const i of indicesAComparar(archivos.length)) {
-        const r = await reconocer({ imagen: comoBlob(archivos[i]), allowedFaissIds: ids, maxFaces: 1 });
+        const r = await buscar(comoBlob(archivos[i]));
         const candidato = r.faces?.[0]?.candidate;
         if (candidato && candidato.score >= umbral) {
             throw error('ROSTRO_YA_REGISTRADO',
@@ -134,7 +148,7 @@ export async function registrarPlantillaPropia({ rpc, svc, admin, ip, form }) {
     const plantilla = await registrarVariasFotos({
         rpc, admin, ip, idAlumno: registro.id_alumno, idConsent, archivos: fotos,
         registrar: (args) => rpc('api_mi_plantilla_registrar', { idConsent, ...args, ip }),
-        antesDeGuardar: (archivos) => exigirRostroNuevo({ rpc, svc, archivos, idAlumno: registro.id_alumno }),
+        antesDeGuardar: (archivos) => exigirRostroNuevo({ rpc, svc, admin, archivos, idAlumno: registro.id_alumno }),
     });
 
     const indice = await reconstruirSinFallar(await admin());
