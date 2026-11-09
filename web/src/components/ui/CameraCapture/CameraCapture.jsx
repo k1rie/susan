@@ -15,6 +15,10 @@ import useCameraCapture from './useCameraCapture.js';
 // termine la promesa anterior, para no acumular trabajo (RNF-01).
 // detectarRostros = dibuja un recuadro sobre cada rostro que se ve (detector en el navegador, solo retroalimentación visual) y avisa con
 // onDeteccion({ estado, cantidad }) cuando cambia el estado del detector o el número de rostros.
+// claseVista = clases de la caja del video en lugar del 4:3 por defecto (p. ej. 'aspect-video'); el tamaño puede cambiar en vivo: el video
+// usa object-cover y los recuadros de rostros se recalculan con las medidas de la caja en cada detección.
+// selectorSuperpuesto = el selector de cámara va sobre el video (abajo a la derecha) en lugar de debajo: la caja queda sola y no hay
+// controles sueltos bajo la vista.
 export default function CameraCapture({
     onCapture,
     onFrame,
@@ -30,6 +34,8 @@ export default function CameraCapture({
     maxWidth = 1280,
     maxHeight = 960,
     allowDeviceSelect = true,
+    selectorSuperpuesto = false,
+    claseVista,
     deviceId,
     onDeviceChange,
     onReady,
@@ -90,6 +96,10 @@ export default function CameraCapture({
         onDeviceChange?.(e.target.value);
     };
 
+    const hayVarias = allowDeviceSelect && dispositivos.length > 1;
+    const opcionesDispositivo = hayVarias ? dispositivos.map((d, i) => ({ value: d.deviceId, label: d.label || `Cámara ${i + 1}` })) : [];
+    const valorDispositivo = dispositivoActivo ?? dispositivos[0]?.deviceId;
+
     return (
         <div className={clsx('flex flex-col gap-3', className)}>
             {errorCamara && (
@@ -100,7 +110,7 @@ export default function CameraCapture({
                     </Button>
                 </Alert>
             )}
-            <div className={clsx('relative aspect-[4/3] w-full overflow-hidden rounded-xl bg-foreground', errorCamara && 'hidden')}>
+            <div className={clsx('relative w-full overflow-hidden rounded-xl bg-foreground', claseVista ?? 'aspect-[4/3]', errorCamara && 'hidden')}>
                 <video
                     ref={videoRef}
                     playsInline
@@ -123,15 +133,21 @@ export default function CameraCapture({
                         <p className="absolute inset-x-0 bottom-2 text-center text-sm text-primary-foreground">Centra el rostro en el óvalo</p>
                     </>
                 )}
+                {hayVarias && selectorSuperpuesto && (
+                    // Mismo estilo que los chips de estado de la vista (fondo oscuro translúcido); `!` porque el Select trae fondo y alto propios;
+                    // las opciones (hijos `*:`) vuelven a tinta sobre blanco: en Linux el desplegable hereda el color del control.
+                    <div className="absolute bottom-3 right-3 w-56 max-w-[38%] sm:max-w-[45%]">
+                        <Select
+                            aria-label="Cámara"
+                            value={valorDispositivo}
+                            onChange={cambiarCamara}
+                            options={opcionesDispositivo}
+                            className="h-8 min-h-8! truncate rounded-full! border-transparent! bg-foreground/80! pl-3 text-xs! font-medium text-primary-foreground! backdrop-blur-sm *:bg-card *:text-foreground"
+                        />
+                    </div>
+                )}
             </div>
-            {allowDeviceSelect && dispositivos.length > 1 && (
-                <Select
-                    aria-label="Cámara"
-                    value={dispositivoActivo ?? dispositivos[0].deviceId}
-                    onChange={cambiarCamara}
-                    options={dispositivos.map((d, i) => ({ value: d.deviceId, label: d.label || `Cámara ${i + 1}` }))}
-                />
-            )}
+            {hayVarias && !selectorSuperpuesto && <Select aria-label="Cámara" value={valorDispositivo} onChange={cambiarCamara} options={opcionesDispositivo} />}
             {mostrarObturador && (
                 <Button onClick={tomarFoto} disabled={estado !== 'ready'}>
                     Capturar foto
