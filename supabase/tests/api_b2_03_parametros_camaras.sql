@@ -5,14 +5,14 @@ SELECT t.cargar_fixtures();
 
 -- =============================== Parametros ===============================
 SELECT t.as_user('tecnico@susan.test');
-SELECT t.eq((public.api_parametros_listar() ->> 'total')::int, 12, 'listar: 12 parametros');
+SELECT t.eq((public.api_parametros_listar() ->> 'total')::int, 14, 'listar: 14 parametros');
 SELECT t.eq((public.api_parametros_listar() -> 'items' -> 0 ->> 'clave'), 'umbral_similitud', 'listar: orden de la Tabla 4');
 SELECT t.eq((public.api_parametros_listar() -> 'items' -> 11 ->> 'clave'), 'minutos_pase_lista_base', 'listar: ultimo parametro');
 SELECT t.eq((public.api_parametros_listar() -> 'items' -> 0 ->> 'minimo'), '0.500', 'listar: minimo del metadato');
 SELECT t.eq((public.api_parametros_listar() -> 'items' -> 4 ->> 'unidad'), 'segundos', 'listar: unidad');
 SELECT t.ok(public.api_parametros_listar() -> 'items' -> 0 -> 'actualizado_por' = 'null'::jsonb, 'listar: valores iniciales sin editor');
-SELECT t.eq(jsonb_array_length(public.api_parametros_listar(5, 10) -> 'items'), 2, 'listar: paginado (offset 10 de 12)');
-SELECT t.eq((public.api_parametros_listar(5, 10) ->> 'total')::int, 12, 'listar: total independiente de la pagina');
+SELECT t.eq(jsonb_array_length(public.api_parametros_listar(5, 10) -> 'items'), 4, 'listar: paginado (offset 10 de 14)');
+SELECT t.eq((public.api_parametros_listar(5, 10) ->> 'total')::int, 14, 'listar: total independiente de la pagina');
 
 -- actualizar: valor canonico, bitacora, advertencias
 SELECT t.eq((public.api_parametro_actualizar('umbral_similitud', '0.9') ->> 'valor'), '0.900', 'canonico 0.9 -> 0.900');
@@ -77,7 +77,7 @@ SELECT t.eq((SELECT valor FROM public.parametro_sistema WHERE clave = 'intervalo
 -- roles: el administrador solo consulta; docentes y alumnos nada
 SELECT t.as_user('admin@susan.test');
 SELECT t.throws($q$ SELECT public.api_parametro_actualizar('umbral_similitud', '0.9') $q$, 'P0001:NO_AUTORIZADO', 'administrador no cambia parametros (Tabla 36)');
-SELECT t.eq((public.api_parametros_listar() ->> 'total')::int, 12, 'administrador si consulta');
+SELECT t.eq((public.api_parametros_listar() ->> 'total')::int, 14, 'administrador si consulta');
 SELECT t.as_user('docente1@susan.test');
 SELECT t.throws($q$ SELECT public.api_parametro_actualizar('umbral_similitud', '0.9') $q$, 'P0001:NO_AUTORIZADO', 'docente no cambia parametros');
 SELECT t.throws($q$ SELECT public.api_parametros_listar() $q$, 'P0001:NO_AUTORIZADO', 'docente no lista parametros');

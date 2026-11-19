@@ -4,30 +4,30 @@ BEGIN;
 SELECT t.begin('schema_01_estructura');
 
 -- Tablas -------------------------------------------------------------------------------------
-SELECT t.eq((SELECT count(*) FROM pg_tables WHERE schemaname = 'public'), 20::bigint, '20 tablas en public (19 de la spec + plantilla_foto)');
+SELECT t.eq((SELECT count(*) FROM pg_tables WHERE schemaname = 'public'), 21::bigint, '21 tablas en public (19 de la spec + plantilla_foto + solicitud_laboratorio)');
 SELECT t.ok((SELECT array_agg(tablename ORDER BY tablename) FROM pg_tables WHERE schemaname = 'public') = ARRAY[
     'alumno', 'asistencia', 'aula', 'bitacora_auditoria', 'camara', 'captura', 'consentimiento', 'deteccion',
     'docente', 'grupo', 'horario_grupo', 'indice_faiss', 'inscripcion', 'justificante', 'materia',
-    'parametro_sistema', 'plantilla_facial', 'plantilla_foto', 'sesion_clase', 'usuario']::name[], 'los nombres de las tablas son los de la spec mas plantilla_foto');
-SELECT t.eq((SELECT count(*) FROM pg_constraint WHERE contype = 'p' AND connamespace = 'public'::regnamespace), 20::bigint, '20 llaves primarias');
-SELECT t.eq((SELECT count(*) FROM pg_constraint WHERE contype = 'f' AND connamespace = 'public'::regnamespace), 26::bigint, '26 llaves foraneas');
+    'parametro_sistema', 'plantilla_facial', 'plantilla_foto', 'sesion_clase', 'solicitud_laboratorio', 'usuario']::name[], 'los nombres de las tablas son los de la spec mas plantilla_foto y solicitud_laboratorio');
+SELECT t.eq((SELECT count(*) FROM pg_constraint WHERE contype = 'p' AND connamespace = 'public'::regnamespace), 21::bigint, '21 llaves primarias');
+SELECT t.eq((SELECT count(*) FROM pg_constraint WHERE contype = 'f' AND connamespace = 'public'::regnamespace), 30::bigint, '30 llaves foraneas (26 + las 4 de solicitud_laboratorio)');
 SELECT t.eq((SELECT count(*) FROM pg_constraint WHERE contype = 'f' AND confdeltype = 'c' AND connamespace = 'public'::regnamespace), 1::bigint, 'una sola FK en cascada');
 SELECT t.eq((SELECT conrelid::regclass::text FROM pg_constraint WHERE contype = 'f' AND confdeltype = 'c' AND connamespace = 'public'::regnamespace), 'horario_grupo', 'la cascada es horario_grupo -> grupo');
-SELECT t.eq((SELECT count(*) FROM pg_constraint WHERE contype = 'f' AND confdeltype = 'r' AND connamespace = 'public'::regnamespace), 25::bigint, 'las otras 25 FK son ON DELETE RESTRICT');
+SELECT t.eq((SELECT count(*) FROM pg_constraint WHERE contype = 'f' AND confdeltype = 'r' AND connamespace = 'public'::regnamespace), 29::bigint, 'las otras 29 FK son ON DELETE RESTRICT');
 SELECT t.eq((SELECT count(*) FROM pg_constraint WHERE contype = 'u' AND connamespace = 'public'::regnamespace), 21::bigint, '21 restricciones UNIQUE');
 SELECT t.ok((SELECT count(*) FROM pg_constraint WHERE contype = 'c' AND connamespace = 'public'::regnamespace) >= 29, 'al menos 29 restricciones CHECK');
 SELECT t.eq((SELECT count(*) FROM pg_constraint WHERE connamespace = 'public'::regnamespace AND contype IN ('p','f','u','c')
               AND conname !~ '^(pk|fk|uq|ck)_'), 0::bigint, 'todas las restricciones usan los prefijos pk_ fk_ uq_ ck_');
 
 -- Dominios -----------------------------------------------------------------------------------
-SELECT t.eq((SELECT count(*) FROM pg_type WHERE typnamespace = 'public'::regnamespace AND typtype = 'e'), 14::bigint, '13 enums de la spec + tipo_camara');
+SELECT t.eq((SELECT count(*) FROM pg_type WHERE typnamespace = 'public'::regnamespace AND typtype = 'e'), 16::bigint, '13 enums de la spec + tipo_camara + tipo_aula + estatus_solicitud_lab');
 SELECT t.eq((SELECT array_agg(e.enumlabel::text ORDER BY e.enumsortorder) FROM pg_enum e WHERE e.enumtypid = 'public.estatus_sesion'::regtype),
             ARRAY['programada', 'abierta', 'cerrada', 'suspendida'], 'estatus_sesion incluye suspendida');
 SELECT t.eq((SELECT array_agg(e.enumlabel::text ORDER BY e.enumsortorder) FROM pg_enum e WHERE e.enumtypid = 'public.tipo_camara'::regtype),
             ARRAY['ip', 'navegador'], 'tipo_camara = ip | navegador');
 SELECT t.eq((SELECT array_agg(e.enumlabel::text ORDER BY e.enumsortorder) FROM pg_enum e WHERE e.enumtypid = 'public.estado_asistencia'::regtype),
             ARRAY['presente', 'retardo', 'ausente', 'pendiente', 'justificado'], 'estado_asistencia (5 valores)');
-SELECT t.eq((SELECT count(*) FROM pg_enum e WHERE e.enumtypid = 'public.accion_bitacora'::regtype), 8::bigint, 'accion_bitacora (8 valores)');
+SELECT t.eq((SELECT count(*) FROM pg_enum e WHERE e.enumtypid = 'public.accion_bitacora'::regtype), 11::bigint, 'accion_bitacora (8 valores base + alta_consentimiento y revocacion_consentimiento de 0239 + solicitud_laboratorio de 0240)');
 
 -- Tipos fisicos clave del diccionario de datos
 SELECT t.eq((SELECT format_type(atttypid, atttypmod) FROM pg_attribute WHERE attrelid = 'public.deteccion'::regclass AND attname = 'score_similitud'), 'numeric(4,3)', 'score_similitud NUMERIC(4,3)');
@@ -39,8 +39,8 @@ SELECT t.eq((SELECT count(*) FROM pg_attribute a JOIN pg_class c ON c.oid = a.at
                 AND (a.atttypid = 'bytea'::regtype OR a.atttypid IN (SELECT oid FROM pg_type WHERE typcategory = 'A'))), 0::bigint,
             'RNF-03: ninguna columna binaria ni de arreglo');
 SELECT t.eq((SELECT count(*) FROM pg_attribute a JOIN pg_class c ON c.oid = a.attrelid
-              WHERE c.relnamespace = 'public'::regnamespace AND c.relkind = 'r' AND a.attidentity = 'a'), 19::bigint,
-            '19 tablas con identity (parametro_sistema usa clave natural)');
+              WHERE c.relnamespace = 'public'::regnamespace AND c.relkind = 'r' AND a.attidentity = 'a'), 20::bigint,
+            '20 tablas con identity (parametro_sistema usa clave natural)');
 
 -- Indices ------------------------------------------------------------------------------------
 SELECT t.eq((SELECT count(*) FROM pg_indexes WHERE schemaname = 'public' AND indexname IN ('ux_plantilla_facial_activa', 'ux_indice_faiss_en_uso')
@@ -58,14 +58,14 @@ SELECT t.eq((SELECT count(*) FROM pg_trigger WHERE tgname IN ('trg_bitacora_sin_
             'los disparadores de la bitacora son ENABLE ALWAYS (valen tambien en modo replica)');
 
 -- RLS y privilegios --------------------------------------------------------------------------
-SELECT t.eq((SELECT count(*) FROM pg_class WHERE relnamespace = 'public'::regnamespace AND relkind = 'r' AND relrowsecurity), 20::bigint, 'RLS activa en las 20 tablas');
+SELECT t.eq((SELECT count(*) FROM pg_class WHERE relnamespace = 'public'::regnamespace AND relkind = 'r' AND relrowsecurity), 21::bigint, 'RLS activa en las 21 tablas');
 SELECT t.ok((SELECT count(*) FROM pg_policies WHERE schemaname = 'public') >= 20, 'cada tabla tiene sus politicas');
 SELECT t.eq((SELECT count(*) FROM pg_class c WHERE c.relnamespace = 'public'::regnamespace AND c.relkind = 'r'
               AND has_table_privilege('anon', c.oid, 'SELECT,INSERT,UPDATE,DELETE,TRUNCATE')), 0::bigint, 'anon sin ningun privilegio de tabla');
 SELECT t.eq((SELECT count(*) FROM pg_class c WHERE c.relnamespace = 'public'::regnamespace AND c.relkind = 'r'
               AND has_table_privilege('authenticated', c.oid, 'INSERT,UPDATE,DELETE,TRUNCATE')), 0::bigint, 'authenticated sin escritura directa en ninguna tabla');
 SELECT t.eq((SELECT count(*) FROM pg_class c WHERE c.relnamespace = 'public'::regnamespace AND c.relkind = 'r'
-              AND has_table_privilege('authenticated', c.oid, 'SELECT')), 20::bigint, 'authenticated con SELECT en las 20 tablas (respaldado por politicas)');
+              AND has_table_privilege('authenticated', c.oid, 'SELECT')), 21::bigint, 'authenticated con SELECT en las 21 tablas (respaldado por politicas)');
 SELECT t.ok(NOT has_table_privilege('service_role', 'public.bitacora_auditoria', 'INSERT,UPDATE,DELETE,TRUNCATE'), 'service_role no escribe la bitacora directamente');
 SELECT t.ok(has_table_privilege('service_role', 'public.asistencia', 'INSERT,UPDATE,DELETE'), 'service_role conserva ALL en las demas tablas');
 SELECT t.eq((SELECT count(*) FROM pg_class WHERE relnamespace = 'public'::regnamespace AND relkind = 'S'
@@ -92,11 +92,11 @@ SELECT t.ok(NOT has_function_privilege('anon', 'public.api_yo()', 'EXECUTE'), 'a
 SELECT t.ok(has_function_privilege('authenticated', 'public.api_yo()', 'EXECUTE'), 'authenticated ejecuta api_yo');
 
 -- Parametros y cuenta de servicio -----------------------------------------------------------
-SELECT t.eq((SELECT count(*) FROM public.parametro_sistema), 12::bigint, '12 parametros iniciales');
+SELECT t.eq((SELECT count(*) FROM public.parametro_sistema), 14::bigint, '14 parametros iniciales (12 de la spec + los 2 de laboratorios)');
 SELECT t.eq((SELECT valor FROM public.parametro_sistema WHERE clave = 'umbral_similitud'), '0.850', 'umbral_similitud = 0.850');
 SELECT t.eq((SELECT count(*) FROM public.parametro_sistema WHERE actualizado_por IS NOT NULL), 0::bigint, 'los iniciales no tienen actualizado_por');
 SELECT t.eq((SELECT count(*) FROM public.usuario WHERE rol = 'tecnico' AND correo = 'servicio@susan.local' AND activo), 1::bigint, 'existe la cuenta de servicio (tecnico)');
-SELECT t.eq((SELECT count(*) FROM app.parametro_meta), 12::bigint, 'app.parametro_meta describe los 12 parametros');
+SELECT t.eq((SELECT count(*) FROM app.parametro_meta), 14::bigint, 'app.parametro_meta describe los 14 parametros');
 
 SELECT t.summary();
 ROLLBACK;

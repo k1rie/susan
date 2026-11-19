@@ -45,7 +45,7 @@ SELECT t.as_postgres();
 
 -- ===== api_parametros_publicos ======================================================================
 SELECT t.as_user('alumno1@susan.test');
-SELECT t.eq((SELECT count(*) FROM jsonb_object_keys(public.api_parametros_publicos())), 12::bigint, 'api_parametros_publicos: las 12 claves, tambien para un alumno');
+SELECT t.eq((SELECT count(*) FROM jsonb_object_keys(public.api_parametros_publicos())), 14::bigint, 'api_parametros_publicos: las 14 claves, tambien para un alumno');
 SELECT t.eq(public.api_parametros_publicos() ->> 'umbral_similitud', '0.850', 'api_parametros_publicos: el umbral conserva sus tres decimales');
 SELECT t.eq(jsonb_typeof(public.api_parametros_publicos() -> 'min_detecciones_validas'), 'number', 'api_parametros_publicos: numericos como numero JSON');
 SELECT t.eq((public.api_parametros_publicos() ->> 'horas_limite_correccion')::int, 48, 'api_parametros_publicos: horas_limite_correccion');

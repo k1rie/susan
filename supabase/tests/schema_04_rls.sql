@@ -10,14 +10,14 @@ SELECT t.cargar_fixtures();
 SELECT t.eq(t.conteos(),
     '{"alumno":6,"docente":2,"materia":2,"aula":2,"grupo":2,"horario_grupo":3,"inscripcion":6,"sesion_clase":5,"asistencia":6,
       "justificante":1,"consentimiento":6,"indice_faiss":2,"plantilla_facial":2,"camara":3,"captura":2,"deteccion":3,
-      "usuario":9,"bitacora_auditoria":1,"parametro_sistema":12}'::jsonb, 'totales reales de los fixtures');
+      "usuario":9,"bitacora_auditoria":1,"parametro_sistema":14}'::jsonb, 'totales reales de los fixtures');
 
 -- Administrador: todo el catalogo, reportes (asistencia), cuentas, bitacora, parametros; NO justificantes ni capturas/detecciones
 SELECT t.as_user('admin@susan.test');
 SELECT t.eq(t.conteos(),
     '{"alumno":6,"docente":2,"materia":2,"aula":2,"grupo":2,"horario_grupo":3,"inscripcion":6,"sesion_clase":5,"asistencia":6,
       "justificante":0,"consentimiento":6,"indice_faiss":2,"plantilla_facial":2,"camara":3,"captura":0,"deteccion":0,
-      "usuario":9,"bitacora_auditoria":1,"parametro_sistema":12}'::jsonb, 'administrador: ve el catalogo, reportes, cuentas, bitacora y parametros; no justificantes ni detecciones');
+      "usuario":9,"bitacora_auditoria":1,"parametro_sistema":14}'::jsonb, 'administrador: ve el catalogo, reportes, cuentas, bitacora y parametros; no justificantes ni detecciones');
 
 -- Docente 1: solo el grupo 3A y lo que cuelga de el
 SELECT t.as_user('docente1@susan.test');
@@ -75,7 +75,7 @@ SELECT t.as_user('tecnico@susan.test');
 SELECT t.eq(t.conteos(),
     '{"alumno":0,"docente":0,"materia":0,"aula":2,"grupo":0,"horario_grupo":0,"inscripcion":0,"sesion_clase":0,"asistencia":0,
       "justificante":0,"consentimiento":0,"indice_faiss":2,"plantilla_facial":0,"camara":3,"captura":0,"deteccion":0,
-      "usuario":1,"bitacora_auditoria":0,"parametro_sistema":12}'::jsonb, 'tecnico: solo aulas, camaras, indice facial y parametros');
+      "usuario":1,"bitacora_auditoria":0,"parametro_sistema":14}'::jsonb, 'tecnico: solo aulas, camaras, indice facial y parametros');
 
 -- JWT valido sin cuenta en usuario: nada
 SELECT t.as_uid_huerfano();
@@ -98,7 +98,7 @@ SELECT t.as_service();
 SELECT t.eq(t.conteos(),
     '{"alumno":6,"docente":2,"materia":2,"aula":2,"grupo":2,"horario_grupo":3,"inscripcion":6,"sesion_clase":5,"asistencia":6,
       "justificante":1,"consentimiento":6,"indice_faiss":2,"plantilla_facial":2,"camara":3,"captura":2,"deteccion":3,
-      "usuario":9,"bitacora_auditoria":1,"parametro_sistema":12}'::jsonb, 'service_role ve todas las filas');
+      "usuario":9,"bitacora_auditoria":1,"parametro_sistema":14}'::jsonb, 'service_role ve todas las filas');
 SELECT t.throws($q$ INSERT INTO bitacora_auditoria (id_usuario, accion, entidad, id_registro) VALUES (1, 'consulta', 'alumno', 1) $q$,
     '42501', 'service_role no inserta en la bitacora directamente (solo via app.bitacora)');
 SELECT t.lives_rb($q$ INSERT INTO aula (clave, edificio, capacidad) VALUES ('Z-99', 'Z', 10) $q$, 'service_role si escribe en el catalogo');
