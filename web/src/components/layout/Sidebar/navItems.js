@@ -4,6 +4,7 @@ import {
     ChartLine,
     ClipboardCheck,
     FileBarChart,
+    FlaskConical,
     GraduationCap,
     LayoutDashboard,
     Presentation,
@@ -28,6 +29,7 @@ export const NAV_POR_ROL = {
         { href: '/admin/docentes', label: 'Docentes', icon: Presentation, grupo: 'Catálogos' },
         { href: '/admin/materias', label: 'Materias', icon: BookOpen, grupo: 'Catálogos' },
         { href: '/admin/aulas', label: 'Aulas', icon: Building2, grupo: 'Catálogos' },
+        { href: '/admin/laboratorios', label: 'Laboratorios', icon: FlaskConical, grupo: 'Operación' },
         { href: '/admin/usuarios', label: 'Usuarios', icon: UserCog, grupo: 'Cuentas y auditoría' },
         { href: '/admin/bitacora', label: 'Bitácora', icon: ScrollText, grupo: 'Cuentas y auditoría' },
         { href: '/reportes', label: 'Reportes', icon: FileBarChart, grupo: 'Análisis' },
@@ -38,10 +40,14 @@ export const NAV_POR_ROL = {
         { href: '/docente', label: 'Panel', icon: LayoutDashboard },
         { href: '/docente/pasar-lista', label: 'Pasar lista', icon: ScanFace },
         { href: '/docente/revision', label: 'Revisión', icon: ClipboardCheck, grupo: 'Asistencia' },
+        { href: '/docente/laboratorios', label: 'Laboratorios', icon: FlaskConical, grupo: 'Asistencia' },
         { href: '/reportes', label: 'Reportes', icon: FileBarChart, grupo: 'Asistencia' },
         { href: '/analitica', label: 'Analítica', icon: ChartLine, grupo: 'Análisis' },
     ],
-    alumno: [{ href: '/alumno', label: 'Mi asistencia', icon: UserCheck }],
+    alumno: [
+        { href: '/alumno', label: 'Mi asistencia', icon: UserCheck },
+        { href: '/alumno/registro', label: 'Mi registro facial', icon: ScanFace, grupo: 'Mi cuenta' },
+    ],
     tecnico: [{ href: '/tecnico', label: 'Consola técnica', icon: Wrench }],
 };
 

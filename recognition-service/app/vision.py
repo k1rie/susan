@@ -26,18 +26,29 @@ class Vision:
         # La inferencia es CPU-intensiva: se limita para que rafagas de peticiones no saturen el equipo
         self._sem = threading.BoundedSemaphore(max(1, settings.embedder_concurrency))
 
-    def detect(self, rgb: np.ndarray) -> list[DetectedFace]:
+    def detect(self, rgb: np.ndarray, con_pose: bool = False, con_vivacidad: bool = False) -> list[DetectedFace]:
+        # Solo se pasan `con_pose` / `con_vivacidad` a los embedders que las miden: los demas conservan su firma `detect(rgb)`.
+        extra = {}
+        if con_pose and self.embedder.mide_pose:
+            extra['con_pose'] = True
+        if con_vivacidad and self.embedder.mide_vivacidad:
+            extra['con_vivacidad'] = True
         with self._sem:
-            return self.embedder.detect(rgb)
+            return self.embedder.detect(rgb, **extra)
 
-    def analyze(self, rgb: np.ndarray, yaw_max_ratio: float | None = None) -> tuple[dict, np.ndarray | None]:
+    def analyze(self, rgb: np.ndarray, yaw_max_ratio: float | None = None, con_pose: bool = False,
+                con_vivacidad: bool = False) -> tuple[dict, np.ndarray | None]:
         """Calidad de UNA foto de registro con UNA sola deteccion. Devuelve (resultado, embedding del unico rostro).
 
         El embedding solo se entrega si la foto pasa TODA la calidad (el llamador lo usa para promediar y nunca lo
         serializa). Con `yaw_max_ratio` (modo de conjunto) y un embedder que mide la razon de giro, `frontal` pasa a ser
-        `yaw_ratio < yaw_max_ratio`; sin ellos queda el booleano heredado, asi /v1/photo/check no cambia de contrato."""
+        `yaw_ratio < yaw_max_ratio`; sin ellos queda el booleano heredado, asi /v1/photo/check no cambia de contrato.
+        Con `con_pose` (y un embedder que la mide) `calidad` agrega `pose` {cabeceo, giro, alabeo} en grados con signo: es
+        aditivo y opcional, no aparece con el embedder fake ni en /v1/photo/check-set.
+        Con `con_vivacidad` (y la deteccion de vida activa) `calidad` agrega `vivacidad` del rostro mayor: es SOLO informativa,
+        no rechaza la foto (modo observacion); tampoco aparece con el embedder fake ni con LIVENESS=off."""
         s = self.settings
-        faces = self.detect(rgb)
+        faces = self.detect(rgb, con_pose, con_vivacidad)
         if not faces:
             return ({'rostros': 0, 'un_solo_rostro': False,
                      'calidad': {'brillo': round(imaging.brightness(rgb), 1), 'nitidez': round(imaging.sharpness(rgb), 1),
@@ -65,11 +76,15 @@ class Vision:
             motivo, codigo = 'La foto esta sobreexpuesta.', EXCESO_LUZ
         elif nitidez < s.min_sharpness:
             motivo, codigo = 'La foto esta desenfocada.', BORROSA
-        resultado = {'rostros': len(faces), 'un_solo_rostro': len(faces) == 1,
-                     'calidad': {'brillo': round(brillo, 1), 'nitidez': round(nitidez, 1),
-                                 'tamano_rostro_px': lado, 'frontal': frontal},
+        medidas = {'brillo': round(brillo, 1), 'nitidez': round(nitidez, 1), 'tamano_rostro_px': lado, 'frontal': frontal}
+        if mayor.pose is not None:
+            cabeceo, giro, alabeo = mayor.pose
+            medidas['pose'] = {'cabeceo': round(cabeceo, 1), 'giro': round(giro, 1), 'alabeo': round(alabeo, 1)}
+        if mayor.vivacidad is not None:
+            medidas['vivacidad'] = mayor.vivacidad
+        resultado = {'rostros': len(faces), 'un_solo_rostro': len(faces) == 1, 'calidad': medidas,
                      'motivo_rechazo': motivo, 'motivo_codigo': codigo}
         return resultado, (mayor.embedding if motivo is None else None)
 
     def check_photo(self, rgb: np.ndarray) -> dict:
-        return self.analyze(rgb)[0]
+        return self.analyze(rgb, con_pose=True, con_vivacidad=True)[0]

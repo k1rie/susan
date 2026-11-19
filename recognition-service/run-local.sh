@@ -12,7 +12,14 @@ if [ ! -d "$VENV" ]; then
     "$VENV/bin/pip" install -q -r requirements.txt
 fi
 export EMBEDDER="${1:-${EMBEDDER:-fake}}"
-if [ "$EMBEDDER" = "insightface" ]; then "$VENV/bin/pip" install -q -r requirements-ml.txt; fi
+if [ "$EMBEDDER" = "insightface" ]; then
+    "$VENV/bin/pip" install -q -r requirements-ml.txt
+    # Addon de deteccion de vida (1,4 MB, verificado con SHA256). El servicio no baja nada solo; sin red queda apagada con un aviso.
+    if [ "${LIVENESS:-observe}" != "off" ]; then
+        "$VENV/bin/python" -c "from insightface.addons import ensure_addon; ensure_addon('liveness', root='${MODEL_DIR:-.models}')" \
+            || echo "AVISO: no se pudo obtener el modelo de deteccion de vida; el servicio arranca sin ella." >&2
+    fi
+fi
 export APP_ENV="${APP_ENV:-development}"
 # Clave solo para desarrollo local; en cualquier otro entorno defina API_KEY en el entorno
 export API_KEY="${API_KEY:-dev-local-key}"

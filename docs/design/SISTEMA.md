@@ -157,6 +157,37 @@ mueven el resto de la página. `SloshGauge` anima el `clip-path` de su líquido 
   `/bienvenida` (menú de cuenta): los tres últimos. El color del avatar se guarda por navegador (`localStorage`, sin datos sensibles); la contraseña va a Supabase Auth; el acuse de privacidad no sustituye al consentimiento firmado.
   No hay autorregistro: las cuentas las crea el administrador (spec).
 
+## Registro facial guiado
+
+El alta de la plantilla facial (ficha del alumno) es un **asistente paso a paso** (`admin/alumnos/RegistroFacialGuiado`; contrato en [`../api/biometria.md`](../api/biometria.md)), con la lógica de la configuración de Face ID y de los flujos de verificación de identidad vistos en Mobbin (Lovi, Warby Parker, MoonPay):
+
+- **Una decisión por pantalla**: portada con consejos → cinco tomas → revisión → guardado → listo. En el teléfono ocupa toda la pantalla (pie con el botón principal sobre el área segura); en escritorio es un diálogo de tamaño fijo (`max-w-xl`) para que no cambie de alto entre pasos.
+- **Visor circular con aro de marcas** (`AnilloRostro`, SVG a mano como la familia de gráficas): las marcas resaltadas son **hacia donde hay que mirar** (el arco izquierdo, derecho o superior según el paso; el aro completo en «de frente» y «otra expresión»), se llenan en azul al mantener la posición, pulsan al verificar y quedan verdes al aceptarse o rojas al rechazarse. El avance entre pasos va en la barra segmentada de arriba y «Toma K de 5», no en el aro. Una flecha dentro del visor refuerza la dirección. Todo lo dibujado es decorativo (`aria-hidden`): el avance y el resultado también van en texto.
+- **La foto se toma sola** (sin botón de disparo): se muestrea la cámara y se pasa por el control de calidad hasta lograr 2 muestras buenas seguidas; mientras tanto el texto dice el motivo en vivo y el aro se llena con cada acierto. Cada toma se verifica al instante y el motivo de un rechazo se dice en tú y con la acción concreta; si la comprobación en vivo falla o tarda, aparece «Tomar foto ahora». La cámara solo está encendida durante las tomas.
+- Solo `transform`/`opacity` y el cambio de color del trazo; las animaciones propias (`registro-marca-entra`, `registro-guia-empuja`) quedan apagadas por la regla global de «reducir movimiento».
+
+## Cámara del pase de lista
+
+- **Siempre en espejo** (`CameraCapture`, también con la cámara trasera): la vista se ve como un reflejo, pero el fotograma que se envía va sin espejar. `mirrored={false}` lo quita si alguna pantalla lo necesita.
+- **Recuadros de detección en vivo** (`CameraCapture` con `detectarRostros`): `ui/DeteccionRostros` corre el detector en el navegador y `ui/MarcosRostros` dibuja un recuadro blanco por rostro (fracciones de la vista, solo `transform` con transición de 100 ms, apagada con «reducir movimiento»; son `aria-hidden`).
+  `VistaCamara` agrega, bajo el chip de estado, el chip con texto («N rostros detectados» · «Sin rostros a la vista» · «Preparando detección…» · «Detección en vivo no disponible»): el recuadro nunca es lo único que informa.
+  Es retroalimentación visual; no sustituye al reconocimiento del servidor (ver `docs/DECISIONS.md` §9).
+
+## Formularios
+
+Todo formulario o captura de datos es **guiado y dinámico**, con patrones vistos en Mobbin (referencias y URLs en
+[`formularios/referencias-flujos-guiados.md`](formularios/referencias-flujos-guiados.md) y
+[`formularios/referencias-campos-y-validacion.md`](formularios/referencias-campos-y-validacion.md)):
+
+- **Contenedor según la complejidad**: catálogos de un paso (aula, materia, docente, cámara) en `ui/PanelLateral` (pantalla completa en el teléfono); altas largas (alumno, grupo) en `ui/Asistente` de 3 pasos con revisión («Editar» por sección) y pantalla de éxito con 2–4 siguientes pasos (`ui/SuccessState`); importaciones en un `Modal` por pasos con `ui/Stepper`.
+- **Validación al salir del campo** (`hooks/ui/useFormulario`), foco al primer error, límites reales de la base en `lib/formularios` (`LIMITES`), errores del servidor pegados al campo que los causó y un solo aviso por error.
+- **Barra de acciones** (`ui/FormActions`) con «N cambios sin guardar» y el motivo visible cuando un botón está bloqueado; el aviso de salida (`useCambiosSinGuardar`) cubre recargar, cerrar, pestañas propias y los enlaces del riel y de la barra inferior.
+- **Selectores con búsqueda** (`ui/Combobox`, opciones de dos líneas) en lugar de `<select>` largos; `ui/SegmentedControl` para 2–4 opciones excluyentes (siempre texto + color); `ui/BarraFiltros` para búsqueda con retraso y chips de filtros activos.
+
+Contrato de cada pieza: [`formularios/PRIMITIVAS-campos.md`](formularios/PRIMITIVAS-campos.md) y [`formularios/PRIMITIVAS-contenedores.md`](formularios/PRIMITIVAS-contenedores.md).
+Qué cambió en cada pantalla (antes → después): `formularios/FRENTE-F2-acceso-y-consola.md`, `FRENTE-F3-alumnos.md`, `FRENTE-F4-catalogos.md`,
+`FRENTE-F5-grupos.md` y `FRENTE-F6-justificantes-y-pase-manual.md`. Auditoría de partida: [`formularios/auditoria.md`](formularios/auditoria.md).
+
 ## Qué NO cambia
 
 Lógica de negocio, RPC, contratos y rutas. El rediseño es solo capa de presentación (`components/`, `globals.css`, `app/**/layout|page` delgadas).

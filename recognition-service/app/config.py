@@ -29,6 +29,14 @@ class Settings:
     dimension: int = 512
     det_size: int = 640
     min_det_score: float = 0.5
+    # Deteccion de vida (addon `liveness` de InsightFace 2.x): 'observe' mide y reporta `vivacidad` por rostro sin bloquear
+    # nada; 'off' la apaga. Solo aplica con EMBEDDER=insightface. Sin el archivo del modelo en <MODEL_DIR>/addons el servicio
+    # arranca igual y la deja apagada (aviso en el log): la vida es opcional y nunca debe tumbar el reconocimiento.
+    liveness: str = 'observe'
+    liveness_threshold: float = 0.8
+    # Menor lado (px) del rostro desde el que se evalua la vida. Medido con rostros reales: bajo ~60 px el puntaje cae aun en
+    # personas reales (a 35 px la mayoria < 0.8), asi que evaluarlos solo produciria falsos "no vivo".
+    liveness_min_face_px: int = 64
     storage_backend: str = 'local'
     storage_dir: str = DEFAULT_STORAGE_DIR
     supabase_url: str = ''
@@ -94,6 +102,9 @@ class Settings:
             dimension=int(e('DIMENSION', '512')),
             det_size=int(e('DET_SIZE', '640')),
             min_det_score=float(e('MIN_DET_SCORE', '0.5')),
+            liveness=(e('LIVENESS') or 'observe').lower(),
+            liveness_threshold=float(e('LIVENESS_THRESHOLD', '0.8')),
+            liveness_min_face_px=int(e('LIVENESS_MIN_FACE_PX', '64')),
             storage_backend=(e('STORAGE_BACKEND') or 'local').lower(),
             storage_dir=e('STORAGE_DIR') or DEFAULT_STORAGE_DIR,
             supabase_url=(e('SUPABASE_URL') or '').rstrip('/'),
@@ -124,6 +135,12 @@ class Settings:
         """Falla al arrancar (fail-fast) si la configuracion es insegura o incompleta."""
         if self.env == 'production' and not self.api_key:
             raise RuntimeError('API_KEY es obligatoria en modo produccion: el servicio no arranca sin ella.')
+        if self.liveness not in ('off', 'observe'):
+            raise RuntimeError('LIVENESS debe ser off u observe.')
+        if not 0 <= self.liveness_threshold <= 1:
+            raise RuntimeError('LIVENESS_THRESHOLD debe estar en [0, 1].')
+        if self.liveness_min_face_px < 1:
+            raise RuntimeError('LIVENESS_MIN_FACE_PX debe ser >= 1.')
         if self.storage_backend not in ('local', 'supabase'):
             raise RuntimeError('STORAGE_BACKEND debe ser local o supabase.')
         if self.storage_backend == 'supabase' and not (self.supabase_url and self.supabase_service_role_key):

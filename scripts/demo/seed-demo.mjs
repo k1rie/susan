@@ -507,6 +507,16 @@ async function verificar({ cfg, cliente, demo, hoy }) {
     comprobar(cams.items.some((c) => c.tipo === 'navegador' && c.estatus === 'activa'),
         `técnico: ${cams.total} cámaras; la del navegador del A-12 está activa`);
 
+    // Laboratorios: la cola del administrador trae las pendientes con su conflicto, y el docente ve solo las suyas.
+    const labs = await rpcComo(cliente, CUENTAS.admin, 'api_laboratorio_solicitudes_listar', { p_limit: 50 });
+    comprobar(labs.conteos.pendiente >= 3 && labs.conteos.aprobada >= 2 && labs.conteos.rechazada >= 1,
+        `laboratorios: ${labs.conteos.pendiente} pendientes, ${labs.conteos.aprobada} aprobadas, ${labs.conteos.rechazada} rechazada(s)`);
+    comprobar(labs.items.some((i) => i.estatus === 'pendiente' && i.conflicto) && labs.items.some((i) => i.compite > 0),
+        'laboratorios: hay una pendiente con conflicto y dos que compiten por el mismo horario');
+    const labsDoc = await rpcComo(cliente, CUENTAS.docente1, 'api_laboratorio_solicitudes_listar', { p_limit: 50 });
+    comprobar(labsDoc.items.every((i) => i.docente.nombre_completo.includes('Ortega')),
+        `laboratorios: docente1 ve solo sus ${labsDoc.total} solicitudes`);
+
     // Archivos referenciados.
     const docs = (await cliente.query('SELECT objeto_documento AS ruta FROM consentimiento UNION ALL SELECT objeto_documento FROM justificante')).rows;
     const sinDoc = docs.filter((d) => !existeObjeto(cfg, d.ruta)).length;
@@ -554,6 +564,7 @@ async function main() {
         }
         await asegurarCasosRevision(ctx);
         await ejecutarSql(cliente, 'limites.sql', { hoy: ctx.hoy });
+        await ejecutarSql(cliente, 'laboratorios.sql', { hoy: ctx.hoy, reiniciar_lab: MODO !== 'normal' ? '1' : '0' });
         if (MODO === 'abierta') await abrirSesionDeHoy(ctx);
         if (MODO !== 'normal') await limpiarRecortesHuerfanos(ctx);
         await escribirDocumentos(ctx);

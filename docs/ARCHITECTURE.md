@@ -18,7 +18,7 @@ Los contratos de detalle (RPC, rutas, formas JSON) viven en `docs/API.md` y `doc
    Programador de tareas = /api/jobs/* (cron)     · construye/carga índice (JSON en el bucket)
  DATOS ───────────────────────────────────────────────────────────────────────────
    PostgreSQL (Supabase): 20 tablas 3FN (19 de la spec + `plantilla_foto`) + RLS + triggers + RPC api_*/svc_*
-   Supabase Storage: bucket privado `susan-private` (fotos, documentos, recortes, índice FAISS .json)
+   Supabase Storage: bucket privado `susan-private` (documentos, recortes, índice FAISS .json; las fotos de registro solo viven hasta que se indexan, ext. 18)
 ```
 
 Reglas de reparto (spec Tabla 34): las **reglas de negocio nunca viven en la interfaz**. Viven en PostgreSQL
@@ -62,11 +62,11 @@ cuentas (Route Handler con service_role → `auth.admin.createUser` + fila `usua
 ```
 PÚBLICO     /login (P-01) · /recuperar · /cambiar-contrasena
 DOCENTE     /docente (P-02) · /docente/sesiones/[id] (P-03 con cámaras / P-04 pase manual, según modo_registro)
-            /docente/revision (P-05) · /reportes (P-07) · /analitica
+            /docente/revision (P-05) · /docente/laboratorios (solicitudes de laboratorio) · /reportes (P-07) · /analitica
 ALUMNO      /alumno (P-08)
 ADMIN       /admin · /admin/grupos · /admin/grupos/[id] (P-09) · /admin/alumnos · /admin/alumnos/nuevo ·
             /admin/alumnos/[id] (P-06) · /admin/docentes · /admin/materias · /admin/aulas · /admin/usuarios ·
-            /admin/bitacora · /reportes · /analitica
+            /admin/bitacora · /admin/laboratorios (autorizar solicitudes de laboratorio) · /reportes · /analitica
 TÉCNICO     /tecnico (cámaras, parámetros del sistema, índice facial)
 ```
 
@@ -113,7 +113,7 @@ Superficie PERMITIDA de ese objeto (nada más; así el modo local puede imitarla
 
 ## 5. Biometría e índice FAISS (spec §3.5.1, RN-12, RNF-03/09/14)
 
-- La BD guarda por rostro solo `faiss_id` + rutas `objeto_*`. El vector de consulta de cada captura existe solo en la
+- La BD guarda por rostro solo `faiss_id` + rutas `objeto_*` (la de la foto de registro pasa a `NULL` cuando la foto se borra al indexarse: ext. 18, `docs/DECISIONS.md` §8). El vector de consulta de cada captura existe solo en la
   memoria del servicio y no figura en ninguna respuesta.
 - **Índice = archivo JSON versionado en el bucket** (`indice/<version>.json`), formato `susan-faiss-json/1`:
   `{ format, version, dimension, model, metric: "ip", created_at, ntotal, ids: [int…], vectors_b64: "<float32 LE
@@ -142,6 +142,10 @@ Superficie PERMITIDA de ese objeto (nada más; así el modo local puede imitarla
   - **Compatibilidad**: las plantillas de una foto siguen funcionando sin migración manual (backfill + trigger crean su fila `orden = 1`). Orden de despliegue: SQL, servicio, web.
   - Archivado: sigue siendo solo `activa = false`; las fotos extra no tienen bandera propia (su estado es el de la plantilla padre) y, como la foto principal, no se borran del bucket al
     archivar (ver la brecha de retención en `docs/DECISIONS.md`). Contratos y algoritmo: `docs/api/biometria.md` §4.
+- **Autoservicio del alumno** (extensión 19; `docs/api/biometria.md` §7). El alumno acepta el aviso y registra su propio rostro por `POST /api/yo/*` (rol `alumno`): ninguna ruta ni RPC `api_mi_*`
+  recibe `id_alumno`/`id_consent`, salen de la sesión (`api_mi_registro`). El consentimiento es una aceptación electrónica con **constancia PDF generada por el servidor** (`lib/server/constancia.js`, con la huella
+  del texto de `lib/avisoBiometrico.js`). El rostro nuevo se busca en el índice en uso entre los demás alumnos (`svc_faiss_ids_otros_alumnos` → `POST /v1/recognize`, mismo umbral que el pase de lista) y se rechaza si ya
+  es de otra matrícula; `app.plantilla_registrar` es el núcleo común de RN-12/RN-13 para alumno y administrador. El servicio de reconocimiento no cambia.
 - Puntaje y modelo: el embedder es enchufable (`EMBEDDER=insightface|fake`); `fake` (determinista) permite pruebas sin
   modelos. Dimensión = parámetro `dimension_vector` (512).
 
@@ -156,7 +160,7 @@ Cierre: `api_cerrar_sesion` (docente) o `/api/jobs/cerrar-sesiones` (cron) → m
 
 ## 7. Propiedad de archivos (para trabajo en paralelo)
 
-Cada agente edita **solo** lo suyo; lo demás se pide en `requests` del reporte final.
+Cada frente edita **solo** lo suyo; lo demás se pide en `requests` del reporte final.
 **El SQL es la fuente de verdad del contrato de RPC**: cada función lleva `COMMENT ON FUNCTION` con argumentos y la
 forma JSON que devuelve, y `scripts/gen-api-catalog.mjs` genera `docs/API-RPC.md` a partir de `pg_proc`. Los documentos
 `docs/api/*.md` son diseño de referencia (algunos son parciales); si el SQL y un documento difieren, manda el SQL.
@@ -177,7 +181,7 @@ forma JSON que devuelve, y `scripts/gen-api-catalog.mjs` genera `docs/API-RPC.md
 | `web/src/app/(app)/docente/revision/**`, `components/revision/**`, `components/alumno/RegistrarJustificanteForm`, `MisJustificantes` | screens-revision |
 | `web/src/app/(app)/reportes/**`, `(app)/alumno/**`, `components/reportes/**`, resto de `components/alumno/**` | screens-reportes |
 | `web/src/app/(app)/analitica/**`, `components/analitica/**` | screens-analitica |
-| `web/src/app/(app)/admin/alumnos/**`, `components/admin/alumnos/**` (AlumnoForm, ConsentimientoPanel, PlantillaFacialPanel, CapturaGuiadaPlantilla, SubidaFotosPlantilla, GaleriaTomas, CalidadFotoResumen) | screens-alumnos |
+| `web/src/app/(app)/admin/alumnos/**`, `components/admin/alumnos/**` (AlumnoForm, ConsentimientoPanel, PlantillaFacialPanel, RegistroFacialGuiado, SubidaFotosPlantilla, GaleriaTomas, CalidadFotoResumen) | screens-alumnos |
 | `web/src/app/(app)/admin/grupos/**`, `components/admin/grupos/**` | screens-grupos |
 | `web/src/app/(app)/admin/page.jsx`, `admin/{docentes,materias,aulas,usuarios,bitacora,importar}/**`, `components/admin/catalogos/**` | screens-catalogos |
 | `web/src/app/(app)/tecnico/**`, `components/tecnico/**` | screens-tecnico |
@@ -197,8 +201,9 @@ forma JSON que devuelve, y `scripts/gen-api-catalog.mjs` genera `docs/API-RPC.md
    del 1er avance.
 6. Carga masiva de alumnos por CSV (herencia de SmartClass `importGroup`).
 7. Tabla `plantilla_foto` (20 tablas frente a las 19 de la spec): plantilla de 3 a 8 fotos promediadas en un solo vector (centroide en el servicio de reconocimiento), con RN-12 intacta.
+8. Laboratorios: `aula.tipo` (`aula` | `laboratorio`), tabla `solicitud_laboratorio` (21 tablas) y RPC `api_laboratorio*`; el docente solicita y el administrador autoriza. Parámetros 13 y 14 (`lab_anticipacion_horas`, `lab_horizonte_dias`). Ver `docs/DECISIONS.md` §11.
 
-## 9. Fuera de alcance (spec §1.2): entrenar el modelo, control de acceso físico, calificaciones, app móvil nativa, detección de vida (anti-spoofing). QR (de SmartClass) no se incluye: la spec no lo contempla.
+## 9. Fuera de alcance (spec §1.2): entrenar el modelo, control de acceso físico (la **autorización** de laboratorios sí está en alcance desde la extensión 20; la puerta con cámara es una fase posterior), calificaciones, app móvil nativa, detección de vida (anti-spoofing). QR (de SmartClass) no se incluye: la spec no lo contempla.
 
 ## 10. Notas de entorno local (verificadas en la máquina de desarrollo)
 
@@ -237,8 +242,8 @@ api_matriz_grupo(p_id_grupo) -> { "fechas": ["2026-08-17", "..."],
 
 **Servicio de reconocimiento** (cabecera `X-API-Key`; detalle en `docs/api/biometria.md` §servicio):
 `POST /v1/recognize` multipart: `image` (archivo) **o** `camera_url`, `allowed_faiss_ids` (JSON array), `crop_prefix`, `max_faces` (60).
-200 → `{ index_version, elapsed_ms, image:{width,height}, faces:[{ bbox:[x1,y1,x2,y2], det_score, candidate:{faiss_id,score}|null, objeto_recorte:string|null }] }`
-(nunca el vector). Errores: 401, 409 `INDEX_NOT_LOADED`, 422 imagen inválida, 504 cámara inalcanzable.
+200 → `{ index_version, elapsed_ms, image:{width,height}, faces:[{ bbox:[x1,y1,x2,y2], det_score, candidate:{faiss_id,score}|null, objeto_recorte:string|null, vivacidad?:{estado,es_viva,puntaje} }] }`
+(nunca el vector; `vivacidad` es aditiva, informativa y ausente con el embedder `fake` o `LIVENESS=off`, ver README del servicio). Errores: 401, 409 `INDEX_NOT_LOADED`, 422 imagen inválida, 504 cámara inalcanzable.
 Además: `GET /health`, `GET /v1/index`, `POST /v1/photo/check`, `POST /v1/photo/check-set`, `POST /v1/index/build`, `POST /v1/index/activate`.
 `POST /v1/photo/check-set`: multipart con `images` repetido (1 a 8 archivos) → `{ total, aceptadas, minimo, maximo, suficiente, consistente, ambiguo, umbral_coseno, coseno_min, coseno_medio, coseno_max_par, advertencias, fotos:[{ indice, estado: aceptada|calidad|inconsistente|ilegible, rostros, un_solo_rostro, calidad, motivo_rechazo, motivo_codigo, coseno_resto }] }`
 (nunca el vector; no guarda nada). `POST /v1/index/build` acepta además entradas `{ objetos_foto: [...] }` (2 a 8 fotos, promedio en el servicio) y responde con `muestras` por plantilla multifoto. Contrato completo en `docs/api/biometria.md` §4.

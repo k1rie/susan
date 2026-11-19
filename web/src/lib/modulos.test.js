@@ -72,7 +72,7 @@ describe('Pasar lista (acción principal del docente)', () => {
 
 describe('consultas', () => {
     it('separa activos y próximos por rol', () => {
-        expect(modulosActivos('alumno').map((m) => m.id)).toEqual(['mi-asistencia']);
+        expect(modulosActivos('alumno').map((m) => m.id)).toEqual(['mi-asistencia', 'registro-facial']);
         expect(modulosParaRol('docente').length).toBe(modulosActivos('docente').length + modulosProximos('docente').length);
         expect(modulosProximos('tecnico').map((m) => m.id)).toEqual(['acceso-campus']);
         expect(modulosParaRol('otro')).toEqual([]);

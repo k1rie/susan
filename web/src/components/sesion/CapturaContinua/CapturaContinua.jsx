@@ -15,6 +15,7 @@ import { cierreHabilitado, motivoCierre } from '../MonitorSesion/monitorSesion.u
 import ResumenPaseLista from '../ResumenPaseLista';
 import LienzoSimulado from '../LienzoSimulado';
 import SimuladorCamara, { useSimuladorCamara } from '../SimuladorCamara';
+import { marcosDelFotograma } from '../SimuladorCamara/simuladorCamara.utils.js';
 import SinAccesoCamara from '../SinAccesoCamara';
 import VistaCamara from '../VistaCamara';
 import { estadoVista, fuentesDeCaptura, nombreCamara } from './capturaContinua.utils.js';
@@ -54,6 +55,7 @@ export default function CapturaContinua({ sesion, camaras = [], alumnos = [], to
     const [usarNavegador, setUsarNavegador] = useState(true);
     const [camaraLista, setCamaraLista] = useState(false);
     const [errorCamara, setErrorCamara] = useState(null);
+    const [deteccionCamara, setDeteccionCamara] = useState(null);
     const camaraRef = useRef(null);
     const panelRef = useRef(null);
 
@@ -96,6 +98,11 @@ export default function CapturaContinua({ sesion, camaras = [], alumnos = [], to
     const puedeCerrar = cierreHabilitado(sesion);
     const sinFuentes = !navegadorEnUso && !simulacionEncendida && camarasIp.length === 0;
 
+    // Detección en vivo para el chip y los recuadros: la cámara real la detecta en el navegador (CameraCapture); la simulada ya sabe dónde
+    // dibuja cada rostro. Es solo retroalimentación visual: lo que cuenta lo decide el reconocimiento del servidor.
+    const simulados = simulacionEncendida ? marcosDelFotograma(simulador.plan) : null;
+    const deteccion = simulados ? { estado: 'listo', cantidad: simulados.cantidad } : navegadorEnUso && !camaraConError ? deteccionCamara : null;
+
     let medio;
     let enmarcar = true;
     if (simulacionEncendida) {
@@ -110,6 +117,8 @@ export default function CapturaContinua({ sesion, camaras = [], alumnos = [], to
                     active={activo}
                     showShutter={false}
                     facingMode="environment"
+                    detectarRostros
+                    onDeteccion={setDeteccionCamara}
                     allowDeviceSelect
                     className={CLASES_CAMARA}
                     onReady={() => {
@@ -177,7 +186,7 @@ export default function CapturaContinua({ sesion, camaras = [], alumnos = [], to
 
             <div className="grid grid-cols-1 gap-5 lg:grid-cols-5 lg:gap-6">
                 <div className="flex min-w-0 flex-col gap-3 lg:col-span-3">
-                    <VistaCamara estado={estado} etiquetaFuente={nombreCamara(camaraElegida)} simulada={simulacionEncendida} enmarcar={enmarcar} className={camaraConError ? MARCO_VISTA : undefined}>
+                    <VistaCamara estado={estado} etiquetaFuente={nombreCamara(camaraElegida)} simulada={simulacionEncendida} enmarcar={enmarcar} deteccion={deteccion} marcos={simulados?.marcos} className={camaraConError ? MARCO_VISTA : undefined}>
                         {medio}
                     </VistaCamara>
                     {!simulacionEncendida && fuentes.navegador.length > 0 && (

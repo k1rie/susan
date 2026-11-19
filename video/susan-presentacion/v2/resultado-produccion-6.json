@@ -14,7 +14,7 @@
     "preview-frame.mjs 10-alumno --at 2.95,3.06,3.12,3.20,3.3 y revisión con Read de t-3.12 y t-3.45: la campana de la píldora y la llama se ven quietas, derechas y bien formadas, y el cuadro sigue legible."
    ],
    "pendientes": [
-    "Para el agente que edita v2/plan.json (sin cambios de tiempos ni sonidos): si el texto del plan menciona 'llama y campana de 10' como rotación inherente que se conserva (reglas 7(j) y 21 de spec), actualizarlo: en 10-alumno ya no hay rotación alguna; la campana hace un pulso de escala (3.00-3.46 s) y la llama parpadea con escala vertical.",
+    "Para el frente que edita v2/plan.json (sin cambios de tiempos ni sonidos): si el texto del plan menciona 'llama y campana de 10' como rotación inherente que se conserva (reglas 7(j) y 21 de spec), actualizarlo: en 10-alumno ya no hay rotación alguna; la campana hace un pulso de escala (3.00-3.46 s) y la llama parpadea con escala vertical.",
     "frame-check (a) cuenta el pulso de escala de la campana como evento visual, pero con mucho menos amplitud que el balanceo anterior; no afecta al resultado (0 % lento)."
    ],
    "decision": "Sin cambios de sonidos, nombres, T ni read_mark en 10-alumno. 'tap' sigue en T_TAP = 2.90 s local (36.30 s abs). La campana usa un pulso de escala 1 -> 1.14 -> 1 en 3.00-3.46 s y la llama solo scaleY desde el origen 50% 88%. Al plan solo conviene quitar la mención de 'rotación inherente de llama y campana'."
@@ -35,7 +35,7 @@
    ],
    "pendientes": [
     "Hay que regenerar index/mezcla (build-index, mount-sfx, verify-sfx) para que el cue de 05-camara desaparezca de la mezcla de audio.",
-    "Actualizar v2/plan.json (lo hace el agente final): ver 'decision'."
+    "Actualizar v2/plan.json (lo hace el frente final): ver 'decision'."
    ],
    "decision": "Para v2/plan.json. 05-camara: borrar la entrada sfx 'sheen-s' (T=2.80, vol 0.30, 'en T=2.80 (tween)'), que ya no existe en el cuadro. En la hoja de beats, quitar 'sfx: sheen-s ...' del beat 2.80 del resplandor; el visual no cambia. El cue sheen-s deja de usarse en todo el video (era su único uso), así que el contador de sonidos baja en 1 y conviene limpiar el texto global que menciona 'sheen/sheen-s'. 06-vivo: el cue de sheen no cambia (T=2.40, vol 0.30, anclado al tween del glint). Actualizar solo la descripción del beat 2.40-2.70: el glint ahora corre x -56 -> 150, 0.44 s, power2.out, y es visible en el fotograma 2.433, un fotograma después del inicio. Valores de origen del glint: GL = 2.40, x -56 -> 150, duración 0.44 s.\"]"
   },
@@ -55,7 +55,7 @@
     "Uso de 'flash' como nombre de sonido: solo la transición 06->07 (v2/plan.json transitions[5].sfx = {name: flash, vol: 0.45, peak: 0}, copiado a index.html línea 304 y etiqueta de la línea 444, y a v2/sfx-cues.json y v2/sfx-mounted.json). Ningún cuadro de compositions/frames lo usa, así que verify-sfx solo fallará en el index/plan hasta que se cambie el nombre. El tipo de transición 'flash' del plan es otra cosa y no cambia."
    ],
    "pendientes": [
-    "El agente del plan debe poner transitions[5].sfx = {name: 'flash-soft', vol: 0.45, peak: 0} en v2/plan.json. Después hay que reconstruir con build-index y mount-sfx (yo no los ejecuté).",
+    "El frente del plan debe poner transitions[5].sfx = {name: 'flash-soft', vol: 0.45, peak: 0} en v2/plan.json. Después hay que reconstruir con build-index y mount-sfx (yo no los ejecuté).",
     "Texto del plan que cita el sonido viejo y habría que ajustar: la regla SONIDO-LENGUAJE (g) 'flash en el corte 06->07' (v2/plan.json línea 16), la hoja del cuadro 07 ('Sonido de la transición: flash vol 0.45', línea 1356) y la nota de la transición 06->07.",
     "Sin escucha humana: la elección se apoya en el espectro, que es lo medible aquí. flash-soft está al final de la cola de masa del mismo corte que el shutter de 05->06 y suena distinto de snap por el aire de banda media."
    ],
@@ -67,7 +67,7 @@
     "/Users/diegoguerrero/Developer/SUSAN/video/susan-presentacion/compositions/frames/04-intro.html, camara, tween de 2.34 a 3.24 s (local; abs 12.79-13.69 s): camTo pasa de s 1, foco (1110,540), x -150 a s 1.06, foco (960,540), x 0, y 0, con dur 0.9, power1.inOut y sfx:false. Es el único cambio del archivo. Motivo: el x -150 corría el lockup 150 px a la izquierda y, sin los destellos, dejaba vacío el tercio derecho.",
     "No cambian: tiempos, duraciones, el empuje 1.08 a 1.20 (0.52-1.20 s), el pull-back 1.20 a 1.00 en el impacto (1.20 s, zoom-out), el sfx(tl, 2.79, 'whoosh-m', 0.15) con su mismo T (sigue en el pico del inOut), los demás sonidos, read_mark 3.19, el bloque canónico de helpers y la duración de 4.2 s.",
     "Percepción del nuevo gesto: 6 % de recorrido, 6.7 %/s medio y 13.3 %/s de pico (frame-check), por encima del mínimo de 3 %/s. Es un empuje suave en lugar de un pan, así que no hay deriva ni rotación. Se sigue lanzando con camTo, sin rotación.",
-    "Fila para frames[].cam[2] del plan (la actualiza otro agente): t 2.34, dur 0.90, power1.inOut, s 1.06, fx 960, fy 540, x 0, y 0, r 0, sfx whoosh-m@2.79 (sin cambio). Hay que cambiar su nombre y la descripción 'seguimiento lateral' por 'empuje suave'. El resumen de cámara, la hoja de beats y la nota de la transición de salida deben dejar de decir x -150, foco (1110,540) y 'wordmark en x = 810'."
+    "Fila para frames[].cam[2] del plan (la actualiza otro frente): t 2.34, dur 0.90, power1.inOut, s 1.06, fx 960, fy 540, x 0, y 0, r 0, sfx whoosh-m@2.79 (sin cambio). Hay que cambiar su nombre y la descripción 'seguimiento lateral' por 'empuje suave'. El resumen de cámara, la hoja de beats y la nota de la transición de salida deben dejar de decir x -150, foco (1110,540) y 'wordmark en x = 810'."
    ],
    "pruebas": [
     "Medí el bbox de la tinta (#1e1919) de SUSAN con scripts/preview-frame.mjs y un script en Python. Antes del cambio: centro (810, 491) a 3.80 s. Después: centro (960.0, 488.5) a 3.80 s, bbox x 462-1458, y 364-613. A 3.19 s (read_mark): centro (959.5, 488.0).",
@@ -76,9 +76,9 @@
     "El pull-back de 1.20 s (20 %, pico 176.7 %/s, centrado en el impacto) y el empuje 0.52-1.20 s (12 %, pico 52.7 %/s) siguen idénticos. No ejecuté render, build-index, mount-sfx ni verify-sfx, y no toqué el plan ni los scripts. Copia del archivo original en el scratchpad: 04-intro.pre-final.html."
    ],
    "pendientes": [
-    "Plan (requests, lo hace el agente final): en transiciones[04->05] cambiar el origen del iris de [0.42, 0.5] a [0.5, 0.452] (x 960/1920 = 0.5; y = 488.5/1080 = 0.452). Con [0.5, 0.5] también queda sobre el wordmark: el origen cae a 48 px de su centro, dentro de la letra, y el iris termina cubriendo todo el cuadro. La nota de la transición dice 'el wordmark queda centrado en x=810 px': debe decir x=960.",
+    "Plan (requests, lo hace el frente final): en transiciones[04->05] cambiar el origen del iris de [0.42, 0.5] a [0.5, 0.452] (x 960/1920 = 0.5; y = 488.5/1080 = 0.452). Con [0.5, 0.5] también queda sobre el wordmark: el origen cae a 48 px de su centro, dentro de la letra, y el iris termina cubriendo todo el cuadro. La nota de la transición dice 'el wordmark queda centrado en x=810 px': debe decir x=960.",
     "Plan: actualizar la hoja de 04 (frames[].cam[2], el resumen de cámara, la hoja de beats 'seguimiento lateral' y el texto de la salida) con los valores nuevos de la fila de arriba. El verbo principal de 04 sigue siendo pull-back.",
-    "Variedad con el cuadro vecino: 05 abre con un snap-zoom a 1.09 en 0.45 s, y el último gesto de 04 es ahora un empuje suave 1.00 a 1.06, no un zoom en snap. Si el agente final prefiere un gesto vertical en lugar del empuje, es un cambio de una sola línea.",
+    "Variedad con el cuadro vecino: 05 abre con un snap-zoom a 1.09 en 0.45 s, y el último gesto de 04 es ahora un empuje suave 1.00 a 1.06, no un zoom en snap. Si el frente final prefiere un gesto vertical en lugar del empuje, es un cambio de una sola línea.",
     "No pude escuchar el audio. No cambió ningún sonido ni su T."
    ],
    "decision": "Origen del iris 04->05 en el plan: [0.5, 0.452]. En el último fotograma útil (3.80 s) el wordmark mide centro x = 960.0, y = 488.5, a 0.5 y 0.452 del ancho y el alto del cuadro. [0.5, 0.5] sirve igual. Fila nueva de cámara 04 (cam[2]): t 2.34, dur 0.90, power1.inOut, s 1.06, fx 960, fy 540, x 0, y 0, r 0, whoosh-m@2.79 sin cambio. Cambio hecho en /Users/diegoguerrero/Developer/SUSAN/video/susan-presentacion/compositions/frames/04-intro.html."

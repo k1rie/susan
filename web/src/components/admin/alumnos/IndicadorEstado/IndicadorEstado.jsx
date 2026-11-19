@@ -1,6 +1,14 @@
+import { CircleCheck, CircleDashed } from 'lucide-react';
 import Badge from '@/components/ui/Badge';
 
-// Indicador con texto y color (nunca solo color): ok -> verde, falso -> gris/ámbar según `tone`.
+// Indicador con texto, icono y color (nunca solo color): ok -> verde con palomita, falso -> gris/ámbar según `tone`, con círculo
+// punteado («pendiente»).
 export default function IndicadorEstado({ ok, textoOk, textoNo, toneNo = 'neutral' }) {
-    return <Badge tone={ok ? 'success' : toneNo}>{ok ? textoOk : textoNo}</Badge>;
+    const Icono = ok ? CircleCheck : CircleDashed;
+    return (
+        <Badge tone={ok ? 'success' : toneNo} className="gap-1">
+            <Icono aria-hidden="true" className="size-3.5" strokeWidth={1.75} />
+            {ok ? textoOk : textoNo}
+        </Badge>
+    );
 }

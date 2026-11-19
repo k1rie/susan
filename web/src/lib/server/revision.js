@@ -72,6 +72,9 @@ export async function detallesDeCaso({ rpc, svc, admin, me, ip, params, query })
         generado_en: new Date().toISOString(),
         foto_registro: foto,
         total: datos.total ?? lecturas.length,
+        // Marca derivada de la detección de vida (migración 0238): alguna lectura válida con es_viva = false. false con una base anterior.
+        sospechosa: Boolean(datos.sospechosa),
+        lecturas_no_vivas: datos.lecturas_no_vivas ?? 0,
         // Nunca se reenvía ninguna ruta objeto_*.
         lecturas: lecturas.map(({ objeto_recorte: ruta, tiene_recorte: tiene, ...resto }) => ({
             ...resto,

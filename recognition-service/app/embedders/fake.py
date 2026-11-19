@@ -83,7 +83,13 @@ class FakeEmbedder(Embedder):
     def yaw_ratio_for(self, seed: int) -> float | None:
         return None
 
-    def detect(self, rgb: np.ndarray) -> list[DetectedFace]:
+    def pose_for(self, seed: int) -> tuple[float, float, float] | None:
+        return None
+
+    def vivacidad_for(self, seed: int) -> dict | None:
+        return None
+
+    def detect(self, rgb: np.ndarray, con_pose: bool = False, con_vivacidad: bool = False) -> list[DetectedFace]:
         r, g, b = (rgb[..., i].astype(np.int16) for i in range(3))
         mask = (r > 180) & (g < 80) & (b > 180)  # marco magenta (tolerante a JPEG)
         out = []
@@ -99,5 +105,7 @@ class FakeEmbedder(Embedder):
                 embedding=self.vector_for(seed),
                 frontal=True,
                 yaw_ratio=self.yaw_ratio_for(seed),
+                pose=self.pose_for(seed) if (con_pose and self.mide_pose) else None,
+                vivacidad=self.vivacidad_for(seed) if (con_vivacidad and self.mide_vivacidad) else None,
             ))
         return out

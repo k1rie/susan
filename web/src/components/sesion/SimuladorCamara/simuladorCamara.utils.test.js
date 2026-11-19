@@ -11,6 +11,7 @@ import {
     descripcionDelFotograma,
     dibujarFotograma,
     disposicionDeRostros,
+    marcosDelFotograma,
     escenarioValido,
     ESCENARIOS,
     hayVisitanteEnCiclo,
@@ -367,5 +368,39 @@ describe('textos', () => {
     it('descripción del fotograma: cuántos alumnos y visitantes', () => {
         expect(descripcionDelFotograma({ ciclo: 0, alumnos: 12, visitantes: 0 })).toContain('ciclo 1: 12 alumnos.');
         expect(descripcionDelFotograma({ ciclo: 1, alumnos: 1, visitantes: 1 })).toContain('1 alumno y un visitante');
+    });
+});
+
+describe('marcosDelFotograma', () => {
+    const plan = (n) => ({ rostros: Array.from({ length: n }, (_, i) => ({ semilla: i })) });
+
+    it('da un recuadro por rostro dibujado, en fracciones del lienzo y dentro de él', () => {
+        const { marcos, cantidad } = marcosDelFotograma(plan(24));
+        expect(cantidad).toBe(24);
+        expect(marcos).toHaveLength(24);
+        for (const m of marcos) {
+            expect(m.x).toBeGreaterThanOrEqual(0);
+            expect(m.y).toBeGreaterThanOrEqual(0);
+            expect(m.x + m.ancho).toBeLessThanOrEqual(1);
+            expect(m.y + m.alto).toBeLessThanOrEqual(1);
+        }
+    });
+
+    it('cada recuadro rodea al cuadrado magenta de su rostro (con holgura, sin cortarlo)', () => {
+        const { lado, rostros } = disposicionDeRostros(5);
+        const { marcos } = marcosDelFotograma(plan(5));
+        marcos.forEach((m, i) => {
+            expect(m.x * 960).toBeLessThanOrEqual(rostros[i].x);
+            expect((m.x + m.ancho) * 960).toBeGreaterThanOrEqual(rostros[i].x + lado);
+            expect(m.y * 540).toBeLessThanOrEqual(rostros[i].y);
+            expect((m.y + m.alto) * 540).toBeGreaterThanOrEqual(rostros[i].y + lado);
+        });
+    });
+
+    it('sin rostros no hay recuadros, y los que no caben en el lienzo no se cuentan', () => {
+        expect(marcosDelFotograma(plan(0))).toEqual({ marcos: [], cantidad: 0 });
+        expect(marcosDelFotograma(undefined)).toEqual({ marcos: [], cantidad: 0 });
+        const d = disposicionDeRostros(400);
+        expect(marcosDelFotograma(plan(400)).cantidad).toBe(400 - d.omitidos);
     });
 });

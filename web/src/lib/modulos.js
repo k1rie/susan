@@ -6,6 +6,7 @@ import {
     ChartLine,
     ClipboardCheck,
     FileBarChart,
+    FlaskConical,
     GraduationCap,
     HeartHandshake,
     LayoutDashboard,
@@ -51,11 +52,13 @@ export const MODULOS = [
     { id: 'panel-docente', titulo: 'Mi panel', descripcion: 'Sesiones de hoy, pendientes de revisión y alertas de asistencia de tus grupos.', icono: LayoutDashboard, categoria: 'asistencia', roles: ['docente'], estado: 'activo', href: '/docente', tono: 'azul' },
     { id: 'pasar-lista', titulo: 'Pasar lista', descripcion: 'Abre la sesión de hoy y registra la asistencia con la cámara del aula o a mano.', icono: ScanFace, categoria: 'asistencia', roles: ['docente'], estado: 'activo', href: '/docente/pasar-lista', tono: 'azul', portada: 'degradado' },
     { id: 'revision', titulo: 'Revisión de registros', descripcion: 'Confirma o corrige los reconocimientos dudosos y los alumnos sin lectura.', icono: ClipboardCheck, categoria: 'asistencia', roles: ['docente'], estado: 'activo', href: '/docente/revision', tono: 'dorado' },
+    { id: 'laboratorios', titulo: 'Laboratorios', descripcion: 'Solicita un laboratorio para tu grupo, elige fecha y horario, y revisa si el administrador lo autorizó.', icono: FlaskConical, categoria: 'asistencia', roles: ['docente'], estado: 'activo', href: '/docente/laboratorios', tono: 'verde' },
     // ---- Activos: docente y administración ----
     { id: 'reportes', titulo: 'Reportes', descripcion: 'Asistencia por periodo, grupo y alumno; exporta a CSV o PDF.', icono: FileBarChart, categoria: 'asistencia', roles: ['docente', 'administrador'], estado: 'activo', href: '/reportes', tono: 'verde' },
     { id: 'analitica', titulo: 'Analítica de ausentismo', descripcion: 'Tendencia, proyección y riesgo con métodos numéricos para intervenir a tiempo.', icono: ChartLine, categoria: 'analisis', roles: ['docente', 'administrador'], estado: 'activo', href: '/analitica', tono: 'violeta' },
     // ---- Activos: alumno ----
     { id: 'mi-asistencia', titulo: 'Mi asistencia', descripcion: 'Tu historial por materia, el límite de faltas para examen y tus justificantes.', icono: UserCheck, categoria: 'asistencia', roles: ['alumno'], estado: 'activo', href: '/alumno', tono: 'azul' },
+    { id: 'registro-facial', titulo: 'Mi registro facial', descripcion: 'Acepta el aviso de privacidad y registra tu rostro para que tu asistencia se tome con la cámara.', icono: ScanFace, categoria: 'asistencia', roles: ['alumno'], estado: 'activo', href: '/alumno/registro', tono: 'dorado' },
     // ---- Activos: administración ----
     { id: 'resumen-admin', titulo: 'Resumen del periodo', descripcion: 'Contadores del periodo: alumnos, grupos, sesiones, cámaras y consentimientos.', icono: LayoutDashboard, categoria: 'administracion', roles: ['administrador'], estado: 'activo', href: '/admin', tono: 'azul' },
     { id: 'grupos', titulo: 'Grupos y horarios', descripcion: 'Grupos del periodo, inscripciones, horarios y cámaras por aula.', icono: Users, categoria: 'administracion', roles: ['administrador'], estado: 'activo', href: '/admin/grupos', tono: 'dorado' },
@@ -63,6 +66,7 @@ export const MODULOS = [
     { id: 'docentes', titulo: 'Docentes', descripcion: 'Alta y baja de docentes y sus cuentas de acceso.', icono: Presentation, categoria: 'administracion', roles: ['administrador'], estado: 'activo', href: '/admin/docentes', tono: 'verde' },
     { id: 'materias', titulo: 'Materias', descripcion: 'Catálogo de materias, créditos y plan de estudios.', icono: BookOpen, categoria: 'administracion', roles: ['administrador'], estado: 'activo', href: '/admin/materias', tono: 'violeta' },
     { id: 'aulas', titulo: 'Aulas', descripcion: 'Aulas, capacidad y cámaras instaladas.', icono: Building2, categoria: 'administracion', roles: ['administrador'], estado: 'activo', href: '/admin/aulas', tono: 'dorado' },
+    { id: 'solicitudes-laboratorio', titulo: 'Solicitudes de laboratorio', descripcion: 'Autoriza o rechaza los usos de laboratorio que piden los docentes y consulta la agenda de cada uno.', icono: FlaskConical, categoria: 'administracion', roles: ['administrador'], estado: 'activo', href: '/admin/laboratorios', tono: 'verde' },
     { id: 'usuarios', titulo: 'Usuarios', descripcion: 'Cuentas de acceso, roles, activación y restablecimiento de contraseña.', icono: UserCog, categoria: 'administracion', roles: ['administrador'], estado: 'activo', href: '/admin/usuarios', tono: 'azul' },
     { id: 'bitacora', titulo: 'Bitácora', descripcion: 'Registro de auditoría de correcciones, justificantes y consultas biométricas.', icono: ScrollText, categoria: 'administracion', roles: ['administrador'], estado: 'activo', href: '/admin/bitacora', tono: 'verde' },
     { id: 'sistema', titulo: 'Sistema (solo consulta)', descripcion: 'Estado de cámaras, parámetros del sistema e índice facial.', icono: Wrench, categoria: 'administracion', roles: ['administrador'], estado: 'activo', href: '/tecnico', tono: 'violeta' },

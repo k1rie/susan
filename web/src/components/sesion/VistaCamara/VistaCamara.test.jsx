@@ -44,4 +44,51 @@ describe('VistaCamara', () => {
         expect(container.querySelector('.pointer-events-none')).not.toBeNull();
         container.querySelectorAll('svg').forEach((svg) => expect(svg).toHaveAttribute('aria-hidden', 'true'));
     });
+
+    describe('detección en vivo', () => {
+        it('dice con texto cuántos rostros se ven, en singular y plural', () => {
+            const { rerender } = render(<VistaCamara estado="reconociendo" deteccion={{ estado: 'listo', cantidad: 1 }} />);
+            expect(screen.getByText('1 rostro detectado')).toBeInTheDocument();
+            rerender(<VistaCamara estado="reconociendo" deteccion={{ estado: 'listo', cantidad: 3 }} />);
+            expect(screen.getByText('3 rostros detectados')).toBeInTheDocument();
+        });
+
+        it('con el detector listo y nadie a la vista lo dice (no se queda mudo)', () => {
+            render(<VistaCamara deteccion={{ estado: 'listo', cantidad: 0 }} />);
+            expect(screen.getByText('Sin rostros a la vista')).toHaveAttribute('data-rostros', '0');
+        });
+
+        it('avisa mientras prepara el detector y si no está disponible', () => {
+            const { rerender } = render(<VistaCamara deteccion={{ estado: 'cargando', cantidad: 0 }} />);
+            expect(screen.getByText('Preparando detección…')).toBeInTheDocument();
+            rerender(<VistaCamara deteccion={{ estado: 'no-disponible', cantidad: 0 }} />);
+            expect(screen.getByText('Detección en vivo no disponible')).toBeInTheDocument();
+        });
+
+        it('sin detección, o con la cámara apagada, no hay chip', () => {
+            const { container, rerender } = render(<VistaCamara />);
+            expect(container.querySelector('[data-deteccion]')).toBeNull();
+            rerender(<VistaCamara deteccion={{ estado: 'inactivo', cantidad: 0 }} />);
+            expect(container.querySelector('[data-deteccion]')).toBeNull();
+        });
+
+        it('no añade otro role="status": el único sigue siendo el del estado del reconocimiento', () => {
+            render(<VistaCamara estado="reconociendo" deteccion={{ estado: 'listo', cantidad: 2 }} />);
+            expect(screen.getAllByRole('status')).toHaveLength(1);
+        });
+
+        it('con enmarcar dibuja los recuadros sobre el contenido (lienzo simulado)', () => {
+            const { container } = render(
+                <VistaCamara enmarcar marcos={[{ x: 0.1, y: 0.1, ancho: 0.1, alto: 0.2 }]} deteccion={{ estado: 'listo', cantidad: 1 }}>
+                    <canvas role="img" aria-label="Lienzo" />
+                </VistaCamara>,
+            );
+            expect(container.querySelectorAll('[data-marco-rostro]')).toHaveLength(1);
+        });
+
+        it('los iconos del chip son decorativos', () => {
+            const { container } = render(<VistaCamara deteccion={{ estado: 'cargando', cantidad: 0 }} />);
+            container.querySelectorAll('svg').forEach((svg) => expect(svg).toHaveAttribute('aria-hidden', 'true'));
+        });
+    });
 });

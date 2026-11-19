@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest';
 import * as admin from './admin.js';
 import * as biometria from './biometria.js';
 import * as errores from './errors.js';
+import * as laboratorios from './laboratorios.js';
 import * as plataforma from './plataforma.js';
 import * as reportes from './reportes.js';
 import * as revision from './revision.js';
@@ -11,12 +12,12 @@ import * as sesiones from './sesiones.js';
 
 const catalogo = fs.readFileSync(path.resolve(import.meta.dirname, '../../../../docs/API-RPC.md'), 'utf8');
 const camel = (s) => s.replace(/_([a-z0-9])/g, (_, c) => c.toUpperCase());
-const modulos = [plataforma, sesiones, revision, reportes, admin, biometria];
+const modulos = [plataforma, sesiones, revision, reportes, admin, biometria, laboratorios];
 
 const apis = [...catalogo.matchAll(/^### `(api_[a-z0-9_]+)\(/gm)].map((m) => m[1]);
 
 describe('sincronia con docs/API-RPC.md', () => {
-    it('el catalogo tiene las 72 api_*', () => expect(apis.length).toBe(72));
+    it('el catalogo tiene las 82 api_* (72 + las 4 api_mi_* del autoservicio + las 6 de laboratorios)', () => expect(apis.length).toBe(82));
 
     it.each(apis)('%s tiene envoltorio exportado', (nombre) => {
         const fn = camel(nombre.replace(/^api_/, ''));
@@ -25,7 +26,7 @@ describe('sincronia con docs/API-RPC.md', () => {
     });
 
     it('cada envoltorio llama a su RPC (el nombre SQL aparece en el codigo)', () => {
-        const fuente = ['plataforma', 'sesiones', 'revision', 'reportes', 'admin', 'biometria']
+        const fuente = ['plataforma', 'sesiones', 'revision', 'reportes', 'admin', 'biometria', 'laboratorios']
             .map((n) => fs.readFileSync(path.resolve(import.meta.dirname, `${n}.js`), 'utf8')).join('\n');
         for (const nombre of apis) expect(fuente).toContain(`callRpc('${nombre}'`);
     });

@@ -145,7 +145,7 @@ Corregí los dos hallazgos graves (bloqueante e importante) y los cuatro menores
    - El acercamiento va de 3.65 a 4.45.
    - El rótulo entra entre 0.52 y 0.77.
 2. **Paleta, Topes y Locked de la dirección de video** («oro solo en los dos subrayados…»), la receta de `frame.md` §8 y los packets de s02 y s08: sin subrayado.
-3. **s01 en el árbol de trabajo:** otro agente lo está editando y, en este momento, a 6.367 s pinta el anillo sin el disco ni el icono. Hay que volver a comparar el relevo 1→2 cuando lo termine.
+3. **s01 en el árbol de trabajo:** otro frente lo está editando y, en este momento, a 6.367 s pinta el anillo sin el disco ni el icono. Hay que volver a comparar el relevo 1→2 cuando lo termine.
 
 ### s05-dia-critico (5 «Qué día faltan más»)
 Revisión: corregir (4 hallazgos)

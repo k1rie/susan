@@ -24,7 +24,7 @@ cd "$P"
 | 3 Story | `STORYBOARD.md` (+ `SCRIPT.md`) | orquestador | plan aprobado en el chat (modo `collaborative`) |
 | 3.1 Audio | `audio_meta.json` | `audio.mjs` | v4: **solo SFX**; la voz, después (§2.3) |
 | 4 Visual | `storyboard.html` (bocetos) + `STORYBOARD.md` enriquecido + `assets/` | orquestador | hoja de bocetos confirmada |
-| 5 Cuadros | `compositions/frames/NN-*.html` + `index.html` | 1 sub-agente por cuadro + `assemble-index.mjs` | todos `animated` |
+| 5 Cuadros | `compositions/frames/NN-*.html` + `index.html` | 1 sub-frente por cuadro + `assemble-index.mjs` | todos `animated` |
 | 6 Final | transiciones, check, snapshots, vista previa, `renders/*.mp4` | orquestador | aprobación de la persona dueña |
 
 Modo: `BRIEF.md` tiene `flow: automation` + `storyboard: yes`, de donde se deriva **`mode: collaborative`**: hay pausa en el
@@ -559,7 +559,7 @@ exista `SCRIPT.md`, porque intentaría sintetizar la voz. La voz se suma en §5-
 2. Paquetes: `node $S/scripts/frame-packets.mjs --project "$P" --storyboard "$P/STORYBOARD.md"` → escribe
    `.hyperframes/frame-packets/<frame_id>.md` + `_role.md` (**los sobrescribe**). Falla si falta `src`, si el blueprint no
    existe o si un paquete pasa de 48 KB.
-3. Dispatch: un sub-agente por cuadro, en paralelo (u olas si hay tope). Su prompt = el contenido completo de `_role.md`
+3. Dispatch: un sub-frente por cuadro, en paralelo (u olas si hay tope). Su prompt = el contenido completo de `_role.md`
    + el de su paquete (o las dos rutas para que las lea primero) + este bloque, copiado tal cual:
    ```
    ## Dispatch context

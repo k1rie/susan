@@ -19,6 +19,27 @@ const seriesDibujadas = (columna) => segmentosDibujados(columna).map((s) => s.da
 const altoDe = (columna) => Number(/([\d.]+)%/.exec(segmentosDibujados(columna)[0].style.height)[1]);
 
 describe('LecturasCaso', () => {
+    it('caso sospechoso: aviso explicado, y cada lectura evaluada dice «Viva» o «No viva» con su puntaje (sin dato, nada)', async () => {
+        obtenerDeteccionesCaso.mockResolvedValue({
+            foto_registro: null, sospechosa: true, lecturas_no_vivas: 1,
+            lecturas: [{ ...L(1, 1, 0.9, true), es_viva: false, puntaje_vida: 0.12 }, { ...L(2, 2, 0.88, true), es_viva: true, puntaje_vida: 0.93 }, L(3, 3, 0.86, true)],
+        });
+        render(<LecturasCaso idAsistencia={5} minimoValidas={3} />);
+        await waitFor(() => expect(screen.getByText('Caso sospechoso')).toBeInTheDocument());
+        expect(screen.getByRole('alert')).toHaveTextContent(/Una lectura válida fue marcada como no viva/);
+        expect(screen.getByRole('alert')).toHaveTextContent(/el sistema no cambió el estado/);
+        expect(screen.getByText('No viva 0.120')).toBeInTheDocument();
+        expect(screen.getByText('Viva 0.930')).toBeInTheDocument();
+        expect(screen.queryAllByText(/^(No viva|Viva) /)).toHaveLength(2);  // la lectura sin evaluar no dice nada
+    });
+
+    it('sin la marca no hay aviso de sospecha', async () => {
+        obtenerDeteccionesCaso.mockResolvedValue({ foto_registro: null, sospechosa: false, lecturas: [{ ...L(1, 1, 0.9, true), es_viva: true, puntaje_vida: 0.93 }] });
+        render(<LecturasCaso idAsistencia={5} minimoValidas={3} />);
+        await waitFor(() => expect(screen.getByText('Viva 0.930')).toBeInTheDocument());
+        expect(screen.queryByText('Caso sospechoso')).toBeNull();
+    });
+
     it('con lecturas muestra el avance de válidas, la gráfica de scores con texto alternativo y una tarjeta por lectura', async () => {
         obtenerDeteccionesCaso.mockResolvedValue({ foto_registro: null, lecturas: [L(1, 1, 0.81, true), L(2, 2, 0.4, false)] });
         const { container } = render(<LecturasCaso idAsistencia={5} minimoValidas={3} />);
@@ -29,7 +50,7 @@ describe('LecturasCaso', () => {
         expect(screen.getAllByText('Válida').length).toBeGreaterThanOrEqual(2);
         expect(screen.getAllByText('No válida').length).toBeGreaterThanOrEqual(2);
         expect(tarjetas()).toHaveLength(2);
-        expect(screen.getByText('Sin foto de registro activa')).toBeInTheDocument();
+        expect(screen.getByText('La foto de registro no se conserva; solo se guarda el vector del rostro.')).toBeInTheDocument();
         // Es una gráfica hecha a mano: una columna por lectura con su score y sin el contenedor `data-slot="chart"` de la librería anterior.
         expect(columnas(container).map((c) => c.dataset.fila)).toEqual(['1', '2']);
         expect(container.querySelector('[data-slot="chart"]')).toBeNull();

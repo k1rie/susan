@@ -1,10 +1,11 @@
+// Pasos de la captura guiada y numeración de las tomas. La interfaz de la captura vive en ../RegistroFacialGuiado.
 import { ArrowLeft, ArrowRight, ArrowUp, ScanFace, SunMedium } from 'lucide-react';
 
 // Las indicaciones se leen a la persona fotografiada, por eso van en «tú». Se piden giros suaves (~15 grados):
 // con más giro el servicio descarta la toma por no estar de frente. «izquierda/derecha» asume la vista en
 // espejo de CameraCapture (facingMode user): la persona ve su propio reflejo.
 export const PASOS_TOMA = [
-    { clave: 'frente', titulo: 'De frente', indicacion: 'Mira de frente a la cámara, con el rostro dentro del óvalo.', Icono: ScanFace, opcional: false },
+    { clave: 'frente', titulo: 'De frente', indicacion: 'Mira de frente a la cámara, con el rostro dentro del círculo.', Icono: ScanFace, opcional: false },
     { clave: 'izquierda', titulo: 'Gira a la izquierda', indicacion: 'Gira la cabeza un poco hacia tu izquierda (unos 15 grados) sin dejar de ver la cámara.', Icono: ArrowLeft, opcional: false },
     { clave: 'derecha', titulo: 'Gira a la derecha', indicacion: 'Ahora gira un poco hacia tu derecha (unos 15 grados).', Icono: ArrowRight, opcional: false },
     { clave: 'arriba', titulo: 'Inclina hacia arriba', indicacion: 'Levanta ligeramente la barbilla, sin cerrar los ojos.', Icono: ArrowUp, opcional: true },
@@ -45,38 +46,4 @@ export function numerarTomas(tomas, modo) {
         ordenadas.forEach((t, i) => numeros.set(t.id, i + 1));
     }
     return numeros;
-}
-
-/** Paso a capturar: el preferido (el de una toma repetida) si está libre y, si no, el primero libre. */
-export function primerPasoLibre(tomas, preferido = null) {
-    const ocupados = new Set(tomas.filter((t) => t.paso != null).map((t) => t.paso));
-    if (preferido != null && preferido >= 0 && preferido < TOTAL_PASOS && !ocupados.has(preferido)) return preferido;
-    for (let i = 0; i < TOTAL_PASOS; i += 1) if (!ocupados.has(i)) return i;
-    return null;
-}
-
-export const textoCaptura = (paso) => `Capturar toma ${paso + 1} de ${TOTAL_PASOS}${PASOS_TOMA[paso].opcional ? ' (opcional)' : ''}`;
-
-/** Ranuras de la rejilla en modo cámara: una por paso (con su toma si ya existe) y las subidas a continuación. */
-export function ranurasGuiadas(tomas, siguiente = null) {
-    const numeros = numerarTomas(tomas, 'camara');
-    const ranuras = PASOS_TOMA.map((p, i) => {
-        const toma = tomas.find((t) => t.paso === i) ?? null;
-        return {
-            clave: `paso-${i}`,
-            numero: i + 1,
-            titulo: p.titulo,
-            toma,
-            destacada: toma === null && i === siguiente,
-            Icono: p.Icono,
-            accion: 'repetir',
-        };
-    });
-    ordenarTomas(tomas)
-        .filter((t) => t.paso == null)
-        .forEach((t) => {
-            const numero = numeros.get(t.id);
-            ranuras.push({ clave: `toma-${t.id}`, numero, titulo: t.nombre || `Foto ${numero}`, toma: t, destacada: false, accion: 'quitar' });
-        });
-    return ranuras;
 }

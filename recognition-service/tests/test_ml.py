@@ -35,6 +35,25 @@ def _jpeg(arr, calidad=92) -> bytes:
     return buf.getvalue()
 
 
+def test_pose_3d_con_signo_solo_cuando_se_pide(emb):
+    """La pose sale del modelo 1k3d68 ya incluido en buffalo_s: grados con signo, solo para el rostro mayor y solo con `con_pose`."""
+    skimage = pytest.importorskip('skimage.data')
+    rgb = np.asarray(skimage.astronaut())
+    sin = emb.detect(rgb)
+    assert sin and sin[0].pose is None  # el pase de lista nunca paga la pose
+    con = emb.detect(rgb, con_pose=True)
+    assert len(con) == 1 and con[0].pose is not None
+    cabeceo, giro, alabeo = con[0].pose
+    assert all(isinstance(v, float) for v in (cabeceo, giro, alabeo))
+    assert abs(giro) < 25 and abs(cabeceo) < 35 and abs(alabeo) < 25  # una foto casi frontal
+
+    # Girar la imagen (alabeo) cambia el alabeo con signo y deja el giro casi igual: el modelo separa los ejes.
+    from PIL import Image
+    inclinada = np.asarray(Image.fromarray(rgb).rotate(20, resample=Image.BICUBIC))
+    c2 = emb.detect(inclinada, con_pose=True)[0].pose
+    assert abs((c2[2] - alabeo)) > 10 and abs(c2[1] - giro) < 15
+
+
 def _variantes_astronauta() -> list[np.ndarray]:
     """El original y 4 variantes (brillo, ruido, escala, giro leve) de UNA foto: la misma persona con condiciones distintas."""
     skimage = pytest.importorskip('skimage.data')
@@ -165,3 +184,39 @@ def test_mezcla_balanceada_de_dos_personas_es_ambigua(cliente, emb, n):
     (de_otra,) = emb.detect(ajenas[0])
     assert float(centroide @ primera.embedding) > 0.99          # es la primera foto, no un promedio
     assert float(centroide @ de_otra.embedding) < 0.3           # y no reconoce a la otra persona
+
+
+# ---------- deteccion de vida (addon liveness de InsightFace 2.x, modo observacion) ----------
+@pytest.fixture(scope='module')
+def emb_vida():
+    if not (Path(MODEL_DIR) / 'addons' / 'liveness.onnx').exists():
+        pytest.skip('Falta <MODEL_DIR>/addons/liveness.onnx (ver README, "Deteccion de vida").')
+    return create_embedder(Settings(embedder='insightface', model_dir=MODEL_DIR, liveness='observe'))
+
+
+def test_vida_solo_cuando_se_pide_y_con_rostro_real(emb_vida):
+    skimage = pytest.importorskip('skimage.data')
+    rgb = np.asarray(skimage.astronaut())  # rostro real de ~90 px
+    assert emb_vida.mide_vivacidad
+    assert emb_vida.detect(rgb)[0].vivacidad is None  # el constructor del indice nunca la paga
+    viva = emb_vida.detect(rgb, con_vivacidad=True)[0].vivacidad
+    assert viva['estado'] == 'ok' and viva['es_viva'] is True and 0.8 <= viva['puntaje'] <= 1
+
+
+def test_vida_omite_rostros_pequenos(emb_vida):
+    """Bajo ~60 px el puntaje cae incluso en personas reales (medido): se omite en vez de dar un falso 'no viva'."""
+    skimage = pytest.importorskip('skimage.data')
+    pequeno = np.asarray(Image.fromarray(skimage.astronaut()).resize((160, 160), Image.LANCZOS))  # rostro de ~29 px
+    (cara,) = emb_vida.detect(pequeno, con_vivacidad=True)
+    assert cara.vivacidad == {'estado': 'omitida', 'es_viva': None, 'puntaje': None}
+
+
+def test_vida_apagada_o_sin_modelo_no_rompe_el_reconocimiento(tmp_path):
+    skimage = pytest.importorskip('skimage.data')
+    rgb = np.asarray(skimage.astronaut())
+    apagado = create_embedder(Settings(embedder='insightface', model_dir=MODEL_DIR, liveness='off'))
+    assert apagado.mide_vivacidad is False
+    assert apagado.detect(rgb, con_vivacidad=True)[0].vivacidad is None
+    # Sin el archivo del modelo (o con insightface < 2.0) el addon queda apagado con un aviso; no lanza
+    apagado._model_dir = str(tmp_path)
+    assert apagado._cargar_liveness() is None

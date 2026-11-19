@@ -106,6 +106,21 @@ describe('POST /api/sesiones/{id}/captura', () => {
         });
     });
 
+    it('manda la detección de vida a la base solo cuando se evaluó (estado ok); si no, se omite', async () => {
+        const conVida = (vivacidad) => ({ ...ROSTROS, faces: [{ ...ROSTROS.faces[0], vivacidad }, { ...ROSTROS.faces[1], vivacidad: null }] });
+        reconocer.mockImplementation(async () => conVida({ estado: 'ok', es_viva: false, puntaje: 0.12 }));
+        await llamar(capturaMultipart());
+        let reg = admin.rpc.mock.calls.find(([n]) => n === 'svc_registrar_detecciones')[1];
+        expect(reg.p_detecciones[0]).toEqual({ faiss_id: 1001, score: 0.912, objeto_recorte: `recortes/12/3-${EPOCH}/1.jpg`, es_viva: false, puntaje_vida: 0.12 });
+        expect('es_viva' in reg.p_detecciones[1]).toBe(false);
+
+        preparar();
+        reconocer.mockImplementation(async () => conVida({ estado: 'omitida', es_viva: null, puntaje: null }));
+        await llamar(capturaMultipart());
+        reg = admin.rpc.mock.calls.find(([n]) => n === 'svc_registrar_detecciones')[1];
+        expect('es_viva' in reg.p_detecciones[0] || 'puntaje_vida' in reg.p_detecciones[0]).toBe(false);
+    });
+
     it('responde el resumen y nunca bbox, vectores ni rutas de recorte', async () => {
         const cuerpo = await (await llamar(capturaMultipart())).json();
         expect(cuerpo).toMatchObject({ id_captura: 4101, rostros: 2, validas: 1, no_atribuidas: 1, ya_procesada: false, marca_tiempo: MARCA, index_version: 'v003' });

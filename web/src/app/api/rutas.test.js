@@ -20,6 +20,7 @@ const RUTAS = {
     'indice/revertir': ['POST'],
     'indice/sincronizar': ['POST'],
     'jobs/cerrar-sesiones': ['GET', 'POST'],
+    'jobs/purgar-fotos-registro': ['GET', 'POST'],
     'jobs/purgar-recortes': ['GET', 'POST'],
     'jobs/recalcular': ['GET', 'POST'],
     'jobs/reconstruir-indice': ['GET', 'POST'],
@@ -29,6 +30,10 @@ const RUTAS = {
     'plantilla/verificar': ['POST'],
     'salud': ['GET'],
     'sesiones/[id]/captura': ['POST'],
+    'yo/consentimiento': ['POST'],
+    'yo/consentimiento/revocar': ['POST'],
+    'yo/plantilla': ['POST'],
+    'yo/plantilla/verificar': ['POST'],
 };
 
 // Rutas de este dominio descubiertas en disco (excluye _local, que es de adapters).

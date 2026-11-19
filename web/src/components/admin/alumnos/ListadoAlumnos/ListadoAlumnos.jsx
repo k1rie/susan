@@ -3,18 +3,18 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import PageHeader from '@/components/layout/PageHeader';
+import BarraFiltros from '@/components/ui/BarraFiltros';
 import Button from '@/components/ui/Button';
 import DataState from '@/components/ui/DataState';
 import EmptyState from '@/components/ui/EmptyState';
-import Field from '@/components/ui/Field';
-import Input from '@/components/ui/Input';
 import Pagination from '@/components/ui/Pagination';
-import Select from '@/components/ui/Select';
 import Table from '@/components/ui/Table';
 import { useApiQuery } from '@/hooks/data';
 import { alumnosListar } from '@/lib/api/admin.js';
-import { ESTATUS_ALUMNO, etiquetaEstatus } from '../AlumnoForm/alumnoForm.utils.js';
+import { ESTATUS_ALUMNO } from '../AlumnoForm/alumnoForm.utils.js';
 import IndicadorEstado from '../IndicadorEstado';
+import EstatusAlumno from '../IndicadorEstado/EstatusAlumno.jsx';
+import FilaAlumno from './FilaAlumno.jsx';
 
 const COLUMNAS = [
     {
@@ -28,7 +28,7 @@ const COLUMNAS = [
         ),
     },
     { key: 'nombre_completo', header: 'Nombre' },
-    { key: 'estatus', header: 'Estatus', render: (a) => etiquetaEstatus(a.estatus) },
+    { key: 'estatus', header: 'Estatus', render: (a) => <EstatusAlumno estatus={a.estatus} /> },
     {
         key: 'consentimiento_vigente',
         header: 'Consentimiento',
@@ -41,10 +41,12 @@ const COLUMNAS = [
     },
 ];
 
-// P-06 (listado): búsqueda por matrícula o nombre, filtro de estatus y paginación.
+const SIN_FILTROS = { q: '', estatus: '' };
+
+// P-06 (listado): búsqueda por matrícula, nombre o correo mientras se escribe, filtro de estatus con chips de lo activo y paginación.
+// En teléfono cada alumno es una tarjeta (la tabla no cabe en 360 px sin desplazarse); desde `md`, la tabla.
 export default function ListadoAlumnos() {
-    const [borrador, setBorrador] = useState('');
-    const [filtros, setFiltros] = useState({ q: '', estatus: '' });
+    const [filtros, setFiltros] = useState(SIN_FILTROS);
     const [pagina, setPagina] = useState({ limit: 25, offset: 0 });
 
     const consulta = useApiQuery(alumnosListar, {
@@ -54,11 +56,16 @@ export default function ListadoAlumnos() {
         offset: pagina.offset,
     });
 
-    const buscar = (e) => {
-        e.preventDefault();
-        setFiltros((f) => ({ ...f, q: borrador.trim() }));
+    const aplicar = (cambio) => {
+        setFiltros((f) => ({ ...f, ...cambio }));
         setPagina((p) => ({ ...p, offset: 0 }));
     };
+    const limpiar = () => {
+        setFiltros(SIN_FILTROS);
+        setPagina((p) => ({ ...p, offset: 0 }));
+    };
+    const hayFiltros = Boolean(filtros.q || filtros.estatus);
+    const total = consulta.data?.total;
 
     return (
         <div className="flex flex-col gap-4">
@@ -67,22 +74,15 @@ export default function ListadoAlumnos() {
                 subtitle="Alta, consentimiento y plantilla facial"
                 actions={<Button href="/admin/alumnos/nuevo">Nuevo alumno</Button>}
             />
-            <form onSubmit={buscar} role="search" aria-label="Buscar alumnos" className="grid gap-3 sm:grid-cols-[1fr_14rem_auto] sm:items-end">
-                <Field label="Matrícula o nombre">
-                    <Input type="search" value={borrador} onChange={(e) => setBorrador(e.target.value)} />
-                </Field>
-                <Field label="Estatus">
-                    <Select
-                        value={filtros.estatus}
-                        onChange={(e) => {
-                            setFiltros((f) => ({ ...f, estatus: e.target.value }));
-                            setPagina((p) => ({ ...p, offset: 0 }));
-                        }}
-                        options={[{ value: '', label: 'Todos' }, ...ESTATUS_ALUMNO]}
-                    />
-                </Field>
-                <Button type="submit">Buscar</Button>
-            </form>
+            <BarraFiltros
+                q={filtros.q}
+                onQ={(q) => aplicar({ q })}
+                onLimpiar={limpiar}
+                label="Buscar alumnos"
+                placeholder="Matrícula, nombre o correo"
+                resultado={total === undefined ? undefined : `${total} ${total === 1 ? 'alumno' : 'alumnos'}`}
+                filtros={[{ name: 'estatus', label: 'Estatus', options: ESTATUS_ALUMNO, value: filtros.estatus, onChange: (estatus) => aplicar({ estatus }) }]}
+            />
             <DataState
                 loading={consulta.loading}
                 error={consulta.error}
@@ -90,16 +90,38 @@ export default function ListadoAlumnos() {
                 onRetry={consulta.refetch}
                 isEmpty={(d) => !d.items?.length}
                 empty={
-                    <EmptyState
-                        title="No hay alumnos que coincidan"
-                        description="Pruebe con otra búsqueda o dé de alta un alumno nuevo."
-                        action={<Button href="/admin/alumnos/nuevo">Nuevo alumno</Button>}
-                    />
+                    hayFiltros ? (
+                        <EmptyState
+                            title="Ningún alumno coincide"
+                            description="Prueba con otra matrícula o nombre, o quita los filtros."
+                            action={
+                                <div className="flex flex-wrap justify-center gap-2">
+                                    <Button variant="secondary" onClick={limpiar}>
+                                        Limpiar filtros
+                                    </Button>
+                                    <Button href="/admin/alumnos/nuevo">Nuevo alumno</Button>
+                                </div>
+                            }
+                        />
+                    ) : (
+                        <EmptyState
+                            title="Aún no hay alumnos registrados"
+                            description="Da de alta al primero para registrar su consentimiento y su plantilla facial."
+                            action={<Button href="/admin/alumnos/nuevo">Nuevo alumno</Button>}
+                        />
+                    )
                 }
             >
                 {(d) => (
                     <div className="flex flex-col gap-3">
-                        <Table columns={COLUMNAS} rows={d.items} rowKey="id_alumno" caption={`${d.total} alumno(s)`} />
+                        <ul aria-label="Alumnos" className="flex flex-col gap-2 md:hidden">
+                            {d.items.map((a) => (
+                                <li key={a.id_alumno}>
+                                    <FilaAlumno alumno={a} />
+                                </li>
+                            ))}
+                        </ul>
+                        <Table className="hidden md:block" columns={COLUMNAS} rows={d.items} rowKey="id_alumno" />
                         <Pagination
                             total={d.total}
                             limit={pagina.limit}

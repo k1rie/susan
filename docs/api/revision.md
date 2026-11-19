@@ -220,7 +220,11 @@ alumno  = { id_alumno, matricula, apellido_paterno, apellido_materno|null, nombr
 materia = { id_materia, clave, nombre }
 grupo   = { id_grupo, clave_grupo, periodo }
 sesion  = { id_sesion, fecha, hora_inicio, hora_fin, modo_registro, limite_presente_min, tolerancia_min }
-lectura = { id_deteccion, id_captura, marca_tiempo, minuto_sesion, camara_posicion, score_similitud, es_valida, tiene_recorte }
+lectura = { id_deteccion, id_captura, marca_tiempo, minuto_sesion, camara_posicion, score_similitud, es_valida, tiene_recorte, es_viva|null, puntaje_vida|null }
+          es_viva / puntaje_vida (migración 0238): veredicto y puntaje de la detección de vida del servicio de reconocimiento; null = no se evaluó.
+          Cada caso de la cola (pendientes y justificantes) y api_detecciones_caso agregan `sospechosa` (boolean) y `lecturas_no_vivas` (integer):
+          sospechosa = existe una lectura VÁLIDA del caso con es_viva = false. Es una marca derivada al leer (sin columna en `asistencia`): informa al
+          docente, no cambia es_valida, conteo_detecciones, estado, estado_sugerido ni los contadores de la cola.
           minuto_sesion = round(extract(epoch FROM marca_tiempo - inicio_sesion) / 60, 2)   (numérico, 2 decimales)
 ```
 

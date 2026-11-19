@@ -260,6 +260,25 @@ export function disposicionDeRostros(cantidad, ancho = ANCHO_FOTOGRAMA, alto = A
     return { lado, rostros: celdas.map((p) => ({ x: p.x + sangria, y: p.y })), omitidos: cantidad - caben };
 }
 
+/**
+ * Recuadros de detección del fotograma simulado, en fracciones (0..1) del lienzo: el simulador sabe dónde dibuja cada rostro, así que no
+ * hace falta un detector. Solo cuenta los que caben (los `omitidos` no se dibujan). El lienzo no se espeja, a diferencia de la cámara real.
+ * @param {{ rostros: unknown[] }} plan
+ * @returns {{ marcos: { x: number, y: number, ancho: number, alto: number }[], cantidad: number }}
+ */
+export function marcosDelFotograma(plan, ancho = ANCHO_FOTOGRAMA, alto = ALTO_FOTOGRAMA) {
+    const { lado, rostros } = disposicionDeRostros(plan?.rostros?.length ?? 0, ancho, alto);
+    // Un poco de holgura, como el recuadro de la cámara real, para que no pise el marco magenta del rostro.
+    const margen = Math.round(lado * 0.12);
+    const marcos = rostros.map((r) => ({
+        x: (r.x - margen) / ancho,
+        y: (r.y - margen) / alto,
+        ancho: (lado + 2 * margen) / ancho,
+        alto: (lado + 2 * margen) / alto,
+    }));
+    return { marcos, cantidad: marcos.length };
+}
+
 /** Rellena `datos` (RGBA) con gris suave y ruido reproducible: la misma `semilla` da el mismo ruido. Sin Math.random. */
 export function rellenarRuido(datos, semilla) {
     let x = (Math.imul(semilla + 1, 2654435761) + 12345) >>> 0;

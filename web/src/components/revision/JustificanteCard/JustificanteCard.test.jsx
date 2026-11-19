@@ -1,9 +1,10 @@
 // @vitest-environment jsdom
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useEffect } from 'react';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import JustificanteCard from './JustificanteCard.jsx';
+import { ApiError } from '@/lib/api/errors.js';
 import { resolverJustificante } from '@/lib/api/revision.js';
 
 vi.mock('@/lib/api/revision.js', () => ({ resolverJustificante: vi.fn() }));
@@ -31,6 +32,10 @@ const j = {
     fecha_registro: '2026-09-15T15:00:00Z',
     motivo: 'Cita médica',
 };
+
+beforeEach(() => {
+    resolverJustificante.mockReset();
+});
 
 describe('JustificanteCard', () => {
     it('muestra el caso compacto, el motivo y las lecturas plegadas', () => {
@@ -69,5 +74,68 @@ describe('JustificanteCard', () => {
         await userEvent.click(screen.getAllByRole('button', { name: 'Aprobar' }).at(-1));
         await waitFor(() => expect(alResolver).toHaveBeenCalledWith({ id_justificante: 3 }, true));
         expect(resolverJustificante).toHaveBeenCalledWith(expect.objectContaining({ idJustificante: 3, aprobar: true }));
+    });
+    it('el comentario ya no se escribe suelto en la tarjeta: vive dentro del diálogo de cada decisión', async () => {
+        render(<JustificanteCard justificante={j} />);
+        expect(screen.queryByRole('textbox')).toBeNull();
+        await userEvent.click(screen.getByRole('button', { name: 'Aprobar' }));
+        const dialogo = await screen.findByRole('dialog');
+        expect(within(dialogo).getByRole('textbox', { name: /Comentario \(opcional\)/ })).toBeInTheDocument();
+        expect(within(dialogo).getByText('Beto Ruiz · Finanzas · sesión del 2026-09-14')).toBeInTheDocument();
+    });
+
+    it('aprobar sin comentario manda comentario null (es opcional)', async () => {
+        resolverJustificante.mockResolvedValue({ id_justificante: 3 });
+        render(<JustificanteCard justificante={j} />);
+        await userEvent.click(screen.getByRole('button', { name: 'Aprobar' }));
+        await userEvent.click(within(await screen.findByRole('dialog')).getByRole('button', { name: 'Aprobar' }));
+        await waitFor(() => expect(resolverJustificante).toHaveBeenCalledWith({ idJustificante: 3, aprobar: true, comentario: null }));
+    });
+
+    it('rechazar exige el motivo dentro del diálogo: sin texto no resuelve y marca el campo', async () => {
+        resolverJustificante.mockResolvedValue({ id_justificante: 3 });
+        const alResolver = vi.fn();
+        render(<JustificanteCard justificante={j} onResuelto={alResolver} />);
+        await userEvent.click(screen.getByRole('button', { name: 'Rechazar' }));
+        const dialogo = await screen.findByRole('dialog');
+        expect(within(dialogo).getByText('Rechazar justificante')).toBeInTheDocument();
+        const campo = within(dialogo).getByRole('textbox', { name: /Motivo del rechazo/ });
+        expect(campo).toHaveFocus();
+        await userEvent.click(within(dialogo).getByRole('button', { name: 'Rechazar' }));
+        expect(await within(dialogo).findByText('Escribe el motivo para continuar.')).toBeInTheDocument();
+        expect(resolverJustificante).not.toHaveBeenCalled();
+
+        await userEvent.type(campo, '  El documento no corresponde a la fecha ');
+        await userEvent.click(within(dialogo).getByRole('button', { name: 'Rechazar' }));
+        await waitFor(() => expect(resolverJustificante).toHaveBeenCalledWith({ idJustificante: 3, aprobar: false, comentario: 'El documento no corresponde a la fecha' }));
+        await waitFor(() => expect(alResolver).toHaveBeenCalledWith({ id_justificante: 3 }, false));
+        expect(screen.queryByRole('dialog')).toBeNull();
+    });
+
+    it('cancelar cierra el diálogo sin resolver y al reabrirlo el campo empieza vacío', async () => {
+        render(<JustificanteCard justificante={j} />);
+        await userEvent.click(screen.getByRole('button', { name: 'Rechazar' }));
+        await userEvent.type(within(await screen.findByRole('dialog')).getByRole('textbox'), 'texto');
+        await userEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Cancelar' }));
+        expect(screen.queryByRole('dialog')).toBeNull();
+        expect(resolverJustificante).not.toHaveBeenCalled();
+        await userEvent.click(screen.getByRole('button', { name: 'Rechazar' }));
+        expect(within(await screen.findByRole('dialog')).getByRole('textbox')).toHaveValue('');
+    });
+
+    it('dice qué pasa con cada decisión y con qué estado queda el registro si se rechaza', () => {
+        render(<JustificanteCard justificante={j} />);
+        expect(screen.getByRole('region', { name: 'Decisión' })).toHaveTextContent('Aprobar deja el registro como justificado. Rechazar lo conserva como ausente.');
+    });
+
+    it('si el servidor dice que ya estaba resuelto, cierra el diálogo, avisa el error y pide recargar', async () => {
+        resolverJustificante.mockRejectedValue(new ApiError({ code: 'JUSTIFICANTE_YA_RESUELTO', message: 'Este justificante ya fue resuelto.', status: 409 }));
+        const alRecargar = vi.fn();
+        render(<JustificanteCard justificante={j} onRecargar={alRecargar} />);
+        await userEvent.click(screen.getByRole('button', { name: 'Aprobar' }));
+        await userEvent.click(within(await screen.findByRole('dialog')).getByRole('button', { name: 'Aprobar' }));
+        expect(await screen.findByText('Este justificante ya fue resuelto.')).toBeInTheDocument();
+        expect(alRecargar).toHaveBeenCalled();
+        expect(screen.queryByRole('dialog')).toBeNull();
     });
 });

@@ -51,5 +51,11 @@ Salir del kiosco: `Alt+F4`. Probar la cámara sin navegador: `rpicam-still -n -o
 - **HTTP en la red local**: el navegador solo permite la cámara en HTTPS o `localhost`; el kiosco usa
   `--unsafely-treat-insecure-origin-as-secure` solo para la URL de SUSAN. Es una configuración de demostración, no de
   producción (en producción SUSAN va por HTTPS y la bandera sobra).
+- **Red en la escuela**: `UnachWiFi` rechaza la asociacion de la Raspberry (`association took too long`), asi que se
+  usa el hotspot del iPhone (`DiegoiPhone`, 2.4 GHz con «Maximizar compatibilidad»). El iPhone oculta el nombre del
+  hotspot fuera de su pantalla de ajustes: el perfil de NetworkManager lleva `hidden=true` y prioridad 30. Sin red
+  conocida, la Wi-Fi se cambia desde la Mac con un paso de un solo arranque en `bootfs` (`systemd.run=` en
+  `cmdline.txt`, respaldo en `cmdline.txt.orig`) que escribe el perfil en `/etc/NetworkManager/system-connections/`.
+  La luz verde no sirve de indicador: al arrancar desde USB solo marca la ranura microSD.
 - Chromium lanzado por SSH necesita `WAYLAND_DISPLAY=wayland-0`, `XDG_RUNTIME_DIR` y `DBUS_SESSION_BUS_ADDRESS` de la
   sesión del escritorio; lanzado por el autoarranque ya los tiene.

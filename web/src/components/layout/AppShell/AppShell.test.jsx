@@ -16,6 +16,7 @@ vi.mock('next/navigation', () => ({
 const DOCENTE = { nombre: 'Patricia Ortega Salinas', rol: 'docente', id_usuario: 2 };
 const ADMIN = { nombre: 'Ana Admin', rol: 'administrador', id_usuario: 1 };
 const ALUMNO = { nombre: 'Mauricio González', rol: 'alumno', id_usuario: 3 };
+const TECNICO = { nombre: 'Tomás Técnico', rol: 'tecnico', id_usuario: 4 };
 
 const barraInferior = () => screen.getByRole('navigation', { name: 'Navegación inferior' });
 const riel = () => screen.getByRole('navigation', { name: 'Principal' });
@@ -52,10 +53,21 @@ describe('AppShell: acción central de la barra inferior por rol', () => {
         expect(await screen.findByRole('combobox')).toBeInTheDocument();
     });
 
-    it('alumno (un solo destino): no hay barra inferior ni «Pasar lista» en ninguna parte', () => {
-        rutaActual = '/alumno';
-        render(<AppShell me={ALUMNO}>contenido</AppShell>);
+    it('técnico (un solo destino): no hay barra inferior ni «Pasar lista» en ninguna parte', () => {
+        rutaActual = '/tecnico';
+        render(<AppShell me={TECNICO}>contenido</AppShell>);
         expect(screen.queryByRole('navigation', { name: 'Navegación inferior' })).toBeNull();
+        expect(screen.queryByRole('link', { name: 'Pasar lista' })).toBeNull();
+    });
+
+    it('alumno (dos destinos): barra inferior con Mi asistencia y Mi registro facial, y el botón central sigue siendo «Buscar o ir a»', () => {
+        rutaActual = '/alumno/registro';
+        render(<AppShell me={ALUMNO}>contenido</AppShell>);
+        const barra = within(barraInferior());
+        expect(barra.getByRole('link', { name: 'Mi asistencia' })).toHaveAttribute('href', '/alumno');
+        expect(barra.getByRole('link', { name: 'Mi registro facial' })).toHaveAttribute('aria-current', 'page');
+        expect(barra.getByRole('link', { name: 'Mi asistencia' })).not.toHaveAttribute('aria-current');
+        expect(barra.getByRole('button', { name: 'Buscar o ir a' })).toBeInTheDocument();
         expect(screen.queryByRole('link', { name: 'Pasar lista' })).toBeNull();
     });
 

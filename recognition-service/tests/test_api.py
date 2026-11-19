@@ -196,6 +196,50 @@ def test_photo_check(client):
     assert r.status_code == 422
 
 
+# ---------- deteccion de vida (informativa) ----------
+class VivoEmbedder(FakeEmbedder):
+    """Embedder de prueba que "mide" la vida: la semilla 5 es una foto (puntaje bajo) y el resto personas reales."""
+    mide_vivacidad = True
+
+    def vivacidad_for(self, seed: int) -> dict | None:
+        if seed == 5:
+            return {'estado': 'ok', 'es_viva': False, 'puntaje': 0.12}
+        return {'estado': 'ok', 'es_viva': True, 'puntaje': 0.93}
+
+
+def test_vivacidad_en_recognize_y_photo_check(settings, storage):
+    app = create_app(settings, storage=storage, embedder=VivoEmbedder(DIM))
+    with TestClient(app, headers={'X-API-Key': KEY}) as c:
+        assert c.get('/health').json()['vivacidad'] == {'modo': 'observe', 'umbral': 0.8, 'rostro_minimo_px': 64}
+        build(c, storage, 'v1', {1: (100, 5), 2: (200, 7)}); activate(c, 'v1')
+        caras = recognize(c, face_image(5, 7), [100, 200]).json()['faces']
+        por_id = {f['candidate']['faiss_id']: f['vivacidad'] for f in caras}
+        # Informativa: la lectura de la "foto" sigue llegando con su candidato; la decision no es de este servicio
+        assert por_id == {100: {'estado': 'ok', 'es_viva': False, 'puntaje': 0.12},
+                          200: {'estado': 'ok', 'es_viva': True, 'puntaje': 0.93}}
+        chk = c.post('/v1/photo/check', files={'image': ('a.png', face_image(7, size=100), 'image/png')}).json()
+        assert chk['motivo_rechazo'] is None and chk['calidad']['vivacidad']['es_viva'] is True
+        # Una foto "no viva" NO se rechaza en modo observacion
+        falsa = c.post('/v1/photo/check', files={'image': ('a.png', face_image(5, size=100), 'image/png')}).json()
+        assert falsa['motivo_rechazo'] is None and falsa['calidad']['vivacidad']['es_viva'] is False
+        cs = c.post('/v1/photo/check-set', files=[('images', (f'f{i}.png', face_image(7, size=100), 'image/png')) for i in range(3)]).json()
+        assert all(f['calidad']['vivacidad']['estado'] == 'ok' for f in cs['fotos'])
+
+
+def test_sin_vivacidad_el_contrato_no_cambia(client, storage):
+    """Con el embedder fake (o LIVENESS=off) la clave `vivacidad` no aparece en ninguna respuesta."""
+    build(client, storage, 'v1', {1: (100, 7)}); activate(client, 'v1')
+    assert 'vivacidad' not in recognize(client, face_image(7), [100]).json()['faces'][0]
+    assert 'vivacidad' not in client.get('/health').json()
+
+
+def test_config_liveness_invalida(settings):
+    for campo, valor in (('liveness', 'block'), ('liveness_threshold', 1.5), ('liveness_min_face_px', 0)):
+        cfg = Settings(**{**settings.__dict__, campo: valor})
+        with pytest.raises(RuntimeError):
+            cfg.validate()
+
+
 # ---------- build ----------
 def test_build_2_rostros_en_foto_de_registro_no_escribe(client, storage):
     storage.put('registro/a.png', face_image(1, 2))

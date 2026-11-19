@@ -53,7 +53,8 @@ baja y no aparece ante la cámara). No hace falta tocar el reloj a mano: el simu
      pantalla de la sesión el «minuto de la clase» ya es el 2, y la tarjeta del reloj de arriba muestra al instante 07:02 y «en marcha».
    - La webcam se apaga: en su lugar, la vista de cámara muestra el **lienzo simulado** (fondo gris con 24 cuadrados de color con
      marco magenta y las iniciales de cada alumno debajo) y el chip de arriba a la derecha dice **«Cámara simulada»**. El chip de
-     la izquierda pasa a **«Reconociendo»**.
+     la izquierda pasa a **«Reconociendo»** y, debajo, un chip dice **«N rostros detectados»** con un recuadro blanco sobre cada cuadrado del lienzo
+     (la cámara real hace lo mismo con su detector en el navegador; aquí el simulador ya sabe dónde dibuja cada rostro).
    - Sale el 1.er fotograma. «Última captura: **24 rostros · 24 válidos** · +24 registros · hace N s» (los «registros» son los alumnos
      que se crearon o se confirmaron con esa captura: el 2.º fotograma no suma ninguno). En la tabla de abajo, los alumnos pasan a
      **Pendiente** con lecturas **1/3** (los números del monitor se refrescan cada 5 s).

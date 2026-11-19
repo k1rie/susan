@@ -17,6 +17,21 @@ export function textoCamara(posicion) {
     return 'Cámara';
 }
 
+/** Detección de vida de una lectura: «Viva 0.930» / «No viva 0.120». Solo se llama con es_viva evaluada (no null). */
+export function textoVida(lectura) {
+    const puntaje = textoScore(lectura?.puntaje_vida);
+    return `${lectura?.es_viva ? 'Viva' : 'No viva'} ${puntaje}`;
+}
+
+/** Explicación del aviso «Caso sospechoso»: cuántas lecturas válidas salieron no vivas. */
+export function textoSospecha(lecturasNoVivas) {
+    const n = Number(lecturasNoVivas) || 0;
+    if (n <= 0) return 'Hay una lectura válida que la detección de vida marcó como no viva (posible foto frente a la cámara).';
+    return n === 1
+        ? 'Una lectura válida fue marcada como no viva por la detección de vida (posible foto frente a la cámara).'
+        : `${n} lecturas válidas fueron marcadas como no vivas por la detección de vida (posible foto frente a la cámara).`;
+}
+
 /** Resumen «Lecturas válidas: x/min». El mínimo viene del servidor. */
 export function resumenValidas(lecturas, minimo) {
     const validas = (lecturas ?? []).filter((l) => l.es_valida).length;

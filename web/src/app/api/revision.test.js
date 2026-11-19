@@ -110,6 +110,22 @@ describe('GET /api/casos/{id}/detecciones', () => {
         expect(cuerpo.alumno.matricula).toBe('A230417');
     });
 
+    it('reenvía la marca sospechosa y la vida por lectura (migración 0238); sin ellas, false', async () => {
+        const conVida = {
+            ...CASO, sospechosa: true, lecturas_no_vivas: 1,
+            lecturas: CASO.lecturas.map((l, i) => ({ ...l, es_viva: i === 0 ? false : null, puntaje_vida: i === 0 ? 0.12 : null })),
+        };
+        preparar({ usuarioRpcs: { api_detecciones_caso: () => conVida } });
+        const cuerpo = await (await ver()).json();
+        expect(cuerpo).toMatchObject({ sospechosa: true, lecturas_no_vivas: 1 });
+        expect(cuerpo.lecturas[0]).toMatchObject({ es_viva: false, puntaje_vida: 0.12 });
+        expect(cuerpo.lecturas[1]).toMatchObject({ es_viva: null, puntaje_vida: null });
+
+        preparar();  // base anterior: la RPC no trae la clave
+        const anterior = await (await ver()).json();
+        expect(anterior).toMatchObject({ sospechosa: false, lecturas_no_vivas: 0 });
+    });
+
     it('una firma individual que falla no aborta la respuesta (url null + error)', async () => {
         preparar({ storage: { createSignedUrl: vi.fn(async (r) => (r.startsWith('recortes') ? { data: null, error: { message: 'x' } } : { data: { signedUrl: 'https://f.test/ok' }, error: null })) } });
         const cuerpo = await (await ver()).json();

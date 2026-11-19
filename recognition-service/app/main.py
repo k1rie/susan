@@ -95,7 +95,7 @@ def _check_set(vision: Vision, settings: Settings, crudas: list[bytes | None]) -
                           'motivo_rechazo': 'No se pudo leer la imagen.', 'motivo_codigo': 'IMAGEN_INVALIDA',
                           'coseno_resto': None})
             continue
-        res, emb = vision.analyze(rgb, settings.template_max_yaw_ratio)
+        res, emb = vision.analyze(rgb, settings.template_max_yaw_ratio, con_vivacidad=True)
         foto = {'indice': i, 'estado': 'calidad' if res['motivo_rechazo'] else 'aceptada', **res, 'coseno_resto': None}
         fotos.append(foto)
         if emb is not None:
@@ -222,7 +222,11 @@ def create_app(settings: Settings | None = None, storage=None, embedder=None) ->
     @app.get('/health')
     def health(request: Request):
         s = request.app.state
-        return {'status': 'ok', 'embedder': s.vision.embedder.name, 'index_loaded': s.manager.current is not None}
+        estado = {'status': 'ok', 'embedder': s.vision.embedder.name, 'index_loaded': s.manager.current is not None}
+        if s.vision.embedder.mide_vivacidad:  # visible solo si de verdad esta cargada (no basta con LIVENESS=observe)
+            estado['vivacidad'] = {'modo': settings.liveness, 'umbral': settings.liveness_threshold,
+                                   'rostro_minimo_px': settings.liveness_min_face_px}
+        return estado
 
     @app.get('/v1/index', dependencies=auth)
     def get_index(request: Request):
@@ -305,7 +309,7 @@ def create_app(settings: Settings | None = None, storage=None, embedder=None) ->
         rgb = imaging.decode_image(data, settings.max_image_pixels)
         h, w = rgb.shape[:2]
 
-        faces = sorted(s.vision.detect(rgb), key=lambda f: -f.det_score)[:max_faces]
+        faces = sorted(s.vision.detect(rgb, con_vivacidad=True), key=lambda f: -f.det_score)[:max_faces]
         if faces:
             q = np.vstack([f.embedding for f in faces])
             candidatos = idx.search(q, allowed)  # el vector q nunca sale de esta funcion
@@ -323,12 +327,15 @@ def create_app(settings: Settings | None = None, storage=None, embedder=None) ->
                 except StorageError as e:
                     # No se tumba el reconocimiento por un recorte; queda sin evidencia y se registra
                     log.error('No se pudo subir un recorte: %s', e)
-            out.append({
+            rostro = {
                 'bbox': imaging.clip_bbox(f.bbox, w, h),
                 'det_score': round(float(f.det_score), 3),
                 'candidate': None if cand is None else {'faiss_id': cand[0], 'score': cand[1]},
                 'objeto_recorte': objeto,
-            })
+            }
+            if f.vivacidad is not None:  # aditivo: ausente con la deteccion de vida apagada o con el embedder fake
+                rostro['vivacidad'] = f.vivacidad
+            out.append(rostro)
         return {'index_version': idx.version, 'elapsed_ms': int((time.perf_counter() - t0) * 1000),
                 'image': {'width': w, 'height': h}, 'faces': out}
 

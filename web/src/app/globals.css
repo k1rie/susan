@@ -276,6 +276,15 @@
   body {
     max-width: 100vw;
     overflow-x: hidden;
+    /* `clip` recorta igual pero no crea un contenedor de scroll: sin él, `hidden` en html/body anula `position: sticky`
+       (la barra de acciones de los formularios). Los navegadores sin `clip` conservan `hidden`. */
+    overflow-x: clip;
+  }
+  /* La barra inferior del teléfono (BottomNav) tapa el campo enfocado al desplazar: reserva su alto al llevarlo a la vista. */
+  @media (max-width: 1023px) {
+    html {
+      scroll-padding-bottom: 7rem;
+    }
   }
   body {
     @apply bg-background text-foreground antialiased;
@@ -397,6 +406,26 @@
   }
   to {
     transform: translate3d(var(--dx, 12px), var(--dy, -16px), 0) rotate(calc(var(--rot, 0deg) + 4deg));
+  }
+}
+
+/* Registro facial guiado: las marcas del aro se encienden en cascada y la flecha de la pose «empuja» hacia donde hay que girar. */
+@keyframes registro-marca-entra {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes registro-guia-empuja {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(var(--guia-x, 0), var(--guia-y, 0), 0);
   }
 }
 

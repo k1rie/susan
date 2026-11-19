@@ -31,6 +31,7 @@ está fijo en el **lunes 14-sep-2026, 07:12**; se mueve con la tarjeta «Reloj d
 | Documentos | PDF reales | Los consentimientos y justificantes que la semilla solo tenía como texto ahora existen en el almacenamiento: «Ver documento» abre un PDF de demostración. |
 | Alumnos con aviso | 9 | Sin derecho a examen: E260014 (3A), E260064 y E260070 (5C), E260039 (3B). En el límite (9 de 9 faltas, conservan el derecho): E260001 y E260020 (3A). En baja: E260025 (3A), E260050 (3B), E260075 (5C) (§2). |
 | Cámaras | A-12 frente (navegador) activa; A-12 fondo (IP) **mantenimiento**; B-04 sin cámaras activas | La IP `10.20.12.2` no existe en una máquina de desarrollo: activa, cada ciclo de muestreo esperaría 3 s y mostraría «cámara inalcanzable». El aula sigue siendo automática por la cámara del navegador. El técnico puede reactivarla desde `/tecnico` para ver ese error. |
+| Laboratorios | 2 laboratorios, 6 solicitudes | **LAB-1** (30 lugares) y **LAB-2** (25), tipo laboratorio. Solicitudes relativas a «hoy»: dos pendientes de docente1 que **compiten** por LAB-1 el jueves (3A 10:00–12:00 y 5C 11:00–13:00), una aprobada de docente2 (3B) en LAB-2 el miércoles 11:00–13:00 y una pendiente de docente1 (3A) que se traslapa con ella (**conflicto**: no se puede aprobar), una rechazada con motivo y una aprobada ya realizada. `--reset` las recrea; una corrida normal no borra lo que resolviste. |
 
 ## 2. Qué abrir con cada cuenta
 
@@ -40,6 +41,7 @@ está fijo en el **lunes 14-sep-2026, 07:12**; se mueve con la tarjeta «Reloj d
 | `docente1@` | **Revisión** (`/docente/revision`) | 8 pendientes, 4 justificantes por resolver y las correcciones. Detalle en §3. |
 | `docente1@` | Panel (`/docente`), **Reportes**, **Analítica** | Alertas (5): E260014 y dos del 5C (E260064, E260070) sin derecho a examen; E260001 y E260020 «a una falta de perder el derecho». Analítica con tendencia, proyección y riesgo (la semilla trae deterioro, abandono, ausencias en viernes y retardos). |
 | `docente2@` | Panel, Reportes, Analítica | Grupo 3B (24 inscritos), una alerta sin derecho a examen (E260039) y un justificante por resolver (E260045). Su sesión es la **67**, mañana 15-sep 09:00: con `Fijar hora` 2026-09-15 09:03 se abre con la cámara del navegador. |
+| `docente1@` | **Laboratorios** (`/docente/laboratorios`) | Sus 5 solicitudes con estatus y el motivo del rechazo. «Nueva solicitud»: elige LAB-1/LAB-2, uno de sus grupos (3A o 5C), fecha, horario y actividad; el formulario muestra la disponibilidad de ese día y avisa si choca. Queda **pendiente** hasta que el administrador la revise. |
 | `docente3@` | Panel | Docente en licencia, sin grupos: estado vacío. |
 | `e260001@` | **Mi asistencia** (`/alumno`) | **En el límite**: 9 de 9 faltas permitidas; una falta más le quita el derecho a examen (aviso). Si cierras la sesión de hoy sin que la cámara lo vea, pasa a «sin derecho a examen». |
 | `e260014@` | `/alumno` | **Sin derecho a examen**: 14 faltas equivalentes, límite 9. |
@@ -48,6 +50,7 @@ está fijo en el **lunes 14-sep-2026, 07:12**; se mueve con la tarjeta «Reloj d
 | `e260007@` | `/alumno` | Un retardo del domingo 13 con justificante pendiente registrado por el docente. |
 | `e260024@` | `/alumno` | Cuatro faltas justificadas y aprobadas (historial con justificantes resueltos). |
 | `admin@` | `/admin` | Resumen del periodo (alumnos, grupos, sesiones, cámaras, consentimientos). `/admin/alumnos`: abre cualquier alumno y verás **Consentimiento vigente** (con documento) y **Plantilla facial activa**, indexada en `v003`, con «Ver foto». `/admin/bitacora`: cierres de sesión, consultas de recortes y fotos, correcciones y resoluciones de justificantes. Catálogos: grupos, aulas, materias, docentes, usuarios. |
+| `admin@` | **Laboratorios** (`/admin/laboratorios`) | Pendientes: las dos del jueves se avisan como «compiten»; la de LAB-2 del miércoles trae el conflicto y **no se puede aprobar**. Aprueba una del jueves y verás que la otra pasa a tener conflicto. Rechazar exige motivo. Pestañas «Agenda» (por laboratorio y semana) e «Historial». En `/admin/aulas` un aula se marca como laboratorio. |
 | `tecnico@` | `/tecnico` | **Cámaras**: 4, con estatus, última captura y capturas de 24 h (las de la clase de reposición del domingo). **Parámetros**: 12 (umbral 0.85, mínimo 3 lecturas, límite de presente 10 min, tolerancia 20 min, intervalo 15 s…). **Índice facial**: `v003`, 75 vectores, «sincronizado», sin pendientes. |
 
 ## 3. Casos de la pantalla de Revisión (docente1)
@@ -148,6 +151,25 @@ solo (verás una versión nueva en `/tecnico`). Con la sesión abierta, manda un
 rostro sale **sin atribuir** y al cerrar la sesión queda **ausente**. Para devolverle consentimiento y plantilla basta
 `scripts/seed-demo.sh` (registra un consentimiento nuevo, una plantilla nueva y reconstruye el índice; la versión en uso deja de
 ser `v003`).
+
+### 4.2b. Autoservicio: el alumno acepta el aviso y registra su propio rostro
+
+El administrador ya no tiene que capturar todo: el alumno lo hace desde **Mi registro facial** (`/alumno/registro`; en el riel, bajo «Mi cuenta», y como recordatorio en `/alumno` mientras esté incompleto).
+Detalle del diseño en [`docs/api/biometria.md`](api/biometria.md) §7 y [`DECISIONS.md`](DECISIONS.md) §10.
+
+1. Entra con `e260001@` → **Mi registro facial**. Como la semilla le dejó el consentimiento que registró el administrador, verás «Tu rostro está registrado» y «Lo registró tu coordinación».
+2. **Revocar consentimiento** (con confirmación): la plantilla se archiva y el índice se reconstruye solo. La pantalla vuelve al paso 1 y en `/alumno` aparece el recordatorio «Completa tu registro facial».
+3. Marca la declaración y **Aceptar y continuar**. Queda como consentimiento de origen *alumno* (vigente 12 meses) y el sistema genera la **constancia PDF** (nombre, matrícula, fecha, IP, versión del aviso y huella SHA-256 del texto):
+   `$SUSAN_LOCAL_DIR/storage/susan-private/consentimientos/<id_alumno>/<uuid>.pdf`. En `/admin/bitacora` aparecen `alta_consentimiento` y `revocacion_consentimiento`, con usuario, IP y origen.
+4. **Registrar mi rostro** abre el asistente guiado en modo *propio*: solo cámara (sin «Subir fotos») y textos en segunda persona.
+
+> **Con el embedder `fake` la webcam no sirve para el paso 4** (no produce los rostros sintéticos que reconoce el servicio). Dos salidas: (a) `scripts/dev-modo.sh insightface` y repetir con tu cara real (§9), o
+> (b) `scripts/seed-demo.sh --autoservicio`, que ejerce de punta a punta las rutas `/api/yo/*` con rostros sintéticos y comprueba: aceptar el aviso, verificar tomas, **rechazo de la cara de otro alumno**
+> (`ROSTRO_YA_REGISTRADO`, sin guardar nada y sin revelar de quién es), registro con origen *alumno* e indexado, el segundo alumno **no** puede registrar esa cara, un docente recibe 403 y el cuerpo no admite `id_alumno`.
+> Opciones: `--alumno E260003 --otro E260004`. Deja al alumno con una cara sintética registrada por él mismo.
+
+El candado de 5 registros por 24 h usa el reloj de negocio: con el reloj de demostración **detenido** se agota tras 5 registros del mismo alumno (`AUTOREGISTRO_LIMITE`); adelanta el reloj un día con
+la tarjeta «Reloj de demostración» (**Fijar hora**) para volver a probar.
 
 ### 4.3. Pase manual (5C, sesión 115)
 
@@ -298,27 +320,31 @@ Si tu cara no se reconoce y quedan lecturas con score entre 0.60 y 0.70 en Revis
 Si ya creaste tu alumno (por ejemplo la matrícula `TEST`, id 76, que hoy ya existe con consentimiento vigente hasta 2029), búscalo en
 `/admin/alumnos` y sigue desde el paso 3 (desde el 2 si aún no tiene consentimiento vigente).
 
-1. **`admin@susan.local`** → **Alumnos** → **Nuevo alumno**. Matrícula única (p. ej. la tuya), apellidos, nombres y correo. Pulsa
-   **Ir a la ficha (consentimiento y foto)**.
+1. **`admin@susan.local`** → **Alumnos** → **Nuevo alumno**. Es un asistente de 3 pasos: identidad (matrícula única, p. ej. la tuya,
+   apellidos y nombres), contacto y cuenta de acceso (opcional) y revisión. Pulsa **Crear alumno** y, en la pantalla de éxito,
+   **Ir a la ficha**.
 2. **Consentimiento** (en la ficha) → registrar: adjunta **cualquier PDF** como documento firmado y elige la **fecha de firma
    igual o anterior al 14-sep-2026** (el reloj de la demostración). El formulario deja elegir hasta la fecha real de tu equipo, pero
    la base valida contra el reloj de la demo: una firma posterior al 14-sep se rechaza con «La fecha de firma no puede ser
    futura». La **vigencia hasta** debe ser posterior a la firma y no anterior al 14-sep (p. ej. 14-sep-2027).
 3. **Plantilla facial** (en la ficha). La plantilla se arma con **3 a 8 fotos** de la misma persona (5 guiadas): SUSAN promedia sus
    vectores en uno solo para reconocer mejor con distintos ángulos y luz. Dos modos:
-   - **Usar cámara** (captura guiada, por defecto): pulsa **Capturar toma K de 5** en cada paso y sigue la indicación sobre la cámara:
+   - **Comenzar** (cámara guiada): pulsa **Registrar rostro** y sigue el asistente. Cada paso muestra la indicación sobre la cámara:
      1) *De frente*, 2) *Gira a la izquierda* (unos 15 grados), 3) *Gira a la derecha*, 4) *Inclina hacia arriba* (la 4 y la 5 son
-     opcionales) y 5) *Otra expresión o luz* (sonríe o cambia un poco la luz o el lugar). La indicación de izquierda y derecha asume la
-     vista en espejo de la cámara. Con **Repetir** rehaces solo esa toma; las demás se conservan.
-   - **Subir fotos**: **Agregar fotos (JPG)** y elige de 3 a 8 fotos distintas de tu cara. Cada foto debe ser JPG y pesar hasta 15 MB; SUSAN la re-codifica a ≈ 300 KB antes de enviarla.
+     opcionales: **Omitir esta toma**) y 5) *Otra expresión o luz* (sonríe o cambia un poco la luz o el lugar). **No hay botón de disparo:** la foto se toma sola cuando
+     pasa el control de calidad (mantén la posición ~1 segundo; si algo falla, el texto dice qué: poca luz, acércate…). La toma se
+     verifica al instante y, si sirve, pasa sola a la siguiente; si no, dice el motivo y reintenta sola (o pulsa **Intentar de nuevo**).
+     Si el control en vivo no responde o tarda demasiado, aparece **Tomar foto ahora**. La indicación de izquierda y derecha asume la vista en espejo de la cámara. Al final, **Revisa tus tomas**:
+     con **Repetir** rehaces solo esa toma; las demás se conservan.
+   - **Subir fotos en lugar de usar la cámara**: **Agregar fotos (JPG)** y elige de 3 a 8 fotos distintas de tu cara. Cada foto debe ser JPG y pesar hasta 15 MB; SUSAN la re-codifica a ≈ 300 KB antes de enviarla.
 
    Una sola persona por toma, luz pareja, sin gorra ni lentes oscuros, rostro de al menos 80 px y nítido. Cada toma muestra su estado
    (*Verificando…*, *Aceptada* o el motivo: «No se detectó ningún rostro», «Hay más de un rostro», «Giraste demasiado; vuelve a mirar hacia
    la cámara», «Falta iluminación», «La imagen está borrosa»…). Si una toma sale **«No parece la misma persona»**, el servicio midió que se
    parece poco a las demás (o es de otra persona): **Repítela o quítala**; si salen **«Las tomas no coinciden entre sí»**, revisa que todas
    sean tuyas. Un aviso «Las tomas son casi idénticas; varía el ángulo, la expresión o la luz» no bloquea. El botón **Registrar plantilla con N
-   fotos** se habilita con al menos 3 tomas aceptadas y ninguna marcada. Si tu cara no supera la consistencia aunque las fotos sean tuyas, queda
-   la salida **Registrar solo con esta foto (menos precisa)** con una única toma aceptada. Al registrar, SUSAN **reconstruye el índice sola**
+   fotos** (en la revisión) se habilita con al menos 3 tomas aceptadas y ninguna marcada. Si tu cara no supera la consistencia aunque las fotos sean tuyas, queda
+   la salida **Registrar con una sola foto** (menos precisa) con una única toma aceptada. Al registrar, SUSAN **reconstruye el índice sola**
    (tarda hasta un minuto; no cierres la ventana): aparece una versión nueva (`v004`) con los 75 vectores de antes más el tuyo, y la ficha
    muestra "Fotos: N", la consistencia entre fotos y la plantilla como indexada. **Si ya tenías plantilla, registrar de nuevo la archiva**
    (RN-12): si el alumno ya tenía una plantilla (de una foto o de varias), quedará archivada y su lugar lo toma la nueva

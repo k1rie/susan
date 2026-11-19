@@ -50,7 +50,7 @@
    "pendientes": [
     "Para el integrador: ya que no existe ningún cue sparkle-short ni chime en 01 ni 02, quien reconstruya los cues no debe esperar cambios de sonido en estos dos cuadros.",
     "Para quien revise: queda una decisión de gusto sobre el skewX -2 del marcador de 01-hook.html (líneas 493-494), que dejé porque es forma de diseño. Si el dueño lo ve como inclinación, basta con pasarlo a 0.",
-    "Sin 'requests' sobre herramientas ni sobre el plan. Aclaración menor: la prosa de v2/plan.json menciona golpes de rotación, tilt-kick y sparkles para otros cuadros (03, 06, 09, 10, 04), que corresponden a otros agentes."
+    "Sin 'requests' sobre herramientas ni sobre el plan. Aclaración menor: la prosa de v2/plan.json menciona golpes de rotación, tilt-kick y sparkles para otros cuadros (03, 06, 09, 10, 04), que corresponden a otros frentes."
    ]
   },
   {

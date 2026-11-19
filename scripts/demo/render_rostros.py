@@ -1,7 +1,7 @@
 """Dibuja los rostros sintéticos de la demostración (solo modo local, EMBEDDER=fake).
 
 Lo invoca scripts/demo/seed-demo.mjs con el Python del venv de recognition-service. Lee de la entrada estándar un
-JSON {"imagenes": [{"destino": "/ruta/absoluta.jpg", "semilla": 123, "tipo": "registro" | "recorte"},
+JSON {"imagenes": [{"destino": "/ruta/absoluta.jpg", "semilla": 123, "tipo": "registro" | "recorte", "variante": 0},
 {"destino": "...", "semillas": [1, 2, 3], "tipo": "cuadro"}]} y escribe un JPEG por cada entrada (crea las carpetas; no pisa un archivo existente salvo "sobrescribir": true).
 Responde por la salida estándar con {"escritas": n, "omitidas": n}.
 
@@ -32,10 +32,12 @@ MAGENTA = (255, 0, 255)
 OSCURO = (30, 30, 30)
 
 
-def dibujar(semilla: int, ancho: int, alto: int, lado: int, x: int, y: int, ruido_interior: int) -> np.ndarray:
+def dibujar(semilla: int, ancho: int, alto: int, lado: int, x: int, y: int, ruido_interior: int, variante: int = 0) -> np.ndarray:
     # Mismo fondo que render_fake_image: gris con ruido suave y reproducible (depende de la semilla para que las
     # fotos de dos alumnos no sean idénticas byte a byte).
-    rng = np.random.default_rng(1000 + semilla)
+    # `variante` cambia SOLO el ruido del fondo (mismo rostro, otros bytes): sirve para armar varias tomas de una misma persona,
+    # porque el registro rechaza fotos idénticas byte a byte. Con variante = 0 la imagen es la de siempre.
+    rng = np.random.default_rng(1000 + semilla + 100_003 * variante)
     img = np.full((alto, ancho, 3), 128, dtype=np.int16)
     img += rng.integers(-6, 7, size=(alto, ancho, 1))
     img = np.clip(img, 0, 255).astype(np.uint8)
@@ -86,7 +88,7 @@ def render(item: dict) -> bytes:
         calidad = 90
     elif tipo == 'registro':
         # Foto de plantilla: cuadro de 480 px con un solo rostro grande y centrado (mínimo del servicio: 80 px).
-        img = dibujar(semilla, 480, 480, 240, 120, 120, ruido_interior=4)
+        img = dibujar(semilla, 480, 480, 240, 120, 120, ruido_interior=4, variante=int(item.get('variante', 0)))
         facciones(img, 120, 120, 240)
         calidad = 92
     elif tipo == 'recorte':

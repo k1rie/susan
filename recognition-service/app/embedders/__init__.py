@@ -16,6 +16,9 @@ def create_embedder(settings) -> Embedder:
             dimension=settings.dimension,
             det_size=settings.det_size,
             min_det_score=settings.min_det_score,
+            liveness=settings.liveness,
+            liveness_threshold=settings.liveness_threshold,
+            liveness_min_face_px=settings.liveness_min_face_px,
         )
     raise ValueError(f'EMBEDDER desconocido: {nombre!r} (use insightface o fake)')
 

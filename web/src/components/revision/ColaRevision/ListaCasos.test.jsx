@@ -26,6 +26,12 @@ describe('ListaCasos', () => {
         expect(screen.queryByText(/límite:/)).toBeNull();
     });
 
+    it('un caso con lecturas válidas no vivas muestra la etiqueta «Sospechosa»; sin la marca no aparece', () => {
+        render(<ListaCasos tipo="pendiente" items={[{ ...base(1), sospechosa: true, lecturas_no_vivas: 2 }, base(2)]} total={2} onSeleccionar={() => {}} />);
+        expect(screen.getAllByText('Sospechosa')).toHaveLength(1);
+        expect(screen.getByText('Sospechosa')).toHaveAttribute('title', '2 lecturas válidas marcadas como no viva');
+    });
+
     it('justificantes: estado de la asistencia y quién lo registró', () => {
         render(<ListaCasos tipo="justificante" items={[{ ...base(2), registrado_por_rol: 'docente' }]} total={1} onSeleccionar={() => {}} />);
         expect(screen.getByText('Ausente')).toBeInTheDocument();

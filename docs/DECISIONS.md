@@ -24,6 +24,9 @@ técnicamente y lo que sigue abierto. El SQL (`supabase/`) y `docs/API-RPC.md` s
 | 15 | Cuenta de servicio `servicio@susan.local` (rol `tecnico`, sin fila en Auth) | Los jobs asientan en bitácora (RN-08) sin inventar un usuario humano. Se oculta de las listas. |
 | 16 | QR (de SmartClass) **no** se incluye | La spec no lo contempla; el respaldo del reconocimiento es el pase de lista manual (RF-09). |
 | 17 | Tabla **`plantilla_foto`** (20.ª tabla; la spec tiene 19) y plantilla de **3 a 8 fotos promediadas** en un solo vector | Una foto sola da cosenos de 0.4–0.7 con fotos de salón y un mal registro no tiene salvaguarda. Con 5 fotos las lecturas bajo el umbral bajan a la mitad frente a una foto frontal buena y de 22.8 % a 3.7 % frente a una foto cualquiera (nivel duro). Se conserva RN-12: una fila activa de `plantilla_facial` y un `faiss_id`. Detalle en la sección 6. |
+| 18 | Las **fotos de registro son efímeras**: se borran del bucket en cuanto su vector queda en el JSON del índice en uso; `objeto_foto` admite NULL | Guardar un rostro que ya no se usa para nada es retención innecesaria de un dato biométrico (RNF-03). El único lector de la foto es la construcción del índice, así que se borra justo después de activar la versión que la contiene. Los recortes de la sesión NO cambian (evidencia de la revisión, RNF-05). Detalle en la sección 8. |
+| 19 | **Autoservicio del alumno**: acepta el aviso (constancia PDF generada por el sistema) y registra su propio rostro; el administrador queda como respaldo, auditor y quien revoca. La bitácora gana `alta_consentimiento` y `revocacion_consentimiento` (**10 valores, no 8**) | La spec (§1.2.1) ya dice que el alumno «otorga su consentimiento»; que el administrador capture todo es un cuello de botella y contradice el objetivo del sistema. Cambia la decisión 12 («`accion_bitacora` tiene exactamente 8 valores»): el consentimiento no tenía auditoría, y revocar no deja otro rastro con fecha. Ver sección 10. |
+| 20 | **Laboratorios**: el docente solicita el uso de un laboratorio para uno de sus grupos (una fecha, hora de inicio y fin, actividad) y el administrador lo aprueba o rechaza. El aula gana `tipo` (`aula` \| `laboratorio`); tabla `solicitud_laboratorio` (21.ª tabla); bitácora gana `solicitud_laboratorio` (**11 acciones**) y su entidad auditable (**19 entidades**); parámetros 13 `lab_anticipacion_horas` (24) y 14 `lab_horizonte_dias` (60) | La fase 2 (puerta con cámara que solo abre a los inscritos de una solicitud aprobada) necesita primero saber QUIÉN puede usar QUÉ laboratorio y CUÁNDO. Es una ampliación de alcance: la spec deja fuera el control de acceso físico (§1.2). Ver sección 11. |
 
 ## 2. Decisiones técnicas
 
@@ -38,7 +41,7 @@ técnicamente y lo que sigue abierto. El SQL (`supabase/`) y `docs/API-RPC.md` s
 ## 3. Abierto / riesgos
 
 1. **Calibración** del umbral (0.700 desde 2026-10-03; antes 0.850, ver RUNBOOK), mínimo de lecturas (3) e intervalo (15 s) con datos reales: viven en `parametro_sistema`; cada detección conserva candidato y score aunque no alcance el umbral.
-2. **Sin detección de vida** (anti-spoofing): el riesgo de suplantación con fotografía sigue abierto; lo atenúan la cola de revisión y las 3 lecturas en capturas distintas.
+2. **Detección de vida solo en observación** (anti-spoofing, 2026-10-06): el servicio mide `vivacidad` por rostro con el addon `liveness` de InsightFace 2.x (`LIVENESS=observe`) pero **no bloquea ni descuenta nada**; el riesgo de suplantación con fotografía sigue abierto y lo atenúan la cola de revisión y las 3 lecturas en capturas distintas. Mediciones, límites (depende del tamaño del rostro, castiga el desenfoque, una réplica nítida de pantalla pasa) y licencia en el README del servicio. **Marca "sospechosa"** (migración 0238, 2026-10-06): el servicio manda `es_viva`/`puntaje_vida` por lectura y se guardan en `deteccion` (NULL = no evaluada). Un caso con alguna lectura **válida** `es_viva = false` aparece como *Sospechosa* en la cola de revisión (pendientes y justificantes) y en sus lecturas; es una marca derivada al leer (sin columna en `asistencia`) que **no cambia** `es_valida`, el conteo, el estado ni la cola: la decisión es del docente. Un caso ya confirmado como presente/retardo con lecturas no vivas **no entra** a la cola (solo los pendientes entran); hacerlo exigiría decidir si la confirmación debe esperar al docente. Pendiente: capturas físicas (impresión y pantalla) con las cámaras del aula y fijar el umbral con ellas, porque con el umbral por omisión (0.8) un rostro real borroso o lejano sale "no vivo" y marcaría casos legítimos.
 3. **Jurídico**: aviso de privacidad, formato/vigencia/revocación del consentimiento deben aprobarse por el área jurídica de la UNACH (LPDPPSOCH, LGPDPPSO). Mientras tanto, quien no consiente se registra por pase manual.
 4. Pendiente: pruebas de **concurrencia** con dos sesiones (corrección simultánea, doble justificante, doble cierre; el diseño usa `FOR UPDATE`/`SKIP LOCKED` e índices únicos parciales).
 5. Pendiente: **bitácora de altas/bajas de catálogo y de creación/restablecimiento de cuentas** (el enum de acciones no tiene valores propios) y `svc_usuario_obtener`.
@@ -129,6 +132,8 @@ open redirect en `?next=`, inyección de fórmulas en CSV, secretos fuera del bu
 
 ### 6.2 Archivado y borrado (hallazgo verificado en el código)
 
+> Actualización: la extensión 18 (sección 8) borra las fotos de registro al indexarse y el job `purgar-fotos-registro` limpia las de plantillas archivadas; lo que sigue describe el estado previo.
+
 "Archivar" es solo `plantilla_facial.activa = false`, en `api_plantilla_registrar` (reemplazo) y en `api_consentimiento_revocar`. `vencer_consentimientos` NO archiva (la plantilla vencida sigue activa y sigue en el índice). Ninguna ruta borra fotos del bucket al archivar y la purga RNF-05 solo cubre recortes; todas las FK son `RESTRICT`; el único borrado es la compensación `eliminarObjetoSilencioso` si falla el registro. Las fotos extra replican EXACTO esa semántica: su estado es el de la plantilla padre y la compensación borra todas las subidas del intento. La brecha de retención y su seguimiento están en la sección 3 (punto 10).
 
 ### 6.3 Calibración y ganancia esperada
@@ -191,3 +196,122 @@ Método y limitaciones: `buffalo_s` real (el embedder del servicio) sobre 8 pers
 - **Consecuencias**: las pruebas que abren la paleta o esperan el reloj usan consultas asíncronas (`findBy…`). Pendiente conocido: `app/error.jsx` y `app/not-found.jsx`
   son grupos de chunks hermanos del layout `(app)` y Turbopack duplica en ellos `Link`, el núcleo de Lucide y `Button` (~12 KB gz en cada ruta).
   Ningún contrato (RPC, JSON, rutas) cambia.
+
+## 8. Fotos de registro efímeras (extensión 18)
+
+- **Contexto**: las fotos de `registro/` solo sirven para calcular el vector del alumno (el servicio las lee al construir el índice). Una vez que ese vector vive en el
+  JSON `indice/<version>.json`, la foto no tiene otro lector y dejarla en el bucket es guardar un rostro sin necesidad. Los recortes (`recortes/`) son otra cosa: son la
+  evidencia que ve el docente al revisar un caso y ya tienen su propia retención (RNF-05); esta extensión no los toca.
+- **Decisión**: la foto se **sube, se indexa y se borra**. Al activarse una versión del índice (último paso de `reconstruirIndice`, ya con el servicio apuntando a ella) se borran los
+  objetos de las plantillas que esa versión acaba de indexar y `objeto_foto` pasa a `NULL` en `plantilla_facial` y `plantilla_foto` (misma técnica que la purga de recortes: listar → borrar
+  objetos → marcar NULL; `svc_fotos_registro_listar` / `svc_fotos_registro_marcar`). El borrado nunca invalida la activación; si falla, lo reintenta el job `purgar-fotos-registro`,
+  que además limpia las fotos de plantillas **archivadas** (cierra la «brecha de retención» de 6.2) y las anteriores a la extensión.
+- **Qué NO se purga nunca**: la foto de una plantilla activa que aún no está en un índice activado. La SQL lo exige al listar y lo vuelve a comprobar al marcar.
+- **Consecuencias que hay que conocer** (son el precio de no guardar la foto):
+  - **La reconstrucción completa y el cambio de dimensión del modelo ya no son posibles sobre plantillas ya indexadas**: re-vectorizar exige la foto. `reconstruirIndice` responde
+    `409 PLANTILLAS_SIN_FOTO` (con la lista de plantillas y alumnos) ANTES de llamar al servicio; la salida es registrar de nuevo a esos alumnos. El incremental (`keep`) no se afecta.
+  - **No se puede revertir a una versión del índice que no conoce a una plantilla ya purgada**: `409 REVERSION_PERDERIA_PLANTILLAS`. Sin la foto ese alumno se quedaría sin vector y todo
+    build posterior fallaría. Revertir sigue siendo posible mientras todas las plantillas activas estén en el manifiesto de la versión destino.
+  - El administrador ya no puede ver la foto de registro (`api_documento_url_autorizar` responde `410 FOTO_NO_CONSERVADA`; la pantalla lo informa en vez de ofrecer un enlace roto) y la
+    revisión del docente ya no muestra la «foto de registro» junto a los recortes: la comparación es el score.
+  - Entre el registro y la activación del índice (segundos si el servicio responde) la foto sí está en el bucket; si el índice queda pendiente, permanece hasta la siguiente
+    reconstrucción exitosa. Es lo que permite reintentar sin pedirle al alumno otra captura.
+- **Alternativas descartadas**:
+
+  | Alternativa | Por qué no |
+  |---|---|
+  | Vectorizar en memoria al registrar y no subir nada al bucket | Un fallo del índice (servicio caído) perdería la única copia: habría que repetir la captura. Reescribe además el contrato entre registro, plan y build |
+  | Conservar la foto N días y purgarla por retención | Es lo que ya hacen los recortes, pero aquí no hay ningún lector durante esos días |
+  | Borrar también las fotos ya existentes en la propia migración | Un borrado irreversible de datos fuera de la BD no va dentro de una migración; lo hace el job (o `scripts`) cuando se decide |
+
+- **Despliegue**: SQL (`0237_fotos_registro_efimeras.sql`), después web; el servicio de reconocimiento no cambia. Las fotos que ya estaban en el bucket NO se borran solas: se limpian
+  ejecutando el job `purgar-fotos-registro` (o esperando a su cron).
+
+## 9. Recuadros de detección en vivo y espejo de la cámara (2026-10-06)
+
+- **Contexto**: el panel de «Pasar lista» solo mostraba la imagen de la cámara: nada decía si se estaban viendo rostros. El único «estado» era el chip «Reconociendo», que habla del
+  muestreo hacia el servidor (un fotograma cada 5-15 s) y cuya respuesta trae solo recuentos, sin cajas. Además la cámara se pedía con `facingMode="environment"`, lo que apagaba el espejo.
+- **Decisión**:
+  - **Detección en el navegador** con MediaPipe (`@mediapipe/tasks-vision`, modelo BlazeFace de rango corto) sobre el `<video>`, ~10 veces por segundo. Dibuja un recuadro por rostro
+    (`ui/DeteccionRostros` + `ui/MarcosRostros`, dentro de `CameraCapture` con `detectarRostros`) y un chip con texto bajo «Reconociendo» (`VistaCamara`): «N rostros detectados», «Sin rostros a la
+    vista», «Preparando detección…» o «Detección en vivo no disponible». **Solo es retroalimentación visual**: quién es cada rostro, la asistencia y todo lo que se guarda lo decide el servicio de
+    reconocimiento como antes. Ni el contrato de `/captura` ni la API cambian, y el video no sale del dispositivo para esto (RNF-03 intacto).
+  - La cámara simulada (modo local) ya sabe dónde dibuja cada rostro, así que pinta sus recuadros sin detector (`marcosDelFotograma`).
+  - **Espejo siempre** en `CameraCapture` (`mirrored` por omisión es `true`, con cualquier cámara). Es solo visual: el JPEG que se captura y se envía va sin espejar, porque el reconocimiento debe
+    ver la imagen real. `mirrored={false}` sigue permitiendo quitarlo.
+- **Archivos y carga**: el modelo (`web/public/mediapipe/blaze_face_short_range.tflite`, 229 746 bytes, sha256 `b4578f35…0152f`, de `storage.googleapis.com/mediapipe-models/face_detector/blaze_face_short_range/float16/1/`)
+  está versionado. Los WASM (~13 MB, solo la variante con SIMD) **no**: los copia `web/scripts/copiar-mediapipe.mjs` en `postinstall` a `web/public/mediapipe/wasm/` (ignorado por git y por ESLint). Todo se
+  sirve del mismo origen (sin CDN, funciona en una red de aula sin salida). La librería se importa con `import()` dentro del efecto: su chunk (~155 KB) no está en ningún manifiesto de página, y
+  `/docente` quedó igual (226,2 KB gz); `/docente/sesiones/[id]` +2,9 KB gz (el cargador y los componentes nuevos).
+- **CSP de producción**: `script-src` suma `'wasm-unsafe-eval'` (`next.config.mjs`). Permite compilar WebAssembly, no `eval` de JS.
+- **Degradación**: sin WebAssembly, sin los archivos o con 5 fallos seguidos al detectar, el chip dice «Detección en vivo no disponible» y la cámara y el pase de lista siguen exactamente igual. Con la
+  pestaña en segundo plano no se detecta (ahorra batería). Un rostro que se pierde 1-2 cuadros conserva su recuadro 0,5 s para que no parpadee. Se usa la GPU (WebGL) y, si falla, la CPU.
+- **Alternativas descartadas**:
+
+  | Alternativa | Por qué no |
+  |---|---|
+  | Usar los `bbox` que ya calcula `recognition-service` | Habría que ampliar la respuesta de `/captura` (contrato) y solo se actualizarían cada 5-15 s: el recuadro quedaría detrás de quien se mueve |
+  | Detector nativo `FaceDetector` (Shape Detection API) | Solo existe en Chrome con bandera experimental o en Android; en Safari y Firefox no habría indicador |
+  | Subir más seguido los fotogramas al servidor para tener cajas | Multiplica la carga del servicio y las consultas en bitácora (RF-19) solo para una ayuda visual |
+
+- **Despliegue**: `npm ci` debe ejecutar los scripts de instalación (`postinstall`). Con `--ignore-scripts` faltarán los WASM y la pantalla mostrará «Detección en vivo no disponible» (no se rompe nada más).
+
+## 10. Autoservicio del alumno (extensión 19, 2026-10-07)
+
+- **Contexto**: hasta ahora el administrador capturaba el consentimiento (PDF firmado a mano) y el rostro de cada alumno (RF-15/16 y la lista de actores de la spec §1.2.1). La misma spec dice que el alumno
+  «otorga o no su consentimiento». Con 20 000 alumnos previstos, que el administrador capture todo es el cuello de botella; el objetivo del sistema es que el alumno se dé de alta solo. Las cuentas siguen
+  creándolas el administrador (RF-20: no hay autorregistro público).
+- **Decisión**: el alumno acepta el aviso de privacidad en `/alumno/registro` y registra su rostro con la cámara de su dispositivo. Dos decisiones fueron del responsable del proyecto: **aceptación en la app**
+  (no «descargar, firmar y subir») y **sin aprobación del administrador, con candados**.
+  - **Consentimiento**: aceptación electrónica con la sesión autenticada. El servidor genera una **constancia PDF** (sin librerías: PDF de texto escrito a mano en `lib/server/constancia.js`; verificada con pypdf y poppler)
+    con los datos de la aceptación, el texto completo y su **huella SHA-256**; queda en el bucket igual que el PDF firmado. Vigencia: 12 meses (`app.consentimiento_meses()`).
+  - **Sin `id_alumno` en la entrada**: RPC `api_mi_*` y rutas `/api/yo/*` toman el alumno de la sesión. El núcleo de RN-12/RN-13 es el mismo (`app.plantilla_registrar`); `api_plantilla_registrar` del administrador conserva su contrato.
+  - **Candados en lugar de aprobación**: solo cámara en vivo en la interfaz; rechazo si el rostro ya pertenece a otra matrícula (búsqueda con `/v1/recognize` y `allowed_faiss_ids` de los demás alumnos, mismo umbral
+    que el pase de lista); tope de 5 registros por 24 h; bitácora con `origen`. El administrador **audita y revoca**, no aprueba.
+  - **Revocar**: el alumno puede retirar su consentimiento cuando quiera (`api_mi_consentimiento_revocar`): es la contraparte de otorgarlo.
+- **Alternativas descartadas**:
+
+  | Alternativa | Por qué no |
+  |---|---|
+  | Descargar el formato, firmarlo y subir el PDF escaneado | Más fricción y más soporte; el administrador acabaría revisando PDFs, que es lo que se quiere evitar |
+  | Cola de aprobación del administrador antes de activar la plantilla | Más seguro, pero devuelve el cuello de botella; el riesgo se atiende con candados y auditoría |
+  | Ampliar `api_plantilla_registrar` para aceptar al alumno (comprobando que el id coincida) | El id seguiría llegando por parámetro; es preferible que no exista como entrada |
+  | Reutilizar `alta_plantilla`/`correccion` de la bitácora para el consentimiento | Rótulos engañosos en `/admin/bitacora` y filtros imprecisos; se prefirió ampliar el enum (desviación documentada) |
+  | Librería de PDF (`pdf-lib`, `pdfkit`) | Una página de texto no justifica una dependencia nueva en el proyecto |
+
+- **Lo que NO garantiza (honesto)**:
+  - «Solo cámara» es un control de la **interfaz**: un cliente que hable con `POST /api/yo/plantilla` directamente puede mandar JPEG cualquiera (con su propia sesión). Lo que sí se comprueba en el servidor es calidad,
+    consistencia entre tomas, que el rostro no sea el de otra matrícula y el tope diario. No hay detección de vida en el registro (la del pase de lista, extensión de `0238`, es solo informativa).
+  - La búsqueda de duplicados compara contra plantillas **ya indexadas** del índice en uso: dos alumnos que se registren casi al mismo tiempo con la misma cara podrían coincidir hasta la siguiente reconstrucción; y si el
+    servicio tiene cargado un índice distinto del de la base, el resultado no es fiable. Si el servicio no responde al buscar, **no se guarda nada**.
+  - Dos personas muy parecidas (gemelos) pueden dar un score sobre el umbral: el alumno ve «acude a tu coordinación» y el administrador puede registrarlas con el flujo de siempre.
+  - **El texto del aviso es un borrador técnico** (`lib/avisoBiometrico.js`): lo debe revisar la oficina jurídica de la UNACH. Cualquier cambio sube `VERSION_AVISO`.
+- **Consecuencias**: la tabla `consentimiento` gana `origen` y `version_aviso`; `plantilla_facial`, `origen`. La bitácora pasa de 8 a 10 acciones (la decisión 12 queda matizada: el consentimiento ahora sí se audita).
+  `usePlantillaFacial` recibe sus llamadas por parámetro (`api`, por omisión las del administrador) y `RegistroFacialGuiado` gana `propio`. El riel y la barra inferior del alumno pasan de un destino a dos (aparece la barra inferior móvil).
+- **Pendiente / siguientes pasos** (no incluidos): que el alumno descargue su constancia (URL firmada propia, con bitácora RF-19); mostrar el origen en `ConsentimientoPanel`/`PlantillaFacialPanel` del administrador;
+  límite de tasa de `POST /api/yo/plantilla/verificar` (hoy solo lo frena el tope diario de registros y el consentimiento); detección de vida en el registro; vencimiento: avisar al alumno antes de que caduque su consentimiento.
+- **Despliegue**: SQL (`0239_autoservicio_registro.sql`), después web; el servicio de reconocimiento no cambia. En modo local reinicia el Next o espera >60 s (caché del catálogo de funciones).
+
+## 11. Laboratorios (extensión 20, 2026-10-07)
+
+- **Contexto**: un profesor señaló que SUSAN «solo pasa lista». La respuesta no es otro tablero sobre los mismos datos, sino aprovechar la identidad ya inscrita (rostro con consentimiento, cámara por espacio, horarios e inscripciones) para
+  resolver un proceso que hoy se hace con papel y llaves: **quién puede usar un laboratorio, con qué grupo y a qué hora**. Primera entrega: solicitud y autorización. La puerta con cámara es la fase 2.
+- **Decisión**: un laboratorio **es un aula** (`aula.tipo = 'laboratorio'`, mismo catálogo, capacidad y cámaras). `solicitud_laboratorio` (una fecha, un laboratorio, un grupo del docente, `hora_inicio`–`hora_fin`, `actividad`, estatus
+  `pendiente | aprobada | rechazada | cancelada`; «vencida» es derivada: una pendiente cuya hora de inicio ya pasó). Decide **solo el administrador** (a petición del responsable del proyecto); el docente cancela las suyas; el administrador cancela cualquiera con motivo.
+- **Reglas que valida la base** (no la interfaz): grupo propio del docente (un grupo ajeno responde igual que uno inexistente), aula tipo laboratorio, 30 min a 8 h, anticipación mínima y horizonte máximo configurables,
+  inscritos activos ≤ capacidad (al solicitar y de nuevo al aprobar), un mismo grupo no puede estar en dos laboratorios a la vez, y el laboratorio debe estar libre: ni otra solicitud **aprobada** que se traslape ni una clase de otro grupo
+  que use ese aula (por sesión concreta no suspendida o, si aún no hay sesiones generadas, por su horario semanal del mismo periodo; una sesión suspendida libera el laboratorio). Las **pendientes no bloquean**: el administrador elige entre ellas
+  y la lista le muestra `conflicto` (por qué hoy no se podría aprobar) y `compite` (con cuántas pendientes se traslapa). Dos aprobadas nunca se traslapan: lo garantiza el disparador `lab01_solicitud_traslape` con candado asesor por laboratorio
+  (red de seguridad ante concurrencia; no se usa `EXCLUDE ... gist` para no depender de la extensión `btree_gist`).
+- **Alternativas descartadas**:
+
+  | Alternativa | Por qué no |
+  |---|---|
+  | Tabla `laboratorio` aparte de `aula` | Duplicaría capacidad, cámaras y los choques de horario que ya resuelve el catálogo de aulas |
+  | Una solicitud con varias fechas o recurrente | Decisión del responsable: una fecha por solicitud (más simple de aprobar y de cancelar). Una práctica semanal exige repetir la solicitud; si duele, se agrega «duplicar a otra fecha» sin tocar el esquema |
+  | Que las pendientes reserven el horario | El primero en solicitar ganaría sin que nadie decida; el administrador necesita ver la competencia |
+  | Reutilizar `sesion_clase` para la práctica de laboratorio | Cada sesión extra entraría al denominador de RN-11 (el 20 % de faltas) y falsearía el derecho a examen |
+- **Pendiente / fase 2** (no incluido): **puerta con cámara** en el laboratorio (tablet con navegador, `camara.tipo = 'navegador'`) que reconoce contra los inscritos del grupo de la solicitud aprobada vigente (universo de ~30, no del campus) y registra
+  entrada y salida (horas de uso por alumno y por laboratorio). Requiere: **finalidad nueva en el aviso de privacidad y consentimiento por finalidad** (hoy cubre el pase de lista; revisión de jurídico de la UNACH, §3.3); decidir qué pasa con la
+  sesión de clase de ese día (si el grupo cambia de aula, su sesión sigue `programada` en el aula original); notificaciones por correo (hoy el docente ve el estatus en `/docente/laboratorios`); y una opción de repetir/duplicar solicitudes.
+- **Despliegue**: SQL (`0240_laboratorios.sql`, `0241_api_laboratorios.sql`), después web. Prueba: `supabase/tests/api_b4_01_laboratorios.sql`. Escenario de demostración: `scripts/demo/laboratorios.sql` (ver `docs/DEMO.md` §1 y §2).

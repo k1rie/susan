@@ -2,6 +2,7 @@ import clsx from 'clsx';
 import Avatar from '@/components/ui/Avatar';
 import Button from '@/components/ui/Button';
 import StatusChip from '@/components/ui/StatusChip';
+import EtiquetaSospechosa from '../EtiquetaSospechosa';
 import PlazoRestante from '../PlazoRestante';
 import { idDeCaso, metaCaso } from './colaRevision.utils.js';
 
@@ -34,7 +35,8 @@ export default function ListaCasos({ tipo, items, total, seleccionadoId, onSelec
                                         <StatusChip kind="asistencia" value={tipo === 'pendiente' ? 'pendiente' : it.estado_asistencia} size="sm" />
                                     </span>
                                     <span className="truncate text-xs text-muted-foreground">{metaCaso(it)}</span>
-                                    <span className="text-xs">
+                                    <span className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs">
+                                        {it.sospechosa && <EtiquetaSospechosa lecturasNoVivas={it.lecturas_no_vivas} />}
                                         {tipo === 'pendiente' ? (
                                             <PlazoRestante compacto key={it.segundos_restantes} venceEn={it.vence_en} segundosRestantes={it.segundos_restantes} />
                                         ) : (

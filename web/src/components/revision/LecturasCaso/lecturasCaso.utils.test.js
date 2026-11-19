@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { contarConScore, datosScores, lecturasNumeradas, MAX_BARRAS_SCORE, progresoValidas, recortePurgado, resumenScores, resumenValidas, textoCamara, textoScore } from './lecturasCaso.utils.js';
+import { contarConScore, datosScores, lecturasNumeradas, MAX_BARRAS_SCORE, progresoValidas, recortePurgado, resumenScores, resumenValidas, textoCamara, textoScore, textoSospecha, textoVida } from './lecturasCaso.utils.js';
 
 const L = (min, score, es_valida) => ({ marca_tiempo: `2026-09-14T13:0${min}:00Z`, score_similitud: score, es_valida });
 
@@ -70,5 +70,18 @@ describe('lecturasCaso.utils', () => {
         expect(progresoValidas([L(1, 0.9, true), L(2, 0.5, false)], 3)).toEqual({ validas: 1, minimo: 3, ancho: (1 / 3) * 100, cumple: false });
         expect(progresoValidas([L(1, 0.9, true), L(2, 0.9, true), L(3, 0.9, true), L(4, 0.9, true)], 3)).toMatchObject({ ancho: 100, cumple: true });
         expect(progresoValidas([], undefined)).toEqual({ validas: 0, minimo: null, ancho: 0, cumple: false });
+    });
+});
+
+describe('detección de vida', () => {
+    it('textoVida: veredicto y puntaje de la lectura', () => {
+        expect(textoVida({ es_viva: true, puntaje_vida: 0.93 })).toBe('Viva 0.930');
+        expect(textoVida({ es_viva: false, puntaje_vida: 0.12 })).toBe('No viva 0.120');
+    });
+
+    it('textoSospecha: singular, plural y sin conteo', () => {
+        expect(textoSospecha(1)).toMatch(/^Una lectura válida fue marcada como no viva/);
+        expect(textoSospecha(3)).toMatch(/^3 lecturas válidas fueron marcadas como no vivas/);
+        expect(textoSospecha(undefined)).toMatch(/^Hay una lectura válida/);
     });
 });

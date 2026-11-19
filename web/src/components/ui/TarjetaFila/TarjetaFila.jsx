@@ -10,11 +10,23 @@ const TONO = {
     neutro: ['bg-muted', 'var(--muted-foreground)'],
 };
 
+// Cuántas líneas ocupan el título y el subtítulo. Por omisión una sola con «…» (las listas densas conservan su alto); con 2 o 3 se corta
+// con `line-clamp` y se parte la palabra que no quepa (`break-words`); 'todas' no corta. Clases completas, no interpoladas, para el compilador
+// de Tailwind. Con más de una línea el elemento NO lleva `block`: `line-clamp` ya lo hace bloque (-webkit-box) y dos `display` chocarían.
+const LINEAS = {
+    1: { titulo: 'block truncate', subtitulo: 'block truncate' },
+    2: { titulo: 'line-clamp-2 break-words', subtitulo: 'line-clamp-2 break-words' },
+    3: { titulo: 'line-clamp-3 break-words', subtitulo: 'line-clamp-3 break-words' },
+    todas: { titulo: 'block break-words', subtitulo: 'block break-words' },
+};
+
 // Tarjeta de fila (componente firma, referencia: tarjetas de apps de Dropbox Dash): ficha con el icono a la izquierda, título +
 // subtítulo al centro y una acción circular a la derecha (`accion`: p. ej. un botón de Lucide). Con href toda la fila es un enlace;
 // si lleva `accion` interactiva, pasa `href` solo cuando la acción sea decorativa (no anides controles dentro de un enlace).
-export default function TarjetaFila({ icono: Icono, tono = 'azul', titulo, subtitulo, accion, href, as, children, className, ...rest }) {
+//   lineas  1 (por omisión, una línea con «…») | 2 | 3 | 'todas': líneas que pueden ocupar título y subtítulo (ver LINEAS).
+export default function TarjetaFila({ icono: Icono, tono = 'azul', titulo, subtitulo, accion, href, as, lineas = 1, children, className, ...rest }) {
     const [fondo, trazo] = TONO[tono] || TONO.neutro;
+    const clasesLineas = LINEAS[lineas] || LINEAS[1];
     const Etiqueta = as || (href ? Link : 'div');
     const props = href && !as ? { href } : {};
     return (
@@ -33,8 +45,8 @@ export default function TarjetaFila({ icono: Icono, tono = 'azul', titulo, subti
                 </span>
             )}
             <span className="min-w-0 flex-1">
-                <span className="block truncate text-[14.5px] font-medium leading-tight">{titulo}</span>
-                {subtitulo && <span className="mt-0.5 block truncate text-[13px] text-muted-foreground">{subtitulo}</span>}
+                <span className={clsx(clasesLineas.titulo, 'text-[14.5px] font-medium leading-tight')}>{titulo}</span>
+                {subtitulo && <span className={clsx('mt-0.5', clasesLineas.subtitulo, 'text-[13px] text-muted-foreground')}>{subtitulo}</span>}
                 {children}
             </span>
             {accion && <span className="shrink-0">{accion}</span>}

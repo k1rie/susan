@@ -178,6 +178,10 @@ export async function ejecutarCaptura({ rpc, svc, me, params, body, form }) {
                 faiss_id: r.candidate?.faiss_id ?? null,
                 score: r.candidate?.score ?? null,
                 objeto_recorte: r.objeto_recorte,
+                // Solo si el servicio la evaluó (estado 'ok'); si no, se omiten y la base guarda NULL = no evaluada.
+                ...(r.vivacidad?.estado === 'ok' && r.vivacidad.es_viva !== null && r.vivacidad.puntaje !== null
+                    ? { es_viva: r.vivacidad.es_viva, puntaje_vida: r.vivacidad.puntaje }
+                    : {}),
             })),
         });
     } catch (e) {

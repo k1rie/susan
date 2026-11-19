@@ -5,7 +5,7 @@ node_modules
 coverage
 __pycache__
 *.pyc
-.venv
+.venv*
 .pytest_cache
 .models
 
@@ -29,3 +29,6 @@ __pycache__
 supabase/.temp
 supabase/.branches
 supabase/dist
+
+# estado local de la herramienta de video (historial de sesiones)
+video/**/.hyperframes/history-*

@@ -7,7 +7,7 @@ Fecha: 2026-10-06. Piloto construido y medido en esta máquina antes de cerrar e
 **Máquina y renderer.** Linux 6.18, 4 núcleos, 16 GB, Node 22.22, `hyperframes@0.8.134`, Chrome headless shell
 152.0.7977.30 con `--use-gl=angle --use-angle=swiftshader` (GL por software: «browserGpuMode probe → software (WebGL
 unavailable)»). El MP4 se captura por **`beginframe`** (la ruta rápida), no por `screenshot`. La máquina es compartida:
-durante la última ronda otro agente corría `frame-check.mjs` con su propio Chrome, así que las cifras tienen ±10–15 % de
+durante la última ronda otro frente corría `frame-check.mjs` con su propio Chrome, así que las cifras tienen ±10–15 % de
 ruido; las tablas usan las rondas tranquilas.
 
 ---
@@ -83,7 +83,7 @@ errores (avisos: pista densa en el piloto y contraste en cuadros a medio desenfo
 | png-sequence · 30 fps | 1 | 37.7 s | 37.1 s | usa la ruta `screenshot` (206 ms/cuadro): no sirve para medir |
 
 Pares «/»: ronda 1 sin `will-change` en la raíz / ronda 2 con `will-change` (misma carga). La ronda 3 (con máscara del
-odómetro, con otro agente usando la CPU) dio 10.3 / 14.3 / 22.9 s: es ruido de la máquina compartida, no de la máscara.
+odómetro, con otro frente usando la CPU) dio 10.3 / 14.3 / 22.9 s: es ruido de la máquina compartida, no de la máscara.
 Renders: `piloto/renders/piloto-{draft-30,high-30,high-60-w3,high-60-w1}.mp4` (+ `ronda1-sin-will-change/`, `ronda2/`).
 
 Lectura útil: **~3 s de render por segundo de video a 60 fps high** y ~2 s a 30 fps high, con 2–3 workers. Para 55 s:

@@ -8,7 +8,7 @@ import Spinner from '@/components/ui/Spinner';
 import TarjetaGrafica from '@/components/ui/TarjetaGrafica';
 import RecorteFirmado from '../RecorteFirmado';
 import { formatearHora } from '../PlazoRestante/plazoRestante.utils.js';
-import { CONFIG_SCORES, contarConScore, datosScores, lecturasNumeradas, progresoValidas, recortePurgado, resumenScores, resumenValidas, textoCamara, textoScore } from './lecturasCaso.utils.js';
+import { CONFIG_SCORES, contarConScore, datosScores, lecturasNumeradas, progresoValidas, recortePurgado, resumenScores, resumenValidas, textoCamara, textoScore, textoSospecha, textoVida } from './lecturasCaso.utils.js';
 import { useLecturasCaso } from './useLecturasCaso.js';
 
 // Evidencia del caso: avance de lecturas válidas, gráfica de scores, foto de registro y una tarjeta compacta por lectura.
@@ -64,6 +64,12 @@ export default function LecturasCaso({ idAsistencia, minimoValidas }) {
                 </Button>
             </div>
 
+            {data?.sospechosa && (
+                <Alert tone="warning" title="Caso sospechoso">
+                    {textoSospecha(data.lecturas_no_vivas)} Revisa los recortes antes de resolver; el sistema no cambió el estado.
+                </Alert>
+            )}
+
             {scores.length >= 2 && (
                 <TarjetaGrafica
                     titulo="Score por lectura"
@@ -75,10 +81,15 @@ export default function LecturasCaso({ idAsistencia, minimoValidas }) {
                 </TarjetaGrafica>
             )}
 
-            <div className="flex items-center gap-3 text-sm">
-                <RecorteFirmado url={data?.foto_registro?.url ?? null} alt="Foto de registro del alumno" onExpirada={recargar} />
-                <span className="text-muted-foreground">{data?.foto_registro ? 'Foto de registro' : 'Sin foto de registro activa'}</span>
-            </div>
+            {data?.foto_registro ? (
+                <div className="flex items-center gap-3 text-sm">
+                    <RecorteFirmado url={data.foto_registro.url ?? null} alt="Foto de registro del alumno" onExpirada={recargar} />
+                    <span className="text-muted-foreground">Foto de registro</span>
+                </div>
+            ) : (
+                // Las fotos de registro se borran al indexarse (extensión 18): solo queda el vector, y la comparación es el score.
+                <p className="text-sm text-muted-foreground">La foto de registro no se conserva; solo se guarda el vector del rostro.</p>
+            )}
             {lecturas.length === 0 ? (
                 <p className="text-sm text-muted-foreground">Sin lecturas del reconocimiento facial en esta sesión.</p>
             ) : (
@@ -104,6 +115,11 @@ export default function LecturasCaso({ idAsistencia, minimoValidas }) {
                                     <span className={l.es_valida ? 'text-presente' : 'text-ausente'}>{l.es_valida ? 'Válida' : 'No válida'}</span>
                                     <span className="text-muted-foreground"> · min {Number(l.minuto_sesion).toFixed(1)}</span>
                                 </p>
+                                {l.es_viva != null && (
+                                    <p className={l.es_viva ? 'text-muted-foreground' : 'font-medium text-ausente'}>
+                                        {textoVida(l)}
+                                    </p>
+                                )}
                             </div>
                         </li>
                     ))}

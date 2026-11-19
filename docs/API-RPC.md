@@ -4,7 +4,7 @@
 > El SQL es la fuente de verdad (docs/ARCHITECTURE.md §7). Convenciones: `api_*` → `authenticated`; `svc_*` → `service_role`.
 > En la capa de datos web: `api_docente_panel` → `docentePanel()`, argumentos sin el prefijo `p_` y en camelCase.
 
-- Funciones `api_*`: **72** · Funciones `svc_*`: **19** · Códigos de error propios: **54**
+- Funciones `api_*`: **82** · Funciones `svc_*`: **22** · Códigos de error propios: **65**
 
 ## Índice
 
@@ -53,10 +53,20 @@
 | `api_inscribir` | `p_id_grupo integer, p_id_alumno integer` | `jsonb` | authenticated | DEFINER |
 | `api_inscritos` | `p_id_grupo integer, p_estatus text DEFAULT NULL::text` | `jsonb` | authenticated | INVOKER |
 | `api_justificante_documento` | `p_id_justificante integer` | `jsonb` | authenticated | INVOKER |
+| `api_laboratorio_agenda` | `p_id_aula integer, p_desde date, p_hasta date` | `jsonb` | authenticated | DEFINER |
+| `api_laboratorio_cancelar` | `p_id_solicitud integer, p_comentario text DEFAULT NULL::text` | `jsonb` | authenticated | DEFINER |
+| `api_laboratorio_resolver` | `p_id_solicitud integer, p_aprobar boolean, p_comentario text DEFAULT NULL::text` | `jsonb` | authenticated | DEFINER |
+| `api_laboratorio_solicitar` | `p jsonb` | `jsonb` | authenticated | DEFINER |
+| `api_laboratorio_solicitudes_listar` | `p_estatus text DEFAULT NULL::text, p_id_aula integer DEFAULT NULL::integer, p_desde date DEFAULT NULL::date, p_hasta date DEFAULT NULL::date, p_limit integer DEFAULT 50, p_offset integer DEFAULT 0` | `jsonb` | authenticated | DEFINER |
+| `api_laboratorios_listar` | — | `jsonb` | authenticated | DEFINER |
 | `api_materia_guardar` | `p jsonb` | `jsonb` | authenticated | DEFINER |
 | `api_materia_obtener` | `p_id_materia integer` | `jsonb` | authenticated | INVOKER |
 | `api_materias_listar` | `p_q text DEFAULT NULL::text, p_limit integer DEFAULT 50, p_offset integer DEFAULT 0` | `jsonb` | authenticated | INVOKER |
 | `api_matriz_grupo` | `p_id_grupo integer, p_limit integer DEFAULT 200, p_offset integer DEFAULT 0` | `jsonb` | authenticated | INVOKER |
+| `api_mi_consentimiento_aceptar` | `p_objeto_documento text, p_version_aviso text, p_ip inet DEFAULT NULL::inet` | `jsonb` | authenticated | DEFINER |
+| `api_mi_consentimiento_revocar` | `p_ip inet DEFAULT NULL::inet` | `jsonb` | authenticated | DEFINER |
+| `api_mi_plantilla_registrar` | `p_id_consent integer, p_objeto_foto text, p_ip inet DEFAULT NULL::inet, p_fotos jsonb DEFAULT NULL::jsonb` | `jsonb` | authenticated | DEFINER |
+| `api_mi_registro` | — | `jsonb` | authenticated | DEFINER |
 | `api_mis_justificables` | `p_limit integer DEFAULT 50, p_offset integer DEFAULT 0` | `jsonb` | authenticated | INVOKER |
 | `api_mis_justificantes` | `p_limit integer DEFAULT 50, p_offset integer DEFAULT 0` | `jsonb` | authenticated | INVOKER |
 | `api_parametro_actualizar` | `p_clave text, p_valor text, p_ip inet DEFAULT NULL::inet` | `jsonb` | authenticated | DEFINER |
@@ -87,6 +97,9 @@
 | `svc_bloqueo_liberar` | `p_clave text, p_dueno text` | `boolean` | service_role | DEFINER |
 | `svc_camara_direccion` | `p_id_sesion integer, p_id_camara integer` | `text` | service_role | DEFINER |
 | `svc_crear_captura` | `p_id_sesion integer, p_id_camara integer, p_marca_tiempo timestamp with time zone, p_rostros integer` | `bigint` | service_role | DEFINER |
+| `svc_faiss_ids_otros_alumnos` | `p_id_alumno integer` | `jsonb` | service_role | DEFINER |
+| `svc_fotos_registro_listar` | `p_ids integer[] DEFAULT NULL::integer[], p_limit integer DEFAULT 200` | `jsonb` | service_role | DEFINER |
+| `svc_fotos_registro_marcar` | `p_ids integer[]` | `jsonb` | service_role | DEFINER |
 | `svc_indice_activar` | `p_id_indice integer, p_mapeo jsonb` | `jsonb` | service_role | DEFINER |
 | `svc_indice_en_uso` | — | `jsonb` | service_role | DEFINER |
 | `svc_indice_plan` | `p_completa boolean DEFAULT false` | `jsonb` | service_role | DEFINER |
@@ -212,14 +225,14 @@ Lista alumnos con filtro de texto y estatus (paginada).
 
 ### `api_aula_guardar(p jsonb)`
 
-Da de alta (sin id_aula) o modifica (con id_aula) un aula.
+Da de alta (sin id_aula) o modifica (con id_aula) un aula o laboratorio.
 
 - **Retorna:** `jsonb`
 - **Ejecuta:** authenticated · DEFINER VOLATILE
 - **Roles:** administrador.
-- **Argumentos:** p {id_aula?, clave (max 10), edificio (max 40), capacidad > 0}; en modificacion lo ausente se conserva.
-- **Forma JSON:** {"id_aula": 3, "clave": "C-01", "edificio": "C", "capacidad": 30, "creado": true}
-- **Errores:** NO_AUTORIZADO, VALIDACION, NO_ENCONTRADO, DUPLICADO (clave), AULA_CAPACIDAD_INSUFICIENTE (menor que los inscritos activos de un grupo).
+- **Argumentos:** p {id_aula?, clave (max 10), edificio (max 40), capacidad > 0, tipo? ('aula' por omision | 'laboratorio')}; en modificacion lo ausente se conserva.
+- **Forma JSON:** {"id_aula": 3, "clave": "C-01", "edificio": "C", "capacidad": 30, "tipo": "aula", "creado": true}
+- **Errores:** NO_AUTORIZADO, VALIDACION, NO_ENCONTRADO, DUPLICADO (clave), AULA_CAPACIDAD_INSUFICIENTE (menor que los inscritos activos de un grupo), AULA_TIPO_CON_SOLICITUDES (deja de ser laboratorio con solicitudes pendientes o aprobadas vigentes).
 
 ### `api_aula_obtener(p_id_aula integer)`
 
@@ -383,7 +396,7 @@ Lecturas de un caso (detecciones atribuidas al alumno en la sesion) con rutas de
 - **Ejecuta:** authenticated · INVOKER STABLE
 - **Roles:** docente titular (via Route Handler)
 - **Argumentos:** p_id_asistencia integer; p_solo_validas boolean (def. false); p_limit integer (def. 50, max 100); p_offset integer
-- **Forma JSON:** {id_usuario, vigencia_url_firmada_seg, asistencia, alumno, sesion, objeto_foto_registro, total, lecturas:[{id_deteccion, id_captura, marca_tiempo, minuto_sesion, camara_posicion, score_similitud, es_valida, tiene_recorte, objeto_recorte}]}
+- **Forma JSON:** {id_usuario, vigencia_url_firmada_seg, asistencia, alumno, sesion, objeto_foto_registro, sospechosa, lecturas_no_vivas, total, lecturas:[{id_deteccion, id_captura, marca_tiempo, minuto_sesion, camara_posicion, score_similitud, es_valida, es_viva, puntaje_vida, tiene_recorte, objeto_recorte}]} sospechosa = alguna lectura valida del caso con es_viva = false (deteccion de vida); es_viva y puntaje_vida son null si la lectura no se evaluo.
 - **Errores:** NO_AUTORIZADO (no es docente), NO_ENCONTRADO (inexistente o de grupo ajeno)
 
 ### `api_docente_cambiar_estatus(p_id_docente integer, p_estatus text)`
@@ -443,14 +456,14 @@ Lista docentes con filtro de texto y estatus (paginada).
 
 ### `api_documento_url_autorizar(p_tipo text, p_id_registro integer, p_ip inet DEFAULT NULL::inet)`
 
-Autoriza la URL firmada de un documento/foto: devuelve la ruta y la vigencia (<= 300 s) y asienta consulta en bitacora (RF-19) antes de devolver. plantilla = foto principal de la plantilla; plantilla_foto = una foto concreta de la plantilla (p_id_registro = id_foto; la consulta se asienta sobre la plantilla con id_foto y orden). Tambien funciona para fotos de plantillas archivadas.
+Autoriza la URL firmada de un documento/foto: devuelve la ruta y la vigencia (<= 300 s) y asienta consulta en bitacora (RF-19) antes de devolver. plantilla = foto principal de la plantilla; plantilla_foto = una foto concreta de la plantilla (p_id_registro = id_foto; la consulta se asienta sobre la plantilla con id_foto y orden). Las fotos de registro se borran al indexarse (extension 18): pedir una ya purgada responde FOTO_NO_CONSERVADA y no asienta consulta.
 
 - **Retorna:** `jsonb`
 - **Ejecuta:** authenticated · DEFINER VOLATILE
 - **Roles:** administrador
 - **Argumentos:** p_tipo (consentimiento | plantilla | plantilla_foto), p_id_registro (id_consent, id_plantilla o id_foto), p_ip (opc.)
 - **Forma JSON:** {"tipo":"plantilla","id_registro":41,"id_alumno":17,"objeto":"registro/17/<uuid>.jpg","vigencia_seg":300}   |   tipo plantilla_foto: {"tipo":"plantilla_foto","id_registro":<id_foto>,"id_alumno":17,"id_plantilla":41,"orden":3,"objeto":"registro/17/<uuid>.jpg","vigencia_seg":300}
-- **Errores:** NO_AUTORIZADO, VALIDACION (tipo), NO_ENCONTRADO
+- **Errores:** NO_AUTORIZADO, VALIDACION (tipo), NO_ENCONTRADO, FOTO_NO_CONSERVADA (plantilla o plantilla_foto ya purgada)
 
 ### `api_generar_sesiones(p_id_grupo integer, p_desde date, p_hasta date, p_omitir_fechas date[] DEFAULT '{}'::date[])`
 
@@ -573,6 +586,72 @@ Ruta del documento de un justificante de un grupo propio: SOLO para el Route Han
 - **Forma JSON:** {id_usuario, vigencia_url_firmada_seg, id_justificante, id_alumno, id_asistencia, estatus, objeto_documento}
 - **Errores:** NO_AUTORIZADO (no es docente), NO_ENCONTRADO (inexistente o de grupo ajeno)
 
+### `api_laboratorio_agenda(p_id_aula integer, p_desde date, p_hasta date)`
+
+Ocupacion de un laboratorio entre dos fechas: clases de los grupos que lo usan como aula (sesiones no suspendidas) y solicitudes pendientes o aprobadas.
+
+- **Retorna:** `jsonb`
+- **Ejecuta:** authenticated · DEFINER STABLE
+- **Roles:** administrador (ve tambien el nombre del docente y el id de cada solicitud); docente (id solo de las suyas).
+- **Argumentos:** p_id_aula (laboratorio); p_desde; p_hasta (maximo 42 dias de rango).
+- **Forma JSON:** {"aula": {"id_aula": 3, "clave": "LAB-1", "edificio": "C", "capacidad": 30, "tipo": "laboratorio"}, "desde": "2026-09-14", "hasta": "2026-09-27", "bloques": [{"tipo": "solicitud", "estatus": "aprobada", "fecha": "2026-09-24", "hora_inicio": "10:00", "hora_fin": "12:00", "clave_grupo": "3A", "materia_clave": "ADM101", "materia_nombre": "Administracion I", "propia": true, "id_solicitud": 7, "docente_nombre": null}]}
+- **Errores:** NO_AUTORIZADO, VALIDACION (rango), NO_ENCONTRADO (no existe o no es laboratorio).
+
+### `api_laboratorio_cancelar(p_id_solicitud integer, p_comentario text DEFAULT NULL::text)`
+
+Cancela una solicitud pendiente o aprobada que aun no inicia. El docente solo cancela las suyas (comentario opcional); el administrador cancela cualquiera y debe indicar el motivo.
+
+- **Retorna:** `jsonb`
+- **Ejecuta:** authenticated · DEFINER VOLATILE
+- **Roles:** administrador, docente. Deja constancia en bitacora (solicitud_laboratorio).
+- **Argumentos:** p_id_solicitud; p_comentario opcional para el docente (max 300), obligatorio para el administrador (minimo 3).
+- **Forma JSON:** la solicitud con estatus cancelada (misma forma que api_laboratorio_solicitar).
+- **Errores:** NO_AUTORIZADO, VALIDACION, NO_ENCONTRADO (no existe o no es del docente), SOLICITUD_YA_RESUELTA (rechazada o cancelada), SOLICITUD_VENCIDA (aprobada que ya inicio).
+
+### `api_laboratorio_resolver(p_id_solicitud integer, p_aprobar boolean, p_comentario text DEFAULT NULL::text)`
+
+El administrador aprueba (p_aprobar = true) o rechaza una solicitud pendiente. Al aprobar se revalidan hora de inicio, laboratorio, capacidad y disponibilidad; al rechazar el comentario es obligatorio.
+
+- **Retorna:** `jsonb`
+- **Ejecuta:** authenticated · DEFINER VOLATILE
+- **Roles:** administrador. Deja constancia en bitacora (solicitud_laboratorio).
+- **Argumentos:** p_id_solicitud; p_aprobar boolean; p_comentario opcional al aprobar (max 300), obligatorio al rechazar (minimo 3).
+- **Forma JSON:** la solicitud con su nuevo estatus (misma forma que api_laboratorio_solicitar).
+- **Errores:** NO_AUTORIZADO, VALIDACION, NO_ENCONTRADO, SOLICITUD_YA_RESUELTA, SOLICITUD_VENCIDA (la hora de inicio ya paso), LAB_NO_ES_LABORATORIO, LAB_CAPACIDAD_INSUFICIENTE, LAB_OCUPADO.
+
+### `api_laboratorio_solicitar(p jsonb)`
+
+El docente solicita un laboratorio para uno de sus grupos en una fecha y horario. Nace pendiente.
+
+- **Retorna:** `jsonb`
+- **Ejecuta:** authenticated · DEFINER VOLATILE
+- **Roles:** docente. Deja constancia en bitacora (solicitud_laboratorio).
+- **Argumentos:** p {id_aula (laboratorio), id_grupo (del docente), fecha 'AAAA-MM-DD', hora_inicio 'HH:MM', hora_fin 'HH:MM', actividad (3 a 200 caracteres)}. Duracion de 30 minutos a 8 horas; anticipacion minima lab_anticipacion_horas y horizonte maximo lab_horizonte_dias.
+- **Forma JSON:** {"id_solicitud": 7, "estatus": "pendiente", "fecha": "2026-09-24", "hora_inicio": "10:00", "hora_fin": "12:00", "actividad": "Practica de balanza", "fecha_solicitud": "2026-09-14T13:12:00+00:00", "vencida": false, "aula": {"id_aula": 3, "clave": "LAB-1", "edificio": "C", "capacidad": 30}, "grupo": {"id_grupo": 1, "clave_grupo": "3A", "periodo": "2026-2", "materia_clave": "ADM101", "materia_nombre": "Administracion I", "inscritos": 4}, "docente": {"id_docente": 1, "nombre_completo": "Lopez Ruiz Ana"}, "resuelto_por": null, "fecha_resolucion": null, "comentario": null, "conflicto": null}
+- **Errores:** NO_AUTORIZADO, DOCENTE_NO_ACTIVO, VALIDACION, HORA_INVALIDA, NO_ENCONTRADO (laboratorio inexistente o grupo que no es del docente), LAB_NO_ES_LABORATORIO, LAB_FUERA_DE_PLAZO, LAB_CAPACIDAD_INSUFICIENTE (inscritos activos mayores que la capacidad), SOLICITUD_DUPLICADA (el grupo ya tiene una solicitud vigente que se traslapa), LAB_OCUPADO (solicitud aprobada o clase de otro grupo en ese horario).
+
+### `api_laboratorio_solicitudes_listar(p_estatus text DEFAULT NULL::text, p_id_aula integer DEFAULT NULL::integer, p_desde date DEFAULT NULL::date, p_hasta date DEFAULT NULL::date, p_limit integer DEFAULT 50, p_offset integer DEFAULT 0)`
+
+Solicitudes de laboratorio (paginada). Pendientes primero por fecha y hora ascendentes; el resto de la mas reciente a la mas antigua. `conteos` ignora el filtro de estatus. Solo para el administrador, las pendientes traen `conflicto` (texto o null: por que no se podria aprobar hoy) y `compite` (otras pendientes que se traslapan).
+
+- **Retorna:** `jsonb`
+- **Ejecuta:** authenticated · DEFINER STABLE
+- **Roles:** administrador (todas); docente (solo las suyas).
+- **Argumentos:** p_estatus pendiente|aprobada|rechazada|cancelada (opcional); p_id_aula; p_desde y p_hasta (fecha de uso); p_limit def. 50 max 200; p_offset def. 0.
+- **Forma JSON:** {"total": 3, "conteos": {"pendiente": 1, "aprobada": 2, "rechazada": 0, "cancelada": 0, "total": 3}, "items": [{"id_solicitud": 7, "estatus": "pendiente", "fecha": "2026-09-24", "hora_inicio": "10:00", "hora_fin": "12:00", "actividad": "Practica de balanza", "vencida": false, "aula": {"id_aula": 3, "clave": "LAB-1", "edificio": "C", "capacidad": 30}, "grupo": {"id_grupo": 1, "clave_grupo": "3A", "materia_clave": "ADM101", "materia_nombre": "Administracion I", "inscritos": 4}, "docente": {"id_docente": 1, "nombre_completo": "Lopez Ruiz Ana"}, "conflicto": null, "compite": 0}]}
+- **Errores:** NO_AUTORIZADO (alumno, tecnico), VALIDACION (estatus desconocido).
+
+### `api_laboratorios_listar()`
+
+Laboratorios del plantel (aulas con tipo laboratorio), ordenados por clave.
+
+- **Retorna:** `jsonb`
+- **Ejecuta:** authenticated · DEFINER STABLE
+- **Roles:** administrador, docente.
+- **Argumentos:** ninguno.
+- **Forma JSON:** {"total": 1, "items": [{"id_aula": 3, "clave": "LAB-1", "edificio": "C", "capacidad": 30, "tipo": "laboratorio"}]}
+- **Errores:** NO_AUTORIZADO (alumno, tecnico).
+
 ### `api_materia_guardar(p jsonb)`
 
 Da de alta (sin id_materia) o modifica (con id_materia) una materia.
@@ -616,6 +695,50 @@ Matriz alumno x sesion cerrada para el analisis numerico: fechas (una por sesion
 - **Argumentos:** p_id_grupo integer; p_limit integer (def. 200, max 200); p_offset integer
 - **Forma JSON:** {fechas:["2026-08-17"], total, alumnos:[{id_alumno, id_inscripcion, matricula, nombre, estados:["presente","ausente",null]}]}
 - **Errores:** NO_AUTORIZADO (rol o grupo ajeno), NO_ENCONTRADO (grupo inexistente para el administrador), VALIDACION (grupo nulo)
+
+### `api_mi_consentimiento_aceptar(p_objeto_documento text, p_version_aviso text, p_ip inet DEFAULT NULL::inet)`
+
+El alumno de la sesion acepta el aviso de privacidad biometrico: registra su consentimiento (firma hoy, vigencia 12 meses) con la constancia PDF ya subida, y lo asienta en bitacora. No recibe id_alumno.
+
+- **Retorna:** `jsonb`
+- **Ejecuta:** authenticated · DEFINER VOLATILE
+- **Roles:** alumno
+- **Argumentos:** p_objeto_documento (consentimientos/{id_alumno}/{uuid}.pdf), p_version_aviso (<= 20 caracteres), p_ip (opc.)
+- **Forma JSON:** {"id_consent":9,"id_alumno":17,"fecha_firma":"2026-10-07","vigencia_hasta":"2027-10-07","estatus":"vigente","vigente":true,"origen":"alumno","version_aviso":"2026-10"}
+- **Errores:** NO_AUTORIZADO (no es alumno), CUENTA_NO_VINCULADA, ALUMNO_INACTIVO, VALIDACION (version), RUTA_INVALIDA, CONSENTIMIENTO_YA_VIGENTE
+
+### `api_mi_consentimiento_revocar(p_ip inet DEFAULT NULL::inet)`
+
+El alumno de la sesion revoca su consentimiento vigente y se archivan sus plantillas activas (pase manual). Asienta revocacion_consentimiento. No recibe id_alumno.
+
+- **Retorna:** `jsonb`
+- **Ejecuta:** authenticated · DEFINER VOLATILE
+- **Roles:** alumno
+- **Argumentos:** p_ip (opc.)
+- **Forma JSON:** {"id_alumno":17,"consentimientos_revocados":1,"plantillas_archivadas":1,"requiere_reconstruccion":true}
+- **Errores:** NO_AUTORIZADO (no es alumno), CUENTA_NO_VINCULADA, RN_13_CONSENTIMIENTO_NO_VIGENTE (no hay uno vigente)
+
+### `api_mi_plantilla_registrar(p_id_consent integer, p_objeto_foto text, p_ip inet DEFAULT NULL::inet, p_fotos jsonb DEFAULT NULL::jsonb)`
+
+El alumno de la sesion registra su propia plantilla facial (RN-12/RN-13): igual que api_plantilla_registrar pero sin id_alumno (sale de la sesion), con origen alumno y un maximo de 5 registros por 24 h.
+
+- **Retorna:** `jsonb`
+- **Ejecuta:** authenticated · DEFINER VOLATILE
+- **Roles:** alumno
+- **Argumentos:** p_id_consent (vigente y del propio alumno), p_objeto_foto (registro/{id_alumno}/{uuid}.jpg; con p_fotos puede ser NULL o igual a la primera), p_ip (opc.), p_fotos (opc.; arreglo JSON de 3 a 8 objetos con la misma forma que en api_plantilla_registrar)
+- **Forma JSON:** {"id_plantilla":41,"id_alumno":17,"id_consent":9,"activa":true,"indexada":false,"plantilla_archivada":33,"fecha_registro":"2026-10-07T09:12:41-06:00","requiere_reconstruccion":true,"n_fotos":5}
+- **Errores:** NO_AUTORIZADO (no es alumno), CUENTA_NO_VINCULADA, AUTOREGISTRO_LIMITE, ALUMNO_INACTIVO, VALIDACION, RUTA_INVALIDA, RN_13_CONSENTIMIENTO_AJENO, RN_13_CONSENTIMIENTO_NO_VIGENTE
+
+### `api_mi_registro()`
+
+Estado del registro biometrico del alumno de la sesion: consentimiento vigente, plantilla activa y el paso que sigue (consentimiento | rostro | listo). No recibe id_alumno: sale de la sesion.
+
+- **Retorna:** `jsonb`
+- **Ejecuta:** authenticated · DEFINER STABLE
+- **Roles:** alumno
+- **Argumentos:** ninguno
+- **Forma JSON:** {"id_alumno":17,"matricula":"E20230045","nombre":"Ana Perez Lopez","estatus":"activo","hoy":"2026-10-07","ahora":"2026-10-07T09:12:41-06:00","puede_registrar":true,"consentimiento":{"id_consent":9,"fecha_firma":"2026-10-07","vigencia_hasta":"2027-10-07","dias_restantes":365,"origen":"alumno","version_aviso":"2026-10"}|null,"plantilla":{"id_plantilla":41,"id_consent":9,"fecha_registro":"...","indexada":true,"en_uso":true,"n_fotos":5,"origen":"alumno","consentimiento_vigente":true}|null,"completo":true,"paso":"listo","vigencia_meses":12,"vigencia_prevista":"2027-10-07","registros_24h":1,"limite_registros_24h":5}
+- **Errores:** NO_AUTENTICADO, CUENTA_INACTIVA, NO_AUTORIZADO (no es alumno), CUENTA_NO_VINCULADA
 
 ### `api_mis_justificables(p_limit integer DEFAULT 50, p_offset integer DEFAULT 0)`
 
@@ -681,13 +804,13 @@ Pase de lista manual por lote, atomico (todo o nada), con origen manual (P-04, R
 
 ### `api_plantilla_alumno(p_id_alumno integer, p_limit integer DEFAULT 50, p_offset integer DEFAULT 0)`
 
-Plantilla facial activa de un alumno (con su version de indice y sus fotos) y las archivadas paginadas. Nunca devuelve rutas objeto_foto: la foto se abre con api_documento_url_autorizar (tipo plantilla o plantilla_foto). coseno_min y coseno_medio son la consistencia entre fotos medida por el servicio al registrar (informativa; null en plantillas de una foto).
+Plantilla facial activa de un alumno (con su version de indice y sus fotos) y las archivadas paginadas. Nunca devuelve rutas objeto_foto: la foto se abre con api_documento_url_autorizar (tipo plantilla o plantilla_foto) y solo mientras siga disponible: tras indexar, la foto se borra y quedan foto_disponible = false y fotos[].disponible = false (extension 18). coseno_min y coseno_medio son la consistencia entre fotos medida por el servicio al registrar (informativa; null en plantillas de una foto).
 
 - **Retorna:** `jsonb`
 - **Ejecuta:** authenticated · INVOKER STABLE
 - **Roles:** administrador
 - **Argumentos:** p_id_alumno, p_limit (def. 50, max 200; aplica a archivadas), p_offset
-- **Forma JSON:** {"id_alumno":17,"activa":{"id_plantilla":41,"id_consent":9,"fecha_registro":"...","indexada":true,"id_indice":3,"version_indice":"v003","faiss_id":1042,"en_uso":true,"consentimiento_vigente":true,"n_fotos":5,"coseno_min":0.512|null,"coseno_medio":0.744|null,"fotos":[{"id_foto":101,"orden":1,"principal":true,"calidad":{"brillo":120.5,"nitidez":88.2,"tamano_rostro_px":210,"frontal":true}|null,"coseno_resto":0.812|null}]}|null,"archivadas":{"total":1,"items":[{"id_plantilla":33,"id_consent":4,"fecha_registro":"...","n_fotos":1}]},"indice_en_uso":{"id_indice":3,"version":"v003"}|null}
+- **Forma JSON:** {"id_alumno":17,"activa":{"id_plantilla":41,"id_consent":9,"fecha_registro":"...","indexada":true,"id_indice":3,"version_indice":"v003","faiss_id":1042,"en_uso":true,"consentimiento_vigente":true,"foto_disponible":false,"n_fotos":5,"coseno_min":0.512|null,"coseno_medio":0.744|null,"fotos":[{"id_foto":101,"orden":1,"principal":true,"disponible":false,"calidad":{"brillo":120.5,"nitidez":88.2,"tamano_rostro_px":210,"frontal":true}|null,"coseno_resto":0.812|null}]}|null,"archivadas":{"total":1,"items":[{"id_plantilla":33,"id_consent":4,"fecha_registro":"...","n_fotos":1}]},"indice_en_uso":{"id_indice":3,"version":"v003"}|null}
 - **Errores:** NO_AUTORIZADO, NO_ENCONTRADO (alumno)
 
 ### `api_plantilla_registrar(p_id_alumno integer, p_id_consent integer, p_objeto_foto text, p_ip inet DEFAULT NULL::inet, p_fotos jsonb DEFAULT NULL::jsonb)`
@@ -942,6 +1065,39 @@ Registra la captura de una camara en una sesion automatica abierta (RF-03). Idem
 - **Forma JSON:** id_captura bigint
 - **Errores:** NO_ENCONTRADO (sesion), CAMARA_NO_ENCONTRADA, CAMARA_FUERA_DE_AULA (RN-06), CAMARA_INACTIVA, SESION_NO_ABIERTA, SESION_NO_AUTOMATICA, FUERA_DE_VENTANA (pasada la tolerancia), MARCA_FUTURA, CAPTURA_EN_OTRA_SESION, VALIDACION
 
+### `svc_faiss_ids_otros_alumnos(p_id_alumno integer)`
+
+faiss_id de las plantillas activas e indexadas (indice en uso) de todos los alumnos activos salvo p_id_alumno, para comprobar que un rostro nuevo no pertenece ya a otra matricula. Solo enteros.
+
+- **Retorna:** `jsonb`
+- **Ejecuta:** service_role · DEFINER STABLE
+- **Roles:** service_role
+- **Argumentos:** p_id_alumno
+- **Forma JSON:** {"indice":"v004","faiss_ids":[1,2,3]}   (indice = null y faiss_ids = [] si no hay indice en uso)
+- **Errores:** VALIDACION (alumno nulo)
+
+### `svc_fotos_registro_listar(p_ids integer[] DEFAULT NULL::integer[], p_limit integer DEFAULT 200)`
+
+Paso 1 de la purga de fotos de registro (extension 18): plantillas cuyo vector ya esta en un indice activado, o que quedaron archivadas, y que todavia guardan alguna foto en el bucket. Una fila por plantilla con TODOS sus objetos. Una plantilla activa sin indexar nunca aparece: su foto aun la necesita el build. Solo lectura.
+
+- **Retorna:** `jsonb`
+- **Ejecuta:** service_role · DEFINER STABLE
+- **Roles:** service_role
+- **Argumentos:** p_ids (opc.; restringe a esas plantillas; null = todas), p_limit (def. 200, max 1000; cuenta plantillas, no objetos)
+- **Forma JSON:** {"pendientes_total":412,"items":[{"id_plantilla":41,"objetos":["registro/17/a.jpg","registro/17/b.jpg"]}]}
+- **Errores:** VALIDACION (p_ids con mas de 5000)
+
+### `svc_fotos_registro_marcar(p_ids integer[])`
+
+Paso 3 de la purga de fotos de registro (despues de borrar los objetos): pone objeto_foto = NULL en la plantilla y en todas sus fotos, solo si su vector ya esta en un indice activado o la plantilla esta archivada. Conserva la fila (faiss_id, id_indice, calidad, coseno_resto). Idempotente.
+
+- **Retorna:** `jsonb`
+- **Ejecuta:** service_role · DEFINER VOLATILE
+- **Roles:** service_role
+- **Argumentos:** p_ids (hasta 5000 id_plantilla)
+- **Forma JSON:** {"solicitadas":200,"marcadas":198}
+- **Errores:** VALIDACION (nulo o mas de 5000)
+
 ### `svc_indice_activar(p_id_indice integer, p_mapeo jsonb)`
 
 Activa atomicamente una version del indice (RF-16, RN-12, RNF-09): apaga la anterior, asigna id_indice/faiss_id a las plantillas del mapeo y enciende la nueva en una sola transaccion; si algo es invalido no cambia nada. Reintentable (ya_activo).
@@ -1081,7 +1237,7 @@ Registra las detecciones de una captura y aplica el ciclo de vida de la asistenc
 - **Retorna:** `jsonb`
 - **Ejecuta:** service_role · DEFINER VOLATILE
 - **Roles:** service_role
-- **Argumentos:** p_id_captura bigint, p_detecciones jsonb = [{faiss_id:int|null, score:numeric|null, objeto_recorte:text|null}] (no mas que los rostros de la captura). Resuelve faiss_id con el indice en uso (sin resolver = sin candidato). Guarda SIEMPRE candidato y score; es_valida = score (a 3 decimales) >= umbral_similitud (0.849 no, 0.850 si) y el candidato esta inscrito, activo y con consentimiento vigente. La 1.a valida de un alumno crea pendiente (origen automatico, hora_registro = marca de la captura); lecturas en capturas distintas suben conteo_detecciones; al llegar a min_detecciones_validas pasa a presente (1.a lectura antes de limite_presente_min) o retardo (hasta tolerancia_min). No pisa registros manuales ni correcciones. Idempotente por captura.
+- **Argumentos:** p_id_captura bigint, p_detecciones jsonb = [{faiss_id:int|null, score:numeric|null, objeto_recorte:text|null, es_viva:boolean|null, puntaje_vida:numeric|null}] (no mas que los rostros de la captura). es_viva y puntaje_vida son OPCIONALES (deteccion de vida del servicio): solo se guardan si llegan ambos y bien formados (puntaje entre 0 y 1); si no, quedan NULL y la deteccion se registra igual. Informativos: no cambian es_valida ni la asistencia. Resuelve faiss_id con el indice en uso (sin resolver = sin candidato). Guarda SIEMPRE candidato y score; es_valida = score (a 3 decimales) >= umbral_similitud (0.849 no, 0.850 si) y el candidato esta inscrito, activo y con consentimiento vigente. La 1.a valida de un alumno crea pendiente (origen automatico, hora_registro = marca de la captura); lecturas en capturas distintas suben conteo_detecciones; al llegar a min_detecciones_validas pasa a presente (1.a lectura antes de limite_presente_min) o retardo (hasta tolerancia_min). No pisa registros manuales ni correcciones. Idempotente por captura.
 - **Forma JSON:** {id_captura,rostros,validas,no_atribuidas,cambios:[{id_alumno,estado,lecturas_validas,hora_registro,creado,confirmado}],ya_procesada}
 - **Errores:** NO_ENCONTRADO (captura), SESION_NO_ABIERTA, SESION_NO_AUTOMATICA, VALIDACION (arreglo mal formado, score fuera de 0..1, mas detecciones que rostros)
 
@@ -1104,27 +1260,32 @@ Se devuelven como `RAISE EXCEPTION ... USING ERRCODE='P0001', HINT='<CODIGO>'`. 
 
 | Código | Mensaje base | Funciones |
 |---|---|---|
-| `ALUMNO_INACTIVO` | El alumno no tiene estatus activo. | `api_consentimiento_registrar`, `api_plantilla_registrar` |
+| `ALUMNO_INACTIVO` | El alumno no tiene estatus activo. | `api_consentimiento_registrar`, `api_mi_consentimiento_aceptar` |
 | `ALUMNO_NO_ACTIVO` | Solo se crea cuenta para un alumno activo. | `svc_usuario_crear` |
 | `AULA_CAPACIDAD_INSUFICIENTE` | Un grupo del aula tiene %s inscritos activos; la capacidad no puede ser menor. | `api_aula_guardar` |
+| `AULA_TIPO_CON_SOLICITUDES` | El laboratorio tiene solicitudes pendientes o aprobadas; resuélvelas o cancélalas antes de cambiar su tipo. | `api_aula_guardar` |
+| `AUTOREGISTRO_LIMITE` | Alcanzaste el límite de registros faciales de hoy. Inténtalo mañana o acude a tu coordinación. | `api_mi_plantilla_registrar` |
 | `CAMARA_FUERA_DE_AULA` | La cámara IP no existe o no pertenece al aula del grupo de la sesión (RN-06). | `svc_camara_direccion`, `svc_crear_captura` |
 | `CAMARA_INACTIVA` | La cámara no está activa. | `svc_crear_captura` |
 | `CAMARA_IP_REQUERIDA` | Una cámara de tipo ip necesita su dirección IP. | `api_camara_guardar` |
 | `CAMARA_NO_ENCONTRADA` | La cámara no existe. | `svc_crear_captura` |
 | `CAMARA_POSICION_DUPLICADA` | El aula ya tiene una cámara en la posición %s. | `api_camara_guardar` |
 | `CAPTURA_EN_OTRA_SESION` | Esa cámara ya registró una captura en ese instante para otra sesión. | `svc_crear_captura` |
+| `CONSENTIMIENTO_YA_VIGENTE` | Ya aceptaste el aviso y tu consentimiento sigue vigente. | `api_mi_consentimiento_aceptar` |
 | `CORREO_RESERVADO` | La cuenta de servicio del sistema está reservada. | `svc_usuario_crear` |
-| `CUENTA_NO_VINCULADA` | Tu cuenta no está vinculada a un perfil. Contacta al administrador. | `api_yo` |
+| `CUENTA_NO_VINCULADA` | Tu cuenta no está vinculada a un alumno. Contacta al administrador. | `api_mi_consentimiento_aceptar`, `api_mi_consentimiento_revocar`, `api_mi_plantilla_registrar`, `api_mi_registro`, `api_yo` |
 | `DOCENTE_CON_GRUPOS` | El docente tiene sesiones por impartir; reasigna sus grupos antes de darlo de baja. | `api_docente_cambiar_estatus` |
-| `DOCENTE_NO_ACTIVO` | No se puede asignar un grupo a un docente que no está activo. | `api_grupo_guardar`, `svc_usuario_crear` |
+| `DOCENTE_NO_ACTIVO` | No se puede asignar un grupo a un docente que no está activo. | `api_grupo_guardar`, `api_laboratorio_solicitar`, `svc_usuario_crear` |
 | `DOCUMENTO_INVALIDO` | El documento no es válido; súbelo de nuevo. | `api_registrar_justificante` |
 | `DUPLICADO` | Ya existe un alumno con la matrícula %s. | `api_alumno_guardar`, `api_aula_guardar`, `api_camara_guardar`, `api_docente_guardar`, `api_grupo_guardar`, `api_importar_inscripciones`, `api_materia_guardar`, `api_usuario_actualizar`, `svc_usuario_crear` |
 | `ESTADO_NO_JUSTIFICABLE` | El registro ya no es una ausencia ni un retardo; no se puede justificar. | `api_resolver_justificante` |
 | `ESTATUS_INVALIDO` | Solo se reanuda una sesión suspendida (esta está %s). | `api_reanudar_sesion`, `api_suspender_sesion` |
+| `FOTO_NO_CONSERVADA` | La foto ya no se conserva: solo se guarda el vector del rostro en el índice. | `api_documento_url_autorizar` |
 | `FUERA_DE_HORARIO` | La sesión solo puede abrirse de %s a %s del %s (hora del plantel). | `api_abrir_sesion` |
 | `FUERA_DE_VENTANA` | La captura excede la ventana de tolerancia de %s minutos de la sesión. | `svc_crear_captura` |
 | `GRUPO_CON_HISTORIAL` | El grupo ya tiene inscripciones o sesiones; no se puede cambiar su materia ni su periodo. | `api_grupo_guardar` |
 | `GRUPO_SIN_HORARIO` | El grupo no tiene horario; captúralo antes de generar sesiones. | `api_generar_sesiones` |
+| `HORA_INVALIDA` | hora_inicio es obligatoria y debe ser HH:MM. | `api_laboratorio_solicitar` |
 | `HORARIO_CHOQUE` | El horario del grupo choca en el aula destino con el %s. | `api_grupo_guardar`, `api_horario_guardar` |
 | `HORARIO_INVALIDO` | Bloque %s: se esperaba un objeto. | `api_horario_guardar` |
 | `INDICE_DIMENSION_INVALIDA` | La dimensión del índice no coincide con dimension_vector. | `svc_indice_activar`, `svc_indice_registrar` |
@@ -1136,25 +1297,31 @@ Se devuelven como `RAISE EXCEPTION ... USING ERRCODE='P0001', HINT='<CODIGO>'`. 
 | `JUSTIFICANTE_DUPLICADO` | Ya existe un justificante pendiente para este registro. | `api_registrar_justificante` |
 | `JUSTIFICANTE_PENDIENTE` | Hay un justificante pendiente para este registro; resuélvelo antes de marcarlo como presente. | `api_corregir_asistencia` |
 | `JUSTIFICANTE_YA_RESUELTO` | Este justificante ya fue resuelto. | `api_resolver_justificante` |
+| `LAB_CAPACIDAD_INSUFICIENTE` | El grupo tiene %s alumnos activos y el laboratorio %s admite %s. | `api_laboratorio_resolver`, `api_laboratorio_solicitar` |
+| `LAB_FUERA_DE_PLAZO` | La fecha y la hora de inicio ya pasaron. | `api_laboratorio_solicitar` |
+| `LAB_NO_ES_LABORATORIO` | El aula %s ya no es un laboratorio. | `api_laboratorio_resolver`, `api_laboratorio_solicitar` |
+| `LAB_OCUPADO` | El laboratorio no está disponible en ese horario: %s. | `api_laboratorio_resolver`, `api_laboratorio_solicitar` |
 | `MARCA_FUTURA` | La marca de tiempo de la captura está en el futuro. | `svc_crear_captura` |
 | `NO_AUTENTICADO` | Debes iniciar sesión. | `api_yo` |
 | `NO_AUTORIZADO` | No estás inscrito en este grupo. | `api_alumno_historial`, `api_corregir_asistencia`, `api_registrar_justificante`, `api_resolver_justificante`, `api_serie_alumno`, `svc_registrar_consulta_revision` |
-| `NO_ENCONTRADO` | El alumno no existe. | `api_alumno_cambiar_estatus`, `api_alumno_guardar`, `api_alumno_obtener`, `api_aula_guardar`, `api_aula_obtener`, `api_baja_inscripcion`, `api_camara_cambiar_estatus`, `api_camara_guardar`, `api_camaras_listar`, `api_consentimiento_registrar`, `api_consentimiento_revocar`, `api_consentimientos_alumno`, `api_corregir_asistencia`, `api_detecciones_caso`, `api_docente_cambiar_estatus`, `api_docente_guardar`, `api_docente_obtener`, `api_documento_url_autorizar`, `api_generar_sesiones`, `api_grupo_guardar`, `api_grupo_obtener`, `api_horario_guardar`, `api_importar_inscripciones`, `api_inscritos`, `api_justificante_documento`, `api_materia_guardar`, `api_materia_obtener`, `api_plantilla_alumno`, `api_plantilla_registrar`, `api_registros_corregibles`, `api_reporte_grupo`, `api_resolver_justificante`, `api_serie_alumno`, `api_usuario_actualizar`, `svc_alumnos_candidatos`, `svc_crear_captura`, `svc_indice_activar`, `svc_indice_revertir`, `svc_registrar_detecciones`, `svc_usuario_crear` |
+| `NO_ENCONTRADO` | El alumno no existe. | `api_alumno_cambiar_estatus`, `api_alumno_guardar`, `api_alumno_obtener`, `api_aula_guardar`, `api_aula_obtener`, `api_baja_inscripcion`, `api_camara_cambiar_estatus`, `api_camara_guardar`, `api_camaras_listar`, `api_consentimiento_registrar`, `api_consentimiento_revocar`, `api_consentimientos_alumno`, `api_corregir_asistencia`, `api_detecciones_caso`, `api_docente_cambiar_estatus`, `api_docente_guardar`, `api_docente_obtener`, `api_documento_url_autorizar`, `api_generar_sesiones`, `api_grupo_guardar`, `api_grupo_obtener`, `api_horario_guardar`, `api_importar_inscripciones`, `api_inscritos`, `api_justificante_documento`, `api_laboratorio_agenda`, `api_laboratorio_cancelar`, `api_laboratorio_resolver`, `api_laboratorio_solicitar`, `api_materia_guardar`, `api_materia_obtener`, `api_plantilla_alumno`, `api_registros_corregibles`, `api_reporte_grupo`, `api_resolver_justificante`, `api_serie_alumno`, `api_usuario_actualizar`, `svc_alumnos_candidatos`, `svc_crear_captura`, `svc_indice_activar`, `svc_indice_revertir`, `svc_registrar_detecciones`, `svc_usuario_crear` |
 | `PARAMETRO_NO_ENCONTRADO` | El parámetro no existe. | `api_parametro_actualizar` |
 | `PERIODO_INVALIDO` | El periodo debe tener el formato AAAA-S (S = 1 o 2). | `api_grupo_guardar`, `api_grupos_listar` |
 | `REGISTRO_DUPLICADO` | El alumno %s aparece más de una vez en el pase de lista; solo hay un registro por alumno y sesión. | `api_pase_lista_manual` |
 | `RN_08_PLAZO_VENCIDO` | El plazo de corrección terminó el %s (%s h después del fin de la sesión). | `api_corregir_asistencia` |
 | `RN_12_INDICE_EN_USO_DUPLICADO` | Ya existe una versión del índice en uso. | `svc_indice_activar`, `svc_indice_revertir` |
-| `RN_13_CONSENTIMIENTO_AJENO` | El consentimiento pertenece a otro alumno. | `api_plantilla_registrar` |
-| `RN_13_CONSENTIMIENTO_NO_VIGENTE` | El consentimiento ya no está vigente (estatus: %s). | `api_consentimiento_revocar`, `api_plantilla_registrar` |
+| `RN_13_CONSENTIMIENTO_NO_VIGENTE` | El consentimiento ya no está vigente (estatus: %s). | `api_consentimiento_revocar`, `api_mi_consentimiento_revocar` |
 | `ROL_VINCULO_INCOHERENTE` | El rol docente requiere id_docente. | `api_usuario_actualizar`, `svc_usuario_crear` |
-| `RUTA_INVALIDA` | La ruta del archivo no es válida para este registro. | `api_consentimiento_registrar`, `api_plantilla_registrar`, `svc_indice_registrar` |
+| `RUTA_INVALIDA` | La ruta del archivo no es válida para este registro. | `api_consentimiento_registrar`, `api_mi_consentimiento_aceptar`, `svc_indice_registrar` |
 | `SESION_CERRADA` | La sesión ya fue cerrada; no puede abrirse de nuevo. | `api_abrir_sesion` |
 | `SESION_NO_ABIERTA` | La sesión no está abierta; no admite capturas. | `svc_crear_captura`, `svc_registrar_detecciones` |
 | `SESION_NO_AUTOMATICA` | La sesión es de pase de lista manual; no admite capturas. | `svc_crear_captura`, `svc_registrar_detecciones` |
 | `SESION_NO_CERRADA` | La sesión sigue abierta; ciérrala antes de corregir un registro. | `api_corregir_asistencia` |
 | `SESION_SUSPENDIDA` | La sesión está suspendida; reanúdala antes de abrirla. | `api_abrir_sesion` |
 | `SIN_CAMBIO` | El registro ya está en el estado indicado. | `api_corregir_asistencia` |
+| `SOLICITUD_DUPLICADA` | Ese grupo ya tiene una solicitud pendiente o aprobada que se traslapa en esa fecha y horario. | `api_laboratorio_solicitar` |
+| `SOLICITUD_VENCIDA` | La solicitud aprobada ya inició o pasó; no se puede cancelar. | `api_laboratorio_cancelar`, `api_laboratorio_resolver` |
+| `SOLICITUD_YA_RESUELTA` | La solicitud ya está %s; no se puede cancelar. | `api_laboratorio_cancelar`, `api_laboratorio_resolver` |
 | `TRANSICION_NO_PERMITIDA` | Un registro no puede volver a pendiente ni pasar a justificado por corrección; el justificado no se modifica. | `api_corregir_asistencia` |
 | `USUARIO_PROPIO` | No puedes desactivar tu cuenta ni quitarte el rol de administrador. | `api_usuario_actualizar` |
-| `VALIDACION` | Estatus de alumno no válido. | `api_alumno_cambiar_estatus`, `api_alumno_guardar`, `api_alumnos_listar`, `api_aula_guardar`, `api_bitacora_listar`, `api_camara_cambiar_estatus`, `api_camara_guardar`, `api_cola_revision`, `api_consentimiento_registrar`, `api_corregir_asistencia`, `api_docente_cambiar_estatus`, `api_docente_guardar`, `api_docentes_listar`, `api_documento_url_autorizar`, `api_generar_sesiones`, `api_grupo_guardar`, `api_horario_guardar`, `api_impacto_tiempo`, `api_importar_inscripciones`, `api_inscritos`, `api_materia_guardar`, `api_pase_lista_manual`, `api_plantilla_registrar`, `api_registrar_justificante`, `api_reporte_periodo`, `api_resolver_justificante`, `api_serie_alumno`, `api_suspender_sesion`, `api_usuario_actualizar`, `api_usuarios_listar`, `svc_crear_captura`, `svc_indice_registrar`, `svc_job_cerrar_sesiones`, `svc_job_purgar_recortes_marcar`, `svc_job_recalcular`, `svc_job_resolver_pendientes`, `svc_registrar_consulta_revision`, `svc_registrar_detecciones`, `svc_usuario_crear` |
+| `VALIDACION` | Estatus de alumno no válido. | `api_alumno_cambiar_estatus`, `api_alumno_guardar`, `api_alumnos_listar`, `api_aula_guardar`, `api_bitacora_listar`, `api_camara_cambiar_estatus`, `api_camara_guardar`, `api_cola_revision`, `api_consentimiento_registrar`, `api_corregir_asistencia`, `api_docente_cambiar_estatus`, `api_docente_guardar`, `api_docentes_listar`, `api_documento_url_autorizar`, `api_generar_sesiones`, `api_grupo_guardar`, `api_horario_guardar`, `api_impacto_tiempo`, `api_importar_inscripciones`, `api_inscritos`, `api_laboratorio_agenda`, `api_laboratorio_cancelar`, `api_laboratorio_resolver`, `api_laboratorio_solicitar`, `api_laboratorio_solicitudes_listar`, `api_materia_guardar`, `api_mi_consentimiento_aceptar`, `api_pase_lista_manual`, `api_registrar_justificante`, `api_reporte_periodo`, `api_resolver_justificante`, `api_serie_alumno`, `api_suspender_sesion`, `api_usuario_actualizar`, `api_usuarios_listar`, `svc_crear_captura`, `svc_faiss_ids_otros_alumnos`, `svc_fotos_registro_listar`, `svc_fotos_registro_marcar`, `svc_indice_registrar`, `svc_job_cerrar_sesiones`, `svc_job_purgar_recortes_marcar`, `svc_job_recalcular`, `svc_job_resolver_pendientes`, `svc_registrar_consulta_revision`, `svc_registrar_detecciones`, `svc_usuario_crear` |

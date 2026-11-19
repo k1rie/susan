@@ -37,6 +37,8 @@ modelos ya descargados; sin `MODEL_DIR` toma `.models/`).
 | `INDEX_BOOTSTRAP_VERSION` | vacia | Version a cargar al iniciar. Vacia: con `STORAGE_BACKEND=supabase` se carga la que la base marca en uso (`svc_indice_en_uso`), asi un reinicio o despertar no deja el servicio sin indice; en local o sin indice en uso, 409 `INDEX_NOT_LOADED` hasta `/v1/index/activate` |
 | `ALLOW_PRIVATE_CAMERAS` | `0` | `1` permite camaras en IP privadas/loopback (LAN). Link-local/metadatos siempre bloqueados |
 | `EMBEDDER_CONCURRENCY` | `2` | Inferencias simultaneas maximas |
+| `LIVENESS` | `observe` | Deteccion de vida (addon `liveness` de InsightFace >= 2.0). `observe` mide y reporta `vivacidad` por rostro **sin bloquear nada**; `off` la apaga. Sin `<MODEL_DIR>/addons/liveness.onnx` arranca igual con ella apagada (aviso en el log) |
+| `LIVENESS_THRESHOLD`, `LIVENESS_MIN_FACE_PX` | `0.8`, `64` | Puntaje desde el que `es_viva` es `true`, y menor lado del rostro desde el que se evalua (por debajo `estado: omitida`) |
 | `MIN_FACE_PX`, `MIN_BRIGHTNESS`, `MAX_BRIGHTNESS`, `MIN_SHARPNESS` | 80, 50, 215, 40 | Umbrales de `/v1/photo/check` (y de la calidad por foto de `/v1/photo/check-set`) |
 | `TEMPLATE_MIN_PHOTOS`, `TEMPLATE_MAX_PHOTOS` | `3`, `8` | Fotos aceptadas necesarias para una plantilla y maximo por conjunto. Se exige `3 <= min <= max <= 8`: el 8 es un techo duro compartido con SQL y con el proxy de Next |
 | `TEMPLATE_OUTLIER_COSINE` | `0.35` | Coseno **medio** minimo de una foto contra las demas (registro, estricto). `0` apaga el descarte (modo calibracion: se siguen informando los cosenos). Es una hipotesis calibrable, ver «Plantilla de varias fotos» |
@@ -120,6 +122,51 @@ Verifica un conjunto antes de registrar: calidad por foto + consistencia de iden
 - `advertencias`: `DIVERSIDAD_BAJA` cuando fotos con coseno >= `TEMPLATE_DUP_COSINE` colapsan en menos grupos que el minimo (una rafaga de
   fotogramas casi iguales: el promedio no aporta variedad). No bloquea.
 - Giro: en este modo `calidad.frontal` es `razon_de_giro < TEMPLATE_MAX_YAW_RATIO`. El booleano heredado de `/v1/photo/check` no cambia.
+
+### Pose en `POST /v1/photo/check` (aditiva)
+
+Con el embedder `insightface`, la verificacion de UNA foto agrega `calidad.pose` = `{cabeceo, giro, alabeo}` (pitch, yaw, roll) en
+**grados con signo**, medida con `1k3d68` (landmarks 3D, ya incluido en el paquete `buffalo_*`; ~20 ms por rostro en CPU) sobre el
+rostro mayor y sobre la imagen **sin espejar**. El asistente de registro facial la usa para exigir la pose de cada paso (girar a la
+izquierda/derecha, levantar la barbilla). Reglas:
+
+- **Solo se mide a peticion**: `/v1/photo/check` la pide; `/v1/photo/check-set`, `/v1/recognize` y el muestreo del pase de lista no, asi que el
+  reconocimiento en clase no paga ni tiempo ni memoria. El modelo se carga la primera vez que se pide (~0,25 s).
+- La clave **no aparece** con el embedder `fake`, si falta `1k3d68.onnx` en `MODEL_DIR/models/<modelo>/` o si el modelo falla (la pose es
+  opcional y nunca tumba la verificacion). Un embedder propio la entrega con `mide_pose = True` y `detect(rgb, con_pose=True)`.
+- El signo es el del modelo; que signo significa «a tu izquierda» lo fija la web tras calibrarlo con un rostro real (`registroGuiado.pose.js`).
+
+### Deteccion de vida (`vivacidad`, aditiva e informativa)
+
+Con `EMBEDDER=insightface` y el modelo en `MODEL_DIR/addons/liveness.onnx` (1,4 MB; se baja una vez con el comando de abajo, que verifica su SHA256),
+`POST /v1/recognize` agrega a cada rostro, y `POST /v1/photo/check` y `/v1/photo/check-set` agregan a `calidad` (rostro mayor):
+
+```json
+"vivacidad": {"estado": "ok", "es_viva": true, "puntaje": 0.864}
+```
+
+```bash
+.venv/bin/python -c "from insightface.addons import ensure_addon; ensure_addon('liveness', root='.models')"   # requiere red
+```
+
+- `estado`: `ok` (evaluada), `omitida` (rostro menor a `LIVENESS_MIN_FACE_PX` o sin puntos de referencia), `entrada_rechazada` (mas del 30 % del
+  recorte alineado queda fuera de la imagen: el rostro esta pegado al borde) o `error` (el addon fallo; se registra sin PII). Con `omitida`,
+  `entrada_rechazada` y `error`, `es_viva` y `puntaje` son `null`.
+- **Informativa**: no rechaza fotos ni lecturas. La decision (revision del docente, umbral, bloqueo) queda para quien consume la respuesta. La web guarda `es_viva` y `puntaje_vida` en `deteccion` (migracion `0238`) y marca como *Sospechosa* el caso con alguna lectura valida no viva (`docs/api/revision.md`).
+- La clave **no aparece** con el embedder `fake`, con `LIVENESS=off` o si falta el modelo. Se calcula solo a peticion (`detect(rgb, con_vivacidad=True)`):
+  el constructor del indice no la paga. Costo medido: ~5 ms por rostro evaluado en CPU.
+- **Es un filtro de ataques burdos, no una garantia.** InsightFace no publica metricas ni los tipos de ataque que cubre, asi que
+  hay que medirla con capturas propias. Mediciones del 2026-10-06 (`buffalo_s` + liveness, CPU, rostros reales de las imagenes de ejemplo de la
+  libreria; los ataques son SIMULADOS por software, no hay capturas fisicas de impresion o pantalla):
+  - **Depende del tamano del rostro.** Reales a 90-110 px: 0.80-0.99 (una de siete personas quedo bajo 0.8). A 50 px: 0.42-0.98. A 35 px o menos
+    la mayoria cae bajo 0.8 aun siendo personas reales. Por eso `LIVENESS_MIN_FACE_PX`. La camara del aula debe dar rostros de >= ~80 px.
+  - **Castiga la baja calidad**, no solo la suplantacion: un rostro real con desenfoque gaussiano 1.6 sale casi siempre `es_viva: false`
+    (1 de 7 rostros), y una recompresion JPEG q45 baja a 4 de 7. Una camara desenfocada o muy comprimida produciria falsos "no viva".
+  - Impresion con semitono, foto de foto y pantalla con moire simulados: casi todos bajo 0.8. Una **replica de pantalla nitida** (sin moire, sin
+    desenfoque) paso en 5 de 7 rostros (en el rostro suelto cayo a 0.68) con puntajes iguales a los reales en la foto de grupo: un pase de lista no debe confiar solo en esto.
+- Un embedder propio la entrega con `mide_vivacidad = True` y `detect(rgb, con_vivacidad=True)`.
+- **Licencia**: el README de InsightFace indica que los modelos preentrenados que acompanan a la libreria son solo para investigacion no
+  comercial (como `buffalo_s`). No pude confirmar la licencia especifica de `liveness.onnx`.
 
 ### Criterio de consistencia (`app/samples.py`)
 

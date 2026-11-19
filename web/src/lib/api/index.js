@@ -10,3 +10,4 @@ export * as revision from './revision.js';
 export * as reportes from './reportes.js';
 export * as admin from './admin.js';
 export * as biometria from './biometria.js';
+export * as laboratorios from './laboratorios.js';

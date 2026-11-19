@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useApiQuery } from '@/hooks/data';
 import { consentimientosAlumno, plantillaAlumno } from '@/lib/api/biometria.js';
-import { registrarPlantilla, verificarFotos } from '@/lib/http/biometria.js';
+import { registrarPlantilla, verificarFoto, verificarFotos } from '@/lib/http/biometria.js';
 import { numerarTomas, ordenarTomas } from '../CapturaGuiadaPlantilla/capturaGuiada.utils.js';
 import {
     anuncioCambios, aplicarRechazoRegistro, aplicarResultadoConjunto, estadoIndiceTrasRegistro, MAXIMO_FOTOS, MINIMO_FOTOS,
@@ -11,6 +11,24 @@ import {
 } from './plantillaFacial.utils.js';
 
 const SIN_VERIFICACION = { clave: null, resultado: null, error: null };
+
+/**
+ * Las llamadas del flujo. Por omisión son las del administrador (sobre un alumno concreto); el autoservicio del alumno pasa las
+ * suyas (components/alumno/MiRegistro/miRegistro.api.js), que no llevan id_alumno ni id_consent: salen de la sesión. Las funciones deben
+ * tener referencia estable (de módulo): `consentimientos` y `plantilla` van a useApiQuery.
+ *   verificar   calidad y consistencia del conjunto de tomas.
+ *   verificarUna  calidad de UNA toma: es la detección en vivo del asistente (PantallaCaptura). Cada rol usa SU ruta: la del
+ *               administrador responde NO_AUTORIZADO a un alumno, así que nada del asistente debe importarla directo.
+ *   permiteUna  false: sin el camino de «una sola foto» (es un recurso del administrador).
+ */
+export const API_ADMIN = {
+    consentimientos: consentimientosAlumno,
+    plantilla: plantillaAlumno,
+    verificar: verificarFotos,
+    verificarUna: verificarFoto,
+    registrar: registrarPlantilla,
+    permiteUna: true,
+};
 
 /**
  * Toda la lógica del panel de plantilla facial: carga, conjunto de tomas, verificación, registro y sondeo
@@ -21,9 +39,9 @@ const SIN_VERIFICACION = { clave: null, resultado: null, error: null };
  * repetir una toma quedan huecos). Cada toma conserva su estado hasta que llega la respuesta nueva
  * (stale-while-revalidate): solo las tomas nuevas muestran «Verificando».
  */
-export default function usePlantillaFacial({ idAlumno, version = 0, onCambio }) {
-    const consentimientos = useApiQuery(consentimientosAlumno, { idAlumno, limit: 50 });
-    const plantilla = useApiQuery(plantillaAlumno, { idAlumno, limit: 1 });
+export default function usePlantillaFacial({ idAlumno, version = 0, onCambio, api = API_ADMIN }) {
+    const consentimientos = useApiQuery(api.consentimientos, { idAlumno, limit: 50 });
+    const plantilla = useApiQuery(api.plantilla, { idAlumno, limit: 1 });
     const refetchC = consentimientos.refetch;
     const refetchP = plantilla.refetch;
 
@@ -82,7 +100,7 @@ export default function usePlantillaFacial({ idAlumno, version = 0, onCambio }) 
         const blobs = lista.map((t) => t.blob);
         const control = new AbortController();
         const temporizador = setTimeout(() => {
-            verificarFotos(blobs, { idAlumno, idConsent, signal: control.signal }).then(
+            api.verificar(blobs, { idAlumno, idConsent, signal: control.signal }).then(
                 (resultado) => {
                     if (control.signal.aborted) return;
                     const previas = tomasRef.current;
@@ -100,7 +118,7 @@ export default function usePlantillaFacial({ idAlumno, version = 0, onCambio }) 
             clearTimeout(temporizador);
             control.abort();
         };
-    }, [clave, idAlumno, idConsent]);
+    }, [clave, idAlumno, idConsent, api]);
 
     // `cargando` se deriva: la respuesta guardada es de otro conjunto o intento hasta que llega la actual.
     const actual = clave !== null && veri.clave === clave;
@@ -126,7 +144,7 @@ export default function usePlantillaFacial({ idAlumno, version = 0, onCambio }) 
         && !verificacion.cargando
         && sinSondeo;
     // Escape de una foto (camino heredado): para personas cuyas tomas no resultan consistentes entre sí.
-    const puedeRegistrarUna = Boolean(vigente) && aceptadas === 1 && !envio.cargando && !verificacion.cargando && sinSondeo;
+    const puedeRegistrarUna = api.permiteUna !== false && Boolean(vigente) && aceptadas === 1 && !envio.cargando && !verificacion.cargando && sinSondeo;
 
     const reiniciarEnvio = useCallback(() => {
         setEnvio({ cargando: false, error: null });
@@ -218,12 +236,12 @@ export default function usePlantillaFacial({ idAlumno, version = 0, onCambio }) 
         const lista = ordenadas;
         setEnvio({ cargando: true, error: null });
         try {
-            const r = await registrarPlantilla({ idAlumno, idConsent, fotos: lista.map((t) => t.blob) });
+            const r = await api.registrar({ idAlumno, idConsent, fotos: lista.map((t) => t.blob) });
             await terminarRegistro(r, lista.length);
         } catch (error) {
             fallarRegistro(error, lista.map((t) => t.id));
         }
-    }, [puedeRegistrar, ordenadas, idAlumno, idConsent, terminarRegistro, fallarRegistro]);
+    }, [puedeRegistrar, ordenadas, idAlumno, idConsent, api, terminarRegistro, fallarRegistro]);
 
     const registrarUna = useCallback(async () => {
         if (!puedeRegistrarUna) return;
@@ -231,12 +249,12 @@ export default function usePlantillaFacial({ idAlumno, version = 0, onCambio }) 
         const toma = tomas.find((t) => t.estado === 'aceptada');
         setEnvio({ cargando: true, error: null });
         try {
-            const r = await registrarPlantilla({ idAlumno, idConsent, foto: toma.blob });
+            const r = await api.registrar({ idAlumno, idConsent, foto: toma.blob });
             await terminarRegistro(r, 1);
         } catch (error) {
             fallarRegistro(error, [toma.id]);
         }
-    }, [puedeRegistrarUna, tomas, idAlumno, idConsent, terminarRegistro, fallarRegistro]);
+    }, [puedeRegistrarUna, tomas, idAlumno, idConsent, api, terminarRegistro, fallarRegistro]);
 
     const reintentarEnvio = useCallback(() => (ultimoEnvio.current === 'una' ? registrarUna() : registrar()), [registrar, registrarUna]);
 
@@ -254,7 +272,7 @@ export default function usePlantillaFacial({ idAlumno, version = 0, onCambio }) 
     return {
         consentimientos, plantilla, vigente, activa,
         tomas, ordenadas, modo, setModo, agregarToma, quitarToma, repetirToma, limpiar,
-        verificacion, minimo, maximo, aceptadas, anuncio,
+        verificacion, verificarUna: api.verificarUna, minimo, maximo, aceptadas, anuncio,
         envio, registro, sondeando,
         puedeRegistrar, puedeRegistrarUna, registrar, registrarUna, reintentarEnvio,
     };

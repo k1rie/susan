@@ -8,6 +8,7 @@ import Detalles from '@/components/ui/Detalles';
 import StatusChip from '@/components/ui/StatusChip';
 import { useApiMutation } from '@/hooks/data';
 import { corregirAsistencia } from '@/lib/api/revision.js';
+import EtiquetaSospechosa from '../EtiquetaSospechosa';
 import LecturasCaso from '../LecturasCaso';
 import PlazoRestante from '../PlazoRestante';
 import ResolverComo from '../ResolverComo';
@@ -46,6 +47,7 @@ export default function CasoPendiente({ caso, minimoValidas, historial = [], onR
                         </p>
                     </div>
                     <StatusChip kind="asistencia" value="pendiente" />
+                    {caso.sospechosa && <EtiquetaSospechosa lecturasNoVivas={caso.lecturas_no_vivas} />}
                 </div>
                 <p className="text-sm text-muted-foreground">
                     Sesión del {caso.sesion.fecha}, {String(caso.sesion.hora_inicio).slice(0, 5)} a {String(caso.sesion.hora_fin).slice(0, 5)}

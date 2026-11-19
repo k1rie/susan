@@ -116,20 +116,66 @@ describe('CamarasEstado', () => {
         await screen.findByRole('heading', { name: 'Aula A-2 · frontal' });
         expect(screen.getAllByText('Sin capturas en 24 h: revise la conexión.')).toHaveLength(1);
     });
+    it('el estatus es un control segmentado con las tres opciones a la vista y el estatus actual marcado', async () => {
+        render(<CamarasEstado />);
+        const grupo = await screen.findByRole('radiogroup', { name: 'Cambiar estatus de la cámara A-1 frontal' });
+        const opciones = within(grupo).getAllByRole('radio');
+        expect(opciones.map((o) => o.textContent)).toEqual(['Activa', 'Inactiva', 'Mantenimiento']);
+        expect(within(grupo).getByRole('radio', { name: 'Activa' })).toBeChecked();
+        const inactiva = await screen.findByRole('radiogroup', { name: 'Cambiar estatus de la cámara A-3 frontal' });
+        expect(within(inactiva).getByRole('radio', { name: 'Inactiva' })).toBeChecked();
+    });
     it('cambiar el estatus pide confirmación y solo entonces llama a la base', async () => {
         cambiar.mockResolvedValue({ advertencias: [] });
         const user = userEvent.setup();
         render(<CamarasEstado />);
-        const selector = await screen.findByLabelText('Estatus de la cámara A-1 frontal');
-        await user.selectOptions(selector, 'mantenimiento');
+        const grupo = await screen.findByRole('radiogroup', { name: 'Cambiar estatus de la cámara A-1 frontal' });
+        await user.click(within(grupo).getByRole('radio', { name: 'Mantenimiento' }));
         expect(cambiar).not.toHaveBeenCalled();
-        await user.click(screen.getByRole('button', { name: 'Cambiar' }));
+        // La confirmación nombra la cámara, dice la consecuencia y el botón lleva el verbo.
+        expect(screen.getByRole('dialog', { name: 'Poner en mantenimiento la cámara A-1 · frontal' })).toBeInTheDocument();
+        expect(screen.getByText(/pasarán a pase manual/)).toBeInTheDocument();
+        await user.click(screen.getByRole('button', { name: 'Poner en mantenimiento' }));
         expect(cambiar).toHaveBeenCalledWith({ idCamara: 1, estatus: 'mantenimiento' });
     });
-    it('en solo lectura no hay selectores de estatus', async () => {
+    it('elegir el estatus que ya tiene no abre nada y cancelar no cambia nada', async () => {
+        const user = userEvent.setup();
+        render(<CamarasEstado />);
+        const grupo = await screen.findByRole('radiogroup', { name: 'Cambiar estatus de la cámara A-1 frontal' });
+        await user.click(within(grupo).getByRole('radio', { name: 'Activa' }));
+        expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+        await user.click(within(grupo).getByRole('radio', { name: 'Inactiva' }));
+        expect(screen.getByRole('dialog', { name: 'Desactivar la cámara A-1 · frontal' })).toBeInTheDocument();
+        await user.click(screen.getByRole('button', { name: 'Cancelar' }));
+        expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+        expect(cambiar).not.toHaveBeenCalled();
+    });
+    it('activar una cámara no avisa de pase manual; desactivar una con sesión abierta advierte de la sesión en curso', async () => {
+        estado.mockResolvedValue({ total: 2, items: [cam(1, { estatus: 'inactiva' }), cam(2, { sesion_abierta: true })] });
+        const user = userEvent.setup();
+        render(<CamarasEstado />);
+        await user.click(within(await screen.findByRole('radiogroup', { name: 'Cambiar estatus de la cámara A-1 frontal' })).getByRole('radio', { name: 'Activa' }));
+        expect(screen.getByRole('dialog', { name: 'Activar la cámara A-1 · frontal' })).toBeInTheDocument();
+        expect(screen.getByText('Volverá a capturar en las sesiones del aula.')).toBeInTheDocument();
+        expect(screen.queryByText(/sesión en curso/)).not.toBeInTheDocument();
+        await user.click(screen.getByRole('button', { name: 'Cancelar' }));
+        await user.click(within(screen.getByRole('radiogroup', { name: 'Cambiar estatus de la cámara A-2 frontal' })).getByRole('radio', { name: 'Inactiva' }));
+        expect(screen.getByText(/dejará de aportar capturas a la sesión en curso/)).toBeInTheDocument();
+    });
+    it('si la base rechaza el cambio el diálogo sigue abierto para reintentar', async () => {
+        cambiar.mockRejectedValue(new Error('No autorizado'));
+        const user = userEvent.setup();
+        render(<CamarasEstado />);
+        const grupo = await screen.findByRole('radiogroup', { name: 'Cambiar estatus de la cámara A-1 frontal' });
+        await user.click(within(grupo).getByRole('radio', { name: 'Inactiva' }));
+        await user.click(screen.getByRole('button', { name: 'Desactivar' }));
+        expect(cambiar).toHaveBeenCalledTimes(1);
+        expect(screen.getByRole('dialog', { name: 'Desactivar la cámara A-1 · frontal' })).toBeInTheDocument();
+    });
+    it('en solo lectura no hay controles de estatus', async () => {
         render(<CamarasEstado soloLectura />);
         await screen.findByRole('heading', { name: 'Aula A-1 · frontal' });
-        expect(screen.queryByLabelText(/Estatus de la cámara/)).not.toBeInTheDocument();
+        expect(screen.queryByRole('radiogroup')).not.toBeInTheDocument();
     });
     it('sin cámaras muestra el aviso', async () => {
         estado.mockResolvedValue({ total: 0, items: [] });

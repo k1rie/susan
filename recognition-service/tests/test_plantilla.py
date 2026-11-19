@@ -44,6 +44,51 @@ def test_photo_check_conserva_forma_y_agrega_motivo_codigo(client):
     assert chk(face_image(7, size=50))['motivo_rechazo'].startswith('El rostro es demasiado pequeno')
 
 
+class PoseEmbedder(GrupoEmbedder):
+    """Embedder de prueba que «mide» la pose: la fija por semilla (cabeceo, giro, alabeo) en grados."""
+    mide_pose = True
+
+    def __init__(self, poses: dict[int, tuple[float, float, float]]):
+        super().__init__()
+        self.poses = dict(poses)
+
+    def pose_for(self, seed: int):
+        return self.poses.get(seed)
+
+
+def test_photo_check_agrega_la_pose_con_signo_solo_si_el_embedder_la_mide(settings, storage):
+    poses = {7: (3.04, -21.26, 7.0), 9: (-12.0, 18.54, -2.0)}
+    with make_client(settings, storage, PoseEmbedder(poses)) as c:
+        def chk(semilla):
+            return c.post('/v1/photo/check', files={'image': ('a.png', face_image(semilla, size=100), 'image/png')}).json()
+
+        izq, der = chk(7), chk(9)
+        assert izq['calidad']['pose'] == {'cabeceo': 3.0, 'giro': -21.3, 'alabeo': 7.0}
+        assert der['calidad']['pose'] == {'cabeceo': -12.0, 'giro': 18.5, 'alabeo': -2.0}  # el signo se conserva
+        assert izq['motivo_codigo'] is None
+        # Sin rostro no hay pose; con rostro sin pose conocida la clave no aparece.
+        assert 'pose' not in chk(11)['calidad']
+        sin_rostro = c.post('/v1/photo/check', files={'image': ('a.png', face_image(), 'image/png')}).json()
+        assert 'pose' not in sin_rostro['calidad']
+
+
+def test_check_set_no_mide_la_pose_aunque_el_embedder_pueda(settings, storage):
+    with make_client(settings, storage, PoseEmbedder({7: (1.0, 2.0, 3.0)})) as c:
+        r = c.post('/v1/photo/check-set', files=[('images', ('a.png', foto(7), 'image/png'))]).json()
+        assert 'pose' not in r['fotos'][0]['calidad']
+
+
+def test_un_embedder_que_no_mide_pose_conserva_su_firma_detect(settings, storage):
+    class Antiguo(GrupoEmbedder):
+        # Un embedder anterior a la pose: `detect(rgb)` sin el parametro; Vision no debe pasarselo.
+        def detect(self, rgb):
+            return super().detect(rgb)
+
+    with make_client(settings, storage, Antiguo()) as c:
+        r = c.post('/v1/photo/check', files={'image': ('a.png', face_image(7, size=100), 'image/png')})
+        assert r.status_code == 200 and 'pose' not in r.json()['calidad']
+
+
 # ---------- /v1/photo/check-set ----------
 def test_cinco_fotos_de_la_misma_persona(client_g):
     r = check_set(client_g, [foto(s) for s in A])
