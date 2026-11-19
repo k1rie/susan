@@ -112,7 +112,7 @@ SUSAN/
 
 - `web/`: `npm run lint`, `npm test` (vitest), `npm run build`. SQL: `scripts/test-sql.sh` contra PostgreSQL 16 local.
   Python: `pytest` dentro de `recognition-service/`.
-- No ejecutes `next build` mientras otros agentes trabajan en el mismo árbol (bloquea `.next`); para un dev-server
+- No ejecutes `next build` mientras otros frentes trabajan en el mismo árbol (bloquea `.next`); para un dev-server
   paralelo usa `NEXT_DIST_DIR=.next-<tu-nombre>` y un puerto propio.
-- Un agente solo modifica los archivos que le pertenecen (tabla de propiedad en `docs/ARCHITECTURE.md` §7).
+- Un frente solo modifica los archivos que le pertenecen (tabla de propiedad en `docs/ARCHITECTURE.md` §7).
   Si necesitas un cambio fuera de tu zona, descríbelo en tu reporte final (`requests`); no lo hagas tú.
