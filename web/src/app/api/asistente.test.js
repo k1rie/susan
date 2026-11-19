@@ -46,6 +46,7 @@ import { YO, crearBackend, errorDeNegocio, pedir } from '@/lib/server/testing';
 import { POST } from './asistente/route.js';
 
 const CLAVE = 'sk-ant-prueba-no-real';
+const MODELO = 'modelo-de-prueba';
 
 const ALERTAS = {
     total: 2, sin_derecho: 1, en_limite: 1,
@@ -85,6 +86,7 @@ const usoHerramienta = (name, input, id = 'tu_1') => ({ type: 'tool_use', id, na
 
 beforeEach(() => {
     process.env.ANTHROPIC_API_KEY = CLAVE;
+    process.env.ASISTENTE_MODELO = MODELO;
     reiniciarCupoAsistente();
     sdk.guiones.length = 0;
     sdk.llamadas.length = 0;
@@ -95,6 +97,7 @@ beforeEach(() => {
 
 afterEach(() => {
     delete process.env.ANTHROPIC_API_KEY;
+    delete process.env.ASISTENTE_MODELO;
 });
 
 describe('POST /api/asistente', () => {
@@ -120,7 +123,7 @@ describe('POST /api/asistente', () => {
 
         // Petición al modelo: modelo, herramientas, fallbacks del servidor y la clave solo en el constructor del cliente.
         const [primera, segunda] = sdk.llamadas;
-        expect(primera.model).toBe('modelo-ia');
+        expect(primera.model).toBe(MODELO);
         expect(primera.fallbacks).toBe('default');
         expect(primera.betas).toEqual(['server-side-fallback-2026-07-01']);
         expect(primera.tools.map((t) => t.name)).toEqual([
@@ -196,6 +199,14 @@ describe('POST /api/asistente', () => {
         expect(sdk.llamadas).toHaveLength(0);
     });
 
+    it('503 ASISTENTE_NO_CONFIGURADO sin ASISTENTE_MODELO (no llama al modelo)', async () => {
+        delete process.env.ASISTENTE_MODELO;
+        const res = await preguntar();
+        expect(res.status).toBe(503);
+        expect((await res.json()).error.code).toBe('ASISTENTE_NO_CONFIGURADO');
+        expect(sdk.llamadas).toHaveLength(0);
+    });
+
     it('solo el docente: 403 para el alumno y 401 sin sesión', async () => {
         preparar({ me: YO.alumno });
         expect((await preguntar()).status).toBe(403);
@@ -231,7 +242,7 @@ describe('POST /api/asistente', () => {
                     content: [
                         { type: 'thinking', thinking: '', signature: 'a' },
                         usoHerramienta('reporte_grupo', { id_grupo: 5 }, 'rechazada'),
-                        { type: 'fallback', from: { model: 'modelo-ia' }, to: { model: 'modelo-ia-respaldo' } },
+                        { type: 'fallback', from: { model: MODELO }, to: { model: 'modelo-de-respaldo' } },
                         usoHerramienta('alumnos_en_riesgo', {}, 'buena'),
                     ],
                 },

@@ -41,6 +41,7 @@ Variables (ver `web/.env.example`). **Ninguna con prefijo `NEXT_PUBLIC_` es secr
 | `RECOGNITION_SERVICE_URL`, `RECOGNITION_SERVICE_API_KEY` | Servicio de reconocimiento y su clave (la misma `API_KEY` del servicio) |
 | `CRON_SECRET` | Bearer de `/api/jobs/*` (si está vacío los jobs responden 401) |
 | `ANTHROPIC_API_KEY` | Solo servidor: API del asistente de IA (`docs/api/asistente.md`). Vacía = asistente desactivado con aviso |
+| `ASISTENTE_MODELO` | Solo servidor: identificador del modelo del asistente de IA. Vacía = asistente desactivado con aviso |
 | `CAMERA_SNAPSHOT_PATH` | Ruta del fotograma de cámaras IP (`/snapshot.jpg`) |
 
 `SUSAN_LOCAL` **no debe** definirse en producción (las rutas `/api/_local/*` además devuelven 404 con `NODE_ENV=production`).

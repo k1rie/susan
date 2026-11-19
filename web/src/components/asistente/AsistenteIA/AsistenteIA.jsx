@@ -15,7 +15,7 @@ import { useAsistenteIA } from './useAsistenteIA.js';
 // Posición: en teléfono queda por encima de la barra inferior Y de las barras de acciones pegadas de los formularios (FormActions
 // 'movil', que llegan hasta ~10,5 rem), para no tapar «Guardar» ni el botón central «Pasar lista»; en escritorio, esquina inferior
 // derecha. No se dibuja en el pase de lista ni en la sesión en vivo (sus acciones principales van abajo).
-//   disponible: false si el servidor no tiene ANTHROPIC_API_KEY; el panel abre igual y explica por qué no responde.
+//   disponible: false si el servidor no tiene ANTHROPIC_API_KEY o ASISTENTE_MODELO; el panel abre igual y explica por qué no responde.
 export default function AsistenteIA({ disponible = true }) {
     const pathname = usePathname();
     const [abierto, setAbierto] = useState(false);

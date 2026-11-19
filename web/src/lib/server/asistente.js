@@ -7,7 +7,7 @@ import { ApiError } from '@/lib/api/errors';
 import { serverEnv } from '@/config';
 import { DEFINICIONES_HERRAMIENTAS, ejecutarHerramienta, etiquetaHerramienta } from './asistenteHerramientas.js';
 
-export const MODELO_ASISTENTE = 'modelo-ia';
+// El identificador del modelo viene de ASISTENTE_MODELO (serverEnv().asistenteModelo); el código no trae valor de omisión.
 const MAX_TOKENS = 16000;
 // Tope de vueltas modelo -> herramientas -> modelo por pregunta: evita bucles caros si algo sale mal.
 const MAX_VUELTAS = 6;
@@ -48,17 +48,20 @@ export const asistenteCuerpo = z.object({
         .refine((m) => m[0].rol === 'usuario', 'La conversación empieza con un mensaje del usuario.'),
 }).strict();
 
-/** true si hay clave configurada en el servidor. Sin clave el asistente queda desactivado (la UI muestra el aviso). */
-export const asistenteDisponible = () => Boolean(serverEnv().anthropicApiKey);
+/** true si hay clave y modelo configurados en el servidor. Si falta alguno el asistente queda desactivado (la UI muestra el aviso). */
+export const asistenteDisponible = () => {
+    const { anthropicApiKey, asistenteModelo } = serverEnv();
+    return Boolean(anthropicApiKey && asistenteModelo);
+};
 
 let clienteCache = null;
 let claveCache = '';
 function cliente() {
-    const { anthropicApiKey } = serverEnv();
-    if (!anthropicApiKey) {
+    const { anthropicApiKey, asistenteModelo } = serverEnv();
+    if (!anthropicApiKey || !asistenteModelo) {
         throw new ApiError({
             code: 'ASISTENTE_NO_CONFIGURADO',
-            message: 'El asistente de IA no está configurado. Pide al administrador que agregue la clave de la API de IA.',
+            message: 'El asistente de IA no está configurado. Pide al administrador que agregue la clave de la API de IA y el modelo.',
             status: 503,
         });
     }
@@ -124,7 +127,7 @@ export async function conversar({ mensajes, rpc, emitir, signal }) {
     for (let vuelta = 0; vuelta < MAX_VUELTAS; vuelta += 1) {
         const stream = anthropic.beta.messages.stream(
             {
-                model: MODELO_ASISTENTE,
+                model: serverEnv().asistenteModelo,
                 max_tokens: MAX_TOKENS,
                 // Consultas de datos cortas: esfuerzo medio basta y responde más rápido. El razonamiento adaptativo es el de omisión.
                 output_config: { effort: 'medium' },
