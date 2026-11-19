@@ -1,0 +1,6 @@
+# Dependencias instaladas con "npm install --no-save --prefix .../tools" (ver README)
+puente/tools/node_modules/
+circuito/tools/node_modules/
+# Binarios generados al compilar
+*.elf
+*.hex

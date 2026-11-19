@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="830" viewBox="0 0 900 830" role="img" aria-label="Arquitectura general del sistema SUSAN">
+<defs>
+<marker id="punta" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#3b4652"/></marker>
+<marker id="punta-ini" viewBox="0 0 10 10" refX="1" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M10,0 L0,5 L10,10 z" fill="#3b4652"/></marker>
+<marker id="punta-pend" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#8a4b00"/></marker>
+<marker id="punta-pend-ini" viewBox="0 0 10 10" refX="1" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M10,0 L0,5 L10,10 z" fill="#8a4b00"/></marker>
+</defs>
+<rect width="900" height="830" fill="#ffffff"/>
+<rect x="70" y="16" width="810" height="150" rx="14" fill="#eef0f2" stroke="#cfd4da" stroke-width="1.4"/>
+<text x="88" y="43" font-family="'Liberation Sans', Arial, Helvetica, sans-serif" font-size="15" font-weight="700" fill="#1d2733">Aula</text>
+<rect x="88" y="58" width="452" height="92" rx="9" fill="#ffffff" stroke="#9aa3ad" stroke-width="1.3"/>
+<text x="314" y="89" text-anchor="middle" font-family="'Liberation Sans', Arial, Helvetica, sans-serif" font-size="16.5" font-weight="700" fill="#1d2733">Estación de aula (Arduino UNO R3)</text>
+<text x="314" y="112" text-anchor="middle" font-family="'Liberation Sans', Arial, Helvetica, sans-serif" font-size="13" fill="#5b6570">Lector RFID MFRC522 · pantalla LCD 16x2 (I2C)</text>
+<text x="314" y="130" text-anchor="middle" font-family="'Liberation Sans', Arial, Helvetica, sans-serif" font-size="13" fill="#5b6570">3 LED · zumbador · pulsador</text>
+<rect x="658" y="58" width="204" height="92" rx="9" fill="#ffffff" stroke="#9aa3ad" stroke-width="1.3"/>
+<text x="760" y="89" text-anchor="middle" font-family="'Liberation Sans', Arial, Helvetica, sans-serif" font-size="16.5" font-weight="700" fill="#1d2733">Cámara IP del aula</text>
+<text x="760" y="112" text-anchor="middle" font-family="'Liberation Sans', Arial, Helvetica, sans-serif" font-size="13" fill="#5b6570">entrega un fotograma</text>
+<text x="760" y="130" text-anchor="middle" font-family="'Liberation Sans', Arial, Helvetica, sans-serif" font-size="13" fill="#5b6570">por HTTP (snapshot)</text>
+<rect x="70" y="232" width="460" height="150" rx="14" fill="#eef0f2" stroke="#cfd4da" stroke-width="1.4"/>
+<text x="88" y="259" font-family="'Liberation Sans', Arial, Helvetica, sans-serif" font-size="15" font-weight="700" fill="#1d2733">Computadora del docente</text>
+<rect x="88" y="274" width="202" height="92" rx="9" fill="#ffffff" stroke="#9aa3ad" stroke-width="1.3"/>
+<text x="189" y="305" text-anchor="middle" font-family="'Liberation Sans', Arial, Helvetica, sans-serif" font-size="16.5" font-weight="700" fill="#1d2733">Puente serie (Node)</text>
+<text x="189" y="328" text-anchor="middle" font-family="'Liberation Sans', Arial, Helvetica, sans-serif" font-size="13" fill="#5b6570">lee y escribe el</text>
+<text x="189" y="346" text-anchor="middle" font-family="'Liberation Sans', Arial, Helvetica, sans-serif" font-size="13" fill="#5b6570">puerto USB de la estación</text>
+<rect x="306" y="274" width="202" height="92" rx="9" fill="#ffffff" stroke="#9aa3ad" stroke-width="1.3"/>
+<text x="407" y="305" text-anchor="middle" font-family="'Liberation Sans', Arial, Helvetica, sans-serif" font-size="16.5" font-weight="700" fill="#1d2733">Navegador</text>
+<text x="407" y="328" text-anchor="middle" font-family="'Liberation Sans', Arial, Helvetica, sans-serif" font-size="13" fill="#5b6570">interfaz web del docente</text>
+<text x="407" y="346" text-anchor="middle" font-family="'Liberation Sans', Arial, Helvetica, sans-serif" font-size="13" fill="#5b6570">webcam opcional</text>
+<rect x="70" y="448" width="460" height="150" rx="14" fill="#e3edf7" stroke="#8fb0d1" stroke-width="1.4"/>
+<text x="88" y="475" font-family="'Liberation Sans', Arial, Helvetica, sans-serif" font-size="15" font-weight="700" fill="#1f4e79">Aplicación web (Next.js 16)</text>
+<rect x="88" y="490" width="202" height="92" rx="9" fill="#1f4e79" stroke="#1f4e79" stroke-width="1.3"/>
+<text x="189" y="521" text-anchor="middle" font-family="'Liberation Sans', Arial, Helvetica, sans-serif" font-size="16.5" font-weight="700" fill="#ffffff">Páginas y formularios</text>
+<text x="189" y="544" text-anchor="middle" font-family="'Liberation Sans', Arial, Helvetica, sans-serif" font-size="13" fill="#d3e3f3">pantallas P-01 a P-09</text>
+<text x="189" y="562" text-anchor="middle" font-family="'Liberation Sans', Arial, Helvetica, sans-serif" font-size="13" fill="#d3e3f3">React 19 · Tailwind 4</text>
+<rect x="306" y="490" width="202" height="92" rx="9" fill="#1f4e79" stroke="#1f4e79" stroke-width="1.3"/>
+<text x="407" y="521" text-anchor="middle" font-family="'Liberation Sans', Arial, Helvetica, sans-serif" font-size="16.5" font-weight="700" fill="#ffffff">Route Handlers</text>
+<text x="407" y="544" text-anchor="middle" font-family="'Liberation Sans', Arial, Helvetica, sans-serif" font-size="13" fill="#d3e3f3">/api/*: autentican,</text>
+<text x="407" y="562" text-anchor="middle" font-family="'Liberation Sans', Arial, Helvetica, sans-serif" font-size="13" fill="#d3e3f3">validan y llaman a la BD</text>
+<rect x="640" y="448" width="240" height="150" rx="14" fill="#eef0f2" stroke="#cfd4da" stroke-width="1.4"/>
+<text x="658" y="475" font-family="'Liberation Sans', Arial, Helvetica, sans-serif" font-size="15" font-weight="700" fill="#1d2733">Servicio de reconocimiento</text>
+<rect x="658" y="490" width="204" height="92" rx="9" fill="#ffffff" stroke="#9aa3ad" stroke-width="1.3"/>
+<text x="760" y="521" text-anchor="middle" font-family="'Liberation Sans', Arial, Helvetica, sans-serif" font-size="16.5" font-weight="700" fill="#1d2733">FastAPI + FAISS</text>
+<text x="760" y="544" text-anchor="middle" font-family="'Liberation Sans', Arial, Helvetica, sans-serif" font-size="13" fill="#5b6570">detecta y vectoriza rostros</text>
+<text x="760" y="562" text-anchor="middle" font-family="'Liberation Sans', Arial, Helvetica, sans-serif" font-size="13" fill="#5b6570">busca en el índice FAISS</text>
+<rect x="70" y="664" width="810" height="150" rx="14" fill="#eef0f2" stroke="#cfd4da" stroke-width="1.4"/>
+<text x="88" y="691" font-family="'Liberation Sans', Arial, Helvetica, sans-serif" font-size="15" font-weight="700" fill="#1d2733">Supabase / PostgreSQL 16</text>
+<rect x="88" y="706" width="400" height="92" rx="9" fill="#ffffff" stroke="#9aa3ad" stroke-width="1.3"/>
+<text x="288" y="737" text-anchor="middle" font-family="'Liberation Sans', Arial, Helvetica, sans-serif" font-size="16.5" font-weight="700" fill="#1d2733">Tablas, RPC y RLS</text>
+<text x="288" y="760" text-anchor="middle" font-family="'Liberation Sans', Arial, Helvetica, sans-serif" font-size="13" fill="#5b6570">PostgreSQL 16: reglas de negocio,</text>
+<text x="288" y="778" text-anchor="middle" font-family="'Liberation Sans', Arial, Helvetica, sans-serif" font-size="13" fill="#5b6570">seguridad por fila y bitácora</text>
+<rect x="508" y="706" width="354" height="92" rx="9" fill="#ffffff" stroke="#9aa3ad" stroke-width="1.3"/>
+<text x="685" y="737" text-anchor="middle" font-family="'Liberation Sans', Arial, Helvetica, sans-serif" font-size="16.5" font-weight="700" fill="#1d2733">Storage privado</text>
+<text x="685" y="760" text-anchor="middle" font-family="'Liberation Sans', Arial, Helvetica, sans-serif" font-size="13" fill="#5b6570">bucket susan-private:</text>
+<text x="685" y="778" text-anchor="middle" font-family="'Liberation Sans', Arial, Helvetica, sans-serif" font-size="13" fill="#5b6570">recortes e índice FAISS (JSON)</text>
+<line x1="189" y1="166" x2="189" y2="232" stroke="#3b4652" stroke-width="2.2" marker-end="url(#punta)" marker-start="url(#punta-ini)"/>
+<text x="201" y="195" text-anchor="start" font-family="'Liberation Sans', Arial, Helvetica, sans-serif" font-size="13.5" font-weight="400" fill="#3b4652">USB serie 115200 8N1</text>
+<text x="201" y="211" text-anchor="start" font-family="'Liberation Sans', Arial, Helvetica, sans-serif" font-size="13.5" font-weight="400" fill="#3b4652">líneas de texto ASCII</text>
+<line x1="407" y1="382" x2="407" y2="448" stroke="#3b4652" stroke-width="2.2" marker-end="url(#punta)" marker-start="url(#punta-ini)"/>
+<text x="419" y="418" text-anchor="start" font-family="'Liberation Sans', Arial, Helvetica, sans-serif" font-size="13.5" font-weight="400" fill="#3b4652">HTTP: páginas y /api/*</text>
+<line x1="530" y1="536" x2="640" y2="536" stroke="#3b4652" stroke-width="2.2" marker-end="url(#punta)" marker-start="url(#punta-ini)"/>
+<text x="585" y="502" text-anchor="middle" font-family="'Liberation Sans', Arial, Helvetica, sans-serif" font-size="13.5" font-weight="400" fill="#3b4652">POST</text>
+<text x="585" y="518" text-anchor="middle" font-family="'Liberation Sans', Arial, Helvetica, sans-serif" font-size="13.5" font-weight="400" fill="#3b4652">/v1/recognize</text>
+<line x1="760" y1="150" x2="760" y2="448" stroke="#3b4652" stroke-width="2.2" marker-end="url(#punta)"/>
+<text x="748" y="304" text-anchor="end" font-family="'Liberation Sans', Arial, Helvetica, sans-serif" font-size="13.5" font-weight="400" fill="#3b4652">fotograma</text>
+<text x="748" y="320" text-anchor="end" font-family="'Liberation Sans', Arial, Helvetica, sans-serif" font-size="13.5" font-weight="400" fill="#3b4652">por HTTP</text>
+<line x1="407" y1="598" x2="407" y2="664" stroke="#3b4652" stroke-width="2.2" marker-end="url(#punta)" marker-start="url(#punta-ini)"/>
+<text x="419" y="636" text-anchor="start" font-family="'Liberation Sans', Arial, Helvetica, sans-serif" font-size="13.5" font-weight="400" fill="#3b4652">supabase-js · RPC</text>
+<line x1="760" y1="598" x2="760" y2="664" stroke="#3b4652" stroke-width="2.2" marker-end="url(#punta)" marker-start="url(#punta-ini)"/>
+<text x="748" y="636" text-anchor="end" font-family="'Liberation Sans', Arial, Helvetica, sans-serif" font-size="13.5" font-weight="400" fill="#3b4652">recortes e índice</text>
+<path d="M 88 320 H 44 V 752 H 70" fill="none" stroke="#8a4b00" stroke-width="2.2" stroke-dasharray="8 6" stroke-linejoin="round" marker-end="url(#punta-pend)"/>
+<text x="31" y="536" text-anchor="middle" font-family="'Liberation Sans', Arial, Helvetica, sans-serif" font-size="13.5" font-weight="700" fill="#8a4b00" transform="rotate(-90 31 536)">siguiente avance</text>
+</svg>

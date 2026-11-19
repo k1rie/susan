@@ -1,0 +1,20 @@
+﻿refs,cantidad,descripcion,valor,en_diagrama,notas
+U1,1,Arduino UNO R3 (o compatible ATmega328P) con cable USB A-B,5 V / 16 MHz,sí,Placa principal; se alimenta y se comunica por USB con la PC del docente
+U2,1,Módulo lector RFID MFRC522 (RC522) 13.56 MHz,3.3 V,sí,"Soldar la tira de pines; suele incluir 1 tarjeta y 1 llavero MIFARE"
+U3,1,Pantalla LCD 16×2 HD44780 con mochila I2C PCF8574,5 V,sí,Dirección 0x27 (PCF8574) o 0x3F (PCF8574A); trae pull-ups de SDA/SCL
+R1-R4,4,Resistor 1/4 W (parte alta de los divisores),1 kΩ,sí,Línea UNO → módulo (SS SCK MOSI RST)
+R5-R8,4,Resistor 1/4 W (parte baja de los divisores),2 kΩ,sí,Del nodo del divisor a GND; Vsalida = 5 × 2/(1+2) = 3.33 V
+R9-R11,3,Resistor 1/4 W en serie con cada LED,220 Ω,sí,Corriente aprox. (5 − 2)/220 = 14 mA por LED
+R12,1,Resistor 1/4 W en serie con el zumbador,100 Ω,sí,Limita la corriente del pin y protege el piezo
+LED1,1,LED 5 mm verde,verde,sí,Resultado OK
+LED2,1,LED 5 mm ámbar,ámbar,sí,Duplicado / sin conexión con la PC
+LED3,1,LED 5 mm rojo,rojo,sí,Tarjeta no registrada / error
+BZ1,1,Zumbador piezoeléctrico pasivo (o activo de 5 V ≤ 20 mA),5 V,sí,El firmware usa tone(); con uno activo definir ZUMBADOR_ACTIVO 1
+SW1,1,Pulsador táctil 6×6 mm normalmente abierto,-,sí,Cambia la página del LCD
+C1,1,Capacitor cerámico,100 nF,sí,Junto al módulo RC522 entre 3V3 y GND
+C2,1,Capacitor electrolítico 16 V,10 µF,sí,Junto al módulo RC522 entre 3V3 y GND (+ a 3V3)
+C3,1,Capacitor electrolítico 16 V,100 µF,sí,Junto al LCD entre 5 V y GND (+ a 5 V)
+TARJETAS,3,Tarjetas o llaveros MIFARE Classic 1K (13.56 MHz),-,no,Una por alumno de la demostración; los UID no son secretos
+PROTOBOARD,1,Protoboard de 830 puntos,-,no,O soldar en una placa perforada
+JUMPERS,30,Cables jumper (aprox. 20 macho-macho + 10 macho-hembra),-,no,Cables SPI cortos (menos de 15 cm)
+CAJA,1,Caja o soporte impreso (opcional),-,no,Pendiente: no se diseñó
