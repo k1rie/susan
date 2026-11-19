@@ -13,7 +13,7 @@ pendientes?») y la respuesta llega en streaming. El modelo no inventa cifras: c
 llaman a las RPC `api_*` con la **sesión del docente** (la RLS limita todo a sus grupos). El asistente **solo lee**: no
 registra asistencias ni resuelve justificantes; si se lo piden, indica la pantalla.
 
-- Modelo: `modelo-ia` (SDK `@anthropic-ai/sdk`), `output_config.effort: "medium"`, razonamiento adaptativo (el de omisión).
+- Modelo: el que indique `ASISTENTE_MODELO` (SDK `@anthropic-ai/sdk`), `output_config.effort: "medium"`, razonamiento adaptativo (el de omisión).
 - Fallbacks del servidor: `fallbacks: "default"` con la beta `server-side-fallback-2026-07-01`; si un clasificador rechaza la
   petición, la API la reintenta en el modelo recomendado dentro de la misma llamada.
 - Prompt de sistema y herramientas fijos (sin fecha ni nombre) con `cache_control` automático: el prefijo se reutiliza.
@@ -26,8 +26,9 @@ registra asistencias ni resuelve justificantes; si se lo piden, indica la pantal
 | Variable | Dónde | Qué es |
 |---|---|---|
 | `ANTHROPIC_API_KEY` | Vercel (Production/Preview), `web/.env.local` | Clave de la API de IA. **Solo servidor**; nunca `NEXT_PUBLIC_*`. |
+| `ASISTENTE_MODELO` | Vercel (Production/Preview), `web/.env.local` | Identificador del modelo, tal como lo publica el proveedor. Sin valor de omisión en el código. |
 
-Sin la variable el asistente queda **desactivado**: el botón aparece igual, el panel muestra «Asistente no disponible» con el
+Si falta cualquiera de las dos el asistente queda **desactivado**: el botón aparece igual, el panel muestra «Asistente no disponible» con el
 motivo y el campo deshabilitado, y la ruta responde `503 ASISTENTE_NO_CONFIGURADO` sin llamar al modelo. Al cliente solo viaja un
 booleano (`asistenteIA.disponible`, calculado en `app/(app)/layout.jsx`); la clave nunca sale del servidor.
 
@@ -58,7 +59,7 @@ booleano (`asistenteIA.disponible`, calculado en `app/(app)/layout.jsx`); la cla
 | 413 / 415 / 400 | `LIMITE_EXCEDIDO` / `TIPO_NO_SOPORTADO` / `PETICION_INVALIDA` | Cuerpo grande, no JSON o JSON roto |
 | 422 | `VALIDACION` | Cuerpo fuera del esquema (`details.campos`) |
 | 429 | `DEMASIADOS_INTENTOS` | Más de 30 preguntas en 10 min por usuario (en memoria, por instancia); `Retry-After` |
-| 503 | `ASISTENTE_NO_CONFIGURADO` | Falta `ANTHROPIC_API_KEY` |
+| 503 | `ASISTENTE_NO_CONFIGURADO` | Falta `ANTHROPIC_API_KEY` o `ASISTENTE_MODELO` |
 
 ### 3.3 Respuesta: `200 application/x-ndjson` en streaming
 

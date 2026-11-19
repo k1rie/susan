@@ -24,6 +24,8 @@ export const serverEnv = () => ({
     cronSecret: process.env.CRON_SECRET || '',
     // API del asistente de IA. Solo servidor: nunca con prefijo NEXT_PUBLIC_. Vacía = asistente desactivado.
     anthropicApiKey: process.env.ANTHROPIC_API_KEY || '',
+    // Identificador del modelo que usa el asistente. Sin valor de omisión: vacío = asistente desactivado.
+    asistenteModelo: (process.env.ASISTENTE_MODELO || '').trim(),
     localDatabaseUrl: process.env.LOCAL_DATABASE_URL || 'postgres://localhost:54329/susan',
     localStorageDir: process.env.LOCAL_STORAGE_DIR || (process.env.SUSAN_LOCAL_DIR ? `${process.env.SUSAN_LOCAL_DIR}/storage` : '.local/storage'),
     // En producción NO hay valor por defecto (el modo local está deshabilitado); así el secreto de desarrollo no viaja en ningún bundle.

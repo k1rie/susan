@@ -12,7 +12,7 @@ export const POST = handle({ roles: ['docente'], input: asistenteCuerpo, maxBody
     if (!asistenteDisponible()) {
         throw new ApiError({
             code: 'ASISTENTE_NO_CONFIGURADO',
-            message: 'El asistente de IA no está configurado. Pide al administrador que agregue la clave de la API de IA.',
+            message: 'El asistente de IA no está configurado. Pide al administrador que agregue la clave de la API de IA y el modelo.',
             status: 503,
         });
     }

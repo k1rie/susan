@@ -21,7 +21,7 @@ export default function ConversacionAsistente({ mensajes, estado, consultando, s
     if (!disponible) {
         return (
             <Alert tone="warning" title="Asistente no disponible">
-                Falta configurar la clave de la API de IA en el servidor. Avisa al administrador del sistema; mientras tanto, consulta tus
+                Falta configurar la clave de la API de IA o el modelo en el servidor. Avisa al administrador del sistema; mientras tanto, consulta tus
                 datos en Reportes y Analítica.
             </Alert>
         );
