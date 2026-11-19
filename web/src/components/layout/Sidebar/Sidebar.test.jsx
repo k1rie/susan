@@ -48,7 +48,7 @@ describe('Sidebar', () => {
     it('pinta los ítems del rol y marca aria-current', () => {
         render(<Sidebar items={navParaRol('docente')} pathname="/docente/revision" open={false} onClose={() => {}} />);
         const nav = screen.getByRole('navigation', { name: 'Principal' });
-        expect(within(nav).getAllByRole('link')).toHaveLength(6);
+        expect(within(nav).getAllByRole('link')).toHaveLength(7);
         expect(within(nav).getByText('Pasar lista').closest('a')).toHaveAttribute('href', '/docente/pasar-lista');
         expect(within(nav).getByText('Revisión').closest('a')).toHaveAttribute('aria-current', 'page');
         expect(within(nav).getByText('Panel').closest('a')).not.toHaveAttribute('aria-current');
